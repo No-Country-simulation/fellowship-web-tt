@@ -10,6 +10,13 @@ Documentación del design system y de los componentes en `components/ui`.
 | --- | --- |
 | [Design system](./design-system.md) | Colores, tipografía, spacing, radius, sombras, layout |
 | [Button](./components/button.md) | Variantes, sizes, ejemplos |
+| [Accordion](./components/accordion.md) | FAQ / paneles colapsables |
+| [Badge](./components/badge.md) | Chips de roles, verticales, geos |
+| [Card](./components/card.md) | Diferencial, evidencia, pasos, stats, garantía, testimonial |
+| [Separator](./components/separator.md) | Divisores en header, footer y bloques densos |
+| [Navigation Menu](./components/navigation-menu.md) | Nav desktop con paneles |
+| [Dropdown Menu](./components/dropdown-menu.md) | Menús desplegables (Para Empresas, Sobre Nosotros) |
+| [Sheet](./components/sheet.md) | Menú mobile (drawer) |
 
 ## Convención al agregar un componente
 
