@@ -1,8 +1,11 @@
+import { JsonLd } from "@/components/json-ld";
 import { Button } from "@/components/ui/button";
+import { getLandingJsonLd } from "@/lib/json-ld";
 
 export default function Home() {
   return (
     <main className="relative flex flex-1 flex-col overflow-hidden bg-bg-base">
+      <JsonLd data={getLandingJsonLd()} />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-brand-gradient opacity-30 blur-3xl"
