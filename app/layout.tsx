@@ -1,5 +1,8 @@
-import type { Metadata } from "next";
 import { DM_Sans, Inter } from "next/font/google";
+import { JsonLd } from "@/components/json-ld";
+import { getSiteJsonLd } from "@/lib/json-ld";
+import { getSiteMetadata } from "@/lib/metadata";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -14,10 +17,7 @@ const dmSans = DM_Sans({
   weight: ["500", "700"],
 });
 
-export const metadata: Metadata = {
-  title: "Fellowship",
-  description: "Talento junior con evidencia real",
-};
+export const metadata = getSiteMetadata();
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -25,7 +25,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       className={`${inter.variable} ${dmSans.variable} dark h-full`}
     >
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <head>
+        <link rel="describedby" href={`${getSiteUrl()}/llms.txt`} />
+      </head>
+      <body className="flex min-h-full flex-col font-sans">
+        <JsonLd data={getSiteJsonLd()} />
+        {children}
+      </body>
     </html>
   );
 }
