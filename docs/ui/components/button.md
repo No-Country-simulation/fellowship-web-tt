@@ -36,7 +36,7 @@ Cualquier otra prop válida de `<button>` (p. ej. `onClick`, `aria-label`) se re
 
 | Valor | Uso |
 | --- | --- |
-| `default` | CTA principal (rosa de marca / `primary`) |
+| `default` | CTA principal (rosa de marca / `#ec4899`) |
 | `outline` | Acción secundaria con borde |
 | `secondary` | Acción menos enfatizada sobre surface |
 | `ghost` | Acción terciaria, sin fondo fuerte |
@@ -97,7 +97,8 @@ import { SearchIcon } from "lucide-react";
 
 ## Notas
 
-- El color `default` usa `--primary` (`#fe0096`).
+- El color `default` usa `--primary` (`#ec4899`, stop rosa del Brand Gradient Primary).
+- El radio del botón es `rounded-button` (6px). No usar `rounded-lg` en botones: en el design system `lg` es 32px.
 - Focus visible incluido (`ring`); no quitar outlines sin reemplazo a11y.
 - Para íconos, Lucide ya está en el proyecto (`lucide-react`).
 - Si necesitás el mismo look en otro elemento, exportamos `buttonVariants` desde el mismo archivo.

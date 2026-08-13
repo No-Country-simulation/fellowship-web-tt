@@ -8,14 +8,14 @@ export default function Home() {
       <JsonLd data={getLandingJsonLd()} />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-brand-gradient opacity-30 blur-3xl"
+        className="pointer-events-none absolute inset-0 bg-brand-gradient-secondary"
       />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-24 right-[-10%] size-[28rem] rounded-full bg-accent-indigo/25 blur-3xl"
       />
 
-      <section className="relative flex flex-1 flex-col justify-center px-sm py-2xl md:px-lg">
+      <section className="relative flex flex-1 flex-col justify-center px-md py-2xl md:px-3xl">
         <div className="container-content flex flex-col gap-md">
           <p className="animate-in fade-in slide-in-from-bottom-2 text-overline text-text-secondary duration-700">
             Fellowship
