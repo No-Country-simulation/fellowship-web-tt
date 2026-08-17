@@ -37,6 +37,7 @@ Cualquier otra prop válida de `<button>` (p. ej. `onClick`, `aria-label`) se re
 | Valor | Uso |
 | --- | --- |
 | `default` | CTA principal (rosa de marca / `#ec4899`) |
+| `gradient` | CTA de landing HF (Brand Gradient Primary) |
 | `outline` | Acción secundaria con borde |
 | `secondary` | Acción menos enfatizada sobre surface |
 | `ghost` | Acción terciaria, sin fondo fuerte |

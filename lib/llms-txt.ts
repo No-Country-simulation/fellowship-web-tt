@@ -20,7 +20,7 @@ export function getLlmsTxt(): string {
 
 ${productSummary}
 
-Hechos del producto:
+Hechos del servicio:
 
 ${facts}
 
