@@ -15,7 +15,7 @@ Usar clases Tailwind generadas desde los tokens. Prefijo según categoría:
 | `bg/base` | `bg-bg-base` | `#000115` |
 | `bg/base-real` | `bg-bg-base-real` | `#030711` |
 | `bg/surface-1` | `bg-bg-surface-1` | `#030428` |
-| `bg/surface-2` | `bg-bg-surface-2` | `#0d0e1f` |
+| `bg/surface-2` | `bg-bg-surface-1` | `#0d0e1f` |
 | `bg/surface-3` | `bg-bg-surface-3` | `#12132a` |
 | `bg/surface-4` | `bg-bg-surface-4` | `#181932` |
 | `bg/alt` | `bg-bg-alt` | `#1e2040` |
@@ -136,6 +136,7 @@ Escala semántica (múltiplos de 8px). `xs` y `2xl` confirmados; intermedios y `
 | Token | Utilidad | Notas |
 | --- | --- | --- |
 | Contenido máx. desktop | `container-content` | max-width **1280px**, centrado |
+| Ancho de copy | `max-w-xl` / `max-w-3xl` | 36rem / 48rem (escala container; **no** es `spacing/xl`) |
 | Desktop frame | — | 1440px / 12 col / gutter 32 (`spacing/lg`) / margen 80px (`spacing/3xl`) |
 | Mobile frame | — | 390px propuesto / 4 col / gutter 16 (`spacing/sm`) / margen 24px (`spacing/md`) |
 

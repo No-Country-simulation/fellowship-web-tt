@@ -104,6 +104,6 @@ Todos aceptan `className` y las props nativas de `div`.
 ## Notas
 
 - Un solo `h1` en la landing: títulos de cards son `h2`/`h3` o el `CardTitle` tal cual (es un `div`).
-- Color de superficie: `bg-card` / `text-card-foreground` (tokens shadcn). Para surfaces de marca, overlayar `bg-bg-surface-2` etc. desde el design system.
+- Color de superficie: `bg-card` / `text-card-foreground` (tokens shadcn). Para surfaces de marca, overlayar `bg-bg-surface-1` etc. desde el design system.
 - `CardTitle` usa `font-heading text-base`. Para stats grandes, aplicar `text-data-number` en el children, no agrandar el title a ciegas.
 - Primera/última imagen hija se recorta al radio del card (`rounded-xl`).

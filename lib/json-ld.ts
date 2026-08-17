@@ -1,8 +1,8 @@
 import {
-  alternateName,
   countriesServed,
   getAnsweredFaqs,
   productSummary,
+  serviceName,
   siteDescription,
   siteName,
   siteTitle,
@@ -11,12 +11,22 @@ import { getSiteUrl } from "@/lib/site";
 
 type IdRef = { "@id": string };
 
+type ImageObjectNode = {
+  "@type": "ImageObject";
+  url: string;
+  contentUrl: string;
+  width: number;
+  height: number;
+  caption: string;
+};
+
 type OrganizationNode = {
   "@type": "Organization";
   "@id": string;
   name: string;
-  alternateName: string;
   url: string;
+  logo: ImageObjectNode;
+  image: string;
   description: string;
   knowsAbout: string[];
 };
@@ -78,6 +88,10 @@ export type JsonLdGraph = {
   >;
 };
 
+const BRAND_LOGO_PATH = "/brand/logo-no-country.jpg";
+const BRAND_LOGO_WIDTH = 1024;
+const BRAND_LOGO_HEIGHT = 1024;
+
 function getIds() {
   const siteUrl = getSiteUrl();
 
@@ -88,11 +102,12 @@ function getIds() {
     webpageId: `${siteUrl}/#webpage`,
     serviceId: `${siteUrl}/#service`,
     faqId: `${siteUrl}/#faq`,
+    logoUrl: `${siteUrl}${BRAND_LOGO_PATH}`,
   };
 }
 
 export function getSiteJsonLd(): JsonLdGraph {
-  const { siteUrl, organizationId, websiteId } = getIds();
+  const { siteUrl, organizationId, websiteId, logoUrl } = getIds();
 
   return {
     "@context": "https://schema.org",
@@ -101,8 +116,16 @@ export function getSiteJsonLd(): JsonLdGraph {
         "@type": "Organization",
         "@id": organizationId,
         name: siteName,
-        alternateName,
         url: siteUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: logoUrl,
+          contentUrl: logoUrl,
+          width: BRAND_LOGO_WIDTH,
+          height: BRAND_LOGO_HEIGHT,
+          caption: siteName,
+        },
+        image: logoUrl,
         description: siteDescription,
         knowsAbout: [
           "Talento junior",
@@ -144,7 +167,7 @@ export function getLandingJsonLd(): JsonLdGraph {
     {
       "@type": "Service",
       "@id": serviceId,
-      name: "Contratación de talento junior con evidencia conductual",
+      name: serviceName,
       serviceType: "Staffing",
       description: productSummary,
       provider: { "@id": organizationId },

@@ -230,12 +230,12 @@
     @apply border-border outline-ring/50;
   }
 
-  body {
-    @apply bg-background text-foreground antialiased;
+  html {
+    @apply overflow-x-clip font-sans;
   }
 
-  html {
-    @apply font-sans;
+  body {
+    @apply overflow-x-clip bg-background text-foreground antialiased;
   }
 }
 
@@ -321,7 +321,70 @@
 
   .container-content {
     width: 100%;
+    min-width: 0;
     max-width: var(--max-width-content);
     margin-inline: auto;
   }
+
+  /* HF Desktop 1440 — textura de estrellas (asset) */
+  .bg-starfield {
+    background-color: var(--bg-base);
+    background-image: url("/background/Background-space.png");
+    background-repeat: repeat;
+    background-position: top center;
+    background-size: auto;
+  }
+
+  .bg-landing-map {
+    background-image: url("/background/Background-map.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .bg-landing-glow {
+    background-image: url("/background/Gradient.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+/*
+ * Unlayered so these beat `@layer utilities`. `--spacing-xl` / `--spacing-3xl`
+ * also emit `max-w-xl` / `max-w-3xl` as 48px / 80px, which wraps copy one
+ * word per line.
+ */
+.max-w-xs {
+  max-width: 20rem;
+}
+.max-w-sm {
+  max-width: 24rem;
+}
+.max-w-md {
+  max-width: 28rem;
+}
+.max-w-lg {
+  max-width: 32rem;
+}
+.max-w-xl {
+  max-width: 36rem;
+}
+.max-w-2xl {
+  max-width: 42rem;
+}
+.max-w-3xl {
+  max-width: 48rem;
+}
+.max-w-4xl {
+  max-width: 56rem;
+}
+.max-w-5xl {
+  max-width: 64rem;
+}
+.max-w-6xl {
+  max-width: 72rem;
+}
+.max-w-7xl {
+  max-width: 80rem;
 }
