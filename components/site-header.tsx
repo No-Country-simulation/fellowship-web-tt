@@ -208,7 +208,9 @@ function ChromeAnchor({
   children,
   ...props
 }: ComponentProps<"a"> & { href: string }) {
-  if (href === PLACEHOLDER_HREF) {
+  const isExternal = href.startsWith("http://") || href.startsWith("https://")
+
+  if (href === PLACEHOLDER_HREF || isExternal) {
     return (
       <a href={href} className={className} {...props}>
         {children}
