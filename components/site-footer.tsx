@@ -5,14 +5,16 @@ import {
   footerNavegacion,
   footerPlataforma,
   footerTagline,
+  instagramUrl,
+  linkedinUrl,
   PLACEHOLDER_HREF,
   type NavLink,
 } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 
 const socials = [
-  { label: "LinkedIn", href: PLACEHOLDER_HREF, icon: LinkedInIcon },
-  { label: "Instagram", href: PLACEHOLDER_HREF, icon: InstagramIcon },
+  { label: "LinkedIn", href: linkedinUrl, icon: LinkedInIcon },
+  { label: "Instagram", href: instagramUrl, icon: InstagramIcon },
   { label: "WhatsApp", href: PLACEHOLDER_HREF, icon: WhatsAppIcon },
 ] as const
 
@@ -32,16 +34,26 @@ function SiteFooter() {
                 Síguenos
               </p>
               <div className="flex gap-sm" aria-label="Redes sociales">
-                {socials.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    className="text-text-secondary transition-colors hover:text-text-primary"
-                    aria-label={social.label}
-                  >
-                    <social.icon className="size-5" />
-                  </a>
-                ))}
+                {socials.map((social) => {
+                  const isExternal = social.href.startsWith("https://")
+
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      className="text-text-secondary transition-colors hover:text-text-primary"
+                      aria-label={social.label}
+                      {...(isExternal
+                        ? {
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                          }
+                        : {})}
+                    >
+                      <social.icon className="size-5" />
+                    </a>
+                  )
+                })}
               </div>
             </div>
 
