@@ -7,6 +7,8 @@ import {
   siteName,
   siteTitle,
 } from "@/lib/geo";
+import { howItWorksHeading, howItWorksSteps } from "@/lib/landing";
+import { empresasUrl, instagramUrl, linkedinUrl, showcaseUrl, simulacionUrl, talentoUrl } from "@/lib/nav";
 import { getSiteUrl } from "@/lib/site";
 
 type IdRef = { "@id": string };
@@ -27,6 +29,7 @@ type OrganizationNode = {
   url: string;
   logo: ImageObjectNode;
   image: string;
+  sameAs: string[];
   description: string;
   knowsAbout: string[];
 };
@@ -81,10 +84,32 @@ type FaqPageNode = {
   }>;
 };
 
+type HowToNode = {
+  "@type": "HowTo";
+  "@id": string;
+  name: string;
+  description: string;
+  inLanguage: string;
+  url: string;
+  isPartOf: IdRef;
+  step: Array<{
+    "@type": "HowToStep";
+    position: number;
+    name: string;
+    text: string;
+    url: string;
+  }>;
+};
+
 export type JsonLdGraph = {
   "@context": "https://schema.org";
   "@graph": Array<
-    OrganizationNode | WebSiteNode | WebPageNode | ServiceNode | FaqPageNode
+    | OrganizationNode
+    | WebSiteNode
+    | WebPageNode
+    | ServiceNode
+    | FaqPageNode
+    | HowToNode
   >;
 };
 
@@ -102,6 +127,8 @@ function getIds() {
     webpageId: `${siteUrl}/#webpage`,
     serviceId: `${siteUrl}/#service`,
     faqId: `${siteUrl}/#faq`,
+    howToId: `${siteUrl}/#howto`,
+    howToUrl: `${siteUrl}/#como-funciona`,
     logoUrl: `${siteUrl}${BRAND_LOGO_PATH}`,
   };
 }
@@ -126,6 +153,14 @@ export function getSiteJsonLd(): JsonLdGraph {
           caption: siteName,
         },
         image: logoUrl,
+        sameAs: [
+          empresasUrl,
+          talentoUrl,
+          showcaseUrl,
+          simulacionUrl,
+          linkedinUrl,
+          instagramUrl,
+        ],
         description: siteDescription,
         knowsAbout: [
           "Talento junior",
@@ -149,8 +184,21 @@ export function getSiteJsonLd(): JsonLdGraph {
 }
 
 export function getLandingJsonLd(): JsonLdGraph {
-  const { siteUrl, organizationId, websiteId, webpageId, serviceId, faqId } =
-    getIds();
+  const {
+    siteUrl,
+    organizationId,
+    websiteId,
+    webpageId,
+    serviceId,
+    faqId,
+    howToId,
+    howToUrl,
+  } = getIds();
+
+  const answeredFaqs = getAnsweredFaqs();
+  const processTimeline = answeredFaqs.find((faq) =>
+    faq.question.startsWith("¿Cuánto tiempo tarda el proceso")
+  );
 
   const graph: JsonLdGraph["@graph"] = [
     {
@@ -180,9 +228,24 @@ export function getLandingJsonLd(): JsonLdGraph {
         audienceType: "Empresas que buscan talento junior",
       },
     },
+    {
+      "@type": "HowTo",
+      "@id": howToId,
+      name: howItWorksHeading,
+      description: processTimeline?.answer ?? howItWorksHeading,
+      inLanguage: "es",
+      url: howToUrl,
+      isPartOf: { "@id": webpageId },
+      step: howItWorksSteps.map((item) => ({
+        "@type": "HowToStep" as const,
+        position: Number(item.step),
+        name: item.title,
+        text: item.body,
+        url: howToUrl,
+      })),
+    },
   ];
 
-  const answeredFaqs = getAnsweredFaqs();
   if (answeredFaqs.length > 0) {
     graph.push({
       "@type": "FAQPage",

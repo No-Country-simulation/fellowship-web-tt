@@ -25,6 +25,12 @@ export function getSiteMetadata(): Metadata {
     publisher: siteName,
     alternates: {
       canonical: "/",
+      types: {
+        "text/plain": [
+          { url: "/llms.txt", title: "llms.txt" },
+          { url: "/llms-full.txt", title: "llms-full.txt" },
+        ],
+      },
     },
     openGraph: {
       type: "website",

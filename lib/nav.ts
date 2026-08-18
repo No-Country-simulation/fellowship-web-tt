@@ -6,6 +6,14 @@
 
 export const PLACEHOLDER_HREF = "#"
 
+export const empresasUrl = "https://nocountry.tech/"
+export const talentoUrl = "https://nocountry.tech/talent"
+export const showcaseUrl =
+  "https://nocountry.tech/showcase/teams/simulaciones"
+export const simulacionUrl = "https://companies.nocountry.tech/simulation"
+export const instagramUrl = "https://www.instagram.com/nocountry.tech/"
+export const linkedinUrl = "https://www.linkedin.com/company/nocountrytalent/"
+
 export type NavLink = {
   label: string
   href: string
@@ -21,9 +29,9 @@ export const headerNav: NavItem[] = [
   {
     type: "link",
     label: "Simulación Laboral",
-    href: PLACEHOLDER_HREF,
+    href: simulacionUrl,
   },
-  { type: "link", label: "Para Talento", href: PLACEHOLDER_HREF },
+  { type: "link", label: "Para Talento", href: talentoUrl },
   {
     type: "group",
     label: "Para Empresas",
@@ -34,7 +42,7 @@ export const headerNav: NavItem[] = [
       { label: "Expansión de tu marca", href: PLACEHOLDER_HREF },
     ],
   },
-  { type: "link", label: "Showcase", href: PLACEHOLDER_HREF },
+  { type: "link", label: "Showcase", href: showcaseUrl },
   {
     type: "group",
     label: "Sobre Nosotros",
@@ -51,19 +59,19 @@ export const loginNav: NavLink = {
 }
 
 export const footerNavegacion: NavLink[] = [
-  { label: "Showcase", href: PLACEHOLDER_HREF },
-  { label: "Para Talento", href: PLACEHOLDER_HREF },
-  { label: "Para Empresas", href: "/" },
+  { label: "Showcase", href: showcaseUrl },
+  { label: "Para Talento", href: talentoUrl },
+  { label: "Para Empresas", href: empresasUrl },
   { label: "Sobre No Country", href: PLACEHOLDER_HREF },
 ]
 
 export const footerShowcase: NavLink[] = [
-  { label: "Ver todos los proyectos", href: PLACEHOLDER_HREF },
+  { label: "Ver todos los proyectos", href: showcaseUrl },
 ]
 
 export const footerPlataforma: NavLink[] = [
-  { label: "Talento", href: PLACEHOLDER_HREF },
-  { label: "Empresas", href: "/" },
+  { label: "Talento", href: talentoUrl },
+  { label: "Empresas", href: empresasUrl },
 ]
 
 export const footerTagline = "Evidenciemos el valor del talento digital"
