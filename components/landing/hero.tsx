@@ -1,33 +1,82 @@
 import Image from "next/image"
 
 import { AdvisorCta } from "@/components/advisor-cta"
-import { MediaPlaceholder } from "@/components/media-placeholder"
 import { Section } from "@/components/section"
 import { SectionEyebrow } from "@/components/section-eyebrow"
 
 const allies = [
   {
-    src: "/brand/logo-viamatica.png",
-    alt: "Viamatica",
-    width: 160,
-    height: 35,
-  },
-  {
-    src: "/brand/logo-oracle-one.png",
+    src: "/brand/logo-oracle-white.svg",
     alt: "Oracle Next Education",
     width: 106,
     height: 56,
   },
   {
-    src: "/brand/logo-alura.png",
+    src: "/brand/logo-alura.svg",
     alt: "Alura",
-    width: 115,
+    width: 122,
+    height: 56,
+  },
+  {
+    src: "/brand/logo-decrypto.svg",
+    alt: "Decrypto",
+    width: 110,
+    height: 56,
+  },
+  {
+    src: "/brand/logo-stellar.svg",
+    alt: "Stellar",
+    width: 51,
+    height: 56,
+  },
+  {
+    src: "/brand/logo-tecnologico-de-monterrey.svg",
+    alt: "Tecnológico de Monterrey",
+    width: 212,
+    height: 56,
+  },
+  {
+    src: "/brand/logo-viamatica.svg",
+    alt: "Viamatica",
+    width: 196,
     height: 56,
   },
 ] as const
 
+const allyTrack = [...allies, ...allies]
+
+function AllyLogo({
+  src,
+  alt,
+  width,
+  height,
+}: (typeof allies)[number]) {
+  return (
+    <li className="flex h-14 shrink-0 items-center justify-center rounded-full border border-accent-cyan/40 bg-transparent px-md">
+      <Image
+        src={encodeURI(src)}
+        alt=""
+        width={width}
+        height={height}
+        unoptimized
+        className="h-8 w-auto max-w-none object-contain md:h-10"
+      />
+    </li>
+  )
+}
+
+function AllyTrack() {
+  return (
+    <ul className="flex shrink-0 items-center gap-md pl-md">
+      {allyTrack.map((ally, index) => (
+        <AllyLogo key={`${ally.alt}-${index}`} {...ally} />
+      ))}
+    </ul>
+  )
+}
+
 /**
- * Hero HF: pill, H1 natural, CTA gradiente, ventana B2B y franja de aliados.
+ * Hero HF: pill, H1 natural, CTA gradiente, captura de índice y franja de aliados.
  */
 function Hero() {
   return (
@@ -50,42 +99,42 @@ function Hero() {
             <AdvisorCta />
           </div>
 
-          <div className="relative min-w-0">
-            <div
-              aria-hidden
-              className=" pointer-events-none absolute -inset-4  "
-            />
-            <MediaPlaceholder
-              label="Captura B2B"
-              note="V1 — placeholder. Mostrar índice de actividad, trayectoria semanal y peer review. Captura B2B en V2."
-              className="relative min-h-80 min-w-0"
+          <div className="relative min-w-0 overflow-hidden rounded-md">
+            <Image
+              src="/product/indice-actividad.svg"
+              alt="Índice de actividad del equipo: trayectoria semanal y contribuciones en simulación"
+              width={1124}
+              height={723}
+              unoptimized
+              className="h-auto w-full"
+              priority
             />
           </div>
         </div>
       </Section>
 
-      <div className="relative">
+      <section
+        aria-label="Aliados y partners"
+        className="overflow-hidden bg-transparent py-md"
+      >
+        <ul className="sr-only">
+          {allies.map((ally) => (
+            <li key={ally.alt}>{ally.alt}</li>
+          ))}
+        </ul>
         <div
           aria-hidden
-          className="bg-landing-glow pointer-events-none absolute inset-0"
-        />
-        <Section className="relative py-md">
-          <ul className="flex min-h-16 max-w-full flex-wrap items-center justify-center gap-xl px-lg">
-            {allies.map((ally) => (
-              <li key={ally.alt} className="flex-1 max-w-40 min-h-12 items-center justify-center rounded-full bg-gray-900 relative h-full">
-                <Image
-                  src={ally.src}
-                  layout="fill"
-                  objectFit="contain"
-                  objectPosition="center"
-                  alt={ally.alt}
-                  className="p-1"
-                />
-              </li>
-            ))}
-          </ul>
-        </Section>
-      </div>
+          className="flex w-max animate-allies-marquee hover:paused focus-within:paused motion-reduce:hidden"
+        >
+          <AllyTrack />
+          <AllyTrack />
+        </div>
+        <ul className="hidden flex-wrap items-center justify-center gap-md px-md motion-reduce:flex">
+          {allies.map((ally) => (
+            <AllyLogo key={ally.alt} {...ally} />
+          ))}
+        </ul>
+      </section>
     </div>
   )
 }

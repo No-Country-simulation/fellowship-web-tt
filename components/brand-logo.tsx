@@ -18,17 +18,18 @@ function BrandLogo({
   width = 152,
   priority = false,
 }: BrandLogoProps) {
-  const height = Math.round((width * 64) / 380)
+  const height = Math.round((width * 32) / 190)
 
   return (
     <Link href="/" className={cn("inline-flex shrink-0", className)}>
       <Image
-        src="/brand/nocountry-logo.png"
+        src="/brand/logo-no-country.svg"
         alt="No Country"
         width={width}
         height={height}
         priority={priority}
         className="h-auto max-w-full"
+        unoptimized
       />
     </Link>
   )
