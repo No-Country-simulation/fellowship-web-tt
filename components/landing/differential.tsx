@@ -16,7 +16,11 @@ import { cn } from "@/lib/utils"
  */
 function Differential() {
   return (
-    <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="diferencial">
+    <Section
+      surface="light"
+      className="scroll-mt-2xl py-2xl md:py-3xl"
+      id="diferencial"
+    >
       <div className="flex flex-col items-center">
         <div className="mb-xl flex flex-col items-center gap-sm text-center">
           <SectionEyebrow>El diferencial</SectionEyebrow>
@@ -50,7 +54,7 @@ function ContrastColumn() {
         {differentialContrasts.map((item) => (
           <li
             key={`${item.from}-${item.to}`}
-            className="grid grid-cols-[1fr_auto_1fr] items-center gap-xs rounded-md bg-bg-surface-3 px-md py-sm"
+            className="grid grid-cols-[1fr_auto_1fr] items-center gap-xs rounded-md bg-bg-surface-3 px-md py-sm in-data-[surface=light]:border in-data-[surface=light]:border-border in-data-[surface=light]:bg-bg-surface-1 in-data-[surface=light]:shadow-card"
           >
             <span className="text-overline text-left text-text-secondary">
               {item.from}
@@ -97,7 +101,7 @@ function ComparisonCard({
             width={152}
             height={26}
             unoptimized
-            className="h-auto w-38 max-w-full"
+            className="h-auto w-38 max-w-full in-data-[surface=light]:brightness-0"
           />
         </h3>
       )}

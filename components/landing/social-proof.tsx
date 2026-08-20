@@ -160,16 +160,14 @@ function TestimonialCard({
           </cite>
           <p className="text-body-small text-text-secondary">{quote.role}</p>
         </div>
-        <div className="flex h-12 shrink-0 items-center justify-center rounded-full border border-accent-cyan/40 px-md">
-          <Image
-            src={encodeURI(quote.logo.src)}
-            alt={quote.logo.alt}
-            width={quote.logo.width}
-            height={quote.logo.height}
-            unoptimized
-            className="h-8 w-auto max-w-none object-contain"
-          />
-        </div>
+        <Image
+          src={encodeURI(quote.logo.src)}
+          alt={quote.logo.alt}
+          width={quote.logo.width}
+          height={quote.logo.height}
+          unoptimized
+          className="h-8 w-auto max-w-none object-contain brightness-0 invert"
+        />
       </figcaption>
 
       <p className="sr-only">

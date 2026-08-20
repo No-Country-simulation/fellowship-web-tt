@@ -52,14 +52,14 @@ function AllyLogo({
   height,
 }: (typeof allies)[number]) {
   return (
-    <li className="flex h-14 shrink-0 items-center justify-center rounded-full border border-accent-cyan/40 bg-transparent px-md">
+    <li className="flex h-14 shrink-0 items-center justify-center px-md">
       <Image
         src={encodeURI(src)}
         alt=""
         width={width}
         height={height}
         unoptimized
-        className="h-8 w-auto max-w-none object-contain md:h-10"
+        className="h-8 w-auto max-w-none object-contain brightness-0 invert md:h-10"
       />
     </li>
   )

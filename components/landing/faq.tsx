@@ -17,7 +17,7 @@ function Faq() {
   }
 
   return (
-    <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="faq">
+    <Section surface="light" className="scroll-mt-2xl py-2xl md:py-3xl" id="faq">
       <div className="flex flex-col gap-xl">
         <h2 className="text-heading-2 text-center text-text-primary">
           {faqHeading}

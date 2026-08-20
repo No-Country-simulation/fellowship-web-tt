@@ -5,6 +5,11 @@ import { cn } from "@/lib/utils"
 type SectionProps = React.ComponentProps<"section"> & {
   /** Clases del inner `container-content` (max-width 1280px). */
   containerClassName?: string
+  /**
+   * Banda de superficie. `light` remapea tokens solo en este bloque
+   * (`[data-surface=light]` en `globals.css`). Default: hereda el dark del sitio.
+   */
+  surface?: "light"
 }
 
 /**
@@ -20,13 +25,15 @@ type SectionProps = React.ComponentProps<"section"> & {
 function Section({
   className,
   containerClassName,
+  surface,
   children,
   ...props
 }: SectionProps) {
   return (
     <section
-      className={cn("min-w-0 overflow-x-clip px-md md:px-3xl", className)}
       {...props}
+      data-surface={surface}
+      className={cn("min-w-0 overflow-x-clip px-md md:px-3xl", className)}
     >
       <div className={cn("container-content", containerClassName)}>
         {children}
