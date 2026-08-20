@@ -16,6 +16,9 @@ const AI_CRAWLERS = [
   "Applebot-Extended",
   "Amazonbot",
   "meta-externalagent",
+  "Bingbot",
+  "BingPreview",
+  "MicrosoftPreview",
 ] as const;
 
 export default function robots(): MetadataRoute.Robots {

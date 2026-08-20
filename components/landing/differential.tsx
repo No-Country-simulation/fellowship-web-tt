@@ -1,30 +1,18 @@
-import { CheckIcon } from "lucide-react"
+import { CheckIcon, ChevronRightIcon, XIcon } from "lucide-react"
+import Image from "next/image"
 
 import { Section } from "@/components/section"
 import { SectionEyebrow } from "@/components/section-eyebrow"
+import {
+  differentialContrasts,
+  differentialHeading,
+  differentialNoCountryItems,
+  differentialTraditionalItems,
+} from "@/lib/landing"
 import { cn } from "@/lib/utils"
 
-const traditionalItems = [
-  "Mide cómo alguien se presenta, no cómo trabaja",
-  "Sin evidencia de comportamiento real",
-  "Decisión basada en una hora de conversación",
-] as const
-
-const noCountryItems = [
-  "Semanas de comportamiento documentado",
-  "Validación conductual con evidencia real",
-  "Decisión basada en cómo trabaja, no cómo se presenta",
-] as const
-
-const costCopy = [
-  "Una entrevista de una hora mide cómo alguien se presenta bajo presión de evaluación. No cómo trabaja bajo presión real durante semanas junto a un equipo.",
-  "El CV dice lo que el candidato quiere que veas. No predice comportamiento en equipo, consistencia bajo carga o cómo reacciona cuando algo falla.",
-  "El costo de una mala contratación junior — onboarding perdido, rotación, tiempo del equipo — es entre tres y seis veces el salario mensual del rol. Y es evitable.",
-] as const
-
 /**
- * Comparativa CV vs No Country (HF): card tradicional sin iconos,
- * card positiva con checks blancos y borde cyan.
+ * Comparativa HF: card tradicional, columna de contraste y card No Country.
  */
 function Differential() {
   return (
@@ -33,66 +21,96 @@ function Differential() {
         <div className="mb-xl flex flex-col items-center gap-sm text-center">
           <SectionEyebrow>El diferencial</SectionEyebrow>
           <h2 className="text-heading-2 max-w-3xl text-pretty text-text-primary">
-            Por qué no alcanza con las palabras
+            {differentialHeading}
           </h2>
         </div>
 
-        <div className="mb-2xl flex w-full flex-wrap items-center justify-center gap-md">
+        <div className="grid w-full min-w-0 items-stretch gap-md lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-lg">
           <ComparisonCard
             title="CV o entrevista tradicional"
-            items={traditionalItems}
-            highlighted={false}
+            items={differentialTraditionalItems}
+            tone="negative"
           />
+          <ContrastColumn />
           <ComparisonCard
-            title="No Country"
-            items={noCountryItems}
-            highlighted
+            items={differentialNoCountryItems}
+            tone="positive"
           />
-        </div>
-
-        <div className="flex w-full flex-col gap-lg">
-          {costCopy.map((paragraph) => (
-            <p key={paragraph} className="text-body-large text-text-primary">
-              {paragraph}
-            </p>
-          ))}
         </div>
       </div>
     </Section>
   )
 }
 
+function ContrastColumn() {
+  return (
+    <div className="flex min-w-0 flex-col items-center justify-center gap-sm lg:w-72">
+      <p className="text-overline text-text-secondary">El contraste</p>
+      <ul className="flex w-full flex-col gap-sm">
+        {differentialContrasts.map((item) => (
+          <li
+            key={`${item.from}-${item.to}`}
+            className="grid grid-cols-[1fr_auto_1fr] items-center gap-xs rounded-md bg-bg-surface-3 px-md py-sm"
+          >
+            <span className="text-overline text-left text-text-secondary">
+              {item.from}
+            </span>
+            <ChevronRightIcon
+              aria-hidden="true"
+              className="size-4 shrink-0 text-accent-cyan"
+            />
+            <span className="text-overline text-right text-text-primary">{item.to}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function ComparisonCard({
   title,
   items,
-  highlighted,
+  tone,
 }: {
-  title: string
+  title?: string
   items: readonly string[]
-  highlighted: boolean
+  tone: "negative" | "positive"
 }) {
+  const Icon = tone === "positive" ? CheckIcon : XIcon
+
   return (
     <article
       className={cn(
-        "flex size-80 shrink-0 flex-col justify-center gap-sm rounded-md bg-bg-surface-1 p-md backdrop-blur-sm",
-        highlighted
+        "flex h-full min-w-0 flex-col justify-start gap-md rounded-md bg-bg-surface-1 p-md backdrop-blur-sm",
+        tone === "positive"
           ? "border-2 border-solid border-accent-cyan"
-          : "border-2 border-solid border-border"
+          : "border-2 border-solid border-transparent"
       )}
     >
-      <h3 className="text-heading-3 text-text-primary">{title}</h3>
+      {title ? (
+        <h3 className="text-heading-3 text-text-primary">{title}</h3>
+      ) : (
+        <h3>
+          <Image
+            src="/brand/logo-no-country.svg"
+            alt="No Country"
+            width={152}
+            height={26}
+            unoptimized
+            className="h-auto w-38 max-w-full"
+          />
+        </h3>
+      )}
       <ul className="flex flex-col gap-sm">
         {items.map((item) => (
           <li
             key={item}
             className="flex min-w-0 gap-sm text-body text-text-secondary"
           >
-            {highlighted ? (
-              <CheckIcon
-                aria-hidden="true"
-                className="mt-0.5 size-5 shrink-0 text-text-primary"
-              />
-            ) : null}
+            <Icon
+              aria-hidden="true"
+              className="mt-0.5 size-5 shrink-0 stroke-[1.5] text-text-primary"
+            />
             <span className="min-w-0 text-pretty">{item}</span>
           </li>
         ))}
