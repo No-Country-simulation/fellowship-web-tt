@@ -109,6 +109,8 @@
     color-mix(in srgb, var(--brand-pink) 45%, transparent);
 
   --max-width-content: 80rem;
+
+  --animate-allies-marquee: allies-marquee 40s linear infinite;
 }
 
 :root {
@@ -347,6 +349,18 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
+  }
+}
+
+@keyframes allies-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-allies-marquee {
+    animation: none;
   }
 }
 

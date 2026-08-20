@@ -1,9 +1,23 @@
+import {
+  FileCheckIcon,
+  RefreshCwIcon,
+  ShieldCheckIcon,
+  UnlockIcon,
+} from "lucide-react"
+
 import { AdvisorCta } from "@/components/advisor-cta"
 import { Section } from "@/components/section"
 import { guaranteeHeading, guaranteeItems } from "@/lib/landing"
 
+const guaranteeIcons = [
+  RefreshCwIcon,
+  FileCheckIcon,
+  UnlockIcon,
+  ShieldCheckIcon,
+] as const
+
 /**
- * Garantía HF: H2 centrado, 4 filas con acento cyan + CTA outline.
+ * Garantía HF: H2 centrado, 4 filas con icono cyan + CTA outline.
  */
 function Guarantee() {
   return (
@@ -14,23 +28,32 @@ function Guarantee() {
         </h2>
 
         <ul className="flex w-full flex-col gap-sm">
-          {guaranteeItems.map((item) => (
-            <li
-              key={item}
-              className="flex min-w-0 items-center gap-md rounded-md bg-bg-surface-1/70 px-md py-md backdrop-blur-sm"
-            >
-              <span
-                aria-hidden
-                className="size-2.5 shrink-0 rounded-full bg-accent-cyan"
-              />
-              <p className="text-body min-w-0 text-pretty text-text-primary">
-                {item}
-              </p>
-            </li>
-          ))}
+          {guaranteeItems.map((item, index) => {
+            const Icon = guaranteeIcons[index]
+
+            return (
+              <li
+                key={item}
+                className="flex min-w-0 items-center gap-md rounded-md border border-border/60 bg-linear-to-r from-brand-violet/20 via-bg-surface-1/55 to-transparent px-md py-md backdrop-blur-sm"
+              >
+                <span
+                  aria-hidden
+                  className="flex size-10 shrink-0 items-center justify-center rounded-md bg-accent-cyan/10"
+                >
+                  <Icon className="size-5 stroke-[1.5] text-accent-cyan drop-shadow-[0_0_6px_var(--accent-cyan)]" />
+                </span>
+                <p className="text-body min-w-0 text-pretty text-text-primary">
+                  {item}
+                </p>
+              </li>
+            )
+          })}
         </ul>
 
-        <AdvisorCta variant="outline" />
+        <AdvisorCta
+          variant="outline"
+          className="self-start border-text-primary/80 bg-transparent text-text-primary hover:bg-text-primary/10"
+        />
       </div>
     </Section>
   )

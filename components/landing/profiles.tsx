@@ -35,11 +35,7 @@ function Profiles() {
         <div className="grid min-w-0 items-start gap-md lg:grid-cols-3 lg:*:min-w-0">
           <ChipGroup title="Roles" items={roles} />
           <ChipGroup title="Verticales" items={verticals} />
-          <ChipGroup
-            title="Geografías"
-            items={countriesServed}
-            footnote="y otros países"
-          />
+          <ChipGroup title="Geografías" items={[...countriesServed, "+100"]} />
         </div>
       </div>
     </Section>
@@ -49,11 +45,9 @@ function Profiles() {
 function ChipGroup({
   title,
   items,
-  footnote,
 }: {
   title: string
   items: readonly string[]
-  footnote?: string
 }) {
   return (
     <div className="rounded-md bg-bg-surface-1/40 p-md backdrop-blur-sm">
@@ -66,9 +60,6 @@ function ChipGroup({
             </Badge>
           </li>
         ))}
-        {footnote ? (
-          <li className="text-body-small text-text-secondary">{footnote}</li>
-        ) : null}
       </ul>
     </div>
   )
