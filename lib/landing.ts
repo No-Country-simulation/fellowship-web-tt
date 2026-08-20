@@ -3,21 +3,24 @@
  * Hechos y plazos alineados a `lib/geo.ts`. No inventar respuestas de FAQ.
  */
 
-export const differentialHeading =
-  "Por qué un CV no alcanza para contratar junior"
+export const differentialHeading = "Por qué no alcanza con las palabras"
 
-export const differentialIntro =
-  "El CV dice lo que el candidato quiere que veas. No predice comportamiento en equipo, consistencia bajo carga o cómo reacciona cuando algo falla."
+export const differentialTraditionalItems = [
+  "Mide cómo alguien se presenta, no cómo trabaja",
+  "Sin evidencia de comportamiento real",
+  "Decisión basada en una hora de conversación",
+] as const
 
-export const differentialHighlights = [
-  {
-    value: "1 hora",
-    body: "Una entrevista de una hora mide cómo alguien se presenta bajo presión de evaluación. No cómo trabaja bajo presión real durante semanas junto a un equipo.",
-  },
-  {
-    value: "3–6x",
-    body: "El costo de una mala contratación junior — onboarding perdido, rotación, tiempo del equipo — es entre tres y seis veces el salario mensual del rol. Y es evitable.",
-  },
+export const differentialNoCountryItems = [
+  "Semanas de comportamiento documentado",
+  "Validación conductual con evidencia real",
+  "Decisión basada en cómo trabaja, no cómo se presenta",
+] as const
+
+export const differentialContrasts = [
+  { from: "Se presenta", to: "Se observa" },
+  { from: "Declarado", to: "Documentado" },
+  { from: "1 hora", to: "Semanas" },
 ] as const
 
 export const evidenceHeading =
@@ -26,48 +29,42 @@ export const evidenceHeading =
 export const evidenceItems = [
   {
     title: "Índice de actividad",
-    body: "Calculado semana a semana contra el pool completo. Mide presencia real — mensajes, reuniones, conexión.",
+    body: "Presencia real semana a semana: mensajes, reuniones y conexión.",
   },
   {
     title: "Trayectoria semanal",
-    body: "La evolución del índice semana a semana: si mantiene el ritmo, si acelera bajo presión, si tiene caídas y cómo las recupera.",
+    body: "Cómo evoluciona el ritmo de trabajo: si acelera, cae o se recupera.",
   },
   {
     title: "Peer review",
-    body: "Evaluación anónima de compañeros de equipo después de trabajar juntos bajo presión real.",
+    body: "Cómo lo describen sus compañeros después de semanas trabajando juntos.",
   },
   {
     title: "Entregables",
-    body: "Lo que construyó concretamente — código, documentación, diseños, análisis.",
+    body: "Lo que construyó de verdad: código, documentación y diseños.",
   },
 ] as const
 
-export const evidencePreviews = [
-  {
-    src: "/product/evidencia-peer-review.svg",
-    alt: "Peer review vs autoevaluación en 13 soft skills, con puntaje recibido y autopercepción",
-    width: 382,
-    height: 192,
-  },
-  {
-    src: "/product/evidencia-fortaleza.svg",
-    alt: "Comentarios anónimos de compañeros: áreas de fortaleza",
-    width: 191,
-    height: 146,
-  },
-  {
-    src: "/product/evidencia-mejora.svg",
-    alt: "Comentarios anónimos de compañeros: áreas de mejora",
-    width: 191,
-    height: 146,
-  },
-  {
+export const evidencePreviews = {
+  metrics: {
     src: "/product/evidencia-metricas.svg",
     alt: "Métricas de un talento: índice de actividad 97/100, pool de 248 participantes y peer review promedio 9.2",
     width: 382,
     height: 109,
   },
-] as const
+  strengths: {
+    src: "/product/evidencia-fortaleza.svg",
+    alt: "Comentarios anónimos de compañeros: áreas de fortaleza",
+    width: 191,
+    height: 146,
+  },
+  improvements: {
+    src: "/product/evidencia-mejora.svg",
+    alt: "Comentarios anónimos de compañeros: áreas de mejora",
+    width: 191,
+    height: 146,
+  },
+} as const
 
 export const howItWorksHeading =
   "Cómo incorporar un junior, de la reunión al día 1"
