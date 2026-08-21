@@ -403,9 +403,44 @@
   }
 }
 
+/*
+ * Native <details> open/close. `::details-content` keeps Q+A in the HTML
+ * (GEO) while interpolating height. Instant fallback if unsupported.
+ */
+.faq-details {
+  interpolate-size: allow-keywords;
+}
+
+.faq-details::details-content {
+  display: block;
+  block-size: 0;
+  opacity: 0;
+  overflow-y: clip;
+  transition:
+    block-size 300ms ease-out,
+    opacity 200ms ease-out,
+    content-visibility 300ms allow-discrete;
+}
+
+.faq-details[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+}
+
+@starting-style {
+  .faq-details[open]::details-content {
+    block-size: 0;
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-allies-marquee {
     animation: none;
+  }
+
+  .faq-details::details-content {
+    transition: none;
   }
 }
 

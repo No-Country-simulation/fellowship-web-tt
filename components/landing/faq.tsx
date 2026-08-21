@@ -27,13 +27,13 @@ function Faq() {
           {items.map((faq) => (
             <details
               key={faq.question}
-              className="group rounded-md border border-border/60 bg-bg-surface-1/70 px-md backdrop-blur-sm"
+              className="faq-details group rounded-md border border-border/60 bg-bg-surface-1/70 px-md backdrop-blur-sm"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-md py-md text-left text-body font-medium text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
                 <span className="min-w-0 text-pretty">{faq.question}</span>
                 <span className="relative size-5 shrink-0">
-                  <PlusIcon className="size-5 text-text-primary group-open:hidden" />
-                  <MinusIcon className="absolute inset-0 hidden size-5 text-text-primary group-open:block" />
+                  <PlusIcon className="size-5 text-text-primary transition-all duration-300 ease-out group-open:scale-75 group-open:opacity-0 motion-reduce:transition-none" />
+                  <MinusIcon className="absolute inset-0 size-5 scale-75 text-text-primary opacity-0 transition-all duration-300 ease-out group-open:scale-100 group-open:opacity-100 motion-reduce:transition-none" />
                 </span>
               </summary>
               <p className="pb-md text-body text-text-secondary">{faq.answer}</p>
