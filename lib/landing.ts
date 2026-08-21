@@ -216,7 +216,7 @@ export const socialProofQuotes = [
     name: "Amanda Gelumbauskas",
     role: "LATAM Head of Oracle Next Education",
     avatar: {
-      src: "/product/avatar.svg",
+      src: "/product/avatar-amanda-gelumbauskas.svg",
       alt: "Amanda Gelumbauskas",
       width: 56,
       height: 56,
@@ -225,6 +225,60 @@ export const socialProofQuotes = [
       src: "/brand/logo-oracle-white.svg",
       alt: "ONE Oracle Next Education",
       width: 106,
+      height: 56,
+    },
+  },
+  {
+    quote:
+      "El nivel de innovación y la calidad de los prototipos desarrollados en solo 4 días fue impresionante. No Country ha creado un ecosistema único para conectar talento con desafíos reales.",
+    name: "Jorge Cobo",
+    role: "Founder",
+    avatar: {
+      src: "/product/avatar-jorge-cobo.svg",
+      alt: "Jorge Cobo",
+      width: 56,
+      height: 56,
+    },
+    logo: {
+      src: "/brand/logo-viamatica.svg",
+      alt: "Viamatica",
+      width: 196,
+      height: 56,
+    },
+  },
+  {
+    quote:
+      "La capacidad de los equipos para entregar soluciones funcionales de IA en tiempo récord demostró el nivel de talento que existe en Ecuador. Identificamos varios perfiles que se alinean con nuestras necesidades de transformación digital.",
+    name: "Jorge Portalanza",
+    role: "Gerente de Proyecto",
+    avatar: {
+      src: "/product/avatar-jorge-portalanza.svg",
+      alt: "Jorge Portalanza",
+      width: 56,
+      height: 56,
+    },
+    logo: {
+      src: "/brand/logo-viamatica.svg",
+      alt: "Viamatica",
+      width: 196,
+      height: 56,
+    },
+  },
+  {
+    quote:
+      "Ver a los equipos trabajar en tiempo real nos dio una perspectiva invaluable sobre cómo colaboran y resuelven problemas. Identificamos varios candidatos que se alinean perfectamente con nuestra cultura.",
+    name: "Christian Velasco Argañaraz",
+    role: "Head of Alura Latam",
+    avatar: {
+      src: "/product/avatar-christian-velasco-arganaraz.svg",
+      alt: "Christian Velasco Argañaraz",
+      width: 56,
+      height: 56,
+    },
+    logo: {
+      src: "/brand/logo-alura.svg",
+      alt: "Alura",
+      width: 122,
       height: 56,
     },
   },

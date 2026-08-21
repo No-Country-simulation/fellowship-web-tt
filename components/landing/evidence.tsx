@@ -71,7 +71,7 @@ function Evidence() {
           })}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-md rounded-lg border border-accent-cyan/50 bg-accent-cyan/10 p-md">
+        <div className="flex min-w-0 flex-col gap-md rounded-lg border border-border bg-bg-surface-1/70 p-md backdrop-blur-sm">
           <EvidenceMetrics />
           <EvidenceFeedback />
         </div>
@@ -103,7 +103,7 @@ function EvidenceMetrics() {
       {metrics.map((item) => (
         <article
           key={item.key}
-          className="flex min-w-0 flex-col justify-center rounded-md bg-bg-surface-3 px-sm py-sm"
+          className="flex min-w-0 flex-col justify-center rounded-md bg-bg-surface-4 px-sm py-sm"
         >
           <p className="flex min-h-8 min-w-0 items-baseline gap-1">
             <span className="text-heading-3 tabular-nums text-text-primary">
