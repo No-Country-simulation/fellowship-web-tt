@@ -62,24 +62,43 @@ function TestimonialCarousel({
   quotes: readonly SocialProofQuote[]
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [outgoingIndex, setOutgoingIndex] = useState<number | null>(null)
+  const [direction, setDirection] = useState<1 | -1>(1)
   const quoteCount = quotes.length
-  const quote = quotes[activeIndex]
-
-  if (!quote) {
-    return null
-  }
 
   function goTo(index: number) {
-    setActiveIndex((index + quoteCount) % quoteCount)
+    const nextIndex = (index + quoteCount) % quoteCount
+
+    if (nextIndex === activeIndex) {
+      return
+    }
+
+    const stepsForward = (nextIndex - activeIndex + quoteCount) % quoteCount
+    setDirection(stepsForward <= quoteCount / 2 ? 1 : -1)
+    setOutgoingIndex(activeIndex)
+    setActiveIndex(nextIndex)
   }
 
   return (
     <article
       aria-label="Testimonios de casos de éxito"
       aria-roledescription="carrusel"
-      className="flex min-w-0 flex-col gap-md rounded-md border border-border bg-bg-surface-1 p-md"
+      className="flex h-full min-w-0 flex-col gap-md rounded-md border border-border p-md"
     >
-      <TestimonialCard quote={quote} index={activeIndex} total={quoteCount} />
+      <div className="grid min-w-0 flex-1 overflow-hidden">
+        {quotes.map((item, index) => (
+          <TestimonialCard
+            key={item.name}
+            quote={item}
+            index={index}
+            total={quoteCount}
+            inactive={index !== activeIndex}
+            outgoing={index === outgoingIndex}
+            entering={index === activeIndex && outgoingIndex !== null}
+            direction={direction}
+          />
+        ))}
+      </div>
 
       <div className="mt-auto flex items-center justify-between gap-sm">
         <Button
@@ -134,20 +153,42 @@ function TestimonialCard({
   quote,
   index,
   total,
+  inactive,
+  outgoing,
+  entering,
+  direction,
 }: {
   quote: SocialProofQuote
   index: number
   total: number
+  inactive: boolean
+  outgoing: boolean
+  entering: boolean
+  direction: 1 | -1
 }) {
   return (
     <figure
-      aria-live="polite"
-      aria-atomic="true"
-      className="flex min-w-0 flex-1 flex-col gap-md"
+      aria-live={inactive ? undefined : "polite"}
+      aria-atomic={inactive ? undefined : "true"}
+      aria-hidden={inactive || undefined}
+      className={cn(
+        "col-start-1 row-start-1 flex min-w-0 flex-col gap-md duration-300 ease-out motion-reduce:animate-none motion-reduce:translate-x-0",
+        (inactive || outgoing) && "pointer-events-none",
+        !inactive && !entering && "z-10 opacity-100",
+        inactive && !outgoing && "opacity-0",
+        outgoing &&
+          (direction === 1
+            ? "z-0 animate-out fade-out-0 slide-out-to-left-4 fill-mode-forwards motion-reduce:opacity-0"
+            : "z-0 animate-out fade-out-0 slide-out-to-right-4 fill-mode-forwards motion-reduce:opacity-0"),
+        entering &&
+          (direction === 1
+            ? "z-10 animate-in fade-in-0 slide-in-from-right-4 motion-reduce:opacity-100"
+            : "z-10 animate-in fade-in-0 slide-in-from-left-4 motion-reduce:opacity-100")
+      )}
     >
       <QuoteAvatar avatar={quote.avatar} />
 
-      <blockquote className="text-heading-3 font-normal text-pretty text-text-primary">
+      <blockquote className="flex-1 text-heading-3 font-normal text-pretty text-text-primary">
         “{quote.quote}”
       </blockquote>
 

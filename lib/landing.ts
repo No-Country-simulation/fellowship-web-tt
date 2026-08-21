@@ -45,26 +45,92 @@ export const evidenceItems = [
   },
 ] as const
 
-export const evidencePreviews = {
-  metrics: {
-    src: "/product/evidencia-metricas.svg",
-    alt: "Métricas de un talento: índice de actividad 97/100, pool de 248 participantes y peer review promedio 9.2",
-    width: 382,
-    height: 109,
+export const evidenceMetricHighlights = [
+  {
+    label: "Índice de actividad",
+    value: "97",
+    suffix: "/100",
+    footer: "Calculado sobre los 248 participantes de esta simulación",
+    glow: "bg-accent-indigo",
   },
-  strengths: {
-    src: "/product/evidencia-fortaleza.svg",
-    alt: "Comentarios anónimos de compañeros: áreas de fortaleza",
-    width: 191,
-    height: 146,
+  {
+    label: "Pool de la simulación",
+    value: "248",
+    suffix: "participantes",
+    footer: "Distribuidos en 31 equipos activos",
+    glow: "bg-accent-cyan",
   },
-  improvements: {
-    src: "/product/evidencia-mejora.svg",
-    alt: "Comentarios anónimos de compañeros: áreas de mejora",
-    width: 191,
-    height: 146,
+  {
+    label: "Peer review promedio",
+    value: "9.2",
+    suffix: "/10",
+    footer: "7 reseñas de tus compañeros de equipo",
+    glow: "bg-accent-mint",
+    starred: true,
   },
-} as const
+] as const
+
+export const evidenceMetricStats = [
+  {
+    value: "27",
+    label: "Reuniones asistidas",
+    footer: "Durante las 4 semanas de simulación",
+    accent: "cyan",
+  },
+  {
+    value: "486",
+    label: "Mensajes enviados",
+    footer: "En canales del equipo",
+    accent: "pink",
+  },
+  {
+    value: "32h 15m",
+    label: "Tiempo en reuniones",
+    footer: "Acumulado en las 4 semanas",
+    accent: "indigo",
+  },
+] as const
+
+export const evidenceStrengths = [
+  {
+    quote:
+      "Su capacidad para tomar feedback y iterar rápido sobre el diseño fue clave para llegar a tiempo al handoff.",
+    source: "Compañero/a de Back-End - anónimo",
+  },
+  {
+    quote:
+      "Muy generosa compartiendo conocimiento de Figma con el resto del equipo, incluso fuera de su rol.",
+    source: "Compañero/a de QA Tester - anónimo",
+  },
+  {
+    quote:
+      "Excelente comunicación de las decisiones de diseño — siempre explica el «por qué», no solo el «qué».",
+    source: "Compañero/a de Front-End - anónimo",
+  },
+  {
+    quote:
+      "Sostuvo el ritmo del equipo en las semanas de más carga, dando el ejemplo con su propia dedicación.",
+    source: "Compañero/a de Team Leader - anónimo",
+  },
+] as const
+
+export const evidenceImprovements = [
+  {
+    quote:
+      "Podría delegar más tareas de detalle visual para enfocarse en las decisiones de mayor impacto.",
+    source: "Compañero/a de Team Leader - anónimo",
+  },
+  {
+    quote:
+      "A veces tarda en responder mensajes fuera del horario de las ceremonias — ayudaría ser más ágil ahí.",
+    source: "Compañero/a de Back-End - anónimo",
+  },
+  {
+    quote:
+      "Podría involucrar antes a QA en el proceso de diseño para detectar edge cases más temprano.",
+    source: "Compañero/a de QA Tester - anónimo",
+  },
+] as const
 
 export const howItWorksHeading =
   "Cómo incorporar un junior, de la reunión al día 1"
@@ -150,7 +216,7 @@ export const socialProofQuotes = [
     name: "Amanda Gelumbauskas",
     role: "LATAM Head of Oracle Next Education",
     avatar: {
-      src: "/product/avatar.svg",
+      src: "/product/avatar-amanda-gelumbauskas.svg",
       alt: "Amanda Gelumbauskas",
       width: 56,
       height: 56,
@@ -159,6 +225,60 @@ export const socialProofQuotes = [
       src: "/brand/logo-oracle-white.svg",
       alt: "ONE Oracle Next Education",
       width: 106,
+      height: 56,
+    },
+  },
+  {
+    quote:
+      "El nivel de innovación y la calidad de los prototipos desarrollados en solo 4 días fue impresionante. No Country ha creado un ecosistema único para conectar talento con desafíos reales.",
+    name: "Jorge Cobo",
+    role: "Founder",
+    avatar: {
+      src: "/product/avatar-jorge-cobo.svg",
+      alt: "Jorge Cobo",
+      width: 56,
+      height: 56,
+    },
+    logo: {
+      src: "/brand/logo-viamatica.svg",
+      alt: "Viamatica",
+      width: 196,
+      height: 56,
+    },
+  },
+  {
+    quote:
+      "La capacidad de los equipos para entregar soluciones funcionales de IA en tiempo récord demostró el nivel de talento que existe en Ecuador. Identificamos varios perfiles que se alinean con nuestras necesidades de transformación digital.",
+    name: "Jorge Portalanza",
+    role: "Gerente de Proyecto",
+    avatar: {
+      src: "/product/avatar-jorge-portalanza.svg",
+      alt: "Jorge Portalanza",
+      width: 56,
+      height: 56,
+    },
+    logo: {
+      src: "/brand/logo-viamatica.svg",
+      alt: "Viamatica",
+      width: 196,
+      height: 56,
+    },
+  },
+  {
+    quote:
+      "Ver a los equipos trabajar en tiempo real nos dio una perspectiva invaluable sobre cómo colaboran y resuelven problemas. Identificamos varios candidatos que se alinean perfectamente con nuestra cultura.",
+    name: "Christian Velasco Argañaraz",
+    role: "Head of Alura Latam",
+    avatar: {
+      src: "/product/avatar-christian-velasco-arganaraz.svg",
+      alt: "Christian Velasco Argañaraz",
+      width: 56,
+      height: 56,
+    },
+    logo: {
+      src: "/brand/logo-alura.svg",
+      alt: "Alura",
+      width: 122,
       height: 56,
     },
   },
