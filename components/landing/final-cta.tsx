@@ -3,22 +3,17 @@ import { Section } from "@/components/section"
 import { finalCtaLabel } from "@/lib/landing"
 
 /**
- * Cierre HF: titular centrado, CTA gradiente, glow de marca (Gradient.png).
+ * Cierre HF: recuadro con borde, titular en gradiente de marca y CTA.
  */
 function FinalCta() {
   return (
-    <div className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="bg-landing-glow pointer-events-none absolute top-1/2 left-1/2 h-[28rem] w-[140%] max-w-none -translate-x-1/2 -translate-y-1/2"
-      />
-
-      <Section
-        className="relative scroll-mt-2xl py-2xl md:py-3xl"
-        id="contacto"
-      >
+    <Section
+      className="relative scroll-mt-2xl py-2xl md:py-3xl"
+      id="contacto"
+    >
+      <div className="relative rounded-md border border-accent-cyan/50 bg-accent-cyan/10 px-md py-xl md:px-2xl md:py-2xl">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-md text-center">
-          <h2 className="text-heading-2 max-w-full text-pretty text-text-primary">
+          <h2 className="text-heading-2 max-w-full text-pretty text-brand-gradient">
             ¿Necesitás incorporar talento junior en los próximos 30 días?
           </h2>
           <AdvisorCta
@@ -30,8 +25,8 @@ function FinalCta() {
             podemos ayudarte.
           </p>
         </div>
-      </Section>
-    </div>
+      </div>
+    </Section>
   )
 }
 

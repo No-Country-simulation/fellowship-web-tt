@@ -41,7 +41,7 @@ function HowItWorks() {
           ))}
         </ol>
 
-        <div className="flex flex-col gap-lg rounded-lg border border-accent-cyan/50 bg-bg-surface-1 px-md py-lg md:px-xl md:py-xl">
+        <div className="flex flex-col gap-lg rounded-lg border border-border bg-bg-surface-1 px-md py-lg md:px-xl md:py-xl">
           <div className="flex flex-col items-center gap-sm text-center">
             <h3 className="text-heading-3 text-pretty text-text-primary">
               <span className="text-brand-gradient">

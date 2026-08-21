@@ -58,7 +58,7 @@ export const allies = [
 
 export const productFacts = [
   "Evidencia conductual real antes de contratar: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos. El ranking se basa en semanas de comportamiento observado en equipo, no en keywords del CV.",
-  "Proceso: reunión de descubrimiento (20 min), catálogo curado en 3 a 5 días hábiles, entrevistas coordinadas. Confirmado el match, el talento arranca en 72 horas.",
+  "Proceso: reunión de descubrimiento (20 min), catálogo curado en 3 a 5 días hábiles, entrevistas coordinadas. Confirmado el match, el talento arranca en 72 horas desde el pago.",
   "Garantía de reemplazo en 72 horas dentro de los primeros 30 días, sin costo adicional.",
   "Contratos de 3 o 6 meses. Al finalizar, el talento puede incorporarse de forma permanente sin comisión.",
   `Pool junior y junior-mid (0 a 2 años de experiencia laboral formal) en desarrollo, diseño, datos, IA y producto. Roles: ${roles.join(", ")}.`,
@@ -107,7 +107,7 @@ export const faqs: FaqItem[] = [
   {
     question: "¿Cuánto tiempo tarda el proceso desde la reunión hasta que el talento arranca?",
     answer:
-      "Desde la reunión de descubrimiento hasta el catálogo curado: 3 a 5 días hábiles. Desde la confirmación del match hasta el inicio: 72 horas.",
+      "Desde la reunión de descubrimiento hasta el catálogo curado: 3 a 5 días hábiles. Confirmado el match, el talento arranca en 72 horas desde el pago.",
   },
 ];
 

@@ -1,31 +1,42 @@
-import Image from "next/image"
+import type { ReactNode } from "react"
+import {
+  BarChart3Icon,
+  FileCheckIcon,
+  RefreshCwIcon,
+  ShieldCheckIcon,
+  StarIcon,
+  TrendingDownIcon,
+} from "lucide-react"
 
 import { Section } from "@/components/section"
 import {
   evidenceHeading,
+  evidenceImprovements,
   evidenceItems,
-  evidencePreviews,
+  evidenceMetricHighlights,
+  evidenceMetricStats,
+  evidenceStrengths,
 } from "@/lib/landing"
 import { cn } from "@/lib/utils"
 
-const accents = [
-  "bg-accent-cyan",
-  "bg-accent-mint",
-  "bg-accent-indigo-light",
-  "bg-accent-yellow",
+const featureIcons = [
+  BarChart3Icon,
+  RefreshCwIcon,
+  ShieldCheckIcon,
+  FileCheckIcon,
+] as const
+
+const featureIconWrap = [
+  "bg-accent-cyan/10 text-accent-cyan",
+  "bg-accent-cyan/10 text-accent-cyan",
+  "bg-accent-indigo/10 text-accent-indigo-light",
+  "bg-accent-indigo/10 text-accent-indigo-light",
 ] as const
 
 /**
- * Evidencia HF: H2 centrado, 4 cards con acento, conector y capturas de producto.
+ * Evidencia HF: H2, 4 cards con icono y panel compacto de métricas + feedback.
  */
 function Evidence() {
-  const [
-    peerReviewPreview,
-    strengthsPreview,
-    improvementsPreview,
-    metricsPreview,
-  ] = evidencePreviews
-
   return (
     <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="evidencia">
       <div className="flex flex-col gap-xl">
@@ -34,110 +45,145 @@ function Evidence() {
         </h2>
 
         <div className="grid min-w-0 gap-md sm:grid-cols-2 lg:grid-cols-4 lg:*:min-w-0">
-          {evidenceItems.map((item, index) => (
-            <article
-              key={item.title}
-              className="flex min-w-0 flex-col gap-sm rounded-md bg-bg-surface-1/70 p-md backdrop-blur-sm"
-            >
-              <span
-                aria-hidden
-                className={cn("size-6 shrink-0 rounded-full", accents[index])}
-              />
-              <h3 className="text-heading-3 text-text-primary">{item.title}</h3>
-              <p className="text-body text-text-secondary">{item.body}</p>
-            </article>
-          ))}
+          {evidenceItems.map((item, index) => {
+            const Icon = featureIcons[index]
+
+            return (
+              <article
+                key={item.title}
+                className="flex min-w-0 flex-col gap-sm rounded-md border border-border/60 bg-bg-surface-1/70 p-md backdrop-blur-sm"
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-md",
+                    featureIconWrap[index]
+                  )}
+                >
+                  <Icon className="size-5 stroke-[1.5]" />
+                </span>
+                <h3 className="text-heading-3 text-text-primary">
+                  {item.title}
+                </h3>
+                <p className="text-body text-text-secondary">{item.body}</p>
+              </article>
+            )
+          })}
         </div>
 
-        <div className="flex flex-col">
-          <EvidenceConnector />
-          <div className="grid min-w-0 items-start gap-md lg:grid-cols-3 lg:*:min-w-0">
-            <div className="flex min-w-0 flex-col gap-md lg:col-span-2">
-              <EvidencePreview
-                preview={peerReviewPreview}
-                sizes="(min-width: 1024px) 66vw, 100vw"
-              />
-              <EvidencePreview
-                preview={metricsPreview}
-                sizes="(min-width: 1024px) 66vw, 100vw"
-              />
-            </div>
-            <div className="flex min-w-0 flex-col gap-md">
-              <EvidencePreview
-                preview={strengthsPreview}
-                sizes="(min-width: 1024px) 33vw, 100vw"
-              />
-              <EvidencePreview
-                preview={improvementsPreview}
-                sizes="(min-width: 1024px) 33vw, 100vw"
-              />
-            </div>
-          </div>
+        <div className="flex min-w-0 flex-col gap-md rounded-lg border border-border bg-bg-surface-1/70 p-md backdrop-blur-sm">
+          <EvidenceMetrics />
+          <EvidenceFeedback />
         </div>
       </div>
     </Section>
   )
 }
 
-function EvidencePreview({
-  preview,
-  sizes,
-  className,
-}: {
-  preview: (typeof evidencePreviews)[number]
-  sizes: string
-  className?: string
-}) {
+function EvidenceMetrics() {
+  const metrics = [
+    ...evidenceMetricHighlights.map((item) => ({
+      key: item.label,
+      value: item.value,
+      suffix: item.suffix,
+      label: item.label,
+      starred: "starred" in item && Boolean(item.starred),
+    })),
+    ...evidenceMetricStats.map((item) => ({
+      key: item.label,
+      value: item.value,
+      suffix: undefined as string | undefined,
+      label: item.label,
+      starred: false,
+    })),
+  ]
+
   return (
-    <figure
-      className={cn(
-        "min-w-0 rounded-md border border-accent-cyan/50 bg-accent-cyan/10 p-sm",
-        className
-      )}
-    >
-      <Image
-        src={preview.src}
-        alt={preview.alt}
-        width={preview.width}
-        height={preview.height}
-        className="h-auto w-full rounded-sm"
-        sizes={sizes}
-        unoptimized
-      />
-    </figure>
+    <div className="grid min-w-0 grid-cols-2 gap-xs sm:grid-cols-3 lg:grid-cols-6">
+      {metrics.map((item) => (
+        <article
+          key={item.key}
+          className="flex min-w-0 flex-col justify-center rounded-md bg-bg-surface-4 px-sm py-sm"
+        >
+          <p className="flex min-h-8 min-w-0 items-baseline gap-1">
+            <span className="text-heading-3 tabular-nums text-text-primary">
+              {item.value}
+            </span>
+            {item.starred ? (
+              <StarIcon
+                aria-hidden
+                className="size-3.5 shrink-0 fill-accent-yellow text-accent-yellow"
+              />
+            ) : null}
+            {item.suffix ? (
+              <span className="text-body-small text-text-muted">{item.suffix}</span>
+            ) : null}
+          </p>
+          <p className="text-body-small text-pretty text-text-muted">{item.label}</p>
+        </article>
+      ))}
+    </div>
   )
 }
 
-function EvidenceConnector() {
+function FeedbackColumn({
+  title,
+  icon,
+  iconClassName,
+  items,
+}: {
+  title: string
+  icon: ReactNode
+  iconClassName: string
+  items: readonly { quote: string; source: string }[]
+}) {
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 1200 80"
-      className="hidden h-16 w-full text-text-muted lg:block"
-      fill="none"
-    >
-      <path
-        d="M600 0 V22"
-        stroke="currentColor"
-        strokeDasharray="2.5 5"
-        strokeLinecap="round"
-        strokeWidth="1.5"
+    <div className="flex min-w-0 flex-col gap-xs">
+      <div className="flex items-center gap-xs">
+        <span
+          aria-hidden
+          className={cn(
+            "flex size-7 shrink-0 items-center justify-center rounded-md border",
+            iconClassName
+          )}
+        >
+          {icon}
+        </span>
+        <h3 className="text-body font-semibold text-text-primary">{title}</h3>
+      </div>
+      {items.map((item) => (
+        <blockquote
+          key={item.quote}
+          className="rounded-md bg-bg-surface-4 px-sm py-xs"
+        >
+          <p className="text-body-small text-pretty text-text-primary">
+            “{item.quote}”
+          </p>
+          <footer className="mt-1 text-overline font-normal tracking-normal text-text-muted normal-case">
+            {item.source}
+          </footer>
+        </blockquote>
+      ))}
+    </div>
+  )
+}
+
+function EvidenceFeedback() {
+  return (
+    <div className="grid min-w-0 gap-md md:grid-cols-2 md:*:min-w-0">
+      <FeedbackColumn
+        title="Áreas de fortaleza"
+        iconClassName="border-accent-mint/40 bg-accent-mint/10"
+        icon={<StarIcon className="size-3.5 fill-accent-mint text-accent-mint" />}
+        items={evidenceStrengths.slice(0, 2)}
       />
-      <path
-        d="M600 22 C600 52 400 36 400 80"
-        stroke="currentColor"
-        strokeDasharray="2.5 5"
-        strokeLinecap="round"
-        strokeWidth="1.5"
+      <FeedbackColumn
+        title="Áreas de mejora"
+        iconClassName="border-accent-yellow/40 bg-accent-yellow/10"
+        icon={<TrendingDownIcon className="size-3.5 text-accent-yellow" />}
+        items={evidenceImprovements.slice(0, 2)}
       />
-      <path
-        d="M600 22 C600 52 1000 36 1000 80"
-        stroke="currentColor"
-        strokeDasharray="2.5 5"
-        strokeLinecap="round"
-        strokeWidth="1.5"
-      />
-    </svg>
+    </div>
   )
 }
 

@@ -1,20 +1,18 @@
 import { MinusIcon, PlusIcon } from "lucide-react"
 
 import { Section } from "@/components/section"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { faqs } from "@/lib/geo"
+import { getAnsweredFaqs } from "@/lib/geo"
 import { faqHeading } from "@/lib/landing"
 
 /**
- * FAQ HF: H2 centrado, 6 barras independientes con icono +.
+ * FAQ HF: H2 centrado, barras independientes con icono +.
+ * `<details>` nativo para que pregunta y respuesta estén en el HTML
+ * del servidor (crawlers / GEO), sin hidratar un acordeón cliente.
  */
 function Faq() {
-  if (faqs.length === 0) {
+  const items = getAnsweredFaqs()
+
+  if (items.length === 0) {
     return null
   }
 
@@ -25,31 +23,23 @@ function Faq() {
           {faqHeading}
         </h2>
 
-        <Accordion className="gap-sm">
-          {faqs.map((faq, index) => {
-            const hasAnswer = Boolean(faq.answer)
-
-            return (
-              <AccordionItem
-                key={faq.question}
-                value={`faq-${index + 1}`}
-                disabled={!hasAnswer}
-                className="rounded-md border border-border bg-bg-surface-1 px-md aria-disabled:opacity-100"
-              >
-                <AccordionTrigger className="items-center rounded-md py-md text-left text-body font-medium text-text-primary hover:no-underline aria-disabled:opacity-100 **:data-[slot=accordion-trigger-icon]:hidden">
-                  {faq.question}
-                  <PlusIcon className="size-5 shrink-0 text-text-primary group-aria-expanded/accordion-trigger:hidden" />
-                  <MinusIcon className="hidden size-5 shrink-0 text-text-primary group-aria-expanded/accordion-trigger:inline" />
-                </AccordionTrigger>
-                {hasAnswer ? (
-                  <AccordionContent className="pb-md text-body text-text-secondary">
-                    <p>{faq.answer}</p>
-                  </AccordionContent>
-                ) : null}
-              </AccordionItem>
-            )
-          })}
-        </Accordion>
+        <div className="flex flex-col gap-sm">
+          {items.map((faq) => (
+            <details
+              key={faq.question}
+              className="group rounded-md border border-border/60 bg-bg-surface-1/70 px-md backdrop-blur-sm"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-md py-md text-left text-body font-medium text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+                <span className="min-w-0 text-pretty">{faq.question}</span>
+                <span className="relative size-5 shrink-0">
+                  <PlusIcon className="size-5 text-text-primary group-open:hidden" />
+                  <MinusIcon className="absolute inset-0 hidden size-5 text-text-primary group-open:block" />
+                </span>
+              </summary>
+              <p className="pb-md text-body text-text-secondary">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </Section>
   )
