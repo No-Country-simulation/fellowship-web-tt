@@ -1,8 +1,8 @@
 # Design system
 
-Fuente: Foundations Figma (actualizado **12/08**). Tokens en `app/globals.css`.
+Fuente: Foundations Figma (actualizado **21/08**). Tokens en `app/globals.css`.
 
-El tema por defecto es **oscuro** (marca). `html` usa la clase `dark`.
+El tema por defecto es **oscuro** (marca). `html` usa la clase `dark`. Bandas claras: `surface="light"` en `Section` (`[data-surface=light]`).
 
 ## Colores
 
@@ -15,11 +15,14 @@ Usar clases Tailwind generadas desde los tokens. Prefijo según categoría:
 | `bg/base` | `bg-bg-base` | `#000115` |
 | `bg/base-real` | `bg-bg-base-real` | `#030711` |
 | `bg/surface-1` | `bg-bg-surface-1` | `#030428` |
-| `bg/surface-2` | `bg-bg-surface-1` | `#0d0e1f` |
+| `bg/surface-2` | `bg-bg-surface-2` | `#0d0e1f` |
 | `bg/surface-3` | `bg-bg-surface-3` | `#12132a` |
 | `bg/surface-4` | `bg-bg-surface-4` | `#181932` |
 | `bg/alt` | `bg-bg-alt` | `#1e2040` |
 | `bg/alt-real` | `bg-bg-alt-real` | `#0f1629` |
+| `bg/marketing-base` | `bg-bg-marketing-base` | alias de `bg/base` |
+| `bg/marketing-surface` | `bg-bg-marketing-surface` | alias de `bg/surface-2` |
+| `bg/marketing-light` | `bg-bg-marketing-light` | `#e9ecf5` |
 
 También disponibles vía shadcn: `bg-background`, `bg-card`, `bg-muted`, `bg-secondary`.
 
@@ -30,6 +33,7 @@ También disponibles vía shadcn: `bg-background`, `bg-card`, `bg-muted`, `bg-se
 | `text/primary` | `text-text-primary` | `#ffffff` |
 | `text/secondary` | `text-text-secondary` | `#999999` |
 | `text/muted` | `text-text-muted` | `#666666` |
+| `text/warm-white` | `text-text-warm-white` | `#fafaf8` |
 | `neutral/900` | `bg-neutral-900` / `text-neutral-900` | `#3f3f46` |
 | `neutral/100` | `bg-neutral-100` / `text-neutral-100` | `#f8fafc` |
 
@@ -52,14 +56,16 @@ shadcn: `text-foreground`, `text-muted-foreground`.
 
 | Token | Clase / utilidad | Hex |
 | --- | --- | --- |
-| Brand Gradient Primary | `bg-brand-gradient` o `text-brand-gradient` | `#ec4899` → `#a855f7` → `#06b6d4` |
-| Brand Gradient Secondary | `bg-brand-gradient-secondary` | mismos 3 tonos al 10% (wash/glow) |
-| `brand/pink` | `bg-brand-pink` | `#ec4899` |
-| `brand/violet` | `bg-brand-violet` | `#a855f7` |
-| `brand/cyan` | `bg-brand-cyan` | `#06b6d4` |
-| `brand/gradient-start` | `bg-brand-gradient-start` | `#fe0096` (primitivo; **no** pinta el gradiente) |
-| `brand/gradient-end` | `bg-brand-gradient-end` | `#01249c` (primitivo; **no** pinta el gradiente) |
+| Brand Gradient Primary | `bg-brand-gradient` o `text-brand-gradient` | `#fe0096` → `#02beef` |
+| Brand Gradient Secondary | `bg-brand-gradient-secondary` | mismos 2 tonos al 10% (wash/glow) |
+| `brand/gradient-start` | `bg-brand-gradient-start` | `#fe0096` (`pink/500`) |
+| `brand/gradient-end` | `bg-brand-gradient-end` | `#02beef` (`cyan/500`) |
+| `brand/pink` | `bg-brand-pink` | alias de `gradient-start` |
+| `brand/cyan` | `bg-brand-cyan` | alias de `gradient-end` |
+| `brand/violet` | `bg-brand-violet` | `#a855f7` (legado; no está en la paleta 21/08) |
 | `border/default` | `border-border` | `#2a2c4a` |
+| `border/subtle` | `border-border-subtle` | `#1d283a` |
+| `border/soft` | `border-border-soft` | `#cccccc` |
 
 ```tsx
 <span className="text-brand-gradient">evidencia real</span>
@@ -67,7 +73,21 @@ shadcn: `text-foreground`, `text-muted-foreground`.
 <div className="bg-brand-gradient-secondary" />
 ```
 
-No usar `pink/500` (`#FE0096`) ni `blue/900` (`#01249C`) para el gradiente de marca: quedaron desactualizados el 12/08.
+### Superficie clara
+
+No es un tema global. `Section surface="light"` remapea los tokens de trabajo para que `text-text-primary`, `bg-bg-base` y `border-border` pinten la paleta on-light:
+
+| Token on-light | Remapea a | Hex |
+| --- | --- | --- |
+| `bg/marketing-light` | `--bg-base` (fondo de banda) | `#e9ecf5` |
+| `text/on-light-primary` | `--text-primary` | `#000115` |
+| `text/on-light-secondary` | `--text-secondary` | `#666666` |
+| `text/on-light-muted` | `--text-muted` | `#999999` |
+| `border/on-light` | `--border-default` | `#cccccc` |
+
+Las cards dentro de la banda usan `--bg-surface-*` en blanco. Los acentos de marca no se oscurecen.
+
+También disponibles como clases directas: `bg-bg-marketing-light`, `text-text-on-light-primary`, `border-border-on-light`.
 
 ## Tipografía
 
@@ -153,7 +173,7 @@ Los tokens semánticos de shadcn (`primary`, `background`, `muted`, etc.) ya apu
 - **Product UI / componentes shadcn:** `bg-primary`, `text-muted-foreground`, `border-border`
 - **Landing / marketing fiel al Figma:** `bg-bg-base`, `text-text-secondary`, `bg-accent-mint`, etc.
 
-`--primary` es el rosa del gradiente corregido (`#ec4899`), no el primitivo `#fe0096`.
+`--primary` es el rosa del gradiente (`#fe0096`).
 
 ## Dónde está definido
 
