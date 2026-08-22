@@ -14,13 +14,17 @@ import {
  */
 function HowItWorks() {
   return (
-    <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="como-funciona">
+    <Section
+      surface="light"
+      className="scroll-mt-2xl py-2xl md:py-3xl"
+      id="como-funciona"
+    >
       <div className="flex flex-col gap-xl">
         <h2 className="text-heading-2 mx-auto max-w-4xl text-center text-pretty text-text-primary">
           {howItWorksHeading}
         </h2>
 
-        <ol className="grid min-w-0 gap-lg sm:grid-cols-2 lg:grid-cols-4 lg:[&>*]:min-w-0">
+        <ol className="grid min-w-0 gap-lg sm:grid-cols-2 lg:grid-cols-4 lg:*:min-w-0">
           {howItWorksSteps.map((item) => (
             <li
               key={item.step}
@@ -41,7 +45,7 @@ function HowItWorks() {
           ))}
         </ol>
 
-        <div className="flex flex-col gap-lg rounded-lg border border-border bg-bg-surface-1 px-md py-lg md:px-xl md:py-xl">
+        <div className="flex flex-col gap-lg rounded-lg bg-accent-cyan/15 px-md py-lg md:px-xl md:py-xl">
           <div className="flex flex-col items-center gap-sm text-center">
             <h3 className="text-heading-3 text-pretty text-text-primary">
               <span className="text-brand-gradient">
