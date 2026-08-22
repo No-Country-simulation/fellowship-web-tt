@@ -160,7 +160,7 @@ export const howItWorksSteps = [
   {
     step: "2",
     title: "Catálogo curado",
-    body: "Preseleccionamos los perfiles de nuestro pool que mejor matchean con tu requerimiento. Solo incluimos perfiles que confirmaron disponibilidad y aceptaron el modelo. Recibís nombres, roles, datos conductuales y resúmenes de peer review — sin datos de contacto hasta confirmar el interés.",
+    body: "En 3 a 5 días hábiles desde la reunión, preseleccionamos los perfiles de nuestro pool que mejor matchean con tu requerimiento. Solo incluimos perfiles que confirmaron disponibilidad y aceptaron el modelo. Recibís nombres, roles, datos conductuales y resúmenes de peer review — sin datos de contacto hasta confirmar el interés.",
   },
   {
     step: "3",

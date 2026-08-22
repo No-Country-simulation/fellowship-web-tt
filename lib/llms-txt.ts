@@ -1,6 +1,7 @@
 import {
   countriesServed,
   getAnsweredFaqs,
+  metricsAsOf,
   productFacts,
   productSummary,
   roles,
@@ -23,13 +24,12 @@ import {
   empresasUrl,
   instagramUrl,
   linkedinUrl,
+  loginUrl,
   showcaseUrl,
   simulacionUrl,
   talentoUrl,
 } from "@/lib/nav";
 import { getSiteUrl } from "@/lib/site";
-
-const DASHBOARD_URL = "https://companies.nocountry.tech";
 
 export function getLlmsTxt(): string {
   const siteUrl = getSiteUrl();
@@ -69,9 +69,10 @@ export function getLlmsFullTxt(): string {
   const evidence = evidenceItems
     .map((item) => `- ${item.title}: ${item.body}`)
     .join("\n");
-  const stats = profileStats
-    .map((item) => `- ${item.value} ${item.label}`)
-    .join("\n");
+  const stats = [
+    ...profileStats.map((item) => `- ${item.value} ${item.label}`),
+    `- Cifras a ${metricsAsOf}.`,
+  ].join("\n");
   const faqs = getAnsweredFaqs()
     .map((faq) => `### ${faq.question}\n\n${faq.answer}`)
     .join("\n\n");
@@ -120,7 +121,7 @@ ${faqs}
 - [Talento](${talentoUrl}): Sitio No Country para talento.
 - [Showcase](${showcaseUrl}): Simulaciones y equipos.
 - [Simulación laboral](${simulacionUrl}): Producto de simulación.
-- [Dashboard](${DASHBOARD_URL}): Acceso con email corporativo.
+- [Dashboard](${loginUrl}): Acceso con email corporativo.
 - [LinkedIn](${linkedinUrl})
 - [Instagram](${instagramUrl})
 `;
