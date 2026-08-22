@@ -62,4 +62,5 @@ Cualquier otra prop de `<section>` (`id`, `aria-labelledby`) se reenvía al elem
 - Horizontal fijo: `px-md` (24px) / `md:px-3xl` (80px). No reimplementar ese frame a mano.
 - `overflow-x-clip` y `min-w-0` evitan scroll horizontal en bloques densos.
 - `surface="light"` no cambia el tema global: solo el subárbol con `data-surface="light"`.
+- En el borde con una sección oscura, el fondo claro se difumina hacia el starfield (máscara + blur). Entre dos bandas claras seguidas no hay costura.
 - Es Server Component (sin `"use client"`).

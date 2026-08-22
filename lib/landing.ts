@@ -3,6 +3,22 @@
  * Hechos y plazos alineados a `lib/geo.ts`. No inventar respuestas de FAQ.
  */
 
+export const problemHeading = "Por qué un CV no alcanza para contratar junior"
+
+export const problemIntro =
+  "El CV dice lo que el candidato quiere que veas. No predice comportamiento en equipo, consistencia bajo carga o cómo reacciona cuando algo falla."
+
+export const problemHighlights = [
+  {
+    value: "1 hora",
+    body: "Una entrevista de una hora mide cómo alguien se presenta bajo presión de evaluación. No cómo trabaja bajo presión real durante semanas junto a un equipo.",
+  },
+  {
+    value: "3–6x",
+    body: "El costo de una mala contratación junior — onboarding perdido, rotación, tiempo del equipo — es entre tres y seis veces el salario mensual del rol. Y es evitable.",
+  },
+] as const
+
 export const differentialHeading = "Por qué no alcanza con las palabras"
 
 export const differentialTraditionalItems = [

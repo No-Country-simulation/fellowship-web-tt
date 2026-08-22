@@ -54,7 +54,7 @@ function ContrastColumn() {
         {differentialContrasts.map((item) => (
           <li
             key={`${item.from}-${item.to}`}
-            className="grid grid-cols-[1fr_auto_1fr] items-center gap-xs rounded-md bg-bg-surface-3 px-md py-sm in-data-[surface=light]:border in-data-[surface=light]:border-border in-data-[surface=light]:bg-bg-surface-1 in-data-[surface=light]:shadow-card"
+            className="grid grid-cols-[1fr_auto_1fr] items-center gap-xs rounded-md border border-border bg-bg-surface-1 px-md py-sm"
           >
             <span className="text-overline text-left text-text-secondary">
               {item.from}
@@ -85,10 +85,10 @@ function ComparisonCard({
   return (
     <article
       className={cn(
-        "flex h-full min-w-0 flex-col justify-start gap-md rounded-md bg-bg-surface-1 p-md backdrop-blur-sm",
+        "flex h-full min-w-0 flex-col justify-start gap-md rounded-md p-md",
         tone === "positive"
-          ? "border-2 border-solid border-accent-cyan"
-          : "border-2 border-solid border-transparent"
+          ? "border-2 border-solid border-accent-cyan bg-accent-cyan/15"
+          : "border-2 border-solid border-brand-pink/40 bg-brand-pink/10"
       )}
     >
       {title ? (
@@ -101,7 +101,7 @@ function ComparisonCard({
             width={152}
             height={26}
             unoptimized
-            className="h-auto w-38 max-w-full in-data-[surface=light]:brightness-0"
+            className="h-auto w-38 max-w-full"
           />
         </h3>
       )}
@@ -113,7 +113,10 @@ function ComparisonCard({
           >
             <Icon
               aria-hidden="true"
-              className="mt-0.5 size-5 shrink-0 stroke-[1.5] text-text-primary"
+              className={cn(
+                "mt-0.5 size-5 shrink-0 stroke-[1.5]",
+                tone === "positive" ? "text-accent-cyan" : "text-brand-pink"
+              )}
             />
             <span className="min-w-0 text-pretty">{item}</span>
           </li>

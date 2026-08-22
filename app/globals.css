@@ -59,6 +59,9 @@
   --color-bg-surface-2: var(--bg-surface-2);
   --color-bg-surface-3: var(--bg-surface-3);
   --color-bg-surface-4: var(--bg-surface-4);
+  --color-bg-marketing-base: var(--bg-marketing-base);
+  --color-bg-marketing-surface: var(--bg-marketing-surface);
+  --color-bg-marketing-light: var(--bg-marketing-light);
   --color-brand-gradient-start: var(--brand-gradient-start);
   --color-brand-gradient-end: var(--brand-gradient-end);
   --color-brand-pink: var(--brand-pink);
@@ -67,8 +70,15 @@
   --color-text-muted: var(--text-muted);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
+  --color-text-warm-white: var(--text-warm-white);
+  --color-text-on-light-primary: var(--text-on-light-primary);
+  --color-text-on-light-secondary: var(--text-on-light-secondary);
+  --color-text-on-light-muted: var(--text-on-light-muted);
   --color-neutral-900: var(--neutral-900);
   --color-neutral-100: var(--neutral-100);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-soft: var(--border-soft);
+  --color-border-on-light: var(--border-on-light);
 
   /* Spacing: xs → 3xl */
   --spacing-xs: 0.5rem;
@@ -114,7 +124,7 @@
 }
 
 :root {
-  /* Foundations — Color (Figma 12/08) */
+  /* Foundations — Color (Figma 21/08) */
   --accent-cyan: #02beef;
   --accent-indigo: #646cf6;
   --accent-indigo-light: #7983f5;
@@ -131,34 +141,40 @@
   --bg-surface-2: #0d0e1f;
   --bg-surface-3: #12132a;
   --bg-surface-4: #181932;
+  --bg-marketing-base: #000115;
+  --bg-marketing-surface: #0d0e1f;
+  --bg-marketing-light: #e9ecf5;
   --border-default: #2a2c4a;
+  --border-subtle: #1d283a;
+  --border-soft: #cccccc;
+  --border-on-light: var(--border-soft);
   --text-muted: #666666;
   --text-primary: #ffffff;
   --text-secondary: #999999;
+  --text-warm-white: #fafaf8;
+  --text-on-light-primary: #000115;
+  --text-on-light-secondary: #666666;
+  --text-on-light-muted: #999999;
   --neutral-900: #3f3f46;
   --neutral-100: #f8fafc;
 
-  /* Primitives still in Figma; they do not paint Brand Gradient Primary */
+  /* Brand Gradient Primary — pink/500 → cyan/500 */
   --brand-gradient-start: #fe0096;
-  --brand-gradient-end: #01249c;
-
-  /* Brand Gradient Primary — 3 stops (corrected 12/08) */
-  --brand-pink: #ec4899;
+  --brand-gradient-end: #02beef;
+  --brand-pink: var(--brand-gradient-start);
   --brand-violet: #a855f7;
-  --brand-cyan: #06b6d4;
+  --brand-cyan: var(--brand-gradient-end);
 
   --gradient-brand: linear-gradient(
     135deg,
-    var(--brand-pink) 0%,
-    var(--brand-violet) 50%,
-    var(--brand-cyan) 100%
+    var(--brand-gradient-start) 0%,
+    var(--brand-gradient-end) 100%
   );
 
   --gradient-brand-secondary: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--brand-pink) 10%, transparent) 0%,
-    color-mix(in srgb, var(--brand-violet) 10%, transparent) 50%,
-    color-mix(in srgb, var(--brand-cyan) 10%, transparent) 100%
+    color-mix(in srgb, var(--brand-gradient-start) 10%, transparent) 0%,
+    color-mix(in srgb, var(--brand-gradient-end) 10%, transparent) 100%
   );
 
   /* shadcn semantic tokens → brand foundations */
@@ -230,27 +246,34 @@
 /*
  * Light band — not a site-wide theme. Remaps tokens locally so existing
  * utilities (`text-text-primary`, `bg-bg-surface-1`, `border-border`) keep
- * working. Paper off-white + navy mix, not #fff + neon.
+ * working. Hex from Figma 21/08 (superficie clara).
+ *
+ * The background lives on ::before so it can mask into the starfield at
+ * theme seams. Consecutive light sections stay solid; only the edge that
+ * meets a dark neighbor fades.
  */
 [data-surface="light"] {
+  --theme-seam: 2rem;
   color-scheme: light;
-  background-color: #f4f5f7;
-  color: color-mix(in srgb, #000115 88%, transparent);
+  position: relative;
+  isolation: isolate;
+  background-color: transparent;
+  color: var(--text-on-light-primary);
 
-  --bg-base: #f4f5f7;
-  --bg-base-real: #eef0f3;
+  --bg-base: var(--bg-marketing-light);
+  --bg-base-real: var(--bg-marketing-light);
   --bg-surface-1: #ffffff;
   --bg-surface-2: #ffffff;
-  --bg-surface-3: color-mix(in srgb, #000115 5%, #ffffff);
-  --bg-surface-4: color-mix(in srgb, #000115 8%, #ffffff);
-  --bg-alt: #eceef2;
-  --bg-alt-real: #e8eaef;
+  --bg-surface-3: #ffffff;
+  --bg-surface-4: #ffffff;
+  --bg-alt: var(--bg-marketing-light);
+  --bg-alt-real: var(--bg-marketing-light);
 
-  --text-primary: color-mix(in srgb, #000115 88%, transparent);
-  --text-secondary: color-mix(in srgb, #000115 55%, transparent);
-  --text-muted: color-mix(in srgb, #000115 40%, transparent);
+  --text-primary: var(--text-on-light-primary);
+  --text-secondary: var(--text-on-light-secondary);
+  --text-muted: var(--text-on-light-muted);
 
-  --border-default: color-mix(in srgb, #000115 10%, transparent);
+  --border-default: var(--border-on-light);
   --border: var(--border-default);
   --input: var(--border-default);
 
@@ -264,12 +287,142 @@
   --secondary-foreground: var(--text-primary);
   --popover: var(--bg-surface-1);
   --popover-foreground: var(--text-primary);
+}
 
-  --accent-cyan: color-mix(in srgb, #02beef 62%, #000115);
-  --accent-indigo-light: color-mix(in srgb, #7983f5 68%, #000115);
-  --brand-pink: color-mix(in srgb, #ec4899 72%, #000115);
-  --brand-violet: color-mix(in srgb, #a855f7 72%, #000115);
-  --brand-cyan: color-mix(in srgb, #06b6d4 68%, #000115);
+[data-surface="light"]::before,
+[data-surface="light"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+[data-surface="light"]::before {
+  background-color: var(--bg-marketing-light);
+  background-image: url("/background/Background-space.png");
+  background-repeat: repeat;
+  background-position: top center;
+  background-blend-mode: screen;
+}
+
+[data-surface="light"]::after {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Dark → light: dissolve from the starfield at the top. */
+*:not([data-surface="light"]) + [data-surface="light"]::before {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) calc(var(--theme-seam) * 0.55),
+    #000 var(--theme-seam)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) calc(var(--theme-seam) * 0.55),
+    #000 var(--theme-seam)
+  );
+}
+
+*:not([data-surface="light"]) + [data-surface="light"]::after {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgb(0 0 0 / 0.4) calc(var(--theme-seam) * 0.5),
+    transparent var(--theme-seam)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgb(0 0 0 / 0.4) calc(var(--theme-seam) * 0.5),
+    transparent var(--theme-seam)
+  );
+}
+
+/* Light → dark: dissolve back into the starfield at the bottom. */
+[data-surface="light"]:has(+ :not([data-surface="light"]))::before {
+  mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) calc(var(--theme-seam) * 0.55),
+    #000 var(--theme-seam)
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) calc(var(--theme-seam) * 0.55),
+    #000 var(--theme-seam)
+  );
+}
+
+[data-surface="light"]:has(+ :not([data-surface="light"]))::after {
+  mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    rgb(0 0 0 / 0.4) calc(var(--theme-seam) * 0.5),
+    transparent var(--theme-seam)
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    rgb(0 0 0 / 0.4) calc(var(--theme-seam) * 0.5),
+    transparent var(--theme-seam)
+  );
+}
+
+/* Light band boxed in by dark on both sides (Cómo funciona, FAQ). */
+*:not([data-surface="light"])
+  + [data-surface="light"]:has(+ :not([data-surface="light"]))::before {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) calc(var(--theme-seam) * 0.55),
+    #000 var(--theme-seam),
+    #000 calc(100% - var(--theme-seam)),
+    rgb(0 0 0 / 0.35) calc(100% - var(--theme-seam) * 0.55),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) calc(var(--theme-seam) * 0.55),
+    #000 var(--theme-seam),
+    #000 calc(100% - var(--theme-seam)),
+    rgb(0 0 0 / 0.35) calc(100% - var(--theme-seam) * 0.55),
+    transparent 100%
+  );
+}
+
+*:not([data-surface="light"])
+  + [data-surface="light"]:has(+ :not([data-surface="light"]))::after {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgb(0 0 0 / 0.4) calc(var(--theme-seam) * 0.5),
+    transparent var(--theme-seam),
+    transparent calc(100% - var(--theme-seam)),
+    rgb(0 0 0 / 0.4) calc(100% - var(--theme-seam) * 0.5),
+    #000 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgb(0 0 0 / 0.4) calc(var(--theme-seam) * 0.5),
+    transparent var(--theme-seam),
+    transparent calc(100% - var(--theme-seam)),
+    rgb(0 0 0 / 0.4) calc(100% - var(--theme-seam) * 0.5),
+    #000 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-surface="light"]::after {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 @layer base {

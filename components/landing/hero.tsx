@@ -53,6 +53,7 @@ function AllyLogo({
 }: (typeof allies)[number]) {
   return (
     <li className="flex h-14 shrink-0 items-center justify-center px-md">
+      {/* Logos blancos, sin pastilla ni borde — el carrusel vive sobre fondo oscuro. */}
       <Image
         src={encodeURI(src)}
         alt=""
@@ -88,8 +89,11 @@ function Hero() {
               Evidencia conductual real — antes de contratar
             </SectionEyebrow>
             <h1 className="text-heading-1 max-w-full text-pretty text-text-primary">
-              Talento junior con evidencia real de cómo trabaja — antes de
-              contratar.
+              Talento junior con{" "}
+              <span className="text-brand-gradient">
+                evidencia real de cómo trabaja
+              </span>{" "}
+              — antes de contratar.
             </h1>
             <p className="text-body-large max-w-xl text-text-secondary">
               Semanas de comportamiento documentado en simulaciones reales —
