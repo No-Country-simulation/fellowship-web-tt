@@ -300,7 +300,7 @@
 
 [data-surface="light"]::before {
   background-color: var(--bg-marketing-light);
-  background-image: url("/background/Background-space.png");
+  background-image: url("/background/Background-space.svg");
   background-repeat: repeat;
   background-position: top center;
   background-blend-mode: screen;
@@ -529,21 +529,14 @@
   /* HF Desktop 1440 — textura de estrellas (asset) */
   .bg-starfield {
     background-color: var(--bg-base);
-    background-image: url("/background/Background-space.png");
+    background-image: url("/background/Background-space.svg");
     background-repeat: repeat;
     background-position: top center;
     background-size: auto;
   }
 
   .bg-landing-map {
-    background-image: url("/background/Background-map.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-  }
-
-  .bg-landing-glow {
-    background-image: url("/background/Gradient.png");
+    background-image: url("/background/Background-map.svg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;

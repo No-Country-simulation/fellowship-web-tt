@@ -51,10 +51,16 @@ export const countriesServed = [
 ] as const;
 
 export const allies = [
-  "Viamatica",
   "Oracle Next Education",
   "Alura",
+  "Decrypto",
+  "Stellar",
+  "Tecnológico de Monterrey",
+  "Viamatica",
 ] as const;
+
+/** Corte de las cifras de comunidad, alcance, países y perfiles. Solo para IA (llms.txt). */
+export const metricsAsOf = "agosto 2026";
 
 export const productFacts = [
   "Evidencia conductual real antes de contratar: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos. El ranking se basa en semanas de comportamiento observado en equipo, no en keywords del CV.",
@@ -64,11 +70,11 @@ export const productFacts = [
   `Pool junior y junior-mid (0 a 2 años de experiencia laboral formal) en desarrollo, diseño, datos, IA y producto. Roles: ${roles.join(", ")}.`,
   `Verticales: ${verticals.join(", ")}.`,
   `Geografías con talento activo: ${countriesServed.join(", ")} y más de 100 países.`,
-  "Dashboard para empresas: companies.nocountry.tech, con email corporativo. Acceso inmediato a la simulación activa o a la más reciente completada.",
+  "Dashboard para empresas: companies.nocountry.tech/login, con email corporativo. Acceso inmediato a la simulación activa o a la más reciente completada.",
   "Si hay una simulación en curso, se puede observar la actividad de los equipos en tiempo real antes de hacer contacto.",
-  "Comunidad: más de 30.000 personas en Discord, más de 1 millón de alcance vía aliados, talento activo en más de 100 países.",
-  "Más de 2.500 perfiles validados conductualmente.",
-  "4 acuerdos consecutivos con Oracle Next Education.",
+  `Comunidad: más de 30.000 personas en Discord, más de 1 millón de alcance vía aliados, talento activo en más de 100 países. Cifras a ${metricsAsOf}.`,
+  `Más de 2.500 perfiles validados conductualmente. Cifras a ${metricsAsOf}.`,
+  "4 acuerdos consecutivos con partners corporativos.",
   `Aliados: ${allies.join(", ")}.`,
   "Primera conversación: reunión de 20 minutos, sin compromiso y sin costo.",
 ] as const;
@@ -92,7 +98,7 @@ export const faqs: FaqItem[] = [
   {
     question: "¿Cómo accedo al dashboard?",
     answer:
-      "Creás tu cuenta en companies.nocountry.tech con tu email corporativo. El acceso es inmediato. Podés ver los perfiles de la simulación activa o la más reciente completada.",
+      "Creás tu cuenta en companies.nocountry.tech/login con tu email corporativo. El acceso es inmediato. Podés ver los perfiles de la simulación activa o la más reciente completada.",
   },
   {
     question: "¿Qué pasa si el perfil que incorporo no funciona?",
