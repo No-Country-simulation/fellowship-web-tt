@@ -52,6 +52,7 @@ export const countriesServed = [
 
 export const allies = [
   "Oracle Next Education",
+  "Oracle",
   "Alura",
   "Decrypto",
   "Stellar",

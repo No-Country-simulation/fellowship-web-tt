@@ -289,6 +289,11 @@
   --popover-foreground: var(--text-primary);
 }
 
+/* Unlayered `color` on the band beats utility `text-white`. */
+[data-surface="light"] .bg-brand-gradient {
+  color: #ffffff;
+}
+
 [data-surface="light"]::before,
 [data-surface="light"]::after {
   content: "";

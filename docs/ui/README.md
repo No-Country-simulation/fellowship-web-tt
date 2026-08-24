@@ -12,9 +12,7 @@ Los bloques de `components/landing/` (hero, FAQ, etc.) no se documentan acá: so
 | --- | --- |
 | [Design system](./design-system.md) | Colores, tipografía, spacing, radius, sombras, layout |
 | [Button](./components/button.md) | Variantes, sizes, ejemplos |
-| [Accordion](./components/accordion.md) | FAQ / paneles colapsables |
 | [Badge](./components/badge.md) | Chips de roles, verticales, geos |
-| [Card](./components/card.md) | Diferencial, evidencia, pasos, stats, garantía, testimonial |
 | [Separator](./components/separator.md) | Divisores en header, footer y bloques densos |
 | [Navigation Menu](./components/navigation-menu.md) | Nav desktop con paneles |
 | [Dropdown Menu](./components/dropdown-menu.md) | Menús desplegables (Para Empresas, Sobre Nosotros) |

@@ -207,7 +207,7 @@ function TestimonialCard({
           width={quote.logo.width}
           height={quote.logo.height}
           unoptimized
-          className="h-8 w-auto max-w-none object-contain brightness-0 invert"
+          className="h-8 w-auto max-w-none object-contain"
         />
       </figcaption>
 

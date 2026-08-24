@@ -14,6 +14,7 @@ export const simulacionUrl = "https://companies.nocountry.tech/simulation"
 export const loginUrl = "https://companies.nocountry.tech/login"
 export const instagramUrl = "https://www.instagram.com/nocountry.tech/"
 export const linkedinUrl = "https://www.linkedin.com/company/nocountrytalent/"
+export const whatsappUrl = "https://wa.me/5491173591034"
 
 export type NavLink = {
   label: string
