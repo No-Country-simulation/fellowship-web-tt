@@ -1,29 +1,27 @@
-import { AdvisorCta } from "@/components/advisor-cta"
+import { LeadBriefForm } from "@/components/landing/lead-brief-form"
 import { Section } from "@/components/section"
-import { finalCtaLabel } from "@/lib/landing"
+import { finalCtaHeading } from "@/lib/landing"
 
 /**
- * Cierre HF: recuadro con borde, titular en gradiente de marca y CTA.
+ * Cierre HF: recuadro con borde, titular y brief de requerimiento.
  */
 function FinalCta() {
   return (
     <Section
-      className="relative scroll-mt-2xl py-2xl md:py-3xl"
+      surface="light"
+      className="relative scroll-mt-2xl pt-0 pb-2xl md:pb-3xl"
       id="contacto"
     >
       <div className="relative rounded-md border border-accent-cyan/50 bg-accent-cyan/10 px-md py-xl md:px-2xl md:py-2xl">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-md text-center">
-          <h2 className="text-heading-2 max-w-full text-pretty text-brand-gradient">
-            ¿Necesitás incorporar talento junior en los próximos 30 días?
+        <div className="flex flex-col items-center gap-lg">
+          <h2 className="w-full text-center text-heading-3 text-pretty text-brand-gradient md:whitespace-nowrap md:text-[2rem]">
+            {finalCtaHeading}
           </h2>
-          <AdvisorCta
-            label={finalCtaLabel}
-            className="h-auto min-h-11 whitespace-normal sm:whitespace-nowrap"
-          />
-          <p className="text-body-small text-text-secondary">
-            Sin compromiso. Sin costo. Solo una conversación para entender si
-            podemos ayudarte.
-          </p>
+          <div className="w-full max-w-2xl">
+            <LeadBriefForm
+              accessKey={process.env.WEB3FORMS_ACCESS_KEY?.trim() ?? ""}
+            />
+          </div>
         </div>
       </div>
     </Section>

@@ -7,7 +7,7 @@ import {
   footerTagline,
   instagramUrl,
   linkedinUrl,
-  PLACEHOLDER_HREF,
+  whatsappUrl,
   type NavLink,
 } from "@/lib/nav"
 import { cn } from "@/lib/utils"
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 const socials = [
   { label: "LinkedIn", href: linkedinUrl, icon: LinkedInIcon },
   { label: "Instagram", href: instagramUrl, icon: InstagramIcon },
-  { label: "WhatsApp", href: PLACEHOLDER_HREF, icon: WhatsAppIcon },
+  { label: "WhatsApp", href: whatsappUrl, icon: WhatsAppIcon },
 ] as const
 
 /**

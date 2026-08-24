@@ -4,7 +4,7 @@ Wrapper de bloque de landing: margen horizontal de frame + contenedor de conteni
 
 **Archivo:** `components/section.tsx`
 
-Uso previsto: cada banda de la landing (hero, evidencia, FAQ, CTA). El card es la unidad visual interna; `Section` es el padding de página.
+Uso previsto: cada banda de la landing (hero, evidencia, FAQ, CTA). `Section` es el padding de página; los bloques internos van con markup propio.
 
 ## Import
 
@@ -17,7 +17,7 @@ import { Section } from "@/components/section";
 - Cualquier bloque de página que deba respetar el frame (24px mobile / 80px desktop) y el `container-content`
 - Bandas claras (`surface="light"`) sobre el fondo oscuro del sitio
 
-No usarlo como card ni como wrapper de un ítem de grilla. Para eso está `Card`. El padding vertical va por `className`, no lo impone el componente.
+No usarlo como wrapper de un ítem de grilla. El padding vertical va por `className`, no lo impone el componente.
 
 ## Props
 

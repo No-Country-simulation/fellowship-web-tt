@@ -160,7 +160,7 @@ export const howItWorksSteps = [
   {
     step: "2",
     title: "Catálogo curado",
-    body: "Preseleccionamos los perfiles de nuestro pool que mejor matchean con tu requerimiento. Solo incluimos perfiles que confirmaron disponibilidad y aceptaron el modelo. Recibís nombres, roles, datos conductuales y resúmenes de peer review — sin datos de contacto hasta confirmar el interés.",
+    body: "En 3 a 5 días hábiles desde la reunión, preseleccionamos los perfiles de nuestro pool que mejor matchean con tu requerimiento. Solo incluimos perfiles que confirmaron disponibilidad y aceptaron el modelo. Recibís nombres, roles, datos conductuales y resúmenes de peer review — sin datos de contacto hasta confirmar el interés.",
   },
   {
     step: "3",
@@ -240,8 +240,8 @@ export const socialProofQuotes = [
     logo: {
       src: "/brand/logo-oracle-white.svg",
       alt: "ONE Oracle Next Education",
-      width: 106,
-      height: 56,
+      width: 388,
+      height: 208,
     },
   },
   {
@@ -258,8 +258,8 @@ export const socialProofQuotes = [
     logo: {
       src: "/brand/logo-viamatica.svg",
       alt: "Viamatica",
-      width: 196,
-      height: 56,
+      width: 389,
+      height: 77,
     },
   },
   {
@@ -276,8 +276,8 @@ export const socialProofQuotes = [
     logo: {
       src: "/brand/logo-viamatica.svg",
       alt: "Viamatica",
-      width: 196,
-      height: 56,
+      width: 389,
+      height: 77,
     },
   },
   {
@@ -294,8 +294,8 @@ export const socialProofQuotes = [
     logo: {
       src: "/brand/logo-alura.svg",
       alt: "Alura",
-      width: 122,
-      height: 56,
+      width: 75,
+      height: 35,
     },
   },
 ] as const
@@ -324,3 +324,27 @@ export const guaranteeItems = [
 export const faqHeading = "Preguntas frecuentes"
 
 export const finalCtaLabel = "Agendá una reunión de 20 minutos"
+
+export const finalCtaHeading =
+  "¿Necesitás incorporar talento junior en los próximos 30 días?"
+
+export const finalCtaNote =
+  "Sin compromiso. Te contactamos para armar el catálogo."
+
+export const leadBriefSubmitLabel = "Enviar requerimiento"
+
+export const leadBriefRolesPlaceholder = "Frontend, Backend, UX/UI"
+
+export const leadBriefNotesMaxLength = 600
+
+export const leadBriefNotesLabel = "Algo más que debamos saber"
+
+export const leadBriefNotesPlaceholder =
+  "Stack, zona horaria u otro detalle del rol (opcional)"
+
+export const leadBriefUrgencies = [
+  { value: "inmediata", label: "Inmediata" },
+  { value: "este-mes", label: "Este mes" },
+  { value: "1-a-3-meses", label: "1 a 3 meses" },
+  { value: "explorando", label: "Explorando" },
+] as const

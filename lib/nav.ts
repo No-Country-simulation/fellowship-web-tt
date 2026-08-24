@@ -11,8 +11,10 @@ export const talentoUrl = "https://nocountry.tech/talent"
 export const showcaseUrl =
   "https://nocountry.tech/showcase/teams/simulaciones"
 export const simulacionUrl = "https://companies.nocountry.tech/simulation"
+export const loginUrl = "https://companies.nocountry.tech/login"
 export const instagramUrl = "https://www.instagram.com/nocountry.tech/"
 export const linkedinUrl = "https://www.linkedin.com/company/nocountrytalent/"
+export const whatsappUrl = "https://wa.me/5491173591034"
 
 export type NavLink = {
   label: string
@@ -55,7 +57,7 @@ export const headerNav: NavItem[] = [
 
 export const loginNav: NavLink = {
   label: "Iniciar sesión",
-  href: PLACEHOLDER_HREF,
+  href: loginUrl,
 }
 
 export const footerNavegacion: NavLink[] = [

@@ -8,38 +8,51 @@ const allies = [
   {
     src: "/brand/logo-oracle-white.svg",
     alt: "Oracle Next Education",
-    width: 106,
-    height: 56,
+    width: 388,
+    height: 208,
+    scale: 1.45,
+  },
+  {
+    src: "/brand/logo-oracle.svg",
+    alt: "Oracle",
+    width: 214,
+    height: 28,
+    scale: 0.58,
   },
   {
     src: "/brand/logo-alura.svg",
     alt: "Alura",
-    width: 122,
-    height: 56,
+    width: 75,
+    height: 35,
+    scale: 0.9,
   },
   {
     src: "/brand/logo-decrypto.svg",
     alt: "Decrypto",
-    width: 110,
+    width: 193,
     height: 56,
+    scale: 1.15,
   },
   {
     src: "/brand/logo-stellar.svg",
     alt: "Stellar",
-    width: 51,
-    height: 56,
+    width: 128,
+    height: 32,
+    scale: 0.85,
   },
   {
     src: "/brand/logo-tecnologico-de-monterrey.svg",
     alt: "Tecnológico de Monterrey",
-    width: 212,
-    height: 56,
+    width: 195,
+    height: 52,
+    scale: 1.1,
   },
   {
     src: "/brand/logo-viamatica.svg",
     alt: "Viamatica",
-    width: 196,
-    height: 56,
+    width: 389,
+    height: 77,
+    scale: 1,
   },
 ] as const
 
@@ -50,17 +63,18 @@ function AllyLogo({
   alt,
   width,
   height,
+  scale,
 }: (typeof allies)[number]) {
   return (
-    <li className="flex h-14 shrink-0 items-center justify-center px-md">
-      {/* Logos blancos, sin pastilla ni borde — el carrusel vive sobre fondo oscuro. */}
+    <li className="flex h-16 shrink-0 items-center justify-center px-md">
       <Image
         src={encodeURI(src)}
         alt=""
         width={width}
         height={height}
         unoptimized
-        className="h-8 w-auto max-w-none object-contain brightness-0 invert md:h-10"
+        className="w-auto max-w-none object-contain"
+        style={{ height: `calc(var(--ally-logo-h) * ${scale})` }}
       />
     </li>
   )
@@ -68,7 +82,7 @@ function AllyLogo({
 
 function AllyTrack() {
   return (
-    <ul className="flex shrink-0 items-center gap-md pl-md">
+    <ul className="flex shrink-0 items-center gap-lg pl-lg">
       {allyTrack.map((ally, index) => (
         <AllyLogo key={`${ally.alt}-${index}`} {...ally} />
       ))}
@@ -89,11 +103,12 @@ function Hero() {
               Evidencia conductual real — antes de contratar
             </SectionEyebrow>
             <h1 className="text-heading-1 max-w-full text-pretty text-text-primary">
-              Talento junior con{" "}
+              <span className="text-[0.78em]">Talento junior con </span>
               <span className="text-brand-gradient">
                 evidencia real de cómo trabaja
-              </span>{" "}
-              — antes de contratar.
+              </span>
+              <br />
+              <span className="text-[0.78em]">antes de contratar.</span>
             </h1>
             <p className="text-body-large max-w-xl text-text-secondary">
               Semanas de comportamiento documentado en simulaciones reales —
@@ -119,7 +134,7 @@ function Hero() {
 
       <section
         aria-label="Aliados y partners"
-        className="overflow-hidden bg-transparent py-md"
+        className="overflow-hidden bg-transparent py-md [--ally-logo-h:2rem] md:[--ally-logo-h:2.5rem]"
       >
         <ul className="sr-only">
           {allies.map((ally) => (
@@ -133,7 +148,7 @@ function Hero() {
           <AllyTrack />
           <AllyTrack />
         </div>
-        <ul className="hidden flex-wrap items-center justify-center gap-md px-md motion-reduce:flex">
+        <ul className="hidden flex-wrap items-center justify-center gap-lg px-md motion-reduce:flex">
           {allies.map((ally) => (
             <AllyLogo key={ally.alt} {...ally} />
           ))}
