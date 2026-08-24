@@ -36,7 +36,7 @@ Cualquier otra prop válida de `<button>` (p. ej. `onClick`, `aria-label`) se re
 
 | Valor | Uso |
 | --- | --- |
-| `default` | CTA principal (rosa de marca / `#ec4899`) |
+| `default` | CTA principal (rosa de marca / `#fe0096`) |
 | `gradient` | CTA de landing HF (Brand Gradient Primary) |
 | `outline` | Acción secundaria con borde |
 | `secondary` | Acción menos enfatizada sobre surface |
@@ -98,7 +98,8 @@ import { SearchIcon } from "lucide-react";
 
 ## Notas
 
-- El color `default` usa `--primary` (`#ec4899`, stop rosa del Brand Gradient Primary).
+- El color `default` usa `--primary` (`#fe0096`, stop rosa del Brand Gradient Primary).
+- `variant="gradient"` usa `text-white`. En una banda `surface="light"` el `color` heredado pisa esa utilidad: `globals.css` fuerza blanco otra vez en `.bg-brand-gradient`.
 - El radio del botón es `rounded-button` (6px). No usar `rounded-lg` en botones: en el design system `lg` es 32px.
 - Focus visible incluido (`ring`); no quitar outlines sin reemplazo a11y.
 - Para íconos, Lucide ya está en el proyecto (`lucide-react`).

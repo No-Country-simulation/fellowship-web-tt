@@ -85,7 +85,9 @@ No es un tema global. `Section surface="light"` remapea los tokens de trabajo pa
 | `text/on-light-muted` | `--text-muted` | `#999999` |
 | `border/on-light` | `--border-default` | `#cccccc` |
 
-Las cards dentro de la banda usan `--bg-surface-*` en blanco. Los acentos de marca no se oscurecen.
+Las superficies internas (`bg-bg-surface-*`) pasan a blanco. Los acentos de marca no se oscurecen.
+
+`[data-surface=light]` pone `color: var(--text-on-light-primary)` en el host. Ese `color` gana a utilidades como `text-white`, así que `bg-brand-gradient` (CTA `gradient`, números de “Cómo funciona”) fuerza blanco otra vez en `globals.css`.
 
 También disponibles como clases directas: `bg-bg-marketing-light`, `text-text-on-light-primary`, `border-border-on-light`.
 
@@ -157,6 +159,8 @@ Escala semántica (múltiplos de 8px). `xs` y `2xl` confirmados; intermedios y `
 | --- | --- | --- |
 | Contenido máx. desktop | `container-content` | max-width **1280px**, centrado |
 | Ancho de copy | `max-w-xl` / `max-w-3xl` | 36rem / 48rem (escala container; **no** es `spacing/xl`) |
+| Starfield | `bg-starfield` | Fondo del `body` (`Background-space.svg`) |
+| Mapa | `bg-landing-map` | Textura del hero (`Background-map.svg`) |
 | Desktop frame | — | 1440px / 12 col / gutter 32 (`spacing/lg`) / margen 80px (`spacing/3xl`) |
 | Mobile frame | — | 390px propuesto / 4 col / gutter 16 (`spacing/sm`) / margen 24px (`spacing/md`) |
 

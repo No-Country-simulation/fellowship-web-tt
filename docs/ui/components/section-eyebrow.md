@@ -45,5 +45,6 @@ No usarlo como chip de rol/vertical/geo; para eso está `Badge`. No usarlo como 
 
 - Es un `<p>`, no un heading: el H2 de la sección va aparte.
 - Estilo fijo: `rounded-full`, `border-accent-cyan/70`, `text-body-small`, fondo `bg-bg-surface-1`.
+- En bandas `surface="light"` el fondo pasa a wash cyan (`bg-accent-cyan/10`) y el texto a indigo (`text-accent-indigo`).
 - `text-pretty` y `max-w-full` evitan desbordes en mobile.
 - Es Server Component (sin `"use client"`).
