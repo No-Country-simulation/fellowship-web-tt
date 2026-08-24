@@ -10,7 +10,9 @@ export type LeadBriefPayload = {
   notes: string
 }
 
-const urgencyValues = new Set(leadBriefUrgencies.map((item) => item.value))
+const urgencyValues = new Set<string>(
+  leadBriefUrgencies.map((item) => item.value)
+)
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
