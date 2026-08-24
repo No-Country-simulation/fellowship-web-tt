@@ -4,7 +4,7 @@ Colección de links de sitio, con paneles desplegables. Basado en shadcn (`base-
 
 **Archivo:** `components/ui/navigation-menu.tsx`
 
-Uso previsto: nav desktop (Para Empresas, Sobre Nosotros). En mobile usar `Sheet`.
+Uso previsto: links de primer nivel del nav desktop. Los grupos (Para Empresas, Sobre Nosotros) van con `DropdownMenu`. En mobile usar `Sheet`.
 
 ## Import
 

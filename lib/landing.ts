@@ -154,8 +154,8 @@ export const howItWorksHeading =
 export const howItWorksSteps = [
   {
     step: "1",
-    title: "Reunión de descubrimiento (20 min)",
-    body: "Entendemos exactamente qué perfil necesitás — rol, stack, zona horaria, urgencia, cantidad. No te mandamos un catálogo genérico. Nos aseguramos de que lo que te presentamos sea lo que buscás.",
+    title: "Reunión de descubrimiento",
+    body: "En 20 minutos entendemos exactamente qué perfil necesitás — rol, stack, zona horaria, urgencia, cantidad. No te mandamos un catálogo genérico. Nos aseguramos de que lo que te presentamos sea lo que buscás.",
   },
   {
     step: "2",

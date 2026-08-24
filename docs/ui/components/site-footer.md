@@ -55,9 +55,7 @@ Editar `lib/nav.ts`, no el componente:
 | `footerPlataforma` | Columna Plataforma |
 | `footerTagline` | Texto junto al logo |
 | `footerCopyright` | Línea inferior |
-| `linkedinUrl` / `instagramUrl` | Redes con URL real |
-
-WhatsApp sigue en `PLACEHOLDER_HREF` (`#`) hasta tener el enlace.
+| `linkedinUrl` / `instagramUrl` / `whatsappUrl` | Redes (URLs reales) |
 
 ## Notas
 

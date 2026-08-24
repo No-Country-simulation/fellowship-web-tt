@@ -39,7 +39,9 @@ function HowItWorks() {
               <p className="text-body-small text-text-secondary">
                 Paso {item.step}
               </p>
-              <h3 className="text-heading-3 text-text-primary">{item.title}</h3>
+              <h3 className="text-body-large whitespace-nowrap font-semibold leading-[1.3] tracking-tight text-text-primary">
+                {item.title}
+              </h3>
               <p className="text-body text-text-secondary">{item.body}</p>
             </li>
           ))}

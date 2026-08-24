@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site";
 
 /** Último cambio de contenido (geo.ts / landing). No usar `new Date()`. */
-const CONTENT_LAST_MODIFIED = "2026-08-20";
+const CONTENT_LAST_MODIFIED = "2026-08-24";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();

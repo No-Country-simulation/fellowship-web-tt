@@ -4,7 +4,7 @@ CTA primario de la landing Empresa: “Hablar con un asesor”.
 
 **Archivo:** `components/advisor-cta.tsx`
 
-Uso previsto: hero, garantía y cierre. Es un `Button` `size="lg"` renderizado como `<a>`.
+Uso previsto: hero y garantía. Es un `Button` `size="lg"` renderizado como `<a>`. El cierre (`#contacto`) usa el brief de requerimiento, no este CTA.
 
 ## Import
 
@@ -15,9 +15,9 @@ import { AdvisorCta } from "@/components/advisor-cta";
 ## Cuándo usarlo
 
 - El mismo CTA comercial en más de un bloque (mismo copy, mismo destino)
-- Variante `gradient` en hero / cierre; `outline` en garantía
+- Variante `gradient` en hero; `outline` en garantía
 
-No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. Hasta tener Calendly o ruta real, el destino default es `#contacto`.
+No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. El destino default es `#contacto` (brief de requerimiento en el cierre).
 
 ## Props
 
@@ -30,7 +30,7 @@ No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. Hasta
 
 ## Ejemplos
 
-### Hero / cierre
+### Hero
 
 ```tsx
 <AdvisorCta />
@@ -52,5 +52,5 @@ No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. Hasta
 
 - Siempre `size="lg"` y `h-11` / `px-lg` / `text-body`. No pasar otro size.
 - `nativeButton={false}` + `render={<a href={href} />}`: es un link, no un `<button>`.
-- El destino real (Calendly / form) se cambia por `href`, no tocando el componente en cada bloque.
+- Para otro destino (Calendly, WhatsApp, etc.) pasar `href`; no tocar el componente en cada bloque.
 - Es Server Component (sin `"use client"`).
