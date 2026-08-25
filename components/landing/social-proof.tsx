@@ -1,29 +1,31 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Section } from "@/components/section"
 import { SectionEyebrow } from "@/components/section-eyebrow"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import {
   socialProofEyebrow,
   socialProofHeading,
   socialProofQuotes,
-  socialProofStats,
 } from "@/lib/landing"
 import { cn } from "@/lib/utils"
 
 type SocialProofQuote = (typeof socialProofQuotes)[number]
 
+const MOBILE_PAGE_SIZE = 1
+const DESKTOP_PAGE_SIZE = 2
+const DESKTOP_CAROUSEL_QUERY = "(min-width: 768px)"
+
 /**
- * Caso de éxito HF: pill + H2, testimonial en card con carrusel y dos métricas.
+ * Testimonios HF: pill + H2, carrusel de 2 cards (1 en mobile) con flechas laterales.
  */
 function SocialProof() {
   return (
-    <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="casos">
+    <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="testimonios">
       <div className="flex flex-col gap-xl">
         <div className="flex flex-col items-center gap-sm text-center">
           <SectionEyebrow className="text-accent-cyan">
@@ -34,26 +36,42 @@ function SocialProof() {
           </h2>
         </div>
 
-        <div className="grid min-w-0 items-stretch gap-md lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:*:min-w-0">
-          <TestimonialCarousel quotes={socialProofQuotes} />
-
-          <div className="grid min-w-0 gap-md sm:grid-cols-2 lg:grid-cols-1 lg:*:min-w-0">
-            {socialProofStats.map((stat) => (
-              <article
-                key={stat.label}
-                className="flex min-w-0 flex-col justify-center gap-sm rounded-md border border-accent-cyan/50 bg-bg-surface-1/40 bg-brand-gradient-secondary p-md backdrop-blur-sm"
-              >
-                <p className="text-heading-2 text-text-primary">{stat.value}</p>
-                <p className="text-data-label text-pretty text-text-primary">
-                  {stat.label}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
+        <TestimonialCarousel quotes={socialProofQuotes} />
       </div>
     </Section>
   )
+}
+
+function useCarouselPageSize() {
+  const [pageSize, setPageSize] = useState(DESKTOP_PAGE_SIZE)
+
+  useEffect(() => {
+    const media = window.matchMedia(DESKTOP_CAROUSEL_QUERY)
+
+    function updatePageSize() {
+      setPageSize(media.matches ? DESKTOP_PAGE_SIZE : MOBILE_PAGE_SIZE)
+    }
+
+    updatePageSize()
+    media.addEventListener("change", updatePageSize)
+
+    return () => media.removeEventListener("change", updatePageSize)
+  }, [])
+
+  return pageSize
+}
+
+function paginateQuotes(
+  quotes: readonly SocialProofQuote[],
+  pageSize: number
+) {
+  const pages: SocialProofQuote[][] = []
+
+  for (let index = 0; index < quotes.length; index += pageSize) {
+    pages.push([...quotes.slice(index, index + pageSize)])
+  }
+
+  return pages
 }
 
 function TestimonialCarousel({
@@ -61,96 +79,101 @@ function TestimonialCarousel({
 }: {
   quotes: readonly SocialProofQuote[]
 }) {
+  const pageSize = useCarouselPageSize()
+  const pages = paginateQuotes(quotes, pageSize)
+  const pageCount = Math.max(pages.length, 1)
   const [activeIndex, setActiveIndex] = useState(0)
   const [outgoingIndex, setOutgoingIndex] = useState<number | null>(null)
   const [direction, setDirection] = useState<1 | -1>(1)
-  const quoteCount = quotes.length
+  const pageIndex = Math.min(activeIndex, pageCount - 1)
+  const outgoingPage =
+    outgoingIndex !== null && outgoingIndex < pageCount ? outgoingIndex : null
 
   function goTo(index: number) {
-    const nextIndex = (index + quoteCount) % quoteCount
+    const nextIndex = (index + pageCount) % pageCount
 
-    if (nextIndex === activeIndex) {
+    if (nextIndex === pageIndex) {
       return
     }
 
-    const stepsForward = (nextIndex - activeIndex + quoteCount) % quoteCount
-    setDirection(stepsForward <= quoteCount / 2 ? 1 : -1)
-    setOutgoingIndex(activeIndex)
+    const stepsForward = (nextIndex - pageIndex + pageCount) % pageCount
+    setDirection(stepsForward <= pageCount / 2 ? 1 : -1)
+    setOutgoingIndex(pageIndex)
     setActiveIndex(nextIndex)
   }
 
   return (
-    <article
-      aria-label="Testimonios de casos de éxito"
+    <div
+      aria-label="Testimonios"
       aria-roledescription="carrusel"
-      className="flex h-full min-w-0 flex-col gap-md rounded-md border border-border p-md"
+      className="flex min-w-0 flex-col gap-md"
     >
-      <div className="grid min-w-0 flex-1 overflow-hidden">
-        {quotes.map((item, index) => (
-          <TestimonialCard
-            key={item.name}
-            quote={item}
-            index={index}
-            total={quoteCount}
-            inactive={index !== activeIndex}
-            outgoing={index === outgoingIndex}
-            entering={index === activeIndex && outgoingIndex !== null}
-            direction={direction}
-          />
-        ))}
-      </div>
-
-      <div className="mt-auto flex items-center justify-between gap-sm">
+      <div className="flex min-w-0 items-center gap-sm md:gap-md">
         <Button
           type="button"
           variant="outline"
           size="icon"
-          aria-label="Testimonio anterior"
-          className="size-10 border-text-primary/40 bg-transparent text-text-primary hover:bg-text-primary/10"
-          onClick={() => goTo(activeIndex - 1)}
+          aria-label="Testimonios anteriores"
+          className="size-10 shrink-0 border-text-primary/40 bg-transparent text-text-primary hover:bg-text-primary/10"
+          onClick={() => goTo(pageIndex - 1)}
         >
           <ChevronLeftIcon />
         </Button>
 
-        <div className="flex items-center gap-xs">
-          {quotes.map((item, index) => {
-            const isActive = index === activeIndex
-
-            return (
-              <button
-                key={item.name}
-                type="button"
-                aria-label={`Ir al testimonio ${index + 1}`}
-                aria-current={isActive ? "true" : undefined}
-                className={cn(
-                  "h-2 rounded-full transition-all",
-                  isActive
-                    ? "w-6 bg-accent-cyan"
-                    : "w-2 bg-text-muted hover:bg-text-secondary"
-                )}
-                onClick={() => goTo(index)}
-              />
-            )
-          })}
+        <div className="grid min-w-0 flex-1 overflow-hidden">
+          {pages.map((pageQuotes, index) => (
+            <TestimonialPage
+              key={pageQuotes.map((item) => item.name).join("-")}
+              quotes={pageQuotes}
+              index={index}
+              total={pageCount}
+              inactive={index !== pageIndex}
+              outgoing={index === outgoingPage}
+              entering={index === pageIndex && outgoingPage !== null}
+              direction={direction}
+            />
+          ))}
         </div>
 
         <Button
           type="button"
           variant="outline"
           size="icon"
-          aria-label="Testimonio siguiente"
-          className="size-10 border-text-primary/40 bg-transparent text-text-primary hover:bg-text-primary/10"
-          onClick={() => goTo(activeIndex + 1)}
+          aria-label="Testimonios siguientes"
+          className="size-10 shrink-0 border-text-primary/40 bg-transparent text-text-primary hover:bg-text-primary/10"
+          onClick={() => goTo(pageIndex + 1)}
         >
           <ChevronRightIcon />
         </Button>
       </div>
-    </article>
+
+      <div className="flex items-center justify-center gap-xs">
+        {pages.map((pageQuotes, index) => {
+          const isActive = index === pageIndex
+
+          return (
+            <button
+              key={pageQuotes.map((item) => item.name).join("-")}
+              type="button"
+              aria-label={`Ir a la página ${index + 1} de testimonios`}
+              aria-current={isActive ? "true" : undefined}
+              className={cn(
+                "h-2 rounded-full transition-all",
+                isActive
+                  ? "w-6 bg-accent-cyan"
+                  : "w-2 bg-text-muted hover:bg-text-secondary"
+              )}
+              onClick={() => goTo(index)}
+            />
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
-function TestimonialCard({
-  quote,
+function TestimonialPage({
+  quotes,
   index,
   total,
   inactive,
@@ -158,7 +181,7 @@ function TestimonialCard({
   entering,
   direction,
 }: {
-  quote: SocialProofQuote
+  quotes: SocialProofQuote[]
   index: number
   total: number
   inactive: boolean
@@ -167,12 +190,13 @@ function TestimonialCard({
   direction: 1 | -1
 }) {
   return (
-    <figure
+    <div
+      aria-label={`Página ${index + 1} de ${total}`}
       aria-live={inactive ? undefined : "polite"}
       aria-atomic={inactive ? undefined : "true"}
       aria-hidden={inactive || undefined}
       className={cn(
-        "col-start-1 row-start-1 flex min-w-0 flex-col gap-md duration-300 ease-out motion-reduce:animate-none motion-reduce:translate-x-0",
+        "col-start-1 row-start-1 grid min-w-0 grid-cols-1 gap-md duration-300 ease-out motion-reduce:animate-none motion-reduce:translate-x-0 md:grid-cols-2 md:*:min-w-0",
         (inactive || outgoing) && "pointer-events-none",
         !inactive && !entering && "z-10 opacity-100",
         inactive && !outgoing && "opacity-0",
@@ -186,17 +210,32 @@ function TestimonialCard({
             : "z-10 animate-in fade-in-0 slide-in-from-left-4 motion-reduce:opacity-100")
       )}
     >
-      <QuoteAvatar avatar={quote.avatar} />
+      {quotes.map((quote) => (
+        <TestimonialCard key={quote.name} quote={quote} />
+      ))}
+    </div>
+  )
+}
 
-      <blockquote className="flex-1 text-heading-3 font-normal text-pretty text-text-primary">
+function TestimonialCard({ quote }: { quote: SocialProofQuote }) {
+  return (
+    <figure className="flex h-full min-w-0 flex-col gap-md rounded-md border border-border bg-transparent p-md">
+      <Image
+        src={quote.avatar.src}
+        alt=""
+        width={quote.avatar.width}
+        height={quote.avatar.height}
+        unoptimized
+        className="mx-auto size-20 rounded-full object-cover"
+      />
+
+      <blockquote className="flex-1 text-center text-body-large font-normal text-pretty text-text-primary">
         “{quote.quote}”
       </blockquote>
 
-      <Separator className="bg-text-primary/40" />
-
-      <figcaption className="flex min-w-0 flex-wrap items-center justify-between gap-md">
-        <div className="flex min-w-0 flex-col gap-1">
-          <cite className="text-body font-semibold not-italic text-text-primary">
+      <figcaption className="mt-auto flex min-w-0 items-end justify-between gap-md">
+        <div className="flex min-w-0 flex-col gap-1 text-left">
+          <cite className="text-body-large font-semibold not-italic text-text-primary">
             {quote.name}
           </cite>
           <p className="text-body-small text-text-secondary">{quote.role}</p>
@@ -207,27 +246,10 @@ function TestimonialCard({
           width={quote.logo.width}
           height={quote.logo.height}
           unoptimized
-          className="h-8 w-auto max-w-none object-contain"
+          className="h-8 w-auto max-w-28 shrink-0 object-contain sm:max-w-none"
         />
       </figcaption>
-
-      <p className="sr-only">
-        Testimonio {index + 1} de {total}
-      </p>
     </figure>
-  )
-}
-
-function QuoteAvatar({ avatar }: { avatar: SocialProofQuote["avatar"] }) {
-  return (
-    <Image
-      src={avatar.src}
-      alt=""
-      width={avatar.width}
-      height={avatar.height}
-      unoptimized
-      className="size-14 rounded-full object-cover"
-    />
   )
 }
 
