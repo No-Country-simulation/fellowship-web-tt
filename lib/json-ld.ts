@@ -168,6 +168,7 @@ export function getSiteJsonLd(): JsonLdGraph {
           "Simulaciones laborales",
           "Peer review",
           "Garantía de reemplazo",
+          "Inteligencia artificial",
         ],
       },
       {

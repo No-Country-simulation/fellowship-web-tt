@@ -97,7 +97,7 @@ export const faqs: FaqItem[] = [
   {
     question: "¿Qué roles y niveles de seniority están disponibles?",
     answer:
-      "El pool incluye perfiles junior y junior-mid en roles de desarrollo, diseño, datos, IA y producto. La mayoría tiene entre 0 y 2 años de experiencia laboral formal, con formación técnica en bootcamps, universidades o programas de certificación.",
+      `El pool incluye perfiles junior y junior-mid (0 a 2 años de experiencia laboral formal). Roles: ${roles.join(", ")} y otros. Conocimientos: ${conocimientos.join(", ")}. Formación técnica en bootcamps, universidades o programas de certificación.`,
   },
   {
     question: "¿Cómo accedo al dashboard?",
