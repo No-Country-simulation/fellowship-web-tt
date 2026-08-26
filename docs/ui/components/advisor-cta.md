@@ -4,7 +4,7 @@ CTA primario de la landing Empresa: “Hablar con un asesor”.
 
 **Archivo:** `components/advisor-cta.tsx`
 
-Uso previsto: hero y garantía. Es un `Button` `size="lg"` renderizado como `<a>`. El cierre (`#contacto`) usa el brief de requerimiento, no este CTA.
+Uso previsto: hero (ancla a `#como-funciona`) y garantía (ancla a `#contacto`). Es un `Button` `size="lg"` renderizado como `<a>`. El cierre (`#contacto`) usa el brief de requerimiento, no este CTA.
 
 ## Import
 
@@ -14,7 +14,7 @@ import { AdvisorCta } from "@/components/advisor-cta";
 
 ## Cuándo usarlo
 
-- El mismo CTA comercial en más de un bloque (mismo copy, mismo destino)
+- El mismo botón comercial en más de un bloque (mismo componente; `href` y `label` pueden variar)
 - Variante `gradient` en hero; `outline` en garantía
 
 No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. El destino default es `#contacto` (brief de requerimiento en el cierre).
@@ -33,7 +33,7 @@ No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. El de
 ### Hero
 
 ```tsx
-<AdvisorCta />
+<AdvisorCta href="#como-funciona" label="Ver cómo funciona" />
 ```
 
 ### Garantía (secundario visual)

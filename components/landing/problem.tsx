@@ -36,7 +36,7 @@ function Problem() {
               >
                 <span
                   aria-hidden
-                  className="flex size-10 items-center justify-center rounded-md bg-brand-pink/10"
+                  className="flex size-10 items-center justify-center rounded-md bg-bg-brand-subtle"
                 >
                   <Icon className="size-5 stroke-[1.5] text-brand-pink" />
                 </span>

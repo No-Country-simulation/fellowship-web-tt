@@ -1,3 +1,4 @@
+import { CheckIcon } from "lucide-react"
 import Image from "next/image"
 
 import { Section } from "@/components/section"
@@ -11,6 +12,7 @@ import {
 
 /**
  * Cómo funciona HF: H2 centrado, 4 pasos numerados y perfiles validados.
+ * Hover CSS: card activa en cyan; pasos previos muestran check.
  */
 function HowItWorks() {
   return (
@@ -24,25 +26,26 @@ function HowItWorks() {
           {howItWorksHeading}
         </h2>
 
-        <ol className="grid min-w-0 gap-lg sm:grid-cols-2 lg:grid-cols-4 lg:*:min-w-0">
+        <ol className="how-it-works-steps grid min-w-0 sm:grid-cols-2 lg:grid-cols-4 lg:*:min-w-0 gap-2 md:gap-4">
           {howItWorksSteps.map((item) => (
             <li
               key={item.step}
-              className="flex min-w-0 flex-col items-start gap-sm"
+              className="how-it-works-step flex min-w-0 flex-col items-start gap-sm rounded-md border border-transparent p-sm"
             >
               <span
                 aria-hidden
-                className="flex size-10 items-center justify-center rounded-full bg-brand-gradient text-body font-semibold text-white"
+                className="how-it-works-step-icon relative flex size-10 shrink-0 items-center justify-center rounded-full text-body font-semibold"
               >
-                {item.step}
+                <span className="how-it-works-step-number">{item.step}</span>
+                <CheckIcon className="how-it-works-step-check size-5 stroke-[2.5]" />
               </span>
               <p className="text-body-small text-text-secondary">
                 Paso {item.step}
               </p>
-              <h3 className="text-body-large whitespace-nowrap font-semibold leading-[1.3] tracking-tight text-text-primary">
+              <h3 className="how-it-works-step-title text-[1.25rem] font-semibold leading-[1.3] whitespace-nowrap tracking-tight text-text-primary">
                 {item.title}
               </h3>
-              <p className="text-body text-text-secondary">{item.body}</p>
+              <p className="text-body-small text-text-secondary">{item.body}</p>
             </li>
           ))}
         </ol>

@@ -62,6 +62,7 @@
   --color-bg-marketing-base: var(--bg-marketing-base);
   --color-bg-marketing-surface: var(--bg-marketing-surface);
   --color-bg-marketing-light: var(--bg-marketing-light);
+  --color-bg-brand-subtle: var(--bg-brand-subtle);
   --color-brand-gradient-start: var(--brand-gradient-start);
   --color-brand-gradient-end: var(--brand-gradient-end);
   --color-brand-pink: var(--brand-pink);
@@ -79,6 +80,7 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-soft: var(--border-soft);
   --color-border-on-light: var(--border-on-light);
+  --color-border-emphasis: var(--border-emphasis);
 
   /* Spacing: xs → 3xl */
   --spacing-xs: 0.5rem;
@@ -144,10 +146,12 @@
   --bg-marketing-base: #000115;
   --bg-marketing-surface: #0d0e1f;
   --bg-marketing-light: #e9ecf5;
+  --bg-brand-subtle: #ff00940d;
   --border-default: #2a2c4a;
   --border-subtle: #1d283a;
   --border-soft: #cccccc;
   --border-on-light: var(--border-soft);
+  --border-emphasis: #ff00940d;
   --text-muted: #666666;
   --text-primary: #ffffff;
   --text-secondary: #999999;
@@ -591,12 +595,83 @@
   }
 }
 
+/*
+ * How-it-works steps: hovered card gets cyan wash + title; previous
+ * siblings swap the step number for a check. Gated to hover-capable
+ * pointers so touch doesn't stick the state.
+ */
+.how-it-works-step {
+  transition:
+    background-color 300ms ease-out,
+    border-color 300ms ease-out;
+}
+
+.how-it-works-step-title {
+  transition: color 300ms ease-out;
+}
+
+.how-it-works-step-number,
+.how-it-works-step-check {
+  transition:
+    opacity 300ms ease-out,
+    transform 300ms ease-out;
+}
+
+.how-it-works-step-check {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.75);
+}
+
+.how-it-works-step-icon {
+  color: #ffffff;
+  background-color: var(--text-on-light-primary);
+}
+
+.how-it-works-step:first-child .how-it-works-step-icon {
+  background-image: var(--gradient-brand);
+}
+
+@media (hover: hover) {
+  .how-it-works-step:hover {
+    border-color: var(--accent-cyan);
+    background-color: color-mix(in srgb, var(--accent-cyan) 15%, transparent);
+  }
+
+  .how-it-works-step:hover .how-it-works-step-title {
+    color: var(--accent-cyan);
+  }
+
+  .how-it-works-step:hover .how-it-works-step-icon,
+  .how-it-works-step:has(~ .how-it-works-step:hover) .how-it-works-step-icon {
+    background-image: var(--gradient-brand);
+  }
+
+  .how-it-works-step:has(~ .how-it-works-step:hover) .how-it-works-step-number {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+
+  .how-it-works-step:has(~ .how-it-works-step:hover) .how-it-works-step-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-allies-marquee {
     animation: none;
   }
 
   .faq-details::details-content {
+    transition: none;
+  }
+
+  .how-it-works-step,
+  .how-it-works-step-title,
+  .how-it-works-step-number,
+  .how-it-works-step-check {
     transition: none;
   }
 }

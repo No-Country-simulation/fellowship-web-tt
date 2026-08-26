@@ -27,7 +27,7 @@ function Faq() {
           {items.map((faq) => (
             <details
               key={faq.question}
-              className="faq-details group rounded-md bg-[#FF00940D] px-md md:px-lg"
+              className="faq-details group rounded-md bg-bg-brand-subtle px-md md:px-lg"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-md py-md text-left text-body font-medium text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
                 <span className="min-w-0 text-pretty">{faq.question}</span>

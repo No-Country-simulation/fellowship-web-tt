@@ -34,7 +34,7 @@ function Guarantee() {
             return (
               <li
                 key={item}
-                className="flex min-w-0 items-center gap-md rounded-md border border-border/60 bg-linear-to-r from-brand-violet/20 via-bg-surface-1/55 to-transparent px-md py-md backdrop-blur-sm"
+                className="flex min-w-0 items-center gap-md rounded-md border border-border/60 bg-brand-gradient-secondary px-md py-md"
               >
                 <span
                   aria-hidden

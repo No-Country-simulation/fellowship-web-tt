@@ -46,143 +46,18 @@ export const evidenceItems = [
   {
     title: "Índice de actividad",
     body: "Presencia real semana a semana: mensajes, reuniones y conexión.",
-    previews: [
-      {
-        src: "/product/indice-actividad.svg",
-        alt: "Índice de actividad del equipo: trayectoria semanal y contribuciones en simulación",
-        width: 1124,
-        height: 723,
-      },
-    ],
   },
   {
     title: "Trayectoria semanal",
     body: "Cómo evoluciona el ritmo de trabajo: si acelera, cae o se recupera.",
-    previews: [
-      {
-        src: "/product/trayectoria-actividad.jpg",
-        alt: "Gráfico de trayectoria de actividad semana a semana, con el nivel del talento destacado en la semana 2",
-        width: 1024,
-        height: 408,
-      },
-    ],
   },
   {
     title: "Peer review",
     body: "Cómo lo describen sus compañeros después de semanas trabajando juntos.",
-    previews: [
-      {
-        src: "/product/peer-review-soft-skills.jpg",
-        alt: "Comparativa de peer review versus autoevaluación en 13 soft skills, con puntaje 9.2 sobre 7 reseñas",
-        width: 1024,
-        height: 505,
-      },
-    ],
   },
   {
     title: "Entregables",
     body: "Lo que construyó de verdad: código, documentación y diseños.",
-    previews: [
-      {
-        src: "/product/entregables-semana-3.png",
-        alt: "Entregables del equipo en la semana 3: video de avance cerrado",
-        width: 973,
-        height: 339,
-      },
-      {
-        src: "/product/entregables-semana-4.png",
-        alt: "Entregables del equipo en Demo Day: video, enlace del producto, documentación y herramientas",
-        width: 982,
-        height: 682,
-      },
-    ],
-  },
-] as const
-
-export const evidenceMetricHighlights = [
-  {
-    label: "Índice de actividad",
-    value: "97",
-    suffix: "/100",
-    footer: "Calculado sobre los 248 participantes de esta simulación",
-    glow: "bg-accent-indigo",
-  },
-  {
-    label: "Pool de la simulación",
-    value: "248",
-    suffix: "participantes",
-    footer: "Distribuidos en 31 equipos activos",
-    glow: "bg-accent-cyan",
-  },
-  {
-    label: "Peer review promedio",
-    value: "9.2",
-    suffix: "/10",
-    footer: "7 reseñas de tus compañeros de equipo",
-    glow: "bg-accent-mint",
-    starred: true,
-  },
-] as const
-
-export const evidenceMetricStats = [
-  {
-    value: "27",
-    label: "Reuniones asistidas",
-    footer: "Durante las 4 semanas de simulación",
-    accent: "cyan",
-  },
-  {
-    value: "486",
-    label: "Mensajes enviados",
-    footer: "En canales del equipo",
-    accent: "pink",
-  },
-  {
-    value: "32h 15m",
-    label: "Tiempo en reuniones",
-    footer: "Acumulado en las 4 semanas",
-    accent: "indigo",
-  },
-] as const
-
-export const evidenceStrengths = [
-  {
-    quote:
-      "Su capacidad para tomar feedback y iterar rápido sobre el diseño fue clave para llegar a tiempo al handoff.",
-    source: "Compañero/a de Back-End - anónimo",
-  },
-  {
-    quote:
-      "Muy generosa compartiendo conocimiento de Figma con el resto del equipo, incluso fuera de su rol.",
-    source: "Compañero/a de QA Tester - anónimo",
-  },
-  {
-    quote:
-      "Excelente comunicación de las decisiones de diseño — siempre explica el «por qué», no solo el «qué».",
-    source: "Compañero/a de Front-End - anónimo",
-  },
-  {
-    quote:
-      "Sostuvo el ritmo del equipo en las semanas de más carga, dando el ejemplo con su propia dedicación.",
-    source: "Compañero/a de Team Leader - anónimo",
-  },
-] as const
-
-export const evidenceImprovements = [
-  {
-    quote:
-      "Podría delegar más tareas de detalle visual para enfocarse en las decisiones de mayor impacto.",
-    source: "Compañero/a de Team Leader - anónimo",
-  },
-  {
-    quote:
-      "A veces tarda en responder mensajes fuera del horario de las ceremonias — ayudaría ser más ágil ahí.",
-    source: "Compañero/a de Back-End - anónimo",
-  },
-  {
-    quote:
-      "Podría involucrar antes a QA en el proceso de diseño para detectar edge cases más temprano.",
-    source: "Compañero/a de QA Tester - anónimo",
   },
 ] as const
 
@@ -246,8 +121,8 @@ export const profilesHeading = "Roles junior con evidencia, en +100 países"
 /** Cifras alineadas a `productFacts` en geo.ts. */
 export const profileStats = [
   {
-    value: "+30.000",
-    label: "Comunidad directa en Discord",
+    value: "+30k",
+    label: "Comunidad directa",
   },
   {
     value: "+1M",
