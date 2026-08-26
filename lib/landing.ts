@@ -46,18 +46,56 @@ export const evidenceItems = [
   {
     title: "Índice de actividad",
     body: "Presencia real semana a semana: mensajes, reuniones y conexión.",
+    previews: [
+      {
+        src: "/product/indice-actividad.svg",
+        alt: "Índice de actividad del equipo: trayectoria semanal y contribuciones en simulación",
+        width: 1124,
+        height: 723,
+      },
+    ],
   },
   {
     title: "Trayectoria semanal",
     body: "Cómo evoluciona el ritmo de trabajo: si acelera, cae o se recupera.",
+    previews: [
+      {
+        src: "/product/trayectoria-actividad.jpg",
+        alt: "Gráfico de trayectoria de actividad semana a semana, con el nivel del talento destacado en la semana 2",
+        width: 1024,
+        height: 408,
+      },
+    ],
   },
   {
     title: "Peer review",
     body: "Cómo lo describen sus compañeros después de semanas trabajando juntos.",
+    previews: [
+      {
+        src: "/product/peer-review-soft-skills.jpg",
+        alt: "Comparativa de peer review versus autoevaluación en 13 soft skills, con puntaje 9.2 sobre 7 reseñas",
+        width: 1024,
+        height: 505,
+      },
+    ],
   },
   {
     title: "Entregables",
     body: "Lo que construyó de verdad: código, documentación y diseños.",
+    previews: [
+      {
+        src: "/product/entregables-semana-3.png",
+        alt: "Entregables del equipo en la semana 3: video de avance cerrado",
+        width: 973,
+        height: 339,
+      },
+      {
+        src: "/product/entregables-semana-4.png",
+        alt: "Entregables del equipo en Demo Day: video, enlace del producto, documentación y herramientas",
+        width: 982,
+        height: 682,
+      },
+    ],
   },
 ] as const
 
@@ -185,21 +223,21 @@ export const howItWorksProfilesIntro =
 export const howItWorksProfilePreviews = [
   {
     src: "/product/perfil-micaela.svg",
-    alt: "Perfil validado de Micaela Juárez, Backend Developer Jr, con índice de actividad, peer review y proyectos en simulación",
-    width: 225,
-    height: 272,
+    alt: "Ficha de candidato de Micaela Juárez, Backend Developer Jr en Argentina, con índice de actividad, peer review y proyectos en simulación",
+    width: 389,
+    height: 475,
   },
   {
     src: "/product/perfil-diego.svg",
-    alt: "Perfil validado de Diego Fernández, con métricas de simulación, soft skills y disponibilidad para entrevista",
-    width: 225,
-    height: 272,
+    alt: "Ficha de candidato de Diego Fernández, Frontend Developer Jr en México, con métricas de simulación, soft skills y disponibilidad para entrevista",
+    width: 389,
+    height: 477,
   },
   {
     src: "/product/perfil-valentina.svg",
-    alt: "Perfil validado de Valentina Rocha, con reseñas, progreso entre simulaciones y proyectos",
-    width: 225,
-    height: 272,
+    alt: "Ficha de candidato de Valentina Rocha, QA Tester en Colombia, con reseñas, progreso entre simulaciones y proyectos",
+    width: 389,
+    height: 475,
   },
 ] as const
 
@@ -221,9 +259,10 @@ export const profileStats = [
   },
 ] as const
 
-export const socialProofEyebrow = "Caso de éxito"
+export const socialProofEyebrow = "Testimonios"
 
-export const socialProofHeading = "No Country ya funcionó en un caso real."
+export const socialProofHeading =
+  "Lo que dicen quienes ya trabajaron con nosotros"
 
 export const socialProofQuotes = [
   {
@@ -297,18 +336,6 @@ export const socialProofQuotes = [
       width: 75,
       height: 35,
     },
-  },
-] as const
-
-/** Fuente visual: mockup Desktop 1440. */
-export const socialProofStats = [
-  {
-    value: "4",
-    label: "Acuerdos consecutivos con partners corporativos",
-  },
-  {
-    value: "+2.500",
-    label: "Perfiles validados conductualmente",
   },
 ] as const
 

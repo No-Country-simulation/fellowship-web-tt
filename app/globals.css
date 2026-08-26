@@ -546,6 +546,12 @@
     background-position: center;
     background-size: cover;
   }
+
+  .profile-chip {
+    color: var(--chip-accent);
+    border-color: var(--chip-accent);
+    background-color: color-mix(in srgb, var(--chip-accent) 12%, transparent);
+  }
 }
 
 @keyframes allies-marquee {

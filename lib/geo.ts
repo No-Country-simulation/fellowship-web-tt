@@ -22,25 +22,28 @@ export const keywords = [
   "garantía de reemplazo",
 ] as const;
 
-export const roles = [
-  "Frontend Developer",
-  "Backend Developer",
-  "Full Stack",
-  "Data Scientist",
-  "UX/UI Designer",
-  "Product Manager",
-  "QA",
-  "Data Analyst",
-  "Mobile Developer",
+export const conocimientos = [
+  "Web",
+  "Mobile",
+  "Data",
+  "UX",
+  "Producto",
+  "Growth",
+  "IA",
+  "Agentes",
+  "Cloud",
+  "Videojuegos",
+  "Ciberseguridad",
 ] as const;
 
-export const verticals = [
-  "Web App",
-  "AI Automation",
-  "Business Intelligence",
-  "Mobile",
-  "UX Research",
-  "Data Science",
+export const roles = [
+  "AI Engineer",
+  "Frontend",
+  "Backend",
+  "UX/UI",
+  "Data Analyst",
+  "Product Designer",
+  "Growth",
 ] as const;
 
 export const countriesServed = [
@@ -68,8 +71,8 @@ export const productFacts = [
   "Proceso: reunión de descubrimiento (20 min), catálogo curado en 3 a 5 días hábiles, entrevistas coordinadas. Confirmado el match, el talento arranca en 72 horas desde el pago.",
   "Garantía de reemplazo en 72 horas dentro de los primeros 30 días, sin costo adicional.",
   "Contratos de 3 o 6 meses. Al finalizar, el talento puede incorporarse de forma permanente sin comisión.",
-  `Pool junior y junior-mid (0 a 2 años de experiencia laboral formal) en desarrollo, diseño, datos, IA y producto. Roles: ${roles.join(", ")}.`,
-  `Verticales: ${verticals.join(", ")}.`,
+  `Pool junior y junior-mid (0 a 2 años de experiencia laboral formal) en desarrollo, diseño, datos, IA y producto. Roles: ${roles.join(", ")} y otros.`,
+  `Conocimientos: ${conocimientos.join(", ")}.`,
   `Geografías con talento activo: ${countriesServed.join(", ")} y más de 100 países.`,
   "Dashboard para empresas: companies.nocountry.tech/login, con email corporativo. Acceso inmediato a la simulación activa o a la más reciente completada.",
   "Si hay una simulación en curso, se puede observar la actividad de los equipos en tiempo real antes de hacer contacto.",
@@ -94,7 +97,7 @@ export const faqs: FaqItem[] = [
   {
     question: "¿Qué roles y niveles de seniority están disponibles?",
     answer:
-      "El pool incluye perfiles junior y junior-mid en roles de desarrollo, diseño, datos, IA y producto. La mayoría tiene entre 0 y 2 años de experiencia laboral formal, con formación técnica en bootcamps, universidades o programas de certificación.",
+      `El pool incluye perfiles junior y junior-mid (0 a 2 años de experiencia laboral formal). Roles: ${roles.join(", ")} y otros. Conocimientos: ${conocimientos.join(", ")}. Formación técnica en bootcamps, universidades o programas de certificación.`,
   },
   {
     question: "¿Cómo accedo al dashboard?",

@@ -1,5 +1,6 @@
 import {
   countriesServed,
+  conocimientos,
   getAnsweredFaqs,
   metricsAsOf,
   productFacts,
@@ -8,7 +9,6 @@ import {
   serviceName,
   siteDescription,
   siteName,
-  verticals,
 } from "@/lib/geo";
 import {
   evidenceHeading,
@@ -103,8 +103,8 @@ ${evidence}
 
 ## ${profilesHeading}
 
-Roles: ${roles.join(", ")}.
-Verticales: ${verticals.join(", ")}.
+Roles: ${roles.join(", ")} y otros.
+Conocimientos: ${conocimientos.join(", ")}.
 Geografías con talento activo: ${countriesServed.join(", ")} y más de 100 países.
 
 ${stats}
