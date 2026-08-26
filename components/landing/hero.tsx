@@ -104,18 +104,16 @@ function Hero() {
             </SectionEyebrow>
             <h1 className="text-heading-1 max-w-full text-pretty text-text-primary">
               <span className="text-[0.78em]">Talento junior con </span>
-              <span className="text-brand-gradient">
-                evidencia real de cómo trabaja
-              </span>
+              <span className="text-brand-gradient">evidencia real</span>
               <br />
               <span className="text-[0.78em]">antes de contratar.</span>
             </h1>
             <p className="text-body-large max-w-xl text-text-secondary">
-              Semanas de comportamiento documentado en simulaciones reales —
-              evidencia que ningún CV ni entrevista te muestra. Con garantía
-              de reemplazo en 30 días.
+              Cada persona fue observada trabajando en equipo durante 5
+              semanas, actividad, entregas y peer reviews. Con garantía de
+              reemplazo en 30 días.
             </p>
-            <AdvisorCta />
+            <AdvisorCta href="#como-funciona" label="Ver cómo funciona" />
           </div>
 
           <div className="relative min-w-0 overflow-hidden rounded-md">

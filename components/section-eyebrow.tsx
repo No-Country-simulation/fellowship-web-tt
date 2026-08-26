@@ -9,13 +9,13 @@ type SectionEyebrowProps = {
 
 /**
  * Pill de sección de la HF: borde cyan, sentence case.
- * En bandas claras (`surface="light"`) el texto pasa a indigo sobre wash cyan.
+ * En bandas claras (`surface="light"`) el texto y el wash siguen en cyan.
  */
 function SectionEyebrow({ children, className }: SectionEyebrowProps) {
   return (
     <p
       className={cn(
-        "inline-flex max-w-full bg-bg-surface-1 rounded-full border border-accent-cyan/70 px-sm py-1 text-center text-body-small text-pretty text-text-primary in-data-[surface=light]:bg-accent-cyan/10 in-data-[surface=light]:text-accent-indigo",
+        "inline-flex max-w-full bg-bg-surface-1 rounded-full border border-accent-cyan/70 px-sm py-1 text-center text-body-small text-pretty text-text-primary in-data-[surface=light]:bg-accent-cyan/10 in-data-[surface=light]:text-accent-cyan",
         className
       )}
     >

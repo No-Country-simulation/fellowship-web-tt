@@ -29,7 +29,7 @@ function Differential() {
           </h2>
         </div>
 
-        <div className="grid w-full min-w-0 items-stretch gap-md lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-lg">
+        <div className="grid w-full min-w-0 items-stretch gap-md lg:grid-cols-3 lg:gap-lg">
           <ComparisonCard
             title="CV o entrevista tradicional"
             items={differentialTraditionalItems}
@@ -48,22 +48,24 @@ function Differential() {
 
 function ContrastColumn() {
   return (
-    <div className="flex min-w-0 flex-col items-center justify-center gap-sm lg:w-72">
-      <p className="text-overline text-text-secondary">El contraste</p>
-      <ul className="flex w-full flex-col gap-sm">
+    <div className="flex min-w-0 flex-col items-center justify-center gap-sm">
+      <p className="text-overline text-text-muted">El contraste</p>
+      <ul className="flex w-full min-w-0 flex-col gap-xs">
         {differentialContrasts.map((item) => (
           <li
             key={`${item.from}-${item.to}`}
-            className="grid grid-cols-[1fr_auto_1fr] items-center gap-xs rounded-md border border-border bg-bg-surface-1 px-md py-sm"
+            className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-xs rounded-md border border-border px-md py-sm"
           >
-            <span className="text-overline text-left text-text-secondary">
+            <span className="text-overline truncate text-left font-normal text-text-muted">
               {item.from}
             </span>
             <ChevronRightIcon
               aria-hidden="true"
               className="size-4 shrink-0 text-accent-cyan"
             />
-            <span className="text-overline text-right text-text-primary">{item.to}</span>
+            <span className="text-overline truncate text-right font-semibold text-text-primary">
+              {item.to}
+            </span>
           </li>
         ))}
       </ul>
@@ -88,7 +90,7 @@ function ComparisonCard({
         "flex h-full min-w-0 flex-col justify-start gap-md rounded-md p-md",
         tone === "positive"
           ? "border-2 border-solid border-accent-cyan bg-accent-cyan/15"
-          : "border-2 border-solid border-brand-pink/40 bg-brand-pink/10"
+          : "border-2 border-solid border-border-emphasis bg-bg-brand-subtle"
       )}
     >
       {title ? (

@@ -1,6 +1,12 @@
 <svg width="389" height="475" viewBox="0 0 389 475" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g clip-path="url(#valentina-clip)">
 <path d="M0 7.99999C0 3.58171 3.58172 0 8 0H380.667C385.085 0 388.667 3.58172 388.667 8V466.525C388.667 470.943 385.085 474.525 380.667 474.525H7.99999C3.58171 474.525 0 470.943 0 466.525V7.99999Z" fill="url(#pattern0_1067_4250)"/>
+<path id="valentina-white-frame" d="M0 7.99999C0 3.58171 3.58172 0 8 0H380.667C385.085 0 388.667 3.58172 388.667 8V466.525C388.667 470.943 385.085 474.525 380.667 474.525H7.99999C3.58171 474.525 0 470.943 0 466.525V7.99999Z" fill="none" stroke="#FFFFFF" stroke-width="10"/>
+</g>
 <defs>
+<clipPath id="valentina-clip">
+<path d="M0 7.99999C0 3.58171 3.58172 0 8 0H380.667C385.085 0 388.667 3.58172 388.667 8V466.525C388.667 470.943 385.085 474.525 380.667 474.525H7.99999C3.58171 474.525 0 470.943 0 466.525V7.99999Z"/>
+</clipPath>
 <pattern id="pattern0_1067_4250" patternContentUnits="objectBoundingBox" width="1" height="1">
 <use xlink:href="#image0_1067_4250" transform="scale(0.000538793 0.000441306)"/>
 </pattern>

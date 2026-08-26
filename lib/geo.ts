@@ -1,16 +1,15 @@
 export const siteName = "No Country";
 
-export const siteTitle =
-  "Talento junior con evidencia real de cómo trabaja";
+export const siteTitle = "Talento junior con evidencia real antes de contratar";
 
 export const siteDescription =
-  "Talento junior con semanas de comportamiento documentado en simulaciones reales — evidencia que ningún CV ni entrevista te muestra. Garantía de reemplazo en 30 días.";
+  "Cada persona fue observada trabajando en equipo durante 5 semanas, actividad, entregas y peer reviews. Con garantía de reemplazo en 30 días.";
 
 export const serviceName =
   "Contratación de talento junior y junior-mid con evidencia real";
 
 export const productSummary =
-  "No Country ofrece a empresas perfiles junior y junior-mid con evidencia real de cómo trabajan. En lugar de decidir con un CV y una entrevista de una hora, las empresas ven semanas de comportamiento documentado en simulaciones laborales: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos.";
+  "No Country ofrece a empresas perfiles junior y junior-mid con evidencia real de cómo trabajan. En lugar de decidir con un CV y una entrevista de una hora, las empresas ven 5 semanas de comportamiento documentado en simulaciones laborales: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos.";
 
 export const keywords = [
   "No Country",
@@ -67,7 +66,7 @@ export const allies = [
 export const metricsAsOf = "agosto 2026";
 
 export const productFacts = [
-  "Evidencia conductual real antes de contratar: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos. El ranking se basa en semanas de comportamiento observado en equipo, no en keywords del CV.",
+  "Evidencia conductual real antes de contratar: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos. El ranking se basa en 5 semanas de comportamiento observado en equipo, no en keywords del CV.",
   "Proceso: reunión de descubrimiento (20 min), catálogo curado en 3 a 5 días hábiles, entrevistas coordinadas. Confirmado el match, el talento arranca en 72 horas desde el pago.",
   "Garantía de reemplazo en 72 horas dentro de los primeros 30 días, sin costo adicional.",
   "Contratos de 3 o 6 meses. Al finalizar, el talento puede incorporarse de forma permanente sin comisión.",

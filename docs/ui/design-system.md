@@ -23,6 +23,7 @@ Usar clases Tailwind generadas desde los tokens. Prefijo según categoría:
 | `bg/marketing-base` | `bg-bg-marketing-base` | alias de `bg/base` |
 | `bg/marketing-surface` | `bg-bg-marketing-surface` | alias de `bg/surface-2` |
 | `bg/marketing-light` | `bg-bg-marketing-light` | `#e9ecf5` |
+| `bg/brand-subtle` | `bg-bg-brand-subtle` | `#ff00940d` (pink ~5%) |
 
 También disponibles vía shadcn: `bg-background`, `bg-card`, `bg-muted`, `bg-secondary`.
 
@@ -66,6 +67,7 @@ shadcn: `text-foreground`, `text-muted-foreground`.
 | `border/default` | `border-border` | `#2a2c4a` |
 | `border/subtle` | `border-border-subtle` | `#1d283a` |
 | `border/soft` | `border-border-soft` | `#cccccc` |
+| `border/emphasis` | `border-border-emphasis` | `#ff00940d` |
 
 ```tsx
 <span className="text-brand-gradient">evidencia real</span>
@@ -87,7 +89,7 @@ No es un tema global. `Section surface="light"` remapea los tokens de trabajo pa
 
 Las superficies internas (`bg-bg-surface-*`) pasan a blanco. Los acentos de marca no se oscurecen.
 
-`[data-surface=light]` pone `color: var(--text-on-light-primary)` en el host. Ese `color` gana a utilidades como `text-white`, así que `bg-brand-gradient` (CTA `gradient`, números de “Cómo funciona”) fuerza blanco otra vez en `globals.css`.
+`[data-surface=light]` pone `color: var(--text-on-light-primary)` en el host. Ese `color` gana a utilidades como `text-white`, así que `bg-brand-gradient` (CTA `gradient`) fuerza blanco otra vez en `globals.css`.
 
 También disponibles como clases directas: `bg-bg-marketing-light`, `text-text-on-light-primary`, `border-border-on-light`.
 
