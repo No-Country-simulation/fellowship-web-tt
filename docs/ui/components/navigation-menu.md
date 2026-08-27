@@ -4,7 +4,7 @@ Colección de links de sitio, con paneles desplegables. Basado en shadcn (`base-
 
 **Archivo:** `components/ui/navigation-menu.tsx`
 
-Uso previsto: links de primer nivel del nav desktop. Los grupos (Para Empresas, Sobre Nosotros) van con `DropdownMenu`. En mobile usar `Sheet`.
+Uso previsto: links de primer nivel del nav desktop (hoy todos planos). Si un ítem de `headerNav` es grupo, va con `DropdownMenu`. En mobile usar `Sheet`.
 
 ## Import
 
@@ -69,25 +69,35 @@ Las rutas hijas de la landing aún no existen: `href="#"` o deshabilitar, no cre
 
 ## Ejemplos
 
-### Desktop: trigger + panel
+### Desktop: links planos (uso actual del header)
 
 ```tsx
 <NavigationMenu>
   <NavigationMenuList>
     <NavigationMenuItem>
-      <NavigationMenuTrigger>Para Empresas</NavigationMenuTrigger>
-      <NavigationMenuContent>
-        <NavigationMenuLink href="#">Buscar talento</NavigationMenuLink>
-        <NavigationMenuLink href="#">Cómo funciona</NavigationMenuLink>
-      </NavigationMenuContent>
+      <NavigationMenuLink href="/" className={navigationMenuTriggerStyle()}>
+        Para Empresas
+      </NavigationMenuLink>
     </NavigationMenuItem>
     <NavigationMenuItem>
       <NavigationMenuLink href="#" className={navigationMenuTriggerStyle()}>
-        Sobre Nosotros
+        Showcase
       </NavigationMenuLink>
     </NavigationMenuItem>
   </NavigationMenuList>
 </NavigationMenu>
+```
+
+### Trigger + panel (si un ítem necesita mega-menú)
+
+```tsx
+<NavigationMenuItem>
+  <NavigationMenuTrigger>Plataforma</NavigationMenuTrigger>
+  <NavigationMenuContent>
+    <NavigationMenuLink href="#">Buscar talento</NavigationMenuLink>
+    <NavigationMenuLink href="#">Cómo funciona</NavigationMenuLink>
+  </NavigationMenuContent>
+</NavigationMenuItem>
 ```
 
 ## Notas

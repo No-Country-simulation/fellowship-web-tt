@@ -4,7 +4,7 @@ Línea divisoria visual (y semántica). Basado en shadcn (`base-nova`) + Base UI
 
 **Archivo:** `components/ui/separator.tsx`
 
-Uso previsto: header, footer y bloques densos.
+Uso previsto: footer y bloques densos. El header ya no lo usa.
 
 ## Import
 
@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 
 ## Cuándo usarlo
 
-- Separar grupos de links en header / footer
+- Separar grupos de links en el footer
 - Dividir bloques densos sin meter un borde ad-hoc en cada wrapper
 
 No usarlo para layout de columnas (ahí va grid/flex + gap). Si el divisor es solo visual y no debe anunciarse, preferí un `border-b` / `border-l` en el contenedor.

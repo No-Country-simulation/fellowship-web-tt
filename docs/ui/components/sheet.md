@@ -83,7 +83,7 @@ Componer con `Button` vía `render` (Base UI, no `asChild`):
     </SheetHeader>
     <nav className="flex flex-col gap-2 px-4">
       <SheetClose render={<a href="#" />}>Para Empresas</SheetClose>
-      <SheetClose render={<a href="#" />}>Sobre Nosotros</SheetClose>
+      <SheetClose render={<a href="#" />}>Showcase</SheetClose>
     </nav>
   </SheetContent>
 </Sheet>

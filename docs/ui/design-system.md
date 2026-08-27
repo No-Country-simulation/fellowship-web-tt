@@ -163,6 +163,8 @@ Escala semántica (múltiplos de 8px). `xs` y `2xl` confirmados; intermedios y `
 | Ancho de copy | `max-w-xl` / `max-w-3xl` | 36rem / 48rem (escala container; **no** es `spacing/xl`) |
 | Starfield | `bg-starfield` | Fondo del `body` (`Background-space.svg`) |
 | Mapa | `bg-landing-map` | Textura del hero (`Background-map.svg`) |
+| Chip de perfil | `profile-chip` | Roles/conocimientos en Profiles. Color vía `--chip-accent` |
+| Capturas de producto | `/public/product/*.webp` | Hero (`indice-actividad.webp`) y Cómo funciona (`perfil-*.webp`). `quality={90}` (allowlist `images.qualities` en `next.config.ts`). Fotos en WebP; avatares y logos siguen en SVG |
 | Desktop frame | — | 1440px / 12 col / gutter 32 (`spacing/lg`) / margen 80px (`spacing/3xl`) |
 | Mobile frame | — | 390px propuesto / 4 col / gutter 16 (`spacing/sm`) / margen 24px (`spacing/md`) |
 

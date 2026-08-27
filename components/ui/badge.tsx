@@ -33,7 +33,7 @@ const badgeVariants = cva(
  * Docs: `docs/ui/components/badge.md`
  *
  * @example
- * <Badge variant="outline">Frontend</Badge>
+ * <Badge variant="outline">Disponible</Badge>
  */
 function Badge({
   className,
