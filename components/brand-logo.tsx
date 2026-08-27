@@ -8,6 +8,7 @@ type BrandLogoProps = {
   /** Ancho visual. Default header 152. */
   width?: number
   priority?: boolean
+  loading?: "eager" | "lazy"
 }
 
 /**
@@ -17,6 +18,7 @@ function BrandLogo({
   className,
   width = 152,
   priority = false,
+  loading,
 }: BrandLogoProps) {
   const height = Math.round((width * 32) / 190)
 
@@ -28,6 +30,7 @@ function BrandLogo({
         width={width}
         height={height}
         priority={priority}
+        loading={priority ? undefined : loading}
         className="h-auto max-w-full"
         unoptimized
       />

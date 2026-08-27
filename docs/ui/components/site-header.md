@@ -35,7 +35,7 @@ Ninguna. Labels, hrefs y grupos salen de `lib/nav.ts` (`headerNav`, `loginNav`).
 
 ```
 SiteHeader
-├── BrandLogo (priority)
+├── BrandLogo (eager, sin preload)
 ├── DesktopNav (xl+, centrado)
 │   └── NavigationMenu (links planos)
 ├── Iniciar Sesión (botón outlined, xl+)

@@ -545,6 +545,8 @@
   }
 
   .bg-landing-map {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
     background-image: url("/background/Background-map.svg");
     background-repeat: no-repeat;
     background-position: center;

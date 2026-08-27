@@ -57,7 +57,7 @@ function SiteHeader() {
   return (
     <header className="relative z-40 min-w-0 overflow-x-clip bg-transparent">
       <div className="relative flex h-[4.5rem] min-w-0 items-center justify-between gap-lg px-sm md:px-lg">
-        <BrandLogo priority />
+        <BrandLogo loading="eager" />
         <DesktopNav />
         <div className="flex shrink-0 items-center">
           <ChromeAnchor
