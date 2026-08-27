@@ -6,7 +6,7 @@ import { problemHeading, problemHighlights, problemIntro } from "@/lib/landing"
 const highlightIcons = [ClockIcon, BarChart3Icon] as const
 
 /**
- * Problema HF: por qué el CV/entrevista no alcanza, dos cifras en magenta.
+ * Problema HF: por qué el CV/entrevista no alcanza, dos cifras en índigo.
  */
 function Problem() {
   return (
@@ -38,9 +38,9 @@ function Problem() {
                   aria-hidden
                   className="flex size-10 items-center justify-center rounded-md bg-bg-brand-subtle"
                 >
-                  <Icon className="size-5 stroke-[1.5] text-brand-pink" />
+                  <Icon className="size-5 stroke-[1.5] text-accent-indigo" />
                 </span>
-                <p className="text-heading-2 text-brand-pink">{item.value}</p>
+                <p className="text-heading-2 text-accent-indigo">{item.value}</p>
                 <p className="text-body text-pretty text-text-secondary">
                   {item.body}
                 </p>

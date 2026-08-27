@@ -38,17 +38,34 @@ import {
 } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 
+const loginButtonClassName = cn(
+  buttonVariants({ variant: "outline" }),
+  "h-9 border-brand-pink bg-transparent px-5 text-brand-pink hover:bg-brand-pink/10 hover:text-brand-pink dark:border-brand-pink dark:bg-transparent dark:hover:bg-brand-pink/10 dark:hover:text-brand-pink"
+)
+
+const navLinkClassName = cn(
+  navigationMenuTriggerStyle(),
+  "h-auto bg-transparent px-0 py-0 font-normal whitespace-nowrap text-text-secondary hover:bg-transparent hover:text-text-primary focus:bg-transparent"
+)
+
 /**
- * Header HF: logo a la izquierda, nav en línea, “Iniciar sesión” como
- * link de texto a la derecha.
+ * Header: logo a la izquierda, nav centrado, “Iniciar Sesión”
+ * como botón outlined a la derecha. Padding más compacto que
+ * el frame de página (`Section` / footer).
  */
 function SiteHeader() {
   return (
     <header className="relative z-40 min-w-0 overflow-x-clip bg-transparent">
-      <div className="px-md md:px-3xl">
-        <div className="container-content flex h-[4.5rem] min-w-0 items-center gap-lg">
-          <BrandLogo priority />
-          <DesktopNav />
+      <div className="relative flex h-[4.5rem] min-w-0 items-center justify-between gap-lg px-sm md:px-lg">
+        <BrandLogo priority />
+        <DesktopNav />
+        <div className="flex shrink-0 items-center">
+          <ChromeAnchor
+            href={loginNav.href}
+            className={cn(loginButtonClassName, "hidden xl:inline-flex")}
+          >
+            {loginNav.label}
+          </ChromeAnchor>
           <MobileNav />
         </div>
       </div>
@@ -58,36 +75,27 @@ function SiteHeader() {
 
 function DesktopNav() {
   return (
-    <div className="hidden min-w-0 flex-1 items-center xl:flex">
-      <NavigationMenu aria-label="Principal" className="min-w-0 max-w-full">
-        <NavigationMenuList>
-          {headerNav.map((item) => (
-            <NavigationMenuItem key={item.label}>
-              {isNavGroup(item) ? (
-                <NavDropdown label={item.label} items={item.children} />
-              ) : (
-                <NavigationMenuLink
-                  render={<ChromeAnchor href={item.href} />}
-                  className={cn(
-                    navigationMenuTriggerStyle(),
-                    "bg-transparent text-text-secondary hover:bg-transparent hover:text-text-primary"
-                  )}
-                >
-                  {item.label}
-                </NavigationMenuLink>
-              )}
-            </NavigationMenuItem>
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
-
-      <a
-        href={loginNav.href}
-        className="ml-auto text-body text-text-secondary transition-colors hover:text-text-primary"
-      >
-        {loginNav.label}
-      </a>
-    </div>
+    <NavigationMenu
+      aria-label="Principal"
+      className="absolute top-1/2 left-1/2 hidden min-w-0 max-w-[calc(100%-22rem)] -translate-x-1/2 -translate-y-1/2 xl:flex"
+    >
+      <NavigationMenuList className="gap-6">
+        {headerNav.map((item) => (
+          <NavigationMenuItem key={item.label}>
+            {isNavGroup(item) ? (
+              <NavDropdown label={item.label} items={item.children} />
+            ) : (
+              <NavigationMenuLink
+                render={<ChromeAnchor href={item.href} />}
+                className={navLinkClassName}
+              >
+                {item.label}
+              </NavigationMenuLink>
+            )}
+          </NavigationMenuItem>
+        ))}
+      </NavigationMenuList>
+    </NavigationMenu>
   )
 }
 
@@ -161,12 +169,9 @@ function MobileNav() {
           <SheetClose
             nativeButton={false}
             render={
-              <a
+              <ChromeAnchor
                 href={loginNav.href}
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "w-full"
-                )}
+                className={cn(loginButtonClassName, "w-full")}
               />
             }
           >

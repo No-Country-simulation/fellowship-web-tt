@@ -1,6 +1,6 @@
 # SiteHeader
 
-Chrome del sitio: logo a la izquierda, nav en línea, “Iniciar sesión” a la derecha. En viewport `< xl` el nav pasa a un Sheet.
+Chrome del sitio: logo a la izquierda, nav centrado, “Iniciar Sesión” como botón outlined a la derecha. En viewport `< xl` el nav pasa a un Sheet.
 
 **Archivo:** `components/site-header.tsx`
 
@@ -36,10 +36,9 @@ Ninguna. Labels, hrefs y grupos salen de `lib/nav.ts` (`headerNav`, `loginNav`).
 ```
 SiteHeader
 ├── BrandLogo (priority)
-├── DesktopNav (xl+)
-│   ├── NavigationMenu (links)
-│   ├── DropdownMenu (Para Empresas, Sobre Nosotros)
-│   └── Iniciar sesión
+├── DesktopNav (xl+, centrado)
+│   └── NavigationMenu (links planos)
+├── Iniciar Sesión (botón outlined, xl+)
 └── MobileNav (< xl)
     └── Sheet
 ```
@@ -53,12 +52,13 @@ Editar `lib/nav.ts`, no el componente:
 | Export | Qué controla |
 | --- | --- |
 | `headerNav` | Ítems y grupos del menú |
-| `loginNav` | Label y href de “Iniciar sesión” |
+| `loginNav` | Label y href de “Iniciar Sesión” |
 | `PLACEHOLDER_HREF` | Rutas hijas que todavía no existen |
 
 ## Notas
 
 - Es Client Component (`"use client"`): DropdownMenu y Sheet lo requieren.
 - Alto fijo `h-[4.5rem]`. El fondo es transparente (el starfield del `body` se ve detrás).
+- Frame más compacto que el resto de la página: `px-sm` / `md:px-lg` (16px / 32px), sin `container-content`. Secciones y footer siguen en `px-md` / `md:px-3xl` (24px / 80px).
 - Breakpoint del menú hamburger: `xl`, no `md`.
 - Ítems `disabled` en `headerNav` se renderizan como texto muted, sin link.

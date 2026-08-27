@@ -16,8 +16,8 @@ export default function Home() {
     <main className="flex min-w-0 flex-1 flex-col overflow-x-clip">
       <JsonLd data={getLandingJsonLd()} />
       <Hero />
-      <Problem />
       <Differential />
+      <Problem />
       <Evidence />
       <HowItWorks />
       <Guarantee />

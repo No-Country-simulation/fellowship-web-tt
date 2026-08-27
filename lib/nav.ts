@@ -1,6 +1,6 @@
 /**
- * IA del chrome (header / footer) según la HF Empresa.
- * Rutas hijas todavía no existen: `PLACEHOLDER_HREF` o `disabled`.
+ * IA del chrome (header / footer).
+ * Casos y Manifiesto todavía no existen: `PLACEHOLDER_HREF`.
  * No crear páginas vacías en este lote.
  */
 
@@ -27,36 +27,20 @@ export type NavItem =
   | { type: "group"; label: string; children: NavLink[] }
 
 export const headerNav: NavItem[] = [
-  { type: "link", label: "Inicio", href: "/" },
+  { type: "link", label: "Para Talento", href: talentoUrl },
+  { type: "link", label: "Para Empresas", href: "/" },
   {
     type: "link",
     label: "Simulación Laboral",
     href: simulacionUrl,
   },
-  { type: "link", label: "Para Talento", href: talentoUrl },
-  {
-    type: "group",
-    label: "Para Empresas",
-    children: [
-      { label: "Contratar", href: "/" },
-      { label: "Producto", href: PLACEHOLDER_HREF },
-      { label: "Empleabilidad", href: PLACEHOLDER_HREF },
-      { label: "Expansión de tu marca", href: PLACEHOLDER_HREF },
-    ],
-  },
+  { type: "link", label: "Casos", href: PLACEHOLDER_HREF },
   { type: "link", label: "Showcase", href: showcaseUrl },
-  {
-    type: "group",
-    label: "Sobre Nosotros",
-    children: [
-      { label: "Casos", href: PLACEHOLDER_HREF },
-      { label: "Manifiesto", href: PLACEHOLDER_HREF },
-    ],
-  },
+  { type: "link", label: "Manifiesto", href: PLACEHOLDER_HREF },
 ]
 
 export const loginNav: NavLink = {
-  label: "Iniciar sesión",
+  label: "Iniciar Sesión",
   href: loginUrl,
 }
 
