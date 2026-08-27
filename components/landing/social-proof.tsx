@@ -157,14 +157,19 @@ function TestimonialCarousel({
               type="button"
               aria-label={`Ir a la página ${index + 1} de testimonios`}
               aria-current={isActive ? "true" : undefined}
-              className={cn(
-                "h-2 rounded-full transition-all",
-                isActive
-                  ? "w-6 bg-accent-cyan"
-                  : "w-2 bg-text-muted hover:bg-text-secondary"
-              )}
+              className="group flex size-6 items-center justify-center"
               onClick={() => goTo(index)}
-            />
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "rounded-full transition-all",
+                  isActive
+                    ? "h-2 w-6 bg-accent-cyan"
+                    : "size-2 bg-text-muted group-hover:bg-text-secondary"
+                )}
+              />
+            </button>
           )
         })}
       </div>

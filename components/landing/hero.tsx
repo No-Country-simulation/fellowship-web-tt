@@ -118,13 +118,14 @@ function Hero() {
 
           <div className="relative min-w-0 overflow-hidden rounded-md">
             <Image
-              src="/product/indice-actividad.svg"
+              src="/product/indice-actividad.webp"
               alt="Índice de actividad del equipo: trayectoria semanal y contribuciones en simulación"
               width={1124}
               height={723}
+              priority
+              fetchPriority="high"
               unoptimized
               className="h-auto w-full"
-              priority
             />
           </div>
         </div>

@@ -97,19 +97,19 @@ export const howItWorksProfilesIntro =
 
 export const howItWorksProfilePreviews = [
   {
-    src: "/product/perfil-micaela.svg",
+    src: "/product/perfil-micaela.webp",
     alt: "Ficha de candidato de Micaela Juárez, Backend Developer Jr en Argentina, con índice de actividad, peer review y proyectos en simulación",
     width: 389,
     height: 475,
   },
   {
-    src: "/product/perfil-diego.svg",
+    src: "/product/perfil-diego.webp",
     alt: "Ficha de candidato de Diego Fernández, Frontend Developer Jr en México, con métricas de simulación, soft skills y disponibilidad para entrevista",
     width: 389,
     height: 477,
   },
   {
-    src: "/product/perfil-valentina.svg",
+    src: "/product/perfil-valentina.webp",
     alt: "Ficha de candidato de Valentina Rocha, QA Tester en Colombia, con reseñas, progreso entre simulaciones y proyectos",
     width: 389,
     height: 475,
