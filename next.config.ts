@@ -21,6 +21,9 @@ function getAllowedDevOrigins(): string[] {
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: getAllowedDevOrigins(),
+  images: {
+    qualities: [75, 90],
+  },
 };
 
 export default nextConfig;

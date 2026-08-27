@@ -72,7 +72,8 @@ function HowItWorks() {
                   width={preview.width}
                   height={preview.height}
                   className="h-auto w-full"
-                  unoptimized
+                  quality={90}
+                  sizes="33vw"
                 />
               </figure>
             ))}

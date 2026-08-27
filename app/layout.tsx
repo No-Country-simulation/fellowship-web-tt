@@ -23,13 +23,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <link rel="describedby" href={`${getSiteUrl()}/llms.txt`} />
-        <link
-          rel="preload"
-          as="image"
-          href="/product/indice-actividad.webp"
-          type="image/webp"
-          fetchPriority="high"
-        />
       </head>
       <body className="bg-starfield flex min-h-full flex-col font-sans">
         <JsonLd data={getSiteJsonLd()} />

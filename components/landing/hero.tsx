@@ -124,7 +124,8 @@ function Hero() {
               height={723}
               priority
               fetchPriority="high"
-              unoptimized
+              quality={90}
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="h-auto w-full"
             />
           </div>
