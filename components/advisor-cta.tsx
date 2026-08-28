@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 const DEFAULT_HREF = "#contacto"
@@ -26,15 +26,16 @@ function AdvisorCta({
   label = LABEL,
 }: AdvisorCtaProps) {
   return (
-    <Button
-      size="lg"
-      variant={variant}
-      className={cn("h-11 max-w-full px-lg text-body", className)}
-      nativeButton={false}
-      render={<a href={href} />}
+    <a
+      href={href}
+      className={cn(
+        buttonVariants({ variant, size: "lg" }),
+        "h-11 max-w-full px-lg text-body",
+        className
+      )}
     >
       {label}
-    </Button>
+    </a>
   )
 }
 

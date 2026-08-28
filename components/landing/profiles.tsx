@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react"
+import Image from "next/image"
 
 import { Section } from "@/components/section"
 import { conocimientos, roles } from "@/lib/geo"
@@ -60,49 +61,59 @@ const profileRoles = [...roles, "otros"] as const
  */
 function Profiles() {
   return (
-    <Section
-      className="bg-landing-map scroll-mt-2xl py-2xl md:py-3xl"
-      id="perfiles"
-    >
-      <div className="flex flex-col gap-xl">
-        <h2 className="text-heading-2 mx-auto w-full text-center text-text-primary">
-          {profilesHeading}
-        </h2>
+    <div className="bg-landing-map relative isolate">
+      <Image
+        src="/background/Background-map.svg"
+        alt=""
+        fill
+        unoptimized
+        loading="lazy"
+        fetchPriority="low"
+        sizes="100vw"
+        aria-hidden
+        className="pointer-events-none -z-10 object-cover object-center"
+      />
+      <Section className="scroll-mt-2xl py-2xl md:py-3xl" id="perfiles">
+        <div className="flex flex-col gap-xl">
+          <h2 className="text-heading-2 mx-auto w-full text-center text-text-primary">
+            {profilesHeading}
+          </h2>
 
-        <div className="grid min-w-0 gap-md sm:grid-cols-3 sm:*:min-w-0">
-          {profileStats.map((stat) => (
-            <div
-              key={stat.label}
-              className="flex min-w-0 flex-col items-center gap-xs text-center"
-            >
-              <p className="text-heading-1 text-brand-gradient leading-none">
-                {stat.value}
-              </p>
-              <p className="text-data-label text-text-secondary">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+          <div className="grid min-w-0 gap-md sm:grid-cols-3 sm:*:min-w-0">
+            {profileStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex min-w-0 flex-col items-center gap-xs text-center"
+              >
+                <p className="text-heading-1 text-brand-gradient leading-none">
+                  {stat.value}
+                </p>
+                <p className="text-data-label text-text-secondary">{stat.label}</p>
+              </div>
+            ))}
+          </div>
 
-        <div className="flex flex-col items-center gap-sm md:gap-md">
-          <ChipRow
-            title="Conocimientos"
-            titleClassName="text-accent-cyan"
-            items={conocimientos.map((label) => ({
-              label,
-              accent: conocimientoAccents[label],
-            }))}
-          />
-          <ChipRow
-            title="Roles"
-            titleClassName="text-brand-pink"
-            items={profileRoles.map((label) => ({
-              label,
-              accent: roleAccents[label],
-            }))}
-          />
+          <div className="flex flex-col items-center gap-sm md:gap-md">
+            <ChipRow
+              title="Conocimientos"
+              titleClassName="text-accent-cyan"
+              items={conocimientos.map((label) => ({
+                label,
+                accent: conocimientoAccents[label],
+              }))}
+            />
+            <ChipRow
+              title="Roles"
+              titleClassName="text-brand-pink"
+              items={profileRoles.map((label) => ({
+                label,
+                accent: roleAccents[label],
+              }))}
+            />
+          </div>
         </div>
-      </div>
-    </Section>
+      </Section>
+    </div>
   )
 }
 

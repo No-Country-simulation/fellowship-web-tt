@@ -124,7 +124,6 @@ function Hero() {
               height={723}
               priority
               fetchPriority="high"
-              decoding="sync"
               quality={90}
               sizes="(min-width: 1024px) 50vw, calc(100vw - 48px)"
               className="h-auto w-full"
