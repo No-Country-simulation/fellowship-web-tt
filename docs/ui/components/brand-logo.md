@@ -28,6 +28,8 @@ No incrustar el SVG a mano ni usar los PNG viejos de marca. No usarlo como ícon
 | `loading` | `"eager" \| "lazy"` | — | Forzá carga eager sin preload (header). |
 | `className` | `string` | — | Clases del `<Link>` |
 
+El resto de props de `Link` se reenvían, excepto `href` (siempre `/`) y `children`. Sirve para componer con `SheetClose` en el menú mobile.
+
 ## Ejemplos
 
 ### Header
@@ -40,6 +42,12 @@ No incrustar el SVG a mano ni usar los PNG viejos de marca. No usarlo como ícon
 
 ```tsx
 <BrandLogo width={120} />
+```
+
+### Como cierre del Sheet mobile
+
+```tsx
+<SheetClose nativeButton={false} render={<BrandLogo loading="eager" />} />
 ```
 
 ## Notas

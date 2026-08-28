@@ -61,5 +61,5 @@ Editar `lib/nav.ts`, no el componente:
 
 - Es Server Component (sin `"use client"`).
 - Logo del footer: `BrandLogo` a 120px de ancho.
-- Iconos sociales son SVG inline (`aria-label` en el `<a>`, el glyph es `aria-hidden`).
+- Iconos sociales: `/brand/icon-linkedin.svg`, `/brand/icon-instagram.svg`, `/brand/icon-whatsapp.svg` (`next/image`, 24px, `unoptimized`). `aria-label` en el `<a>`, `alt=""` en el glyph. No re-inlinear SVG.
 - Externos abren en nueva pestaña (`rel="noopener noreferrer"`).

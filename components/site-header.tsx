@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react"
 import Link from "next/link"
-import { ChevronDownIcon, MenuIcon } from "lucide-react"
+import { ChevronDownIcon, MenuIcon, XIcon } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -142,18 +142,38 @@ function MobileNav() {
         <MenuIcon />
         <span className="sr-only">Abrir menú</span>
       </SheetTrigger>
-      <SheetContent side="right" className="xl:hidden">
-        <SheetHeader>
+      <SheetContent
+        side="right"
+        showCloseButton={false}
+        className="inset-0 h-dvh w-full gap-0 overflow-y-auto border-0 bg-bg-base p-0 shadow-none data-[side=right]:w-full data-[side=right]:border-0 data-[side=right]:sm:max-w-none xl:hidden"
+      >
+        <SheetHeader className="sr-only">
           <SheetTitle>Menú</SheetTitle>
-          <SheetDescription className="sr-only">
-            Navegación del sitio
-          </SheetDescription>
+          <SheetDescription>Navegación del sitio</SheetDescription>
         </SheetHeader>
-        <nav className="flex flex-col gap-sm px-4">
+        <div className="flex h-[4.5rem] shrink-0 items-center justify-between gap-lg px-sm md:px-lg">
+          <SheetClose
+            nativeButton={false}
+            render={<BrandLogo loading="eager" />}
+          />
+          <SheetClose
+            render={
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-border bg-transparent text-text-primary hover:bg-muted hover:text-text-primary"
+              />
+            }
+          >
+            <XIcon />
+            <span className="sr-only">Cerrar menú</span>
+          </SheetClose>
+        </div>
+        <nav className="flex flex-col px-sm pt-md md:px-lg">
           {headerNav.map((item) =>
             isNavGroup(item) ? (
-              <div key={item.label} className="flex flex-col gap-1">
-                <p className="text-overline px-2 text-text-muted">
+              <div key={item.label} className="flex flex-col">
+                <p className="text-overline py-sm text-text-muted">
                   {item.label}
                 </p>
                 {item.children.map((child) => (
@@ -165,13 +185,13 @@ function MobileNav() {
             )
           )}
         </nav>
-        <SheetFooter>
+        <SheetFooter className="px-sm pt-0 pb-lg md:px-lg">
           <SheetClose
             nativeButton={false}
             render={
               <ChromeAnchor
                 href={loginNav.href}
-                className={cn(loginButtonClassName, "w-full")}
+                className={cn(loginButtonClassName, "h-10 w-full")}
               />
             }
           >
@@ -184,12 +204,10 @@ function MobileNav() {
 }
 
 function MobileNavLink({ item }: { item: NavLink }) {
+  const className = "text-body py-sm text-text-secondary transition-colors"
+
   if (item.disabled) {
-    return (
-      <span className="rounded-md px-2 py-1.5 text-sm text-text-muted">
-        {item.label}
-      </span>
-    )
+    return <span className={cn(className, "text-text-muted")}>{item.label}</span>
   }
 
   return (
@@ -198,7 +216,7 @@ function MobileNavLink({ item }: { item: NavLink }) {
       render={
         <ChromeAnchor
           href={item.href}
-          className="rounded-md px-2 py-1.5 text-sm text-text-primary hover:bg-muted"
+          className={cn(className, "hover:text-text-primary")}
         />
       }
     >

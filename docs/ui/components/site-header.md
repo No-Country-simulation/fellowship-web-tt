@@ -40,7 +40,10 @@ SiteHeader
 │   └── NavigationMenu (links planos)
 ├── Iniciar Sesión (botón outlined, xl+)
 └── MobileNav (< xl)
-    └── Sheet
+    └── Sheet (full-screen, bg-bg-base, sin X default)
+        ├── BrandLogo (SheetClose) + X outlined (SheetClose)
+        ├── nav (links text-body / text-secondary)
+        └── Iniciar Sesión (outlined, full width)
 ```
 
 Links internos usan `next/link`. Externos y `PLACEHOLDER_HREF` (`#`) van en `<a>`.
@@ -61,4 +64,5 @@ Editar `lib/nav.ts`, no el componente:
 - Alto fijo `h-[4.5rem]`. El fondo es transparente (el starfield del `body` se ve detrás).
 - Frame más compacto que el resto de la página: `px-sm` / `md:px-lg` (16px / 32px), sin `container-content`. Secciones y footer siguen en `px-md` / `md:px-3xl` (24px / 80px).
 - Breakpoint del menú hamburger: `xl`, no `md`.
+- El Sheet mobile es overlay a pantalla completa (`bg-bg-base`), no drawer al 75%. Logo + X arriba, “Iniciar Sesión” anclado abajo.
 - Ítems `disabled` en `headerNav` se renderizan como texto muted, sin link.

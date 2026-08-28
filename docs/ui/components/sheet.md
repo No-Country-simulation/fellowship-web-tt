@@ -4,7 +4,7 @@ Panel que entra desde un borde de la pantalla (drawer). Basado en shadcn (`base-
 
 **Archivo:** `components/ui/sheet.tsx`
 
-Uso previsto: menú mobile del header.
+Uso previsto: menú mobile del header. El header **no** usa el drawer default: overridea a overlay full-screen (`showCloseButton={false}`, `bg-bg-base`). Ver [SiteHeader](./site-header.md).
 
 ## Import
 
@@ -55,7 +55,7 @@ Sheet
 | `showCloseButton` | `boolean` | `true` | Botón X (usa `Button` ghost `icon-sm`) |
 | `className` | `string` | — | Clases extra |
 
-En `left` / `right` el ancho es `w-3/4` con `sm:max-w-sm`.
+En `left` / `right` el default es `w-3/4` con `sm:max-w-sm`. El header pisa eso a `w-full` / `h-dvh`.
 
 ### `SheetTrigger` / `SheetClose`
 
@@ -70,36 +70,35 @@ Componer con `Button` vía `render` (Base UI, no `asChild`):
 
 ## Ejemplos
 
-### Menú mobile
+### Drawer default (filtros, detalle)
 
 ```tsx
 <Sheet>
   <SheetTrigger render={<Button variant="ghost" size="icon" />}>
-    <span className="sr-only">Abrir menú</span>
+    <span className="sr-only">Abrir panel</span>
   </SheetTrigger>
   <SheetContent side="right">
     <SheetHeader>
-      <SheetTitle>Menú</SheetTitle>
+      <SheetTitle>Filtros</SheetTitle>
     </SheetHeader>
-    <nav className="flex flex-col gap-2 px-4">
-      <SheetClose render={<a href="#" />}>Para Empresas</SheetClose>
-      <SheetClose render={<a href="#" />}>Showcase</SheetClose>
-    </nav>
   </SheetContent>
 </Sheet>
 ```
 
-### Sin botón cerrar
+### Sin botón cerrar (chrome custom, como el header)
 
 ```tsx
-<SheetContent side="left" showCloseButton={false}>
+<SheetContent side="right" showCloseButton={false} className="h-dvh w-full">
   …
 </SheetContent>
 ```
 
+El menú mobile real vive en `SiteHeader`: logo + X propios, nav y “Iniciar Sesión”. No copiar el drawer default para el header.
+
 ## Notas
 
-- Overlay: `bg-black/10` + blur. El panel usa `bg-popover`.
-- Incluir `SheetTitle` (aunque sea visualmente discreto) para el nombre accesible del diálogo.
-- El botón cerrar ya tiene `<span className="sr-only">Close</span>`; el trigger del menú también necesita nombre accesible.
+- Overlay: `bg-black/10` + blur. El panel default usa `bg-popover`; el header lo pinta `bg-bg-base`.
+- Incluir `SheetTitle` (aunque sea `sr-only`) para el nombre accesible del diálogo.
+- Si `showCloseButton` queda en `true`, el X default ya tiene `<span className="sr-only">Close</span>`. Con chrome custom, el trigger y el X propio también necesitan nombre accesible.
+- `SheetClose` puede componer con `BrandLogo` o un `<a>` vía `render` (Base UI, no `asChild`).
 - Focus trap y cierre con Escape los maneja Base UI Dialog.

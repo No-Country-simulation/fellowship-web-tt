@@ -21,7 +21,8 @@ const DESKTOP_PAGE_SIZE = 2
 const DESKTOP_CAROUSEL_QUERY = "(min-width: 768px)"
 
 /**
- * Testimonios HF: pill + H2, carrusel de 2 cards (1 en mobile) con flechas laterales.
+ * Testimonios HF: pill + H2, carrusel de 2 cards (1 en mobile).
+ * Mobile: flechas debajo de la card, atribución centrada. Desktop: flechas laterales.
  */
 function SocialProof() {
   return (
@@ -102,52 +103,56 @@ function TestimonialCarousel({
     setActiveIndex(nextIndex)
   }
 
+  const navButtonClassName =
+    "size-10 shrink-0 border-border bg-transparent text-text-primary hover:bg-text-primary/10"
+
   return (
     <div
       aria-label="Testimonios"
       aria-roledescription="carrusel"
-      className="flex min-w-0 flex-col gap-md"
+      className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-sm gap-y-md md:gap-x-md"
     >
-      <div className="flex min-w-0 items-center gap-sm md:gap-md">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          aria-label="Testimonios anteriores"
-          className="size-10 shrink-0 border-text-primary/40 bg-transparent text-text-primary hover:bg-text-primary/10"
-          onClick={() => goTo(pageIndex - 1)}
-        >
-          <ChevronLeftIcon />
-        </Button>
-
-        <div className="grid min-w-0 flex-1 overflow-hidden">
-          {pages.map((pageQuotes, index) => (
-            <TestimonialPage
-              key={pageQuotes.map((item) => item.name).join("-")}
-              quotes={pageQuotes}
-              index={index}
-              total={pageCount}
-              inactive={index !== pageIndex}
-              outgoing={index === outgoingPage}
-              entering={index === pageIndex && outgoingPage !== null}
-              direction={direction}
-            />
-          ))}
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          aria-label="Testimonios siguientes"
-          className="size-10 shrink-0 border-text-primary/40 bg-transparent text-text-primary hover:bg-text-primary/10"
-          onClick={() => goTo(pageIndex + 1)}
-        >
-          <ChevronRightIcon />
-        </Button>
+      <div className="col-span-3 grid min-w-0 overflow-hidden md:col-span-1 md:col-start-2 md:row-start-1">
+        {pages.map((pageQuotes, index) => (
+          <TestimonialPage
+            key={pageQuotes.map((item) => item.name).join("-")}
+            quotes={pageQuotes}
+            index={index}
+            total={pageCount}
+            inactive={index !== pageIndex}
+            outgoing={index === outgoingPage}
+            entering={index === pageIndex && outgoingPage !== null}
+            direction={direction}
+          />
+        ))}
       </div>
 
-      <div className="flex items-center justify-center gap-xs">
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        aria-label="Testimonios anteriores"
+        className={cn(navButtonClassName, "col-start-1 row-start-2 md:row-start-1")}
+        onClick={() => goTo(pageIndex - 1)}
+      >
+        <ChevronLeftIcon />
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        aria-label="Testimonios siguientes"
+        className={cn(
+          navButtonClassName,
+          "col-start-3 row-start-2 md:col-start-3 md:row-start-1"
+        )}
+        onClick={() => goTo(pageIndex + 1)}
+      >
+        <ChevronRightIcon />
+      </Button>
+
+      <div className="col-start-2 row-start-2 flex items-center justify-center gap-xs md:col-span-3 md:col-start-1">
         {pages.map((pageQuotes, index) => {
           const isActive = index === pageIndex
 
@@ -238,8 +243,8 @@ function TestimonialCard({ quote }: { quote: SocialProofQuote }) {
         “{quote.quote}”
       </blockquote>
 
-      <figcaption className="mt-auto flex min-w-0 items-end justify-between gap-md">
-        <div className="flex min-w-0 flex-col gap-1 text-left">
+      <figcaption className="mt-auto flex min-w-0 flex-col items-center gap-sm border-t border-border pt-md text-center md:flex-row md:items-end md:justify-between md:gap-md md:border-t-0 md:pt-0 md:text-left">
+        <div className="flex min-w-0 flex-col gap-1">
           <cite className="text-body-large font-semibold not-italic text-text-primary">
             {quote.name}
           </cite>

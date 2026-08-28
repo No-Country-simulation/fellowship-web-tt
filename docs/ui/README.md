@@ -16,7 +16,7 @@ Los bloques de `components/landing/` (hero, FAQ, etc.) no se documentan acá: so
 | [Separator](./components/separator.md) | Divisores en header, footer y bloques densos |
 | [Navigation Menu](./components/navigation-menu.md) | Nav desktop con paneles |
 | [Dropdown Menu](./components/dropdown-menu.md) | Menús desplegables (Para Empresas, Sobre Nosotros) |
-| [Sheet](./components/sheet.md) | Menú mobile (drawer) |
+| [Sheet](./components/sheet.md) | Drawer / overlay (menú mobile full-screen en el header) |
 | [Section](./components/section.md) | Wrapper de bloque (frame + container) |
 | [SectionEyebrow](./components/section-eyebrow.md) | Pill de sección |
 | [BrandLogo](./components/brand-logo.md) | Wordmark No Country |
