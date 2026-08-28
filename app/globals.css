@@ -545,10 +545,8 @@
   }
 
   .bg-landing-map {
-    background-image: url("/background/Background-map.svg");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
   }
 
   .profile-chip {

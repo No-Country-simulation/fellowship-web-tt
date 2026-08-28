@@ -4,7 +4,7 @@ Chip o etiqueta compacta. Basado en shadcn (`base-nova`).
 
 **Archivo:** `components/ui/badge.tsx`
 
-Uso previsto en la landing: chips de roles, verticales y geos.
+Chip genérico de UI. Los chips de roles/conocimientos de la landing (Profiles) **no** usan este componente: van con `.profile-chip` y `--chip-accent` (ver [design system](../design-system.md)).
 
 ## Import
 
@@ -14,10 +14,10 @@ import { Badge } from "@/components/ui/badge";
 
 ## Cuándo usarlo
 
-- Etiquetas cortas (rol, vertical, país, estado)
-- Contadores o flags junto a un título
+- Etiquetas cortas de UI (estado, categoría, flag junto a un título)
+- Contadores compactos
 
-No usarlo como botón de acción; para eso está `Button`. Si el chip navega, usar `render` con un `Link`.
+No usarlo como botón de acción; para eso está `Button`. Si el chip navega, usar `render` con un `Link`. Los chips de Conocimientos/Roles de Profiles van con `.profile-chip`, no con este componente.
 
 ## Props
 
@@ -42,12 +42,11 @@ Extiende un `<span>` (vía `useRender` de Base UI) más:
 
 ## Ejemplos
 
-### Chips de roles / verticales / geos
+### Tags genéricos
 
 ```tsx
-<Badge variant="outline">Frontend</Badge>
-<Badge variant="outline">Fintech</Badge>
-<Badge variant="outline">LatAm</Badge>
+<Badge variant="outline">Disponible</Badge>
+<Badge variant="outline">Nuevo</Badge>
 ```
 
 ### Con ícono

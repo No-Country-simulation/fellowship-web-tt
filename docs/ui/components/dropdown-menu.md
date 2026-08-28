@@ -4,7 +4,7 @@ Menú de acciones o links disparado por un botón. Basado en shadcn (`base-nova`
 
 **Archivo:** `components/ui/dropdown-menu.tsx`
 
-Uso previsto: nav desktop compacto (Para Empresas, Sobre Nosotros) cuando el panel de `NavigationMenu` es más de lo que hace falta.
+Uso previsto: submenú de un grupo en el nav desktop (`headerNav` con `type: "group"`). Hoy el header es de links planos; el componente sigue cableado para cuando vuelva un grupo.
 
 ## Import
 
@@ -53,7 +53,7 @@ Usar `render` para componer con `Button` (patrón Base UI, no `asChild` de Radix
 
 ```tsx
 <DropdownMenuTrigger render={<Button variant="ghost" />}>
-  Para Empresas
+  Plataforma
 </DropdownMenuTrigger>
 ```
 
@@ -78,16 +78,18 @@ También: `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup` + `DropdownMenuRa
 
 ## Ejemplos
 
-### Nav: Para Empresas
+### Grupo en el nav (`headerNav` con `type: "group"`)
+
+Hoy el header no tiene grupos; el patrón queda cableado en `SiteHeader` para cuando vuelva uno.
 
 ```tsx
 <DropdownMenu>
   <DropdownMenuTrigger render={<Button variant="ghost" />}>
-    Para Empresas
+    Plataforma
   </DropdownMenuTrigger>
   <DropdownMenuContent>
     <DropdownMenuGroup>
-      <DropdownMenuLabel>Plataforma</DropdownMenuLabel>
+      <DropdownMenuLabel>Destinos</DropdownMenuLabel>
       <DropdownMenuItem>Buscar talento</DropdownMenuItem>
       <DropdownMenuItem>Cómo funciona</DropdownMenuItem>
     </DropdownMenuGroup>

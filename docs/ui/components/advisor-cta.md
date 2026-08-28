@@ -4,7 +4,7 @@ CTA primario de la landing Empresa: “Hablar con un asesor”.
 
 **Archivo:** `components/advisor-cta.tsx`
 
-Uso previsto: hero (ancla a `#como-funciona`) y garantía (ancla a `#contacto`). Es un `Button` `size="lg"` renderizado como `<a>`. El cierre (`#contacto`) usa el brief de requerimiento, no este CTA.
+Uso previsto: hero (ancla a `#como-funciona`) y garantía (ancla a `#contacto`). Es un `<a>` con `buttonVariants` (`size="lg"`). El cierre (`#contacto`) usa el brief de requerimiento, no este CTA.
 
 ## Import
 
@@ -51,6 +51,6 @@ No usarlo para acciones genéricas (submit, login, nav). Ahí va `Button`. El de
 ## Notas
 
 - Siempre `size="lg"` y `h-11` / `px-lg` / `text-body`. No pasar otro size.
-- `nativeButton={false}` + `render={<a href={href} />}`: es un link, no un `<button>`.
+- Es un link nativo (`<a>`), no un `<button>` de Base UI, para no hidratar JS en el hero.
 - Para otro destino (Calendly, WhatsApp, etc.) pasar `href`; no tocar el componente en cada bloque.
 - Es Server Component (sin `"use client"`).

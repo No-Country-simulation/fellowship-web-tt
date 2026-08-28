@@ -56,8 +56,6 @@ const allies = [
   },
 ] as const
 
-const allyTrack = [...allies, ...allies]
-
 function AllyLogo({
   src,
   alt,
@@ -73,6 +71,8 @@ function AllyLogo({
         width={width}
         height={height}
         unoptimized
+        loading="lazy"
+        fetchPriority="low"
         className="w-auto max-w-none object-contain"
         style={{ height: `calc(var(--ally-logo-h) * ${scale})` }}
       />
@@ -83,8 +83,8 @@ function AllyLogo({
 function AllyTrack() {
   return (
     <ul className="flex shrink-0 items-center gap-lg pl-lg">
-      {allyTrack.map((ally, index) => (
-        <AllyLogo key={`${ally.alt}-${index}`} {...ally} />
+      {allies.map((ally) => (
+        <AllyLogo key={ally.alt} {...ally} />
       ))}
     </ul>
   )
@@ -118,13 +118,15 @@ function Hero() {
 
           <div className="relative min-w-0 overflow-hidden rounded-md">
             <Image
-              src="/product/indice-actividad.svg"
+              src="/product/indice-actividad.webp"
               alt="Índice de actividad del equipo: trayectoria semanal y contribuciones en simulación"
               width={1124}
               height={723}
-              unoptimized
-              className="h-auto w-full"
               priority
+              fetchPriority="high"
+              quality={90}
+              sizes="(min-width: 1024px) 50vw, calc(100vw - 48px)"
+              className="h-auto w-full"
             />
           </div>
         </div>

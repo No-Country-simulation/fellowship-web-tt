@@ -63,7 +63,7 @@ function HowItWorks() {
             </p>
           </div>
 
-          <div className="grid min-w-0 grid-cols-3 gap-sm md:gap-md *:min-w-0">
+          <div className="grid min-w-0 grid-cols-1 gap-sm md:grid-cols-3 md:gap-md *:min-w-0">
             {howItWorksProfilePreviews.map((preview) => (
               <figure key={preview.src} className="min-w-0">
                 <Image
@@ -72,8 +72,8 @@ function HowItWorks() {
                   width={preview.width}
                   height={preview.height}
                   className="h-auto w-full"
-                  sizes="33vw"
-                  unoptimized
+                  quality={90}
+                  sizes="(min-width: 768px) 33vw, 100vw"
                 />
               </figure>
             ))}
