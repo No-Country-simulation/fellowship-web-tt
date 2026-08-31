@@ -2,12 +2,12 @@
 
 Botón de acción de la UI. Basado en shadcn (`base-nova`) + Base UI.
 
-**Archivo:** `components/ui/button.tsx`
+**Archivo:** `packages/ui/src/button.tsx`
 
 ## Import
 
 ```tsx
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/button";
 ```
 
 ## Cuándo usarlo
@@ -106,7 +106,7 @@ import { SearchIcon } from "lucide-react";
 - Si necesitás el mismo look en otro elemento, exportamos `buttonVariants` desde el mismo archivo.
 
 ```tsx
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@repo/ui/button";
 import Link from "next/link";
 
 <Link href="/login" className={buttonVariants({ variant: "outline" })}>

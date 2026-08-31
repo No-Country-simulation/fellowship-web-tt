@@ -9,7 +9,7 @@ Uso previsto: submenú de un grupo en el nav desktop (`headerNav` con `type: "gr
 ## Import
 
 ```tsx
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,

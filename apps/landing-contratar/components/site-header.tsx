@@ -4,9 +4,9 @@ import { useState, type ComponentProps } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDownIcon, MenuIcon, XIcon } from "lucide-react"
+import { Button, buttonVariants } from "@repo/ui/button"
 
 import { BrandLogo } from "@/components/brand-logo"
-import { Button, buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -9,7 +9,7 @@ Uso previsto: menú mobile del header. El header **no** usa el drawer default: o
 ## Import
 
 ```tsx
-import { Button } from "@/components/ui/button";
+import { Button } from "@repo/ui/button";
 import {
   Sheet,
   SheetClose,

@@ -21,6 +21,7 @@ function getAllowedDevOrigins(): string[] {
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: getAllowedDevOrigins(),
+  transpilePackages: ["@repo/ui"],
   images: {
     qualities: [75, 90],
   },
