@@ -91,7 +91,7 @@ export const faqs: FaqItem[] = [
   {
     question: "¿En qué se diferencia de LinkedIn o una bolsa de empleo?",
     answer:
-      "En LinkedIn ves lo que el candidato declara. En No Country ves cómo trabaja. El ranking no está basado en keywords del CV — está basado en semanas de comportamiento observado en equipo bajo presión real. No podés falsificar cinco semanas de trabajo.",
+      "En LinkedIn ves lo que el candidato declara. En No Country ves cómo trabaja. El ranking no está basado en keywords del CV: está basado en semanas de comportamiento observado en equipo bajo presión real. No podés falsificar cinco semanas de trabajo.",
   },
   {
     question: "¿Qué roles y niveles de seniority están disponibles?",

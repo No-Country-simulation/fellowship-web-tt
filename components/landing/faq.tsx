@@ -5,7 +5,7 @@ import { getAnsweredFaqs } from "@/lib/geo"
 import { faqHeading } from "@/lib/landing"
 
 /**
- * FAQ HF: H2 centrado, barras rosa-lavanda con icono +, sin borde.
+ * FAQ HF: H2 centrado, cards con borde gris suave e icono +.
  * `<details>` nativo para que pregunta y respuesta estén en el HTML
  * del servidor (crawlers / GEO), sin hidratar un acordeón cliente.
  */
@@ -27,7 +27,7 @@ function Faq() {
           {items.map((faq) => (
             <details
               key={faq.question}
-              className="faq-details group rounded-md bg-bg-brand-subtle px-md md:px-lg"
+              className="faq-details group rounded-md border border-border-soft px-md md:px-lg"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-md py-md text-left text-body font-medium text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
                 <span className="min-w-0 text-pretty">{faq.question}</span>

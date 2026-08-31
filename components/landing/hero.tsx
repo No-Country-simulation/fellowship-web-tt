@@ -1,6 +1,7 @@
 import Image from "next/image"
 
 import { AdvisorCta } from "@/components/advisor-cta"
+import { HeroValidatedProfiles } from "@/components/landing/hero-validated-profiles"
 import { Section } from "@/components/section"
 import { SectionEyebrow } from "@/components/section-eyebrow"
 
@@ -91,43 +92,33 @@ function AllyTrack() {
 }
 
 /**
- * Hero HF: pill, H1 natural, CTA gradiente, captura de índice y franja de aliados.
+ * Hero HF: pill, H1 natural, CTA gradiente, perfiles compactos y franja de aliados.
  */
 function Hero() {
   return (
     <div>
       <Section className="relative py-xl md:py-2xl">
-        <div className="grid min-w-0 items-center gap-xl lg:grid-cols-2 lg:*:min-w-0">
-          <div className="flex min-w-0 flex-col items-start gap-md">
-            <SectionEyebrow>
-              Evidencia conductual real — antes de contratar
-            </SectionEyebrow>
-            <h1 className="text-heading-1 max-w-full text-pretty text-text-primary">
-              <span className="text-[0.78em]">Talento junior con </span>
-              <span className="text-brand-gradient">evidencia real</span>
-              <br />
-              <span className="text-[0.78em]">antes de contratar.</span>
-            </h1>
-            <p className="text-body-large max-w-xl text-text-secondary">
-              Cada persona fue observada trabajando en equipo durante 5
-              semanas, actividad, entregas y peer reviews. Con garantía de
-              reemplazo en 30 días.
-            </p>
-            <AdvisorCta href="#como-funciona" label="Ver cómo funciona" />
-          </div>
+        <div className="flex min-w-0 flex-col items-start gap-md">
+          <SectionEyebrow>
+            Evidencia conductual real, antes de contratar
+          </SectionEyebrow>
+          <div className="grid min-w-0 w-full items-start gap-xl lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:*:min-w-0">
+            <div className="flex min-w-0 flex-col items-start gap-md">
+              <h1 className="text-heading-1 max-w-full text-pretty text-text-primary">
+                <span className="text-[0.78em]">Talento junior con </span>
+                <span className="text-brand-gradient">evidencia real</span>
+                <br />
+                <span className="text-[0.78em]">antes de contratar.</span>
+              </h1>
+              <p className="text-body-large max-w-xl text-text-secondary">
+                Cada persona fue observada trabajando en equipo durante 5
+                semanas, actividad, entregas y peer reviews. Con garantía de
+                reemplazo en 30 días.
+              </p>
+              <AdvisorCta href="#como-funciona" label="Ver cómo funciona" />
+            </div>
 
-          <div className="relative min-w-0 overflow-hidden rounded-md">
-            <Image
-              src="/product/indice-actividad.webp"
-              alt="Índice de actividad del equipo: trayectoria semanal y contribuciones en simulación"
-              width={1124}
-              height={723}
-              priority
-              fetchPriority="high"
-              quality={90}
-              sizes="(min-width: 1024px) 50vw, calc(100vw - 48px)"
-              className="h-auto w-full"
-            />
+            <HeroValidatedProfiles />
           </div>
         </div>
       </Section>
