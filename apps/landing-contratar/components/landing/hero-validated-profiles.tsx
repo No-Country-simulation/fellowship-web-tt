@@ -1,4 +1,5 @@
 import { StarIcon } from "lucide-react"
+import Image from "next/image"
 
 import { heroValidatedProfiles } from "@/lib/landing"
 import { cn } from "@/lib/utils"
@@ -27,16 +28,27 @@ function HeroValidatedProfiles() {
 function HeroProfileCard({ profile }: { profile: HeroProfile }) {
   return (
     <article className="flex h-full min-w-0 flex-col gap-sm rounded-md border border-border/40 px-sm py-sm">
-      <div className="flex min-w-0 items-start justify-between gap-xs">
-        <div className="min-w-0">
-          <p className="text-body-small truncate font-semibold text-text-primary">
-            {profile.name}
-          </p>
-          <p className="text-overline truncate text-text-secondary">
-            {profile.role} · {profile.country}
-          </p>
+      <div className="flex min-w-0 items-center justify-between gap-xs">
+        <div className="flex min-w-0 items-center gap-xs">
+          <span className="hero-profile-avatar">
+            <Image
+              src={profile.avatar.src}
+              alt=""
+              width={profile.avatar.width}
+              height={profile.avatar.height}
+              unoptimized
+            />
+          </span>
+          <div className="min-w-0">
+            <p className="text-body-small truncate font-semibold text-text-primary">
+              {profile.name}
+            </p>
+            <p className="text-overline truncate text-text-secondary">
+              {profile.role} · {profile.country}
+            </p>
+          </div>
         </div>
-        <p className="flex shrink-0 items-center gap-1 text-body-small font-semibold text-text-primary">
+        <p className="flex shrink-0 items-center gap-1 text-body-large font-bold text-text-primary">
           {profile.rating.toFixed(1)}
           <StarIcon
             aria-hidden

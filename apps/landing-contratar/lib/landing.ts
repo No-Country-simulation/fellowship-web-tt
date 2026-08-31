@@ -125,6 +125,11 @@ export const heroValidatedProfiles = [
     name: "Micaela Juárez",
     role: "Backend Developer Jr",
     country: "Argentina",
+    avatar: {
+      src: "/product/avatar-micaela.webp",
+      width: 256,
+      height: 256,
+    },
     rating: 9.4,
     metrics: [
       { value: "94%", label: "Actividad" },
@@ -143,6 +148,11 @@ export const heroValidatedProfiles = [
     name: "Diego Fernández",
     role: "Frontend Developer Jr",
     country: "México",
+    avatar: {
+      src: "/product/avatar-diego.webp",
+      width: 256,
+      height: 256,
+    },
     rating: 9.1,
     metrics: [
       { value: "91%", label: "Actividad" },
@@ -161,6 +171,11 @@ export const heroValidatedProfiles = [
     name: "Valentina Rocha",
     role: "QA Tester",
     country: "Colombia",
+    avatar: {
+      src: "/product/avatar-valentina.webp",
+      width: 256,
+      height: 256,
+    },
     rating: 9.0,
     metrics: [
       { value: "95%", label: "Actividad" },

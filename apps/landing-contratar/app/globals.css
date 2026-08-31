@@ -610,6 +610,30 @@
 }
 
 /*
+ * Hexágono de vértices vivos. El recorte lo hace clip-path (antialiased);
+ * la foto va un poco más chica para que no roce los bordes.
+ */
+.hero-profile-avatar {
+  display: grid;
+  padding-top: 1%;
+  place-items: end center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-image: var(--gradient-brand);
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+.hero-profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  clip-path: polygon(25% 1.5%, 75% 1.5%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+/*
  * Native <details> open/close. `::details-content` keeps Q+A in the HTML
  * (GEO) while interpolating height. Instant fallback if unsupported.
  */

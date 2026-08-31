@@ -3,10 +3,10 @@ export const siteName = "No Country";
 export const siteTitle = "Talento junior con evidencia real antes de contratar";
 
 export const siteDescription =
-  "Cada persona fue observada trabajando en equipo durante 5 semanas, actividad, entregas y peer reviews. Con garantía de reemplazo en 30 días.";
+  "Cada persona fue observada trabajando en equipo, actividad, entregas y peer reviews. Con garantía de reemplazo en 30 días.";
 
 export const serviceName =
-  "Contratación de talento junior y junior-mid con evidencia real";
+  "Contratación de talento junior y junior-mid con evidencia de comportamiento y ejecución";
 
 export const productSummary =
   "No Country ofrece a empresas perfiles junior y junior-mid con evidencia real de cómo trabajan. En lugar de decidir con un CV y una entrevista de una hora, las empresas ven 5 semanas de comportamiento documentado en simulaciones laborales: índice de actividad, trayectoria semanal, peer review anónimo y entregables concretos.";
@@ -75,7 +75,7 @@ export const productFacts = [
   `Geografías con talento activo: ${countriesServed.join(", ")} y más de 100 países.`,
   "Dashboard para empresas: companies.nocountry.tech/login, con email corporativo. Acceso inmediato a la simulación activa o a la más reciente completada.",
   "Si hay una simulación en curso, se puede observar la actividad de los equipos en tiempo real antes de hacer contacto.",
-  `Comunidad: más de 30.000 personas en Discord, más de 1 millón de alcance vía aliados, talento activo en más de 100 países. Cifras a ${metricsAsOf}.`,
+  `Comunidad: más de 5 millones de alcance vía aliados, talento activo en más de 100 países. Cifras a ${metricsAsOf}.`,
   `Más de 2.500 perfiles validados conductualmente. Cifras a ${metricsAsOf}.`,
   "4 acuerdos consecutivos con partners corporativos.",
   `Aliados: ${allies.join(", ")}.`,
