@@ -30,3 +30,9 @@ Tokens, tipografía y componentes documentados para el equipo:
 - [Button](./docs/ui/components/button.md)
 
 Al crear un componente en `components/ui`, documentarlo en `docs/ui/components/` antes del PR.
+
+## SEO y GEO
+
+Metadata, JSON-LD, sitemap/robots y `llms.txt` para buscadores y modelos de IA. Copy canónico en `lib/geo.ts`.
+
+- [docs/seo-geo.md](./docs/seo-geo.md) — arquitectura, qué tocar según el cambio, cómo verificar

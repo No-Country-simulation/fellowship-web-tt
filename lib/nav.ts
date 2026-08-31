@@ -1,12 +1,13 @@
 /**
  * IA del chrome (header / footer).
- * Casos y Manifiesto todavía no existen: `PLACEHOLDER_HREF`.
- * No crear páginas vacías en este lote.
+ * Destinos sin página en este lote: `PLACEHOLDER_HREF`.
+ * No crear páginas vacías.
  */
 
 export const PLACEHOLDER_HREF = "#"
 
 export const empresasUrl = "https://nocountry.tech/"
+export const homeUrl = empresasUrl
 export const talentoUrl = "https://nocountry.tech/talent"
 export const showcaseUrl =
   "https://nocountry.tech/showcase/teams/simulaciones"
@@ -27,16 +28,37 @@ export type NavItem =
   | { type: "group"; label: string; children: NavLink[] }
 
 export const headerNav: NavItem[] = [
-  { type: "link", label: "Para Talento", href: talentoUrl },
-  { type: "link", label: "Para Empresas", href: "/" },
+  { type: "link", label: "Home", href: homeUrl },
   {
-    type: "link",
+    type: "group",
     label: "Simulación Laboral",
-    href: simulacionUrl,
+    children: [
+      { label: "Paradigma", href: PLACEHOLDER_HREF },
+      { label: "Cómo funciona", href: PLACEHOLDER_HREF },
+      { label: "Qué observamos", href: PLACEHOLDER_HREF },
+      { label: "Qué insights genera", href: PLACEHOLDER_HREF },
+    ],
   },
-  { type: "link", label: "Casos", href: PLACEHOLDER_HREF },
-  { type: "link", label: "Showcase", href: showcaseUrl },
-  { type: "link", label: "Manifiesto", href: PLACEHOLDER_HREF },
+  { type: "link", label: "Para Talento", href: talentoUrl },
+  { type: "link", label: "Para Instituciones", href: PLACEHOLDER_HREF },
+  {
+    type: "group",
+    label: "Para Empresas",
+    children: [
+      { label: "Contratar talento", href: "/" },
+      { label: "Producto", href: PLACEHOLDER_HREF },
+      { label: "Expansión de marca", href: PLACEHOLDER_HREF },
+    ],
+  },
+  {
+    type: "group",
+    label: "Sobre Nosotros",
+    children: [
+      { label: "Manifiesto", href: PLACEHOLDER_HREF },
+      { label: "Showcase", href: showcaseUrl },
+      { label: "Casos de Éxito", href: PLACEHOLDER_HREF },
+    ],
+  },
 ]
 
 export const loginNav: NavLink = {

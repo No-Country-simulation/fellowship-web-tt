@@ -24,6 +24,8 @@ Usar clases Tailwind generadas desde los tokens. Prefijo según categoría:
 | `bg/marketing-surface` | `bg-bg-marketing-surface` | alias de `bg/surface-2` |
 | `bg/marketing-light` | `bg-bg-marketing-light` | `#e9ecf5` |
 | `bg/brand-subtle` | `bg-bg-brand-subtle` | `#ff00940d` (pink ~5%) |
+| `bg/white-a5` | `bg-bg-white-a5` | `#ffffff0d` (white ~5%; hover de nav) |
+| `bg/pink-a10` | `bg-bg-pink-a10` | `#ff00941a` (pink ~10%; hover de “Iniciar Sesión”) |
 
 También disponibles vía shadcn: `bg-background`, `bg-card`, `bg-muted`, `bg-secondary`.
 

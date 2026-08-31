@@ -4,7 +4,7 @@ Colección de links de sitio, con paneles desplegables. Basado en shadcn (`base-
 
 **Archivo:** `components/ui/navigation-menu.tsx`
 
-Uso previsto: links de primer nivel del nav desktop (hoy todos planos). Si un ítem de `headerNav` es grupo, va con `DropdownMenu`. En mobile usar `Sheet`.
+Uso previsto: barra de primer nivel del nav desktop. Ítems `type: "link"` van en `NavigationMenuLink`; ítems `type: "group"` van en `DropdownMenu` (no en `NavigationMenuContent`). En mobile usar `Sheet`.
 
 ## Import
 
@@ -69,26 +69,26 @@ Las rutas hijas de la landing aún no existen: `href="#"` o deshabilitar, no cre
 
 ## Ejemplos
 
-### Desktop: links planos (uso actual del header)
+### Desktop: links + grupos (uso actual del header)
+
+Links planos (`Home`, `Para Talento`, `Para Instituciones`) usan `NavigationMenuLink`. Los grupos no usan `NavigationMenuTrigger`: van a [Dropdown Menu](./dropdown-menu.md).
 
 ```tsx
 <NavigationMenu>
   <NavigationMenuList>
     <NavigationMenuItem>
-      <NavigationMenuLink href="/" className={navigationMenuTriggerStyle()}>
-        Para Empresas
+      <NavigationMenuLink active render={<Link href="/" />}>
+        Home
       </NavigationMenuLink>
     </NavigationMenuItem>
-    <NavigationMenuItem>
-      <NavigationMenuLink href="#" className={navigationMenuTriggerStyle()}>
-        Showcase
-      </NavigationMenuLink>
-    </NavigationMenuItem>
+    {/* grupo: DropdownMenu, ver SiteHeader */}
   </NavigationMenuList>
 </NavigationMenu>
 ```
 
-### Trigger + panel (si un ítem necesita mega-menú)
+El markup real vive en `SiteHeader`. El header no usa `navigationMenuTriggerStyle()`.
+
+### Trigger + panel (mega-menú nativo, no es el patrón del header)
 
 ```tsx
 <NavigationMenuItem>

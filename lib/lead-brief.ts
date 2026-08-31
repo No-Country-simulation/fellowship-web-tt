@@ -16,6 +16,10 @@ const urgencyValues = new Set<string>(
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+export function isValidEmail(value: string): boolean {
+  return emailPattern.test(value.trim())
+}
+
 function parseRoles(value: unknown): string[] {
   if (typeof value === "string") {
     return splitRoles(value)
@@ -55,7 +59,7 @@ export function parseLeadBrief(body: unknown):
   const urgency = typeof record.urgency === "string" ? record.urgency : ""
   const roles = parseRoles(record.roles)
 
-  if (!emailPattern.test(email)) {
+  if (!isValidEmail(email)) {
     return { ok: false, error: "Ingresá un email de trabajo válido." }
   }
 
