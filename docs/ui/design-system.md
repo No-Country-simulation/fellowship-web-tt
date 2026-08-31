@@ -164,7 +164,7 @@ Escala semántica (múltiplos de 8px). `xs` y `2xl` confirmados; intermedios y `
 | Starfield | `bg-starfield` | Fondo del `body` (`Background-space.svg`) |
 | Mapa | `bg-landing-map` | Contenedor de la sección Perfiles. El SVG (`Background-map.svg`) se carga lazy, no como `background-image` de CSS |
 | Chip de perfil | `profile-chip` | Roles/conocimientos en Profiles. Color vía `--chip-accent` |
-| Capturas de producto | `/public/product/*.webp` | Hero (`indice-actividad.webp`) y Cómo funciona (`perfil-*.webp`). `quality={90}` (allowlist `images.qualities` en `next.config.ts`). Fotos en WebP; avatares y logos siguen en SVG |
+| Capturas de producto | `/public/product/*.webp` | Cómo funciona (`perfil-*.webp`). El hero usa fichas HTML, no captura. `quality={90}` (allowlist `images.qualities` en `next.config.ts`). Fotos en WebP; avatares y logos siguen en SVG |
 | Iconos sociales | `/public/brand/icon-*.svg` | Footer (LinkedIn, Instagram, WhatsApp). `unoptimized`; no re-inlinear el SVG |
 | Desktop frame | — | 1440px / 12 col / gutter 32 (`spacing/lg`) / margen 80px (`spacing/3xl`) |
 | Mobile frame | — | 390px propuesto / 4 col / gutter 16 (`spacing/sm`) / margen 24px (`spacing/md`) |

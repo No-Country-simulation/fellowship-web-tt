@@ -15,7 +15,7 @@ export const problemHighlights = [
   },
   {
     value: "3–6x",
-    body: "El costo de una mala contratación junior — onboarding perdido, rotación, tiempo del equipo — es entre tres y seis veces el salario mensual del rol. Y es evitable.",
+    body: "El costo de una mala contratación junior (onboarding perdido, rotación, tiempo del equipo) es entre tres y seis veces el salario mensual del rol. Y es evitable.",
   },
 ] as const
 
@@ -40,7 +40,7 @@ export const differentialContrasts = [
 ] as const
 
 export const evidenceHeading =
-  "Esto es lo que vas a poder ver de cada talento — antes de decidir."
+  "Esto es lo que vas a poder ver de cada talento, antes de decidir."
 
 export const evidenceItems = [
   {
@@ -68,17 +68,17 @@ export const howItWorksSteps = [
   {
     step: "1",
     title: "Reunión de descubrimiento",
-    body: "En 20 minutos entendemos exactamente qué perfil necesitás — rol, stack, zona horaria, urgencia, cantidad. No te mandamos un catálogo genérico. Nos aseguramos de que lo que te presentamos sea lo que buscás.",
+    body: "En 20 minutos entendemos exactamente qué perfil necesitás: rol, stack, zona horaria, urgencia, cantidad. No te mandamos un catálogo genérico. Nos aseguramos de que lo que te presentamos sea lo que buscás.",
   },
   {
     step: "2",
     title: "Catálogo curado",
-    body: "En 3 a 5 días hábiles desde la reunión, preseleccionamos los perfiles de nuestro pool que mejor matchean con tu requerimiento. Solo incluimos perfiles que confirmaron disponibilidad y aceptaron el modelo. Recibís nombres, roles, datos conductuales y resúmenes de peer review — sin datos de contacto hasta confirmar el interés.",
+    body: "En 3 a 5 días hábiles desde la reunión, preseleccionamos los perfiles de nuestro pool que mejor matchean con tu requerimiento. Solo incluimos perfiles que confirmaron disponibilidad y aceptaron el modelo. Recibís nombres, roles, datos conductuales y resúmenes de peer review, sin datos de contacto hasta confirmar el interés.",
   },
   {
     step: "3",
     title: "Entrevistas coordinadas",
-    body: "Si un perfil te interesa, nosotros coordinamos la entrevista. Vos llegás con evidencia de semanas de comportamiento documentado — la conversación confirma lo que los datos ya te dijeron.",
+    body: "Si un perfil te interesa, nosotros coordinamos la entrevista. Vos llegás con evidencia de semanas de comportamiento documentado. La conversación confirma lo que los datos ya te dijeron.",
   },
   {
     step: "4",
@@ -93,7 +93,7 @@ export const howItWorksProfilesHeading = {
 } as const
 
 export const howItWorksProfilesIntro =
-  "Las recomendaciones están basadas en datos reales de ejecución y comportamiento, capturados durante las simulaciones — no en CV ni entrevistas."
+  "Las recomendaciones están basadas en datos reales de ejecución y comportamiento, capturados durante las simulaciones, no en CV ni entrevistas."
 
 export const howItWorksProfilePreviews = [
   {
@@ -113,6 +113,67 @@ export const howItWorksProfilePreviews = [
     alt: "Ficha de candidato de Valentina Rocha, QA Tester en Colombia, con reseñas, progreso entre simulaciones y proyectos",
     width: 389,
     height: 475,
+  },
+] as const
+
+/**
+ * Perfiles de las fichas de producto, en formato compacto para el hero.
+ * Rotación CSS: una card visible a la vez, mismo lugar.
+ */
+export const heroValidatedProfiles = [
+  {
+    name: "Micaela Juárez",
+    role: "Backend Developer Jr",
+    country: "Argentina",
+    rating: 9.4,
+    metrics: [
+      { value: "94%", label: "Actividad" },
+      { value: "3", label: "Equipos" },
+      { value: "15", label: "Semanas" },
+      { value: "27", label: "Reseñas" },
+    ],
+    peerReviews: [
+      { skill: "Trabajo en equipo", score: 9.5 },
+      { skill: "Proactividad", score: 9.4 },
+      { skill: "Comunicación", score: 9.2 },
+      { skill: "Resolución de problemas", score: 8.8 },
+    ],
+  },
+  {
+    name: "Diego Fernández",
+    role: "Frontend Developer Jr",
+    country: "México",
+    rating: 9.1,
+    metrics: [
+      { value: "91%", label: "Actividad" },
+      { value: "2", label: "Equipos" },
+      { value: "10", label: "Semanas" },
+      { value: "18", label: "Reseñas" },
+    ],
+    peerReviews: [
+      { skill: "Adaptabilidad", score: 9.3 },
+      { skill: "Comunicación", score: 9.0 },
+      { skill: "Trabajo en equipo", score: 8.9 },
+      { skill: "Liderazgo", score: 8.4 },
+    ],
+  },
+  {
+    name: "Valentina Rocha",
+    role: "QA Tester",
+    country: "Colombia",
+    rating: 9.0,
+    metrics: [
+      { value: "95%", label: "Actividad" },
+      { value: "4", label: "Equipos" },
+      { value: "20", label: "Semanas" },
+      { value: "34", label: "Reseñas" },
+    ],
+    peerReviews: [
+      { skill: "Atención al detalle", score: 9.6 },
+      { skill: "Resolución de problemas", score: 9.2 },
+      { skill: "Comunicación", score: 8.8 },
+      { skill: "Proactividad", score: 9.0 },
+    ],
   },
 ] as const
 
@@ -218,7 +279,7 @@ export const guaranteeHeading = "Garantía de reemplazo en 30 días"
 
 export const guaranteeItems = [
   "Reemplazo en 72 horas si el perfil no funciona en los primeros 30 días, sin costo adicional.",
-  "Basado en evidencia de comportamiento real documentada durante semanas — no en un CV armado para impresionar.",
+  "Basado en evidencia de comportamiento real documentada durante semanas, no en un CV armado para impresionar.",
   "Al finalizar el período contratado (3 o 6 meses), el talento queda libre para incorporarlo directo, sin comisión.",
   "Ya lo conocés. Ya sabés cómo trabaja. Es el camino más seguro a una contratación permanente.",
 ] as const

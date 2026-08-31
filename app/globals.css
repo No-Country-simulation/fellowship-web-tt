@@ -563,6 +563,47 @@
 }
 
 /*
+ * Hero profile rotator: 3 cards occupy the same grid cell and crossfade.
+ * 9s cycle, ~3s visible each. Negative delays so the loop is in sync
+ * from first paint (positive delay would flash all cards at opacity 1).
+ */
+@keyframes hero-profile-cycle {
+  0%,
+  28% {
+    opacity: 1;
+    z-index: 1;
+  }
+
+  33.33%,
+  95% {
+    opacity: 0;
+    z-index: 0;
+  }
+
+  100% {
+    opacity: 1;
+    z-index: 1;
+  }
+}
+
+.hero-profile-cycle {
+  animation: hero-profile-cycle 9s ease-in-out infinite;
+}
+
+.hero-profile-cycle:nth-child(2) {
+  animation-delay: -6s;
+}
+
+.hero-profile-cycle:nth-child(3) {
+  animation-delay: -3s;
+}
+
+.hero-profile-rotator:hover .hero-profile-cycle,
+.hero-profile-rotator:focus-within .hero-profile-cycle {
+  animation-play-state: paused;
+}
+
+/*
  * Native <details> open/close. `::details-content` keeps Q+A in the HTML
  * (GEO) while interpolating height. Instant fallback if unsupported.
  */
@@ -660,6 +701,14 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-allies-marquee {
     animation: none;
+  }
+
+  .hero-profile-cycle {
+    animation: none;
+  }
+
+  .hero-profile-cycle:not(:first-child) {
+    display: none;
   }
 
   .faq-details::details-content {

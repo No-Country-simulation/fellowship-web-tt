@@ -24,7 +24,7 @@ No incrustar el SVG a mano ni usar los PNG viejos de marca. No usarlo como ícon
 | Prop | Tipo | Default | Descripción |
 | --- | --- | --- | --- |
 | `width` | `number` | `152` | Ancho visual en px (header HF). El alto se calcula con ratio 190×32 |
-| `priority` | `boolean` | `false` | `priority` de `next/image` (preload). No usar en el header: el LCP es la captura del hero. |
+| `priority` | `boolean` | `false` | `priority` de `next/image` (preload). No usar en el header: el LCP es el H1 del hero. |
 | `loading` | `"eager" \| "lazy"` | — | Forzá carga eager sin preload (header). |
 | `className` | `string` | — | Clases del `<Link>` |
 
