@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react"
 import { CheckIcon, ChevronDownIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { parseLeadBrief, urgencyLabel } from "@/lib/lead-brief"
+import { isValidEmail, parseLeadBrief, urgencyLabel } from "@/lib/lead-brief"
 import {
   finalCtaNote,
   leadBriefNotesLabel,
@@ -40,11 +40,12 @@ function LeadBriefForm({ accessKey }: { accessKey: string }) {
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const emailReady = isValidEmail(brief.email)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (submitting) {
+    if (submitting || !emailReady) {
       return
     }
 
@@ -255,7 +256,7 @@ function LeadBriefForm({ accessKey }: { accessKey: string }) {
           type="submit"
           variant="gradient"
           size="lg"
-          disabled={submitting}
+          disabled={submitting || !emailReady}
           className="h-11 w-full px-lg text-body"
         >
           {submitting ? "Enviando…" : leadBriefSubmitLabel}

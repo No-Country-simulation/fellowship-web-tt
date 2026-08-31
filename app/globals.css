@@ -63,6 +63,8 @@
   --color-bg-marketing-surface: var(--bg-marketing-surface);
   --color-bg-marketing-light: var(--bg-marketing-light);
   --color-bg-brand-subtle: var(--bg-brand-subtle);
+  --color-bg-white-a5: var(--bg-white-a5);
+  --color-bg-pink-a10: var(--bg-pink-a10);
   --color-brand-gradient-start: var(--brand-gradient-start);
   --color-brand-gradient-end: var(--brand-gradient-end);
   --color-brand-pink: var(--brand-pink);
@@ -147,6 +149,8 @@
   --bg-marketing-surface: #0d0e1f;
   --bg-marketing-light: #e9ecf5;
   --bg-brand-subtle: #ff00940d;
+  --bg-white-a5: #ffffff0d;
+  --bg-pink-a10: #ff00941a;
   --border-default: #2a2c4a;
   --border-subtle: #1d283a;
   --border-soft: #cccccc;

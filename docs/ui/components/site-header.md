@@ -37,16 +37,20 @@ Ninguna. Labels, hrefs y grupos salen de `lib/nav.ts` (`headerNav`, `loginNav`).
 SiteHeader
 ├── BrandLogo (eager, sin preload)
 ├── DesktopNav (xl+, centrado)
-│   └── NavigationMenu (links planos)
-├── Iniciar Sesión (botón outlined, xl+)
+│   └── NavigationMenu
+│       ├── NavigationMenuLink (ítems type: "link")
+│       └── DropdownMenu (ítems type: "group")
+├── Iniciar Sesión (outlined rosa, xl+)
 └── MobileNav (< xl)
     └── Sheet (full-screen, bg-bg-base, sin X default)
         ├── BrandLogo (SheetClose) + X outlined (SheetClose)
-        ├── nav (links text-body / text-secondary)
-        └── Iniciar Sesión (outlined, full width)
+        ├── nav (links + grupos acordeón)
+        └── Iniciar Sesión (outlined rosa, full width)
 ```
 
 Links internos usan `next/link`. Externos y `PLACEHOLDER_HREF` (`#`) van en `<a>`.
+
+Grupos actuales en `headerNav`: Simulación Laboral, Para Empresas, Sobre Nosotros. El ítem activo (`href === pathname`) lleva `aria-current="page"` y texto en gradiente de marca.
 
 ## Cómo cambiar copy o rutas
 
@@ -64,5 +68,6 @@ Editar `lib/nav.ts`, no el componente:
 - Alto fijo `h-[4.5rem]`. El fondo es transparente (el starfield del `body` se ve detrás).
 - Frame más compacto que el resto de la página: `px-sm` / `md:px-lg` (16px / 32px), sin `container-content`. Secciones y footer siguen en `px-md` / `md:px-3xl` (24px / 80px).
 - Breakpoint del menú hamburger: `xl`, no `md`.
-- El Sheet mobile es overlay a pantalla completa (`bg-bg-base`), no drawer al 75%. Logo + X arriba, “Iniciar Sesión” anclado abajo.
+- El Sheet mobile es overlay a pantalla completa (`bg-bg-base`), no drawer al 75%. Logo + X arriba, “Iniciar Sesión” anclado abajo. Los grupos se expanden in-place (no `DropdownMenu`).
+- “Iniciar Sesión”: `outline` con `border-brand-pink`; hover `bg-bg-pink-a10`. Los links de nav usan hover `bg-bg-white-a5`.
 - Ítems `disabled` en `headerNav` se renderizan como texto muted, sin link.

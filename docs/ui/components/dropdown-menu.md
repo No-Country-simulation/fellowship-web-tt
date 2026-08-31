@@ -4,7 +4,7 @@ Menú de acciones o links disparado por un botón. Basado en shadcn (`base-nova`
 
 **Archivo:** `components/ui/dropdown-menu.tsx`
 
-Uso previsto: submenú de un grupo en el nav desktop (`headerNav` con `type: "group"`). Hoy el header es de links planos; el componente sigue cableado para cuando vuelva un grupo.
+Uso previsto: submenú de un grupo en el nav desktop (`headerNav` con `type: "group"`). Hoy: Simulación Laboral, Para Empresas y Sobre Nosotros. En mobile esos grupos van en acordeón dentro del `Sheet`, no acá.
 
 ## Import
 
@@ -80,26 +80,26 @@ También: `DropdownMenuCheckboxItem`, `DropdownMenuRadioGroup` + `DropdownMenuRa
 
 ### Grupo en el nav (`headerNav` con `type: "group"`)
 
-Hoy el header no tiene grupos; el patrón queda cableado en `SiteHeader` para cuando vuelva uno.
+El header no usa `Button` en el trigger: chrome de texto + chevron, panel `bg-bg-surface-1`. Cada ítem es un link (`nativeButton={false}` + `render`).
 
 ```tsx
 <DropdownMenu>
-  <DropdownMenuTrigger render={<Button variant="ghost" />}>
-    Plataforma
+  <DropdownMenuTrigger>
+    Para Empresas
+    <ChevronDownIcon className="size-3" aria-hidden="true" />
   </DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>Destinos</DropdownMenuLabel>
-      <DropdownMenuItem>Buscar talento</DropdownMenuItem>
-      <DropdownMenuItem>Cómo funciona</DropdownMenuItem>
-    </DropdownMenuGroup>
-    <DropdownMenuSeparator />
-    <DropdownMenuItem disabled>Dashboard</DropdownMenuItem>
+  <DropdownMenuContent align="start" sideOffset={8} className="bg-bg-surface-1">
+    <DropdownMenuItem nativeButton={false} render={<Link href="/" />}>
+      Contratar talento
+    </DropdownMenuItem>
+    <DropdownMenuItem nativeButton={false} render={<a href="#" />}>
+      Producto
+    </DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
 ```
 
-Rutas hijas inexistentes: `disabled` o `href="#"` — no páginas vacías.
+Rutas hijas inexistentes: `disabled` o `href="#"` — no páginas vacías. El markup real vive en `SiteHeader`; no copiar clases a mano.
 
 ### Acción destructiva
 
@@ -110,5 +110,5 @@ Rutas hijas inexistentes: `disabled` o `href="#"` — no páginas vacías.
 ## Notas
 
 - No mezclar con `Separator` genérico: dentro del menú usar `DropdownMenuSeparator`.
-- El trigger suele ser `Button variant="ghost"` para que coincida con el header.
+- En el header el trigger es chrome de texto, no `Button`. En menús sueltos sí: `Button variant="ghost"`.
 - Focus y teclado los maneja Base UI Menu (flechas, Enter, Escape).

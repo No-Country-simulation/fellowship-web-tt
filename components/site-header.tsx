@@ -1,7 +1,8 @@
 "use client"
 
-import type { ComponentProps } from "react"
+import { useState, type ComponentProps } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { ChevronDownIcon, MenuIcon, XIcon } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
@@ -17,7 +18,6 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import {
   Sheet,
@@ -34,19 +34,61 @@ import {
   isNavGroup,
   loginNav,
   PLACEHOLDER_HREF,
+  type NavItem,
   type NavLink,
 } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 
 const loginButtonClassName = cn(
   buttonVariants({ variant: "outline" }),
-  "h-9 border-brand-pink bg-transparent px-5 text-brand-pink hover:bg-brand-pink/10 hover:text-brand-pink dark:border-brand-pink dark:bg-transparent dark:hover:bg-brand-pink/10 dark:hover:text-brand-pink"
+  "h-9 border-brand-pink bg-transparent px-5 text-brand-pink hover:bg-bg-pink-a10 hover:text-brand-pink dark:border-brand-pink dark:bg-transparent dark:hover:bg-bg-pink-a10 dark:hover:text-brand-pink"
 )
 
-const navLinkClassName = cn(
-  navigationMenuTriggerStyle(),
-  "h-auto bg-transparent px-0 py-0 font-normal whitespace-nowrap text-text-secondary hover:bg-transparent hover:text-text-primary focus:bg-transparent"
+const navChromeClassName = cn(
+  "inline-flex items-center gap-1 rounded-md px-xs py-xs -mx-xs text-body-small font-normal whitespace-nowrap outline-none transition-colors",
+  "bg-transparent data-open:bg-transparent data-popup-open:bg-transparent aria-expanded:bg-transparent",
+  "data-open:hover:bg-bg-white-a5 data-popup-open:hover:bg-bg-white-a5"
 )
+
+const navPopoverClassName = cn(
+  "flex w-max min-w-0 flex-col gap-0 rounded-md border border-border bg-bg-surface-1 p-xs text-text-secondary shadow-none ring-0"
+)
+
+const navItemActiveClassName =
+  "bg-gradient-to-r from-brand-pink to-brand-cyan bg-clip-text text-transparent"
+
+function navPopoverItemClassName(isCurrent: boolean) {
+  return cn(
+    "cursor-pointer rounded-md px-sm py-xs text-body-small font-normal whitespace-nowrap outline-none",
+    isCurrent
+      ? cn(
+          navItemActiveClassName,
+          "hover:bg-transparent focus:bg-transparent data-highlighted:bg-transparent data-[highlighted]:bg-transparent"
+        )
+      : "bg-transparent text-text-secondary hover:bg-bg-white-a5 hover:text-text-primary focus:bg-bg-white-a5 focus:text-text-primary data-highlighted:bg-bg-white-a5 data-highlighted:text-text-primary data-[highlighted]:bg-bg-white-a5 data-[highlighted]:text-text-primary"
+  )
+}
+
+function isCurrentHref(href: string, pathname: string) {
+  return href === pathname
+}
+
+function isCurrentNavItem(item: NavItem, pathname: string) {
+  if (isNavGroup(item)) {
+    return item.children.some((child) => isCurrentHref(child.href, pathname))
+  }
+
+  return isCurrentHref(item.href, pathname)
+}
+
+function navItemClassName(isCurrent: boolean) {
+  return cn(
+    navChromeClassName,
+    isCurrent
+      ? "hover:bg-transparent data-open:hover:bg-transparent data-popup-open:hover:bg-transparent"
+      : "text-text-secondary hover:bg-bg-white-a5 hover:text-text-primary"
+  )
+}
 
 /**
  * Header: logo a la izquierda, nav centrado, “Iniciar Sesión”
@@ -54,11 +96,13 @@ const navLinkClassName = cn(
  * el frame de página (`Section` / footer).
  */
 function SiteHeader() {
+  const pathname = usePathname()
+
   return (
     <header className="relative z-40 min-w-0 overflow-x-clip bg-transparent">
       <div className="relative flex h-[4.5rem] min-w-0 items-center justify-between gap-lg px-sm md:px-lg">
         <BrandLogo loading="eager" />
-        <DesktopNav />
+        <DesktopNav pathname={pathname} />
         <div className="flex shrink-0 items-center">
           <ChromeAnchor
             href={loginNav.href}
@@ -66,72 +110,103 @@ function SiteHeader() {
           >
             {loginNav.label}
           </ChromeAnchor>
-          <MobileNav />
+          <MobileNav pathname={pathname} />
         </div>
       </div>
     </header>
   )
 }
 
-function DesktopNav() {
+function DesktopNav({ pathname }: { pathname: string }) {
   return (
     <NavigationMenu
       aria-label="Principal"
       className="absolute top-1/2 left-1/2 hidden min-w-0 max-w-[calc(100%-22rem)] -translate-x-1/2 -translate-y-1/2 xl:flex"
     >
-      <NavigationMenuList className="gap-6">
-        {headerNav.map((item) => (
-          <NavigationMenuItem key={item.label}>
-            {isNavGroup(item) ? (
-              <NavDropdown label={item.label} items={item.children} />
-            ) : (
-              <NavigationMenuLink
-                render={<ChromeAnchor href={item.href} />}
-                className={navLinkClassName}
-              >
-                {item.label}
-              </NavigationMenuLink>
-            )}
-          </NavigationMenuItem>
-        ))}
+      <NavigationMenuList className="gap-md">
+        {headerNav.map((item) => {
+          const isCurrent = isCurrentNavItem(item, pathname)
+
+          return (
+            <NavigationMenuItem key={item.label}>
+              {isNavGroup(item) ? (
+                <NavDropdown
+                  label={item.label}
+                  items={item.children}
+                  isCurrent={isCurrent}
+                  pathname={pathname}
+                />
+              ) : (
+                <NavigationMenuLink
+                  active={isCurrent}
+                  render={<ChromeAnchor href={item.href} />}
+                  className={navItemClassName(isCurrent)}
+                  aria-current={isCurrent ? "page" : undefined}
+                >
+                  {item.label}
+                </NavigationMenuLink>
+              )}
+            </NavigationMenuItem>
+          )
+        })}
       </NavigationMenuList>
     </NavigationMenu>
   )
 }
 
-function NavDropdown({ label, items }: { label: string; items: NavLink[] }) {
+function NavDropdown({
+  label,
+  items,
+  isCurrent,
+  pathname,
+}: {
+  label: string
+  items: NavLink[]
+  isCurrent: boolean
+  pathname: string
+}) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            className="bg-transparent text-text-secondary hover:bg-transparent hover:text-text-primary"
-          />
-        }
-      >
-        {label}
-        <ChevronDownIcon className="size-3" aria-hidden="true" />
+      <DropdownMenuTrigger className={navItemClassName(isCurrent)}>
+        <span className={isCurrent ? "text-brand-gradient" : undefined}>
+          {label}
+        </span>
+        <ChevronDownIcon
+          className={cn(
+            "size-3 shrink-0",
+            isCurrent ? "text-brand-cyan" : "text-current"
+          )}
+          aria-hidden="true"
+        />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {items.map((item) => (
-          <DropdownMenuItem
-            key={item.label}
-            disabled={item.disabled}
-            nativeButton={false}
-            render={
-              item.disabled ? undefined : <ChromeAnchor href={item.href} />
-            }
-          >
-            {item.label}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent
+        align="start"
+        sideOffset={8}
+        className={navPopoverClassName}
+      >
+        {items.map((item) => {
+          const itemIsCurrent = isCurrentHref(item.href, pathname)
+
+          return (
+            <DropdownMenuItem
+              key={item.label}
+              disabled={item.disabled}
+              nativeButton={false}
+              className={navPopoverItemClassName(itemIsCurrent)}
+              render={
+                item.disabled ? undefined : <ChromeAnchor href={item.href} />
+              }
+            >
+              {item.label}
+            </DropdownMenuItem>
+          )
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-function MobileNav() {
+function MobileNav({ pathname }: { pathname: string }) {
   return (
     <Sheet>
       <SheetTrigger
@@ -169,19 +244,21 @@ function MobileNav() {
             <span className="sr-only">Cerrar menú</span>
           </SheetClose>
         </div>
-        <nav className="flex flex-col px-sm pt-md md:px-lg">
+        <nav className="flex flex-1 flex-col px-sm pt-md md:px-lg">
           {headerNav.map((item) =>
             isNavGroup(item) ? (
-              <div key={item.label} className="flex flex-col">
-                <p className="text-overline py-sm text-text-muted">
-                  {item.label}
-                </p>
-                {item.children.map((child) => (
-                  <MobileNavLink key={child.label} item={child} />
-                ))}
-              </div>
+              <MobileNavGroup
+                key={item.label}
+                label={item.label}
+                items={item.children}
+                pathname={pathname}
+              />
             ) : (
-              <MobileNavLink key={item.label} item={item} />
+              <MobileNavLink
+                key={item.label}
+                item={item}
+                isCurrent={isCurrentHref(item.href, pathname)}
+              />
             )
           )}
         </nav>
@@ -203,8 +280,55 @@ function MobileNav() {
   )
 }
 
-function MobileNavLink({ item }: { item: NavLink }) {
-  const className = "text-body py-sm text-text-secondary transition-colors"
+function MobileNavGroup({
+  label,
+  items,
+  pathname,
+}: {
+  label: string
+  items: NavLink[]
+  pathname: string
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        className="py-sm text-left font-sans text-body-small font-normal text-text-secondary transition-colors hover:text-text-primary"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {label}
+      </button>
+      {open ? (
+        <div className="flex flex-col pl-md">
+          {items.map((item) => (
+            <MobileNavLink
+              key={item.label}
+              item={item}
+              isCurrent={isCurrentHref(item.href, pathname)}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function MobileNavLink({
+  item,
+  isCurrent,
+}: {
+  item: NavLink
+  isCurrent: boolean
+}) {
+  const className = cn(
+    "py-sm font-sans text-body-small font-normal transition-colors",
+    isCurrent
+      ? navItemActiveClassName
+      : "text-text-secondary hover:text-text-primary"
+  )
 
   if (item.disabled) {
     return <span className={cn(className, "text-text-muted")}>{item.label}</span>
@@ -216,7 +340,8 @@ function MobileNavLink({ item }: { item: NavLink }) {
       render={
         <ChromeAnchor
           href={item.href}
-          className={cn(className, "hover:text-text-primary")}
+          className={className}
+          aria-current={isCurrent ? "page" : undefined}
         />
       }
     >
