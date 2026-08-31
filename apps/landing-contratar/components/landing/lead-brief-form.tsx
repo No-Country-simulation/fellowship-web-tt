@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react"
 import { CheckIcon, ChevronDownIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@repo/ui/button"
 import { isValidEmail, parseLeadBrief, urgencyLabel } from "@/lib/lead-brief"
 import {
   finalCtaNote,

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { Button } from "@repo/ui/button"
 
 import { Section } from "@/components/section"
 import { SectionEyebrow } from "@/components/section-eyebrow"
-import { Button } from "@/components/ui/button"
 import {
   socialProofEyebrow,
   socialProofHeading,

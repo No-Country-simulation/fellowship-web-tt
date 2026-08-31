@@ -11,7 +11,7 @@ Los bloques de `components/landing/` (hero, FAQ, etc.) no se documentan acá: so
 | Recurso | Descripción |
 | --- | --- |
 | [Design system](./design-system.md) | Colores, tipografía, spacing, radius, sombras, layout |
-| [Button](./components/button.md) | Variantes, sizes, ejemplos |
+| [Button](./components/button.md) | Variantes, sizes, ejemplos — paquete `@repo/ui` |
 | [Badge](./components/badge.md) | Chips de roles, verticales, geos |
 | [Separator](./components/separator.md) | Divisores en header, footer y bloques densos |
 | [Navigation Menu](./components/navigation-menu.md) | Nav desktop con paneles |
@@ -45,14 +45,17 @@ No documentar bloques de `components/landing/` ni utilidades no-UI (`json-ld`).
 pnpm dlx shadcn@latest add <nombre>
 ```
 
+Correr desde `apps/landing-contratar` (esta app), no desde la raíz del monorepo.
+
 Después: documentarlo en `docs/ui/components/` y linkearlo acá.
 
 ### Paths
 
-| Alias | Carpeta |
+| Alias | Dónde |
 | --- | --- |
-| `@/components/ui` | componentes shadcn |
+| `@repo/ui/button` | Button compartido (`packages/ui`) |
+| `@/components/ui` | shadcn que todavía es de esta app |
 | `@/components` | componentes de producto |
-| `@/lib/utils` | `cn()` para mergear clases |
+| `@/lib/utils` | `cn()` (reexporta `@repo/ui/utils`) |
 
 Tokens y utilidades visuales viven en `app/globals.css`.

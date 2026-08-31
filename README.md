@@ -1,38 +1,48 @@
 # Fellowship Web
 
-Proyecto Next.js del equipo Fellowship.
+Monorepo No Country. **pnpm workspaces** define las apps y el install; **Turborepo** orquesta `dev` / `build` / `lint` / `start` y cachea lo que no cambió.
 
-## Getting Started
+```
+apps/                  productos (cada uno con su package.json)
+packages/              código compartido (`@repo/ui` hoy: Button + `cn`)
+package.json           scripts del repo
+pnpm-workspace.yaml    paquetes: apps/*, packages/*
+turbo.json             tasks de Turbo
+```
+
+Código compartido vive en `packages/` y las apps lo instalan con `"@repo/ui": "workspace:*"`.
+
+| App | Qué es |
+| --- | --- |
+| [`landing-contratar`](./apps/landing-contratar) | Landing para contratar talento |
+
+## Comandos
+
+Desde la raíz, una sola vez:
 
 ```bash
 pnpm install
-cp .env.example .env.local
-pnpm dev
 ```
 
-Abrí [http://localhost:3000](http://localhost:3000).
-
-### Variables de entorno
-
-Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
-
-| Variable | Para qué |
+| Script | Qué hace |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Origen canónico (sitemap, JSON-LD, `canonical`). Opcional: en local cae a `http://localhost:3000`; en el primer deploy de Vercel usa la URL del deployment. Setearla después, cuando exista el dominio estable (sin slash final). |
-| `WEB3FORMS_ACCESS_KEY` | Access key de [Web3Forms](https://web3forms.com). Llega al mail con el que te registrás. Sin esto el brief de requerimiento del cierre no envía. |
+| `pnpm dev` | `turbo run dev` — levanta **todas** las apps con script `dev` |
+| `pnpm build` | build de todas |
+| `pnpm lint` | lint de todas |
+| `pnpm start` | `next start` de todas (hace falta un build previo) |
 
-## UI / Design system
+Una app puntual:
 
-Tokens, tipografía y componentes documentados para el equipo:
+```bash
+pnpm turbo run dev --filter=landing-contratar
+```
 
-- [docs/ui/README.md](./docs/ui/README.md) — índice y convención al agregar componentes
-- [Design system](./docs/ui/design-system.md) — colores, type scale, spacing, sombras
-- [Button](./docs/ui/components/button.md)
+Si corrés más de una Next a la vez, cada una necesita su puerto (`next dev --port 3001` en la segunda). Env, UI y copy viven en el README de cada app.
 
-Al crear un componente en `components/ui`, documentarlo en `docs/ui/components/` antes del PR.
+## Nueva app
 
-## SEO y GEO
+Crear `apps/<nombre>` con `package.json` (el `name` tiene que ser único) y los scripts que Turbo ya declara (`dev`, `build`, `lint`, `start`). pnpm la toma sola por `apps/*`. UI compartida: `"@repo/ui": "workspace:*"` (detalle de Next/Tailwind en el README de cada app).
 
-Metadata, JSON-LD, sitemap/robots y `llms.txt` para buscadores y modelos de IA. Copy canónico en `lib/geo.ts`.
+## Deploy (Vercel)
 
-- [docs/seo-geo.md](./docs/seo-geo.md) — arquitectura, qué tocar según el cambio, cómo verificar
+Un proyecto Vercel por app. Root Directory: `apps/<nombre>`. El install sigue siendo `pnpm install` en la raíz del repo.
