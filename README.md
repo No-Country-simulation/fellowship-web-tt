@@ -18,7 +18,7 @@ Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
 
 | Variable | Para qué |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Origen canónico (sitemap, JSON-LD, `canonical`). En local puede quedar vacío: cae a `http://localhost:3000`. En producción es obligatorio. |
+| `NEXT_PUBLIC_SITE_URL` | Origen canónico (sitemap, JSON-LD, `canonical`). Opcional: en local cae a `http://localhost:3000`; en el primer deploy de Vercel usa la URL del deployment. Setearla después, cuando exista el dominio estable (sin slash final). |
 | `WEB3FORMS_ACCESS_KEY` | Access key de [Web3Forms](https://web3forms.com). Llega al mail con el que te registrás. Sin esto el brief de requerimiento del cierre no envía. |
 
 ## UI / Design system

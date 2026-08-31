@@ -17,7 +17,14 @@ lib/landing.ts      copy de secciones (pasos, evidencia, garantía)
         └── lib/llms-txt.ts     /llms.txt y /llms-full.txt
 ```
 
-`lib/site.ts` resuelve el origen canónico (`NEXT_PUBLIC_SITE_URL`). Lo usan sitemap, robots, JSON-LD, canonical y los links de `llms.txt`. En producción es obligatorio: si falta, el build falla a propósito para no indexar `localhost`.
+`lib/site.ts` resuelve el origen canónico. Lo usan sitemap, robots, JSON-LD, canonical y los links de `llms.txt`. Orden:
+
+1. `NEXT_PUBLIC_SITE_URL` — override cuando ya hay dominio estable (custom o `*.vercel.app` de producción). No hace falta para el primer deploy: todavía no existe esa URL.
+2. `VERCEL_PROJECT_PRODUCTION_URL` — host de producción que Vercel inyecta en el build.
+3. `VERCEL_URL` — host de *este* deployment. Cubre el primer deploy, cuando el proyecto todavía no tiene URL de producción.
+4. En local (`next dev`): `http://localhost:3000`.
+
+El build de producción solo falla si no hay ninguna de esas (p. ej. `next build` en una máquina sin env de Vercel y sin `NEXT_PUBLIC_SITE_URL`). Así no se indexa `localhost`. No falla el primer deploy en Vercel.
 
 ## Fuente de verdad del copy
 
@@ -104,7 +111,7 @@ Descubrimiento:
 | Pasos / evidencia / garantía | `lib/landing.ts` → UI, HowTo, llms-full |
 | Cifras o fecha de corte | `lib/geo.ts` (`productFacts` + `metricsAsOf`) |
 | Países, roles, conocimientos | `lib/geo.ts` |
-| URL canónica / dominio | `.env` `NEXT_PUBLIC_SITE_URL` (sin slash final) |
+| URL canónica / dominio | `NEXT_PUBLIC_SITE_URL` cuando ya exista (sin slash final). El primer deploy no la necesita. |
 | Contenido publicado | `CONTENT_LAST_MODIFIED` en `app/sitemap.ts` |
 | Imagen de share | `app/opengraph-image.jpg` / `app/twitter-image.jpg` |
 | Bots de IA extra | `AI_CRAWLERS` en `app/robots.ts` |
@@ -129,4 +136,4 @@ curl -s http://localhost:3000/sitemap.xml
 
 En el HTML de `/` tiene que haber: `rel="canonical"`, `rel="describedby"` a `/llms.txt`, y dos `<script type="application/ld+json">` (sitio + landing). Validar schema con [Rich Results Test](https://search.google.com/test/rich-results) contra la URL de producción.
 
-En producción, `NEXT_PUBLIC_SITE_URL` tiene que ser el origen público (ej. `https://fellowship.nocountry.tech`), sin slash final. Ver `.env.example`.
+Cuando el sitio ya tenga dominio estable, setear `NEXT_PUBLIC_SITE_URL` (ej. `https://fellowship.nocountry.tech`), sin slash final. Ver `.env.example`. El primer deploy en Vercel no la necesita.
