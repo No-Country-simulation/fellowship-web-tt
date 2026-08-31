@@ -732,6 +732,12 @@
  * also emit `max-w-xl` / `max-w-3xl` as 48px / 80px, which wraps copy one
  * word per line.
  */
+.nav-item-type {
+  font-size: var(--text-body-small);
+  font-weight: 400;
+  line-height: 1.5;
+  font-family: inherit;
+}
 .max-w-xs {
   max-width: 20rem;
 }

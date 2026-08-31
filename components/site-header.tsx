@@ -45,7 +45,7 @@ const loginButtonClassName = cn(
 )
 
 const navChromeClassName = cn(
-  "inline-flex items-center gap-1 rounded-md px-xs py-xs -mx-xs text-body-small font-normal whitespace-nowrap outline-none transition-colors",
+  "nav-item-type inline-flex items-center gap-1 rounded-md px-xs py-xs -mx-xs whitespace-nowrap outline-none transition-colors",
   "bg-transparent data-open:bg-transparent data-popup-open:bg-transparent aria-expanded:bg-transparent",
   "data-open:hover:bg-bg-white-a5 data-popup-open:hover:bg-bg-white-a5"
 )
@@ -59,7 +59,7 @@ const navItemActiveClassName =
 
 function navPopoverItemClassName(isCurrent: boolean) {
   return cn(
-    "cursor-pointer rounded-md px-sm py-xs text-body-small font-normal whitespace-nowrap outline-none",
+    "nav-item-type cursor-pointer rounded-md px-sm py-xs whitespace-nowrap outline-none",
     isCurrent
       ? cn(
           navItemActiveClassName,
@@ -295,7 +295,7 @@ function MobileNavGroup({
     <div className="flex flex-col">
       <button
         type="button"
-        className="py-sm text-left font-sans text-body-small font-normal text-text-secondary transition-colors hover:text-text-primary"
+        className="nav-item-type py-sm text-left text-text-secondary transition-colors hover:text-text-primary"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
@@ -324,7 +324,7 @@ function MobileNavLink({
   isCurrent: boolean
 }) {
   const className = cn(
-    "py-sm font-sans text-body-small font-normal transition-colors",
+    "nav-item-type py-sm transition-colors",
     isCurrent
       ? navItemActiveClassName
       : "text-text-secondary hover:text-text-primary"
