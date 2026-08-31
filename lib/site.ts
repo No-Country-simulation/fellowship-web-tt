@@ -1,6 +1,9 @@
 /**
- * Canonical public origin. In production set `NEXT_PUBLIC_SITE_URL`
- * (no trailing slash), e.g. `https://fellowship.nocountry.tech`.
+ * Canonical public origin for sitemap, JSON-LD and `canonical`.
+ *
+ * `NEXT_PUBLIC_SITE_URL` is optional. Set it after the first deploy, once
+ * the stable (custom) domain exists. Until then Vercel system env vars
+ * cover the build: project production host, then this deployment's host.
  * Localhost is only allowed in development.
  */
 export function getSiteUrl(): string {
@@ -16,9 +19,15 @@ export function getSiteUrl(): string {
     return `https://${vercelProduction}`;
   }
 
+  // First Vercel deploy: project URL may not exist yet; deployment URL does.
+  const vercelDeployment = normalizeHost(process.env.VERCEL_URL);
+  if (vercelDeployment) {
+    return `https://${vercelDeployment}`;
+  }
+
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "NEXT_PUBLIC_SITE_URL is required in production so canonical, sitemap and JSON-LD do not use localhost."
+      "No public origin for canonical/sitemap/JSON-LD. On Vercel this is injected automatically; otherwise set NEXT_PUBLIC_SITE_URL after the first deploy (never localhost)."
     );
   }
 
