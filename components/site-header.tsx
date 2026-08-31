@@ -54,21 +54,6 @@ const navPopoverClassName = cn(
   "flex w-max min-w-0 flex-col gap-0 rounded-md border border-border bg-bg-surface-1 p-xs text-text-secondary shadow-none ring-0"
 )
 
-const navItemActiveClassName =
-  "bg-gradient-to-r from-brand-pink to-brand-cyan bg-clip-text text-transparent"
-
-function navPopoverItemClassName(isCurrent: boolean) {
-  return cn(
-    "nav-item-type cursor-pointer rounded-md px-sm py-xs whitespace-nowrap outline-none",
-    isCurrent
-      ? cn(
-          navItemActiveClassName,
-          "hover:bg-transparent focus:bg-transparent data-highlighted:bg-transparent data-[highlighted]:bg-transparent"
-        )
-      : "bg-transparent text-text-secondary hover:bg-bg-white-a5 hover:text-text-primary focus:bg-bg-white-a5 focus:text-text-primary data-highlighted:bg-bg-white-a5 data-highlighted:text-text-primary data-[highlighted]:bg-bg-white-a5 data-[highlighted]:text-text-primary"
-  )
-}
-
 function isCurrentHref(href: string, pathname: string) {
   return href === pathname
 }
@@ -192,12 +177,19 @@ function NavDropdown({
               key={item.label}
               disabled={item.disabled}
               nativeButton={false}
-              className={navPopoverItemClassName(itemIsCurrent)}
+              className={cn(
+                "nav-item-type cursor-pointer rounded-md px-sm py-xs whitespace-nowrap outline-none",
+                itemIsCurrent
+                  ? "hover:bg-transparent focus:bg-transparent data-highlighted:bg-transparent data-[highlighted]:bg-transparent"
+                  : "bg-transparent text-text-secondary hover:bg-bg-white-a5 hover:text-text-primary focus:bg-bg-white-a5 focus:text-text-primary data-highlighted:bg-bg-white-a5 data-highlighted:text-text-primary data-[highlighted]:bg-bg-white-a5 data-[highlighted]:text-text-primary"
+              )}
               render={
                 item.disabled ? undefined : <ChromeAnchor href={item.href} />
               }
             >
-              {item.label}
+              <span className={itemIsCurrent ? "text-brand-gradient" : undefined}>
+                {item.label}
+              </span>
             </DropdownMenuItem>
           )
         })}
@@ -289,17 +281,31 @@ function MobileNavGroup({
   items: NavLink[]
   pathname: string
 }) {
+  const isCurrent = items.some((item) => isCurrentHref(item.href, pathname))
   const [open, setOpen] = useState(false)
 
   return (
     <div className="flex flex-col">
       <button
         type="button"
-        className="nav-item-type py-sm text-left text-text-secondary transition-colors hover:text-text-primary"
+        className={cn(
+          "nav-item-type inline-flex items-center gap-1 py-sm text-left transition-colors",
+          !isCurrent && "text-text-secondary hover:text-text-primary"
+        )}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        {label}
+        <span className={isCurrent ? "text-brand-gradient" : undefined}>
+          {label}
+        </span>
+        <ChevronDownIcon
+          className={cn(
+            "size-3 shrink-0 transition-transform",
+            isCurrent ? "text-brand-cyan" : "text-current",
+            open && "rotate-180"
+          )}
+          aria-hidden="true"
+        />
       </button>
       {open ? (
         <div className="flex flex-col pl-md">
@@ -324,14 +330,18 @@ function MobileNavLink({
   isCurrent: boolean
 }) {
   const className = cn(
-    "nav-item-type py-sm transition-colors",
-    isCurrent
-      ? navItemActiveClassName
-      : "text-text-secondary hover:text-text-primary"
+    "nav-item-type inline-flex self-start py-sm",
+    !isCurrent && "text-text-secondary hover:text-text-primary"
+  )
+
+  const label = (
+    <span className={isCurrent ? "text-brand-gradient" : undefined}>
+      {item.label}
+    </span>
   )
 
   if (item.disabled) {
-    return <span className={cn(className, "text-text-muted")}>{item.label}</span>
+    return <span className={cn(className, "text-text-muted")}>{label}</span>
   }
 
   return (
@@ -345,7 +355,7 @@ function MobileNavLink({
         />
       }
     >
-      {item.label}
+      {label}
     </SheetClose>
   )
 }
