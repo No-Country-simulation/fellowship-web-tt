@@ -16,7 +16,7 @@ import { SiteHeader } from "@/components/site-header";
 
 - Solo en el root layout. Cualquier página nueva hereda header y footer.
 
-No copiar el markup del header en un bloque. Para el wordmark aislado usá `BrandLogo`. Para un menú suelto, `NavigationMenu` / `DropdownMenu` / `Sheet`.
+No copiar el markup del header en un bloque. Para el wordmark aislado usá `BrandLogo` (`@repo/ui/brand-logo`). Para un menú suelto, `NavigationMenu` / `DropdownMenu` / `Sheet`.
 
 ## Props
 

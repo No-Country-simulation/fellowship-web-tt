@@ -12,6 +12,7 @@ Los bloques de `components/landing/` (hero, FAQ, etc.) no se documentan acá: so
 | --- | --- |
 | [Design system](./design-system.md) | Colores, tipografía, spacing, radius, sombras, layout |
 | [Button](./components/button.md) | Variantes, sizes, ejemplos — paquete `@repo/ui` |
+| [BrandLogo](./components/brand-logo.md) | Wordmark No Country — paquete `@repo/ui` |
 | [Badge](./components/badge.md) | Chips de roles, verticales, geos |
 | [Separator](./components/separator.md) | Divisores en header, footer y bloques densos |
 | [Navigation Menu](./components/navigation-menu.md) | Nav desktop con paneles |
@@ -19,7 +20,6 @@ Los bloques de `components/landing/` (hero, FAQ, etc.) no se documentan acá: so
 | [Sheet](./components/sheet.md) | Drawer / overlay (menú mobile full-screen en el header) |
 | [Section](./components/section.md) | Wrapper de bloque (frame + container) |
 | [SectionEyebrow](./components/section-eyebrow.md) | Pill de sección |
-| [BrandLogo](./components/brand-logo.md) | Wordmark No Country |
 | [AdvisorCta](./components/advisor-cta.md) | CTA “Hablar con un asesor” |
 | [SiteHeader](./components/site-header.md) | Chrome del layout (nav desktop/mobile) |
 | [SiteFooter](./components/site-footer.md) | Chrome del layout (columnas + redes) |
@@ -36,6 +36,8 @@ Cada componente nuevo en `components/ui` o chrome/producto reutilizable en `comp
    - Notas (a11y, limitaciones, cuándo no usarlo)
 2. **Entrada en esta tabla** (índice de arriba)
 3. **JSDoc breve** en el export del componente (para IntelliSense en el IDE)
+
+Si el componente lo van a usar dos apps (como Button o BrandLogo), va en `packages/ui`, no en `components/` de una app.
 
 No documentar bloques de `components/landing/` ni utilidades no-UI (`json-ld`).
 
@@ -54,6 +56,7 @@ Después: documentarlo en `docs/ui/components/` y linkearlo acá.
 | Alias | Dónde |
 | --- | --- |
 | `@repo/ui/button` | Button compartido (`packages/ui`) |
+| `@repo/ui/brand-logo` | Wordmark No Country (`packages/ui`) |
 | `@/components/ui` | shadcn que todavía es de esta app |
 | `@/components` | componentes de producto |
 | `@/lib/utils` | `cn()` (reexporta `@repo/ui/utils`) |

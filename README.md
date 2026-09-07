@@ -4,7 +4,7 @@ Monorepo No Country. **pnpm workspaces** define las apps y el install; **Turbore
 
 ```
 apps/                  productos (cada uno con su package.json)
-packages/              código compartido (`@repo/ui` hoy: Button + `cn`)
+packages/              código compartido (`@repo/ui` hoy: Button, BrandLogo, `cn`)
 package.json           scripts del repo
 pnpm-workspace.yaml    paquetes: apps/*, packages/*
 turbo.json             tasks de Turbo
@@ -12,9 +12,10 @@ turbo.json             tasks de Turbo
 
 Código compartido vive en `packages/` y las apps lo instalan con `"@repo/ui": "workspace:*"`.
 
-| App | Qué es |
-| --- | --- |
-| [`landing-contratar`](./apps/landing-contratar) | Landing para contratar talento |
+| App | Qué es | Puerto |
+| --- | --- | --- |
+| [`landing-contratar`](./apps/landing-contratar) | Landing para contratar talento | 3000 |
+| [`testimonios`](./apps/testimonios) | Captura, validación y galería de testimonios | 3001 |
 
 ## Comandos
 
@@ -37,7 +38,7 @@ Una app puntual:
 pnpm turbo run dev --filter=landing-contratar
 ```
 
-Si corrés más de una Next a la vez, cada una necesita su puerto (`next dev --port 3001` en la segunda). Env, UI y copy viven en el README de cada app.
+`landing-contratar` usa el 3000; `testimonios` el 3001. Env, UI y copy viven en el README de cada app.
 
 ## Nueva app
 

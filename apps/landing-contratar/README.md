@@ -28,8 +28,9 @@ Deploy: en Vercel, Root Directory `apps/landing-contratar`.
 - [docs/ui/README.md](./docs/ui/README.md) — índice y convención al agregar componentes
 - [Design system](./docs/ui/design-system.md) — colores, type scale, spacing, sombras
 - [Button](./docs/ui/components/button.md) — vive en `@repo/ui` (`packages/ui`)
+- [BrandLogo](./docs/ui/components/brand-logo.md) — vive en `@repo/ui` (`packages/ui`)
 
-Al crear un componente en `components/ui`, documentarlo en `docs/ui/components/` antes del PR. shadcn de esta app se corre desde este directorio. El Button compartido se edita en `packages/ui`. Esta app ya tiene `transpilePackages: ["@repo/ui"]` y `@source` de ese paquete en `app/globals.css`.
+Al crear un componente en `components/ui`, documentarlo en `docs/ui/components/` antes del PR. shadcn de esta app se corre desde este directorio. Button y BrandLogo compartidos se editan en `packages/ui`. Esta app ya tiene `transpilePackages: ["@repo/ui"]` y `@source` de ese paquete en `app/globals.css`.
 
 ## SEO y GEO
 
