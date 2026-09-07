@@ -15,7 +15,7 @@ export function AdminLoginForm() {
   );
 
   return (
-    <form action={formAction} className="mt-md flex max-w-sm flex-col gap-sm">
+    <form action={formAction} className="mt-md flex w-full flex-col gap-sm">
       <Field label="Email">
         {({ id, describedBy, invalid }) => (
           <input
