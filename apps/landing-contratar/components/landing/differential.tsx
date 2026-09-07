@@ -98,11 +98,10 @@ function ComparisonCard({
       ) : (
         <h3>
           <Image
-            src="/brand/logo-no-country.svg"
+            src="/brand/logo-no-country.png"
             alt="No Country"
             width={152}
             height={26}
-            unoptimized
             className="h-auto w-38 max-w-full"
           />
         </h3>

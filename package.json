@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web...",
+    "dev:testimonios": "turbo run dev --filter=testimonios...",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint"

@@ -16,7 +16,7 @@ import { SiteFooter } from "@/components/site-footer";
 
 - Solo en el root layout. Cualquier página nueva hereda header y footer.
 
-No rearmar las columnas a mano. Para el wordmark aislado usá `BrandLogo`. Para un divisor suelto, `Separator`.
+No rearmar las columnas a mano. Para el wordmark aislado usá `BrandLogo` (`@repo/ui/brand-logo`). Para un divisor suelto, `Separator`.
 
 ## Props
 

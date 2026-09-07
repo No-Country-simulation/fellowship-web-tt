@@ -1,8 +1,6 @@
 # Button
 
-Botón de acción de la UI. Basado en shadcn (`base-nova`) + Base UI.
-
-**Archivo:** `packages/ui/src/button.tsx`
+Botón compartido en `@repo/ui`. Docs canónicas: [packages/ui/docs/button.md](../../../../../packages/ui/docs/button.md).
 
 ## Import
 
@@ -10,106 +8,8 @@ Botón de acción de la UI. Basado en shadcn (`base-nova`) + Base UI.
 import { Button } from "@repo/ui/button";
 ```
 
-## Cuándo usarlo
+## Uso en esta app
 
-- Acciones primarias/secundarias (submit, CTA, navegación que dispara acción)
-- Acciones destructivas (eliminar, cancelar suscripción)
-- Botones solo-ícono en toolbars
+CTAs de landing: `variant="gradient"` + `size="lg"` + `shadow-glow`. En bandas `surface="light"`, `globals.css` fuerza el texto blanco de `.bg-brand-gradient`.
 
-No usarlo para navegación pura tipo link de texto largo; ahí preferí `variant="link"` o un `<Link>` estilizado.
-
-## Props
-
-Extiende las props nativas de botón (Base UI) más:
-
-| Prop | Tipo | Default | Descripción |
-| --- | --- | --- | --- |
-| `variant` | ver abajo | `"default"` | Estilo visual |
-| `size` | ver abajo | `"default"` | Tamaño |
-| `className` | `string` | — | Clases extra (se mergean con `cn`) |
-| `disabled` | `boolean` | `false` | Deshabilita interacción |
-| `type` | `"button" \| "submit" \| "reset"` | — | Tipo HTML |
-
-Cualquier otra prop válida de `<button>` (p. ej. `onClick`, `aria-label`) se reenvía al primitivo.
-
-### `variant`
-
-| Valor | Uso |
-| --- | --- |
-| `default` | CTA principal (rosa de marca / `#fe0096`) |
-| `gradient` | CTA de landing HF (Brand Gradient Primary) |
-| `outline` | Acción secundaria con borde |
-| `secondary` | Acción menos enfatizada sobre surface |
-| `ghost` | Acción terciaria, sin fondo fuerte |
-| `destructive` | Acciones peligrosas |
-| `link` | Apariencia de enlace |
-
-### `size`
-
-| Valor | Uso |
-| --- | --- |
-| `default` | Uso general |
-| `xs` / `sm` | Densidad alta (tables, filters) |
-| `lg` | CTAs de hero / formularios destacados |
-| `icon` / `icon-xs` / `icon-sm` / `icon-lg` | Solo ícono; el botón es cuadrado |
-
-## Ejemplos
-
-### Primario y secundario
-
-```tsx
-<Button>Buscar talento</Button>
-<Button variant="outline">Cómo funciona</Button>
-```
-
-### CTA grande con glow de marca
-
-```tsx
-<Button size="lg" className="shadow-glow">
-  Buscar talento
-</Button>
-```
-
-### Destructivo
-
-```tsx
-<Button variant="destructive" onClick={onDelete}>
-  Eliminar
-</Button>
-```
-
-### Solo ícono (accesible)
-
-```tsx
-import { SearchIcon } from "lucide-react";
-
-<Button size="icon" aria-label="Buscar">
-  <SearchIcon />
-</Button>
-```
-
-### Como submit en form
-
-```tsx
-<Button type="submit" disabled={isPending}>
-  Guardar
-</Button>
-```
-
-## Notas
-
-- El color `default` usa `--primary` (`#fe0096`, stop rosa del Brand Gradient Primary).
-- `variant="gradient"` usa `text-white`. En una banda `surface="light"` el `color` heredado pisa esa utilidad: `globals.css` fuerza blanco otra vez en `.bg-brand-gradient`.
-- El radio del botón es `rounded-button` (6px). No usar `rounded-lg` en botones: en el design system `lg` es 32px.
-- Focus visible incluido (`ring`); no quitar outlines sin reemplazo a11y.
-- Para íconos, Lucide ya está en el proyecto (`lucide-react`).
-- Si necesitás el mismo look en otro elemento, exportamos `buttonVariants` desde el mismo archivo.
-
-```tsx
-import { buttonVariants } from "@repo/ui/button";
-import Link from "next/link";
-
-<Link href="/login" className={buttonVariants({ variant: "outline" })}>
-  Iniciar sesión
-</Link>
-```
+Navegación que debe verse como botón: `buttonVariants` sobre `<Link>` (p. ej. “Iniciar Sesión”).

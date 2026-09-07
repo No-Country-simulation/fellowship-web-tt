@@ -1,6 +1,6 @@
 import Image from "next/image"
 
-import { BrandLogo } from "@/components/brand-logo"
+import { BrandLogo } from "@repo/ui/brand-logo"
 import { Separator } from "@/components/ui/separator"
 import {
   footerCopyright,
