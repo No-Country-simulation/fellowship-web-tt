@@ -4,7 +4,7 @@ Monorepo No Country. **pnpm workspaces** define las apps y el install; **Turbore
 
 ```
 apps/                  productos (cada uno con su package.json)
-packages/              código compartido (`@repo/ui` hoy: Button, BrandLogo, `cn`)
+packages/              código compartido (`@repo/ui`: Button, BrandLogo, `cn` — docs en `packages/ui/docs/`)
 package.json           scripts del repo
 pnpm-workspace.yaml    paquetes: apps/*, packages/*
 turbo.json             tasks de Turbo

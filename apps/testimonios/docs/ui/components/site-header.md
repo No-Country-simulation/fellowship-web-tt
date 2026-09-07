@@ -16,7 +16,7 @@ import { SiteHeader } from "@/components/site-header";
 
 - Solo en el root layout. Cualquier página nueva hereda el header.
 
-No copiar el markup del header en una página. Para el wordmark aislado usá `BrandLogo`.
+No copiar el markup del header en una página. Para el wordmark aislado usá `BrandLogo` (`@repo/ui/brand-logo`).
 
 ## Props
 

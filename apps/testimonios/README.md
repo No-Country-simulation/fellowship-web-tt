@@ -53,6 +53,6 @@ Deploy: en Vercel, Root Directory `apps/testimonios`.
 
 ## UI
 
-Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura, Button de `@repo/ui`). Sin chrome de marketing: esta app es operativa (formulario, inbox, galería).
+Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura). Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). Sin chrome de marketing: esta app es operativa (formulario, inbox, galería).
 
 Componentes reutilizables (PageShell, TestimonialCard, Field, etc.): [docs/ui](./docs/ui/README.md).

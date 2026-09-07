@@ -146,7 +146,7 @@ Instagram no acepta un post de solo texto. El post es **una imagen cuadrada + un
 
 La card (PNG 1080×1080) se arma con `ImageResponse` (`next/og`), mismos tokens que la app (fondo oscuro, DM Sans).
 
-**Logo:** el chrome usa [`BrandLogo`](../../../packages/ui/src/brand-logo.tsx) (`@repo/ui`) con `/brand/logo-no-country.svg`. La card de Instagram (`next/og`) no carga bien el SVG: ahí va el PNG (`public/brand/logo-no-country.png`).
+**Logo:** el chrome y la card de Instagram usan el mismo PNG (`public/brand/logo-no-country.png`). El header usa [`BrandLogo`](../../../packages/ui/docs/brand-logo.md) (`@repo/ui`); el PNG es el default del componente. No hay SVG en esta app.
 
 - Logo No Country
 - Avatar redondo

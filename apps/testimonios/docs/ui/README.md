@@ -4,7 +4,7 @@ Documentación de los componentes reutilizables de `apps/testimonios`.
 
 **Objetivo:** cualquier dev puede armar galería, ficha, form o inbox sin reimplementar chrome ni cards.
 
-Tokens y type scale: [design system de la landing](../../../landing-contratar/docs/ui/design-system.md). Button: [docs del Button](../../../landing-contratar/docs/ui/components/button.md) (`@repo/ui`).
+Tokens y type scale: [design system de la landing](../../../landing-contratar/docs/ui/design-system.md). Compartidos en `@repo/ui`: [Button](../../../../packages/ui/docs/button.md), [BrandLogo](../../../../packages/ui/docs/brand-logo.md).
 
 Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-form`, `admin-session-aside`) no se documentan acá: son de una ruta, no primitivos.
 
@@ -12,7 +12,8 @@ Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-for
 
 | Recurso | Descripción |
 | --- | --- |
-| [BrandLogo](./components/brand-logo.md) | Wordmark No Country (PNG) |
+| [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` |
+| [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [SiteHeader](./components/site-header.md) | Chrome del layout (logo + nav) |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
 | [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha, inbox) |
@@ -32,13 +33,16 @@ Cada chrome/producto reutilizable nuevo en `components/` debe incluir:
 2. **Entrada en esta tabla** (índice de arriba)
 3. **JSDoc breve** en el export del componente (para IntelliSense en el IDE)
 
+Si el componente lo van a usar dos apps, va en `packages/ui` y la ficha canónica en `packages/ui/docs/`. Esta app solo linkea y anota uso local.
+
 No documentar formularios de una sola ruta ni utilidades no-UI (`lib/`).
 
 ### Paths
 
 | Alias | Dónde |
 | --- | --- |
-| `@repo/ui/button` | Button compartido (`packages/ui`) |
+| `@repo/ui/button` | Button — ficha en [`packages/ui/docs/button.md`](../../../../packages/ui/docs/button.md) |
+| `@repo/ui/brand-logo` | Wordmark — ficha en [`packages/ui/docs/brand-logo.md`](../../../../packages/ui/docs/brand-logo.md) |
 | `@/components` | componentes de producto |
 | `@/lib/utils` | `cn()` |
 

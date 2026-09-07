@@ -48,7 +48,7 @@ type ButtonProps = ButtonPrimitive.Props &
 /**
  * Botón de acción del design system (shadcn).
  *
- * Docs: `apps/landing-contratar/docs/ui/components/button.md`
+ * Docs: `packages/ui/docs/button.md`
  *
  * @example
  * <Button variant="outline" size="lg">Cómo funciona</Button>

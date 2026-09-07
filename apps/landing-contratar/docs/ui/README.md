@@ -11,8 +11,8 @@ Los bloques de `components/landing/` (hero, FAQ, etc.) no se documentan acá: so
 | Recurso | Descripción |
 | --- | --- |
 | [Design system](./design-system.md) | Colores, tipografía, spacing, radius, sombras, layout |
-| [Button](./components/button.md) | Variantes, sizes, ejemplos — paquete `@repo/ui` |
-| [BrandLogo](./components/brand-logo.md) | Wordmark No Country — paquete `@repo/ui` |
+| [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` ([uso local](./components/button.md)) |
+| [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [Badge](./components/badge.md) | Chips de roles, verticales, geos |
 | [Separator](./components/separator.md) | Divisores en header, footer y bloques densos |
 | [Navigation Menu](./components/navigation-menu.md) | Nav desktop con paneles |
@@ -37,7 +37,7 @@ Cada componente nuevo en `components/ui` o chrome/producto reutilizable en `comp
 2. **Entrada en esta tabla** (índice de arriba)
 3. **JSDoc breve** en el export del componente (para IntelliSense en el IDE)
 
-Si el componente lo van a usar dos apps (como Button o BrandLogo), va en `packages/ui`, no en `components/` de una app.
+Si el componente lo van a usar dos apps, va en `packages/ui` y la ficha canónica en `packages/ui/docs/`. Esta app solo linkea y anota uso local.
 
 No documentar bloques de `components/landing/` ni utilidades no-UI (`json-ld`).
 
@@ -55,8 +55,8 @@ Después: documentarlo en `docs/ui/components/` y linkearlo acá.
 
 | Alias | Dónde |
 | --- | --- |
-| `@repo/ui/button` | Button compartido (`packages/ui`) |
-| `@repo/ui/brand-logo` | Wordmark No Country (`packages/ui`) |
+| `@repo/ui/button` | Button — ficha en [`packages/ui/docs/button.md`](../../../../packages/ui/docs/button.md) |
+| `@repo/ui/brand-logo` | Wordmark — ficha en [`packages/ui/docs/brand-logo.md`](../../../../packages/ui/docs/brand-logo.md) |
 | `@/components/ui` | shadcn que todavía es de esta app |
 | `@/components` | componentes de producto |
 | `@/lib/utils` | `cn()` (reexporta `@repo/ui/utils`) |

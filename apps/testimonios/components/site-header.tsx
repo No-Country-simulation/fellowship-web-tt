@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandLogo } from "@repo/ui/brand-logo";
 import { publicNav, staffNav } from "@/lib/nav";
 import { SITE_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
