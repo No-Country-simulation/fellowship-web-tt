@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AdminLoginForm } from "@/components/admin-login-form";
-import { PageShell, adminShellClassName } from "@/components/page-shell";
+import { PageShell } from "@/components/page-shell";
 import { getAdminUser } from "@/lib/auth/admin";
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 
@@ -17,7 +17,7 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <PageShell className={adminShellClassName} title="Entrar al admin">
+    <PageShell centered title="Entrar al admin">
       {hasSupabasePublicEnv() ? (
         <AdminLoginForm />
       ) : (
