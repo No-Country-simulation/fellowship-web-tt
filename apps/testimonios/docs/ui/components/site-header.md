@@ -1,6 +1,6 @@
 # SiteHeader
 
-Chrome de la app: logo a la izquierda, nav a la derecha (Galería, Enviar, Admin).
+Chrome de la app: logo a la izquierda, nav al centro, sesión admin a la derecha.
 
 **Archivo:** `components/site-header.tsx`
 
@@ -20,7 +20,7 @@ No copiar el markup del header en una página. Para el wordmark aislado usá `Br
 
 ## Props
 
-Ninguna. Labels y hrefs salen de `lib/nav.ts` (`publicNav`, `staffNav`). El subtítulo junto al logo sale de `SITE_NAME` en `lib/site.ts`.
+Ninguna. Labels y hrefs salen de `lib/nav.ts` (`publicNav`, `staffNav`). El subtítulo junto al logo sale de `SITE_NAME` en `lib/site.ts`. Si hay sesión admin, `getAdminUser()` monta `AdminSession` a la derecha.
 
 ## Uso
 
@@ -33,11 +33,12 @@ Ninguna. Labels y hrefs salen de `lib/nav.ts` (`publicNav`, `staffNav`). El subt
 ## Composición
 
 ```
-SiteHeader
+SiteHeader (grid 1fr | auto | 1fr)
 ├── BrandLogo (eager) + SITE_NAME
-└── nav (aria-label="Principal")
-    ├── publicNav (Galería, Enviar)
-    └── staffNav (Admin, estilo muted)
+├── nav (aria-label="Principal")
+│   ├── publicNav (Galería, Enviar)
+│   └── staffNav (Admin, estilo muted)
+└── AdminSession (solo si hay admin logueado)
 ```
 
 ## Cómo cambiar copy o rutas

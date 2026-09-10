@@ -18,4 +18,4 @@ El header pasa el nombre del producto como `children`. Si hace falta el wordmark
 </BrandLogo>
 ```
 
-La card de Instagram (`next/og`) usa el mismo PNG.
+La card de Instagram (`drawIgCard` en canvas) usa el mismo PNG.

@@ -64,9 +64,9 @@ Totales: simulación 6 obligatorios (incluye avatar); empleo y reconversión 8.
 Al enviar, el sistema arma dos textos **sin IA**: recorta lo que escribió la persona.
 
 - **Quote** (card y Discord): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
-- **Caption** de Instagram: ese quote + nombre + perfil de instagram (si esta disponible) + hashtags fijos.
+- **Caption** de Instagram: quote + tipo + línea de contexto (puesto/empresa o reconversión, si hay) + nombre + @instagram si hay + hashtags fijos (`#NoCountry #DemoDay #TalentoIT`).
 
-El admin puede editarlos antes de publicar.
+El admin puede editar quote y caption antes de publicar. Si cambia el quote, el caption se vuelve a armar.
 
 ## Guardar
 
@@ -76,7 +76,7 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 ## Validar — `/admin`
 
-Inbox. Preview de la card (y del embed de YouTube si hay). Publicar o rechazar. Retocar quote si hace falta.
+Inbox. En `/admin/[id]`: envío original a la izquierda; a la derecha quote + caption editables y preview en vivo de Discord y de la card IG. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption, y reintentar Discord si falló.
 
 ## Publicar en Discord de comunidad (post validación)
 
@@ -112,18 +112,18 @@ El aviso del Demo Day en el canal **general** es a mano (link `/enviar`). Los we
 
 **Al publicar:** el server action pasa a `published`, escribe `published_at`, y **después** hace `POST` al webhook de comunidad. El testimonio no espera a Discord para quedar publicado.
 
-Cuerpo del `POST` (comunidad): `content` (YouTube suelto si hay, para el player) + `embeds[0]`.
+Cuerpo del `POST` (comunidad): solo `embeds[0]` (sin `content`). Username del webhook: No Country. `avatar_url` de la raíz: logo de No Country.
 
 Cuerpo del post (embed):
 
-- Autor: `full_name` + avatar. El archivo **no se sube a Discord**. Se manda `embeds[0].author.icon_url` con la URL pública de Storage (`publicStorageUrl("avatars", avatar_path)`), la misma que ya usa el admin. Discord la descarga. El `avatar_url` de la raíz del webhook es el logo de No Country, no la cara del talento.
+- Autor: `full_name` + avatar. El archivo **no se sube a Discord**. Se manda `embeds[0].author.icon_url` con la URL pública de Storage (`publicStorageUrl("avatars", avatar_path)`), la misma que ya usa el admin. Discord la descarga.
 - Título: tipo (Simulación / Primer empleo / Reconversión)
 - Descripción: `quote`
 - Imagen grande: **captura** del proyecto, si hay
-- Campos: empresa/puesto o reconversión si vienen en `payload`
+- Campos: empresa/puesto o reconversión si vienen en `payload`. Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube)
 - Color/footer: No Country
 
-Si el webhook falla, el testimonio **igual queda publicado**. El admin ve “no se pudo postear en Discord” y un botón **Reintentar**.
+Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `discord_posted_at` queda null. El admin ve el error y un botón **Reintentar Discord**. Si el POST sale bien, se escribe `discord_posted_at`.
 
 ### Cómo se usa cada media (sin galería)
 
@@ -131,27 +131,30 @@ Hay tres archivos. Cada canal los usa distinto porque Discord y Instagram no ace
 
 - **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo.
 - **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram v1 **no entra** al post (la imagen del feed es la card).
-- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord el link va en el **texto del mensaje** para que se desarme el player. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL puede ir en el caption, que no es clickeable. El Reel queda para v2.
+- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord el link `watch?v=` va en un **campo del embed**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card. El Reel queda para v2.
 
 **Discord, en la práctica**
 
 1. Siempre: nombre + avatar chico + quote.
 2. Si hay captura: va de imagen grande. Si no hay, el post es solo texto + cara.
-3. Si hay YouTube: se manda la URL suelta en el mensaje para que Discord muestre el video. Un embed **no** reproduce YouTube; hace falta el link en el body.
+3. Si hay YouTube: el link `watch?v=` va en un campo del embed. Un embed **no** reproduce YouTube; el link queda clickeable. No se manda `content` aparte.
 4. No se sube el video como archivo. No hace falta.
 
 **Instagram, en la práctica (v1)**
 
 Instagram no acepta un post de solo texto. El post es **una imagen cuadrada + un caption**. La imagen **se genera** en la app: no se sube la captura ni el avatar crudo.
 
-La card (PNG 1080×1080) se arma con `ImageResponse` (`next/og`), mismos tokens que la app (fondo oscuro, DM Sans).
+La card (PNG 1080×1080) se dibuja **en el browser** (`drawIgCard` sobre un `<canvas>`), con los mismos tokens que la app (fondo oscuro, DM Sans). No hay `ImageResponse` ni ruta `/admin/[id]/ig-card`.
 
 **Logo:** el chrome y la card de Instagram usan el mismo PNG (`public/brand/logo-no-country.png`). El header usa [`BrandLogo`](../../../packages/ui/docs/brand-logo.md) (`@repo/ui`); el PNG es el default del componente. No hay SVG en esta app.
 
-- Logo No Country
+- Barra rosa + logo No Country
 - Avatar redondo
+- Tipo en mayúsculas
 - Quote (el que el admin retocó)
+- Línea de contexto (puesto/empresa o reconversión), si hay
 - Nombre
+- Handle de Instagram, si hay
 
 La captura del proyecto **no va** en esta pieza. Sigue yendo a Discord. YouTube no entra como video.
 
@@ -169,8 +172,8 @@ flowchart LR
 
 **Cómo se publica**
 
-1. En `/admin/[id]`: preview de la card (se regenera si cambia el quote) + **Descargar imagen** + **Copiar caption**.
-2. Ruta protegida tipo `/admin/[id]/ig-card` (sesión admin). No es pública mientras esté `in_review`.
+1. En revisión (`/admin/[id]`): preview en vivo de Discord y de la card (se regenera si cambia el quote). Publicar.
+2. Después de publicar: **Descargar imagen** + **Copiar caption** (`AdminIgShare` en modo `share`). El PNG se genera en el cliente; no hay URL de imagen en el server.
 3. El equipo sube el PNG y pega el caption en Instagram (app o Meta Business). Discord sí es automático; IG en v1 no.
 4. Graph API queda para después: haría falta una URL pública del PNG (recién cuando está `published`).
 
@@ -185,7 +188,7 @@ flowchart LR
 - Next 16 en `apps/testimonios`, puerto 3001, UI propia
 - Supabase: Postgres, Auth (admin), Storage (`avatars` + `captures`), RLS
 - Vercel. Sin worker de video
-- Env: Supabase, `DISCORD_INBOX_WEBHOOK_URL`, `DISCORD_COMMUNITY_WEBHOOK_URL`, tokens Meta si hay IG Business
+- Env: Supabase, `DISCORD_INBOX_WEBHOOK_URL`, `DISCORD_COMMUNITY_WEBHOOK_URL`. Tokens Meta opcionales (v1 no postea a IG por API)
 
 ## Orden de implementación (v1)
 

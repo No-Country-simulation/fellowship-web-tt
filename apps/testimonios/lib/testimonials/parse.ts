@@ -1,6 +1,10 @@
 import { excerptQuote, buildIgCaption } from "./quote";
 import {
+  careerChangeFields,
+  firstJobFields,
   isTestimonialType,
+  storyContextLine,
+  typeOption,
   type TestimonialPayload,
   type TestimonialType,
 } from "./types";
@@ -132,6 +136,27 @@ export function youtubeVideoId(raw: string): string | null {
 export function youtubeEmbedSrc(raw: string): string | null {
   const id = youtubeVideoId(raw);
   return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
+export function youtubeWatchUrl(raw: string) {
+  const id = youtubeVideoId(raw);
+  if (!id) {
+    return raw;
+  }
+
+  const watch = new URL("https://www.youtube.com/watch");
+  watch.searchParams.set("v", id);
+
+  try {
+    const t = new URL(raw).searchParams.get("t");
+    if (t) {
+      watch.searchParams.set("t", t);
+    }
+  } catch {
+    // keep watch?v=id
+  }
+
+  return watch.toString();
 }
 
 export function normalizeYouTubeUrl(raw: string): string | null {
@@ -321,6 +346,11 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     quote,
     fullName,
     instagram,
+    typeLabel: typeOption(type).label,
+    contextLine: storyContextLine({
+      firstJob: firstJobFields(payload),
+      careerChange: careerChangeFields(payload),
+    }),
   });
 
   return {

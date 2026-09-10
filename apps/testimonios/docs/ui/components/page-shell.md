@@ -62,7 +62,7 @@ También exporta `adminShellClassName` (`"max-w-content"`). El default del conte
   className={adminShellClassName}
   title={fullName}
   titleStart={<BackToInbox />}
-  titleAddon={<span className="ml-auto …">{typeLabel}</span>}
+  titleAddon={<AdminStatusBadge status={status} />}
 >
   {children}
 </PageShell>

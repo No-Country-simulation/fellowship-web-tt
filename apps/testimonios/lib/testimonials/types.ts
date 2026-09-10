@@ -112,6 +112,20 @@ export function careerChangeFields(payload: unknown): CareerChangePayload | null
   };
 }
 
+/** Línea corta para galería, Discord e Instagram. */
+export function storyContextLine(input: {
+  firstJob: FirstJobPayload | null;
+  careerChange: CareerChangePayload | null;
+}): string | null {
+  if (input.firstJob) {
+    return `${input.firstJob.role_achieved} en ${input.firstJob.company}`;
+  }
+  if (input.careerChange) {
+    return `De ${input.careerChange.previous_profession} a ${input.careerChange.new_role}`;
+  }
+  return null;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

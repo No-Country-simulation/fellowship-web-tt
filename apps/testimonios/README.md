@@ -19,7 +19,7 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 | `/` | Galería (publicados) |
 | `/enviar` | Formulario público, sin login |
 | `/admin` | Inbox del equipo: validar y publicar |
-| `/admin/[id]` | Preview, retocar quote y publicar o rechazar |
+| `/admin/[id]` | Revisar: quote/caption, preview Discord + card IG. Al publicar: descargar PNG, copiar caption, reintentar Discord |
 | `/t/[slug]` | Ficha de un testimonio publicado |
 
 ## Variables de entorno
@@ -35,14 +35,14 @@ Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
 | `ADMIN_EMAILS` | Allowlist del equipo, separada por coma. |
 | `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. |
-| `META_ACCESS_TOKEN` | Opcional; Instagram Business. |
-| `META_IG_USER_ID` | Opcional; Instagram Business. |
+| `META_ACCESS_TOKEN` | Opcional; no se usa en v1 (IG es descargar PNG + copiar caption). |
+| `META_IG_USER_ID` | Opcional; no se usa en v1. |
 
 ## Supabase
 
-Proyecto aparte de la landing (`testimonials_nc_fellow`). Vive en esta app: [`supabase/migrations/20260906000000_init.sql`](./supabase/migrations/20260906000000_init.sql).
+Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at`).
 
-1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`.
+1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`. `discord_posted_at` marca si el webhook de comunidad ya posteó; si falla, el admin reintenta.
 2. En Authentication: desactivá el registro público. Creá un usuario del equipo.
 3. En ese usuario, `app_metadata.role = admin`, **o** poné su email en `ADMIN_EMAILS`.
 4. Copiá URL, anon key y service role a `.env.local`.

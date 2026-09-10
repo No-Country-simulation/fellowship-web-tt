@@ -9,6 +9,7 @@ import { youtubeEmbedSrc } from "./parse";
 import {
   careerChangeFields,
   firstJobFields,
+  storyContextLine,
   typeOption,
   type CareerChangePayload,
   type FirstJobPayload,
@@ -36,6 +37,7 @@ export type AdminTestimonial = {
   careerChange: CareerChangePayload | null;
   submittedAt: string;
   publishedAt: string | null;
+  discordPostedAt: string | null;
 };
 
 export type AdminInboxItem = {
@@ -71,6 +73,7 @@ export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
     careerChange: careerChangeFields(row.payload),
     submittedAt: row.submitted_at,
     publishedAt: row.published_at,
+    discordPostedAt: row.discord_posted_at ?? null,
   };
 }
 
@@ -91,5 +94,12 @@ export function formatSubmittedAt(iso: string) {
   return new Date(iso).toLocaleString("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
+  });
+}
+
+export function adminContextLine(testimonial: AdminTestimonial) {
+  return storyContextLine({
+    firstJob: testimonial.firstJob,
+    careerChange: testimonial.careerChange,
   });
 }

@@ -4,7 +4,7 @@ Card de un testimonio: avatar, tipo, nombre, quote y slots opcionales.
 
 **Archivo:** `components/testimonial-card.tsx`
 
-Uso previsto: grilla de galería, inbox admin, preview al revisar y bloque de quote en la ficha.
+Uso previsto: grilla de galería, inbox admin y bloque de quote en la ficha. El preview al revisar es Discord + card IG (`DiscordPublishPreview`, `AdminIgShare`), no esta card.
 
 ## Import
 
@@ -15,10 +15,9 @@ import { TestimonialCard } from "@/components/testimonial-card";
 ## Cuándo usarlo
 
 - Listar testimonios (galería, inbox)
-- Preview de cómo se ve la card (admin)
 - Quote destacado en la ficha pública
 
-No usarlo para la captura del proyecto ni para el embed de YouTube: esos van aparte. No meter email ni historia completa adentro.
+No usarlo para la captura del proyecto ni para el embed de YouTube: esos van aparte. No meter email ni historia completa adentro. No usarlo como preview de Discord ni de Instagram.
 
 ## Props
 

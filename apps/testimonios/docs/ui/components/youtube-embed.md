@@ -4,7 +4,7 @@ Iframe 16:9 para un video de YouTube ya parseado.
 
 **Archivo:** `components/youtube-embed.tsx`
 
-Uso previsto: ficha pública (`/t/[slug]`) y preview del admin. V1 no sube mp4: solo embebe un link.
+Uso previsto: ficha pública (`/t/[slug]`) y envío original del admin (`AdminSubmission`). V1 no sube mp4: solo embebe un link.
 
 ## Import
 
@@ -15,7 +15,7 @@ import { YoutubeEmbed } from "@/components/youtube-embed";
 ## Cuándo usarlo
 
 - Mostrar el video que el talento pegó en `/enviar`
-- Preview en `/admin/[id]`
+- El envío original en `/admin/[id]` (`AdminSubmission`)
 
 No pasarle una URL de watch (`youtube.com/watch?v=`). El `src` tiene que ser `https://www.youtube.com/embed/{id}`. Para convertir el link crudo usá `youtubeEmbedSrc` de `lib/testimonials/parse.ts` (ya lo hacen `public.ts` y `admin-view.ts` como `youtubeEmbedUrl`).
 

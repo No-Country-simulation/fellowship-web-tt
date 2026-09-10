@@ -1,8 +1,11 @@
 "use server";
 
+import { notifyInboxNewTestimonial } from "@/lib/discord";
+
 import { firstErrorStep, parseTestimonialForm } from "./parse";
 import { saveTestimonial } from "./store";
 import type { SubmitState } from "./submit-state";
+import { typeOption } from "./types";
 
 export async function submitTestimonial(
   _prev: SubmitState,
@@ -34,6 +37,12 @@ export async function submitTestimonial(
       message: saved.message,
     };
   }
+
+  await notifyInboxNewTestimonial({
+    id: saved.testimonial.id,
+    fullName: parsed.data.fullName,
+    typeLabel: typeOption(parsed.data.type).label,
+  });
 
   return { status: "success" };
 }

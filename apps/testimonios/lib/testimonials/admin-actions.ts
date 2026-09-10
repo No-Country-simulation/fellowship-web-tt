@@ -4,15 +4,23 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import { postCommunityTestimonial } from "@/lib/discord";
 
 import { buildIgCaption, CAPTION_EDIT_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "./quote";
 import {
   getTestimonialById,
+  markDiscordPosted,
   publishTestimonial,
   rejectTestimonial,
   saveReviewEdits,
 } from "./store";
 import type { ReviewState } from "./review-state";
+import {
+  careerChangeFields,
+  firstJobFields,
+  storyContextLine,
+  typeOption,
+} from "./types";
 
 export async function reviewTestimonial(
   id: string,
@@ -57,6 +65,11 @@ export async function reviewTestimonial(
       quote,
       fullName: current.testimonial.full_name,
       instagram: current.testimonial.instagram,
+      typeLabel: typeOption(current.testimonial.type).label,
+      contextLine: storyContextLine({
+        firstJob: firstJobFields(current.testimonial.payload),
+        careerChange: careerChangeFields(current.testimonial.payload),
+      }),
     });
   }
   if (igCaption.length > CAPTION_EDIT_MAX_CHARS) {
@@ -80,8 +93,57 @@ export async function reviewTestimonial(
     return { status: "error", message: published.message };
   }
 
+  const latest = await getTestimonialById(id);
+  const discord = latest.ok
+    ? await postCommunityTestimonial(latest.testimonial)
+    : "failed";
+
+  if (discord === "posted") {
+    await markDiscordPosted(id);
+  }
+
   revalidateAdmin(id, published.slug);
-  redirect("/admin");
+
+  // Queda en el testimonio: el siguiente paso es descargar la card y subirla a IG.
+  if (discord === "failed") {
+    redirect(`/admin/${id}?discord=failed`);
+  }
+  if (discord === "posted") {
+    redirect(`/admin/${id}?discord=ok`);
+  }
+  redirect(`/admin/${id}`);
+}
+
+export async function retryCommunityDiscord(id: string) {
+  await requireAdmin();
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    redirect("/admin");
+  }
+
+  if (current.testimonial.status !== "published") {
+    redirect(`/admin/${id}`);
+  }
+
+  if (current.testimonial.discord_posted_at) {
+    redirect(`/admin/${id}?discord=ok`);
+  }
+
+  const discord = await postCommunityTestimonial(current.testimonial);
+  if (discord === "posted") {
+    await markDiscordPosted(id);
+    revalidateAdmin(id, current.testimonial.slug);
+    redirect(`/admin/${id}?discord=ok`);
+  }
+
+  revalidateAdmin(id, current.testimonial.slug);
+
+  if (discord === "skipped") {
+    redirect(`/admin/${id}`);
+  }
+
+  redirect(`/admin/${id}?discord=failed`);
 }
 
 function revalidateAdmin(id: string, slug: string) {
