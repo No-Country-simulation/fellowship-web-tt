@@ -234,6 +234,39 @@ export async function publishTestimonial(
   return { ok: true, slug: updated.slug };
 }
 
+export async function markDiscordPosted(
+  id: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!hasSupabaseServiceRoleEnv()) {
+    return { ok: false, message: missingServiceRole };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .update({ discord_posted_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("status", "published")
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return {
+      ok: false,
+      message: "No pudimos marcar el post de Discord.",
+    };
+  }
+
+  if (!data) {
+    return {
+      ok: false,
+      message: "Este envío no está publicado.",
+    };
+  }
+
+  return { ok: true };
+}
+
 export async function rejectTestimonial(
   id: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {

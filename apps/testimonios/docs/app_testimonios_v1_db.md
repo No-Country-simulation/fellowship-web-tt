@@ -44,20 +44,23 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `instagram` | `text` | sí | | Handle o URL. El caption puede usarlo |
 | `story` | `text` | no | | Texto largo (experiencia / cómo ayudó / por qué cambió) |
 | `quote` | `text` | no | | Recorte literal de `story` |
-| `ig_caption` | `text` | no | | Quote + nombre + IG si hay + hashtags |
+| `ig_caption` | `text` | no | | Quote + tipo + contexto + nombre + IG si hay + hashtags |
 | `avatar_path` | `text` | no | | Path en `avatars`. Foto de **perfil**. Obligatorio |
 | `capture_path` | `text` | sí | | Path en `captures`. Screenshot del **proyecto/demo**, no la cara |
 | `video_url` | `text` | sí | | URL de YouTube |
 | `payload` | `jsonb` | no | `'{}'` | Solo campos del tipo (abajo) |
 | `consent_at` | `timestamptz` | no | | |
 | `submitted_at` | `timestamptz` | no | `now()` | |
-| `published_at` | `timestamptz` | sí | | Al publicar |
+| `published_at` | `timestamptz` | sí | | Al publicar. Se escribe aunque Discord falle |
+| `discord_posted_at` | `timestamptz` | sí | | Cuando el webhook de comunidad posteó con éxito. Null = pendiente, falló, o no hay webhook |
 | `created_at` | `timestamptz` | no | `now()` | |
 | `updated_at` | `timestamptz` | no | `now()` | Trigger `on update` |
 
 Índices: `unique (slug)`, `(status, submitted_at desc)`, `(type)`.
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). Validar forma de `payload` en la app y, si se quiere, con un check JSON.
+
+`discord_posted_at` sale de [`supabase/migrations/20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). No va en `testimonials_public`: es estado interno del admin.
 
 ---
 

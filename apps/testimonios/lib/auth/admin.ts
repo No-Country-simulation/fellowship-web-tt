@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
@@ -17,7 +18,7 @@ export function isAdminUser(user: User | null | undefined): user is User {
   return Boolean(email && getAdminEmails().includes(email));
 }
 
-export async function getAdminUser() {
+export const getAdminUser = cache(async () => {
   if (!hasSupabasePublicEnv()) {
     return null;
   }
@@ -28,7 +29,7 @@ export async function getAdminUser() {
   } = await supabase.auth.getUser();
 
   return isAdminUser(user) ? user : null;
-}
+});
 
 export async function requireAdmin() {
   const user = await getAdminUser();

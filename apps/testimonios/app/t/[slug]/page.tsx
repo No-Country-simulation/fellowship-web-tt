@@ -11,6 +11,7 @@ import {
   getPublishedTestimonialBySlug,
   type PublicTestimonial,
 } from "@/lib/testimonials/public";
+import { storyContextLine } from "@/lib/testimonials/types";
 
 export async function generateMetadata({
   params,
@@ -126,11 +127,8 @@ export default async function TestimonyPage({
 }
 
 function extraLine(testimonial: PublicTestimonial) {
-  if (testimonial.firstJob) {
-    return `${testimonial.firstJob.role_achieved} en ${testimonial.firstJob.company}`;
-  }
-  if (testimonial.careerChange) {
-    return `De ${testimonial.careerChange.previous_profession} a ${testimonial.careerChange.new_role}`;
-  }
-  return null;
+  return storyContextLine({
+    firstJob: testimonial.firstJob,
+    careerChange: testimonial.careerChange,
+  });
 }

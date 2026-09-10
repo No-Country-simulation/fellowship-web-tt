@@ -30,8 +30,14 @@ export function buildIgCaption(input: {
   quote: string;
   fullName: string;
   instagram: string | null;
+  typeLabel: string;
+  contextLine: string | null;
 }): string {
-  const lines = [`"${input.quote}"`, "", input.fullName];
+  const lines = [`"${input.quote}"`, "", input.typeLabel];
+  if (input.contextLine) {
+    lines.push(input.contextLine);
+  }
+  lines.push(input.fullName);
   if (input.instagram) {
     lines.push(input.instagram);
   }
