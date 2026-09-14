@@ -62,7 +62,7 @@ No usarlo en la galería pública. Instagram en v1 no se postea solo.
 
 ## Notas
 
-- Client Component (`"use client"`): el canvas corre en el browser.
+- La card en preview no supera `max-w-md` (448px). El tab de Instagram topea el bloque (card + caption) en `max-w-4xl`.
 - Layout de la card: barra rosa, logo, tipo, avatar, quote, contexto, nombre, handle.
 - La preview debouncea el quote ~400 ms. Descargar usa el quote actual, no el debounceado.
 - El avatar y el logo se fetchean con CORS. Si Storage no manda headers CORS, el preview puede fallar; el admin ve el error.

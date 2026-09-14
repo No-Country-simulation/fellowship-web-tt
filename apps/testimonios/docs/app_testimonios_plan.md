@@ -78,7 +78,7 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 Inbox master-detail (`AdminInboxShell` en el layout protegido): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`AdminDetailLoading` / `[id]/loading.tsx`) hasta que carga `/admin/[id]`.
 
-En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (Discord por defecto / Instagram). Discord va a la mitad del ancho. En Instagram, card a la izquierda y caption editable a la derecha. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption, y reintentar Discord si falló.
+En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (Discord por defecto / Instagram). Discord topea en `max-w-lg`; la card de Instagram en `max-w-md`, con el caption al lado. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption, y reintentar Discord si falló.
 
 ## Publicar en Discord de comunidad (post validación)
 

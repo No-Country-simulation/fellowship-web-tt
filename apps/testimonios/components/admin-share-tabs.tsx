@@ -78,7 +78,7 @@ export function AdminShareTabs({ discord, instagram }: AdminShareTabsProps) {
         hidden={tab !== "discord"}
         className="min-w-0 rounded-md border border-border bg-card p-md"
       >
-        <div className="w-full md:w-1/2">{discord}</div>
+        <div className="w-full max-w-lg">{discord}</div>
       </div>
       <div
         id={`${baseId}-instagram-panel`}
@@ -87,7 +87,7 @@ export function AdminShareTabs({ discord, instagram }: AdminShareTabsProps) {
         hidden={tab !== "instagram"}
         className="min-w-0 rounded-md border border-border bg-card p-md"
       >
-        {instagram}
+        <div className="w-full max-w-4xl">{instagram}</div>
       </div>
     </div>
   );

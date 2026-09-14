@@ -132,7 +132,7 @@ export function AdminIgShare({
   }
 
   const canvas = (
-    <>
+    <div className="w-full max-w-md">
       {previewFailed ? (
         <div className="grid aspect-square w-full place-items-center rounded-md border border-border bg-bg-surface-3 p-md text-center">
           <p className="text-body-small text-destructive">
@@ -150,7 +150,7 @@ export function AdminIgShare({
           previewFailed && "hidden",
         )}
       />
-    </>
+    </div>
   );
 
   if (previewOnly) {
