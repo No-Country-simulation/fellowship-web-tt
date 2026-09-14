@@ -66,7 +66,7 @@ Al enviar, el sistema arma dos textos **sin IA**: recorta lo que escribió la pe
 - **Quote** (card y Discord): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
 - **Caption** de Instagram: quote + tipo + línea de contexto (puesto/empresa o reconversión, si hay) + nombre + @instagram si hay + hashtags fijos (`#NoCountry #DemoDay #TalentoIT`).
 
-El admin puede editar quote y caption antes de publicar. Si cambia el quote, el caption se vuelve a armar.
+El admin puede editar quote y caption antes de publicar. Si cambia el quote, el caption se ajusta automáticamente.
 
 ## Guardar
 
@@ -76,7 +76,9 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 ## Validar — `/admin`
 
-Inbox. En `/admin/[id]`: envío original a la izquierda; a la derecha quote + caption editables y preview en vivo de Discord y de la card IG. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption, y reintentar Discord si falló.
+Inbox master-detail (`AdminInboxShell` en el layout protegido): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`AdminDetailLoading` / `[id]/loading.tsx`) hasta que carga `/admin/[id]`.
+
+En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (Discord por defecto / Instagram). Discord va a la mitad del ancho. En Instagram, card a la izquierda y caption editable a la derecha. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption, y reintentar Discord si falló.
 
 ## Publicar en Discord de comunidad (post validación)
 
@@ -172,8 +174,8 @@ flowchart LR
 
 **Cómo se publica**
 
-1. En revisión (`/admin/[id]`): preview en vivo de Discord y de la card (se regenera si cambia el quote). Publicar.
-2. Después de publicar: **Descargar imagen** + **Copiar caption** (`AdminIgShare` en modo `share`). El PNG se genera en el cliente; no hay URL de imagen en el server.
+1. En revisión (`/admin/[id]`): tabs Discord / Instagram. El embed de Discord y la card IG se actualizan si cambia el quote; el caption de IG se ajusta automáticamente. Publicar.
+2. Después de publicar: mismas tabs. En Instagram, **Descargar imagen** + **Copiar caption** (`AdminIgShare` en modo `share`, card a la izquierda y caption a la derecha). El PNG se genera en el cliente; no hay URL de imagen en el server.
 3. El equipo sube el PNG y pega el caption en Instagram (app o Meta Business). Discord sí es automático; IG en v1 no.
 4. Graph API queda para después: haría falta una URL pública del PNG (recién cuando está `published`).
 

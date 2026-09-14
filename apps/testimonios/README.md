@@ -18,8 +18,8 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 | --- | --- |
 | `/` | Galería (publicados) |
 | `/enviar` | Formulario público, sin login |
-| `/admin` | Inbox del equipo: validar y publicar |
-| `/admin/[id]` | Revisar: quote/caption, preview Discord + card IG. Al publicar: descargar PNG, copiar caption, reintentar Discord |
+| `/admin` | Inbox: lista a la izquierda (filtro local por estado), ficha a la derecha |
+| `/admin/[id]` | Revisar: envío plegado, quote, tabs Discord / Instagram (caption editable). Al publicar: descargar PNG, copiar caption, reintentar Discord |
 | `/t/[slug]` | Ficha de un testimonio publicado |
 
 ## Variables de entorno
@@ -53,6 +53,6 @@ Deploy: en Vercel, Root Directory `apps/testimonios`.
 
 ## UI
 
-Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura). Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). Sin chrome de marketing: esta app es operativa (formulario, inbox, galería).
+Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura). Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). Sin chrome de marketing: esta app es operativa (formulario, inbox, galería). Scrollbar fino en `app/globals.css` (thumb de borde, hover cyan).
 
 Componentes reutilizables (PageShell, TestimonialCard, Field, etc.): [docs/ui](./docs/ui/README.md).

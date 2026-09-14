@@ -62,17 +62,17 @@ export async function drawIgCard(
     ctx.fillText("No Country", cx, y);
   }
 
-  y += logoHeight + 32;
-  drawAvatar(ctx, avatar, input.fullName, cx, y, fontFamily);
-  y += AVATAR_SIZE + 36;
-
-  const typeSize = 24;
-  ctx.fillStyle = TEXT_SECONDARY;
+  const typeSize = 32;
+  y += logoHeight + 20;
+  ctx.fillStyle = TEXT_PRIMARY;
   ctx.font = `500 ${typeSize}px ${fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   ctx.fillText(input.typeLabel.toUpperCase(), cx, y);
-  y += typeSize + 28;
+  y += typeSize + 32;
+
+  drawAvatar(ctx, avatar, input.fullName, cx, y, fontFamily);
+  y += AVATAR_SIZE + 36;
 
   const nameSize = 32;
   const igSize = 26;

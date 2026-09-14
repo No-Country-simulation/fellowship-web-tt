@@ -1,3 +1,5 @@
+import { ChevronDown } from "lucide-react";
+
 import { YoutubeEmbed } from "@/components/youtube-embed";
 import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 
@@ -5,29 +7,28 @@ type AdminSubmissionProps = {
   testimonial: AdminTestimonial;
 };
 
-/** Lo que mandó el talento: historia, media y datos de contacto. Siempre visible. */
+/** Lo que mandó el talento: historia, media y datos. Va en un desplegable. */
 export function AdminSubmission({ testimonial }: AdminSubmissionProps) {
   const hasMedia = Boolean(
     testimonial.captureUrl || testimonial.youtubeEmbedUrl || testimonial.videoUrl,
   );
 
   return (
-    <section
-      aria-labelledby="admin-submission-title"
-      className="flex min-w-0 flex-col gap-md rounded-md border border-border bg-card p-md"
-    >
-      <header className="flex flex-col gap-xs">
-        <h2
+    <details className="group min-w-0 rounded-md border border-border bg-card">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-sm px-md py-sm [&::-webkit-details-marker]:hidden">
+        <span
           id="admin-submission-title"
           className="text-overline text-text-secondary"
         >
           Envío original
-        </h2>
-        <p className="text-body-small text-text-secondary">
-          Lo que escribió el talento. No se edita; el quote sale de acá.
-        </p>
-      </header>
+        </span>
+        <ChevronDown
+          aria-hidden
+          className="size-5 shrink-0 text-text-muted transition-transform group-open:rotate-180"
+        />
+      </summary>
 
+      <div className="flex flex-col gap-md border-t border-border px-md py-md">
       <figure>
         <figcaption className="text-body-small font-medium text-text-primary">
           Foto
@@ -120,7 +121,8 @@ export function AdminSubmission({ testimonial }: AdminSubmissionProps) {
           </>
         ) : null}
       </dl>
-    </section>
+      </div>
+    </details>
   );
 }
 

@@ -154,63 +154,50 @@ export function AdminIgShare({
   );
 
   if (previewOnly) {
-    return (
-      <div className="flex flex-col gap-sm">
-        {canvas}
+    return canvas;
+  }
+
+  return (
+    <div className="grid items-start gap-md md:grid-cols-2">
+      <div className="min-w-0">{canvas}</div>
+      <div className="flex min-w-0 flex-col gap-sm">
+        <div className="grid gap-sm sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={downloadCard}
+            disabled={downloading || !quote}
+            className={cn(
+              buttonVariants({ variant: "gradient", size: "lg" }),
+              "w-full",
+            )}
+          >
+            {downloading ? "Generando…" : "Descargar imagen"}
+          </button>
+          <button
+            type="button"
+            onClick={copyCaption}
+            disabled={!caption}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "w-full",
+            )}
+          >
+            {copied ? "Caption copiado" : "Copiar caption"}
+          </button>
+        </div>
+        {downloadError ? (
+          <p className="text-body-small text-destructive" role="alert">
+            {downloadError}
+          </p>
+        ) : null}
         {previewCaption ? (
-          <p className="max-h-48 overflow-y-auto whitespace-pre-wrap text-body-small text-text-secondary">
+          <p className="whitespace-pre-wrap text-body-small text-text-secondary">
             {previewCaption}
           </p>
         ) : (
           <p className="text-body-small text-text-muted">Sin caption.</p>
         )}
       </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-sm">
-      <div className="mx-auto w-full max-w-sm">{canvas}</div>
-      <div className="grid gap-sm sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={downloadCard}
-          disabled={downloading || !quote}
-          className={cn(
-            buttonVariants({ variant: "gradient", size: "lg" }),
-            "w-full",
-          )}
-        >
-          {downloading ? "Generando…" : "Descargar imagen"}
-        </button>
-        <button
-          type="button"
-          onClick={copyCaption}
-          disabled={!caption}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "w-full",
-          )}
-        >
-          {copied ? "Caption copiado" : "Copiar caption"}
-        </button>
-      </div>
-      {downloadError ? (
-        <p className="text-body-small text-destructive" role="alert">
-          {downloadError}
-        </p>
-      ) : null}
-      {previewCaption ? (
-        <details className="group rounded-md border border-border bg-bg-base">
-          <summary className="cursor-pointer list-none px-sm py-xs text-body-small text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
-            <span className="group-open:hidden">Ver caption</span>
-            <span className="hidden group-open:inline">Ocultar caption</span>
-          </summary>
-          <p className="whitespace-pre-wrap border-t border-border px-sm py-sm text-body-small text-text-secondary">
-            {previewCaption}
-          </p>
-        </details>
-      ) : null}
     </div>
   );
 }

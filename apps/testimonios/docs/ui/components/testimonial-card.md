@@ -4,7 +4,7 @@ Card de un testimonio: avatar, tipo, nombre, quote y slots opcionales.
 
 **Archivo:** `components/testimonial-card.tsx`
 
-Uso previsto: grilla de galería, inbox admin y bloque de quote en la ficha. El preview al revisar es Discord + card IG (`DiscordPublishPreview`, `AdminIgShare`), no esta card.
+Uso previsto: grilla de galería y bloque de quote en la ficha. El inbox admin usa filas en `AdminInboxList`, no esta card. El preview al revisar es Discord + card IG (`DiscordPublishPreview`, `AdminIgShare`) en tabs (`AdminShareTabs`).
 
 ## Import
 
@@ -14,7 +14,7 @@ import { TestimonialCard } from "@/components/testimonial-card";
 
 ## Cuándo usarlo
 
-- Listar testimonios (galería, inbox)
+- Listar testimonios (galería)
 - Quote destacado en la ficha pública
 
 No usarlo para la captura del proyecto ni para el embed de YouTube: esos van aparte. No meter email ni historia completa adentro. No usarlo como preview de Discord ni de Instagram.
@@ -29,7 +29,7 @@ No usarlo para la captura del proyecto ni para el embed de YouTube: esos van apa
 | `avatarUrl` | `string` | — | URL pública del avatar (Storage) |
 | `href` | `string` | — | Si está, la card es un `<Link>` a esa ruta |
 | `cta` | `string` | — | Texto cyan al pie (“Ver historia”) |
-| `footer` | `ReactNode` | — | Meta muted al fondo (fecha de envío en el inbox) |
+| `footer` | `ReactNode` | — | Meta muted al fondo |
 | `lineClamp` | `2 \| 3 \| 4 \| 5 \| 6` | `3` si hay `href` | Cortes del quote. Sin `href` y sin valor: quote completo |
 | `className` | `string` | — | Clases del `<article>` |
 
@@ -46,20 +46,6 @@ No usarlo para la captura del proyecto ni para el embed de YouTube: esos van apa
   href={`/t/${testimonial.slug}`}
   lineClamp={3}
   cta="Ver historia"
-/>
-```
-
-### Inbox admin (fecha al pie)
-
-```tsx
-<TestimonialCard
-  name={item.fullName}
-  typeLabel={item.typeLabel}
-  quote={item.quote}
-  avatarUrl={item.avatarUrl}
-  href={`/admin/${item.id}`}
-  lineClamp={3}
-  footer={formatSubmittedAt(item.submittedAt)}
 />
 ```
 

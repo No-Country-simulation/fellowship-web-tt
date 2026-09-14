@@ -4,7 +4,7 @@ Pill de estado del testimonio: en revisión, publicado o rechazado.
 
 **Archivo:** `components/admin-status-badge.tsx`
 
-Uso previsto: chrome del admin (título de `/admin/[id]`). El inbox filtra por estado con links, no con este badge.
+Uso previsto: chrome del admin (título de `/admin/[id]`). El inbox filtra la lista en el cliente, no con este badge.
 
 ## Import
 

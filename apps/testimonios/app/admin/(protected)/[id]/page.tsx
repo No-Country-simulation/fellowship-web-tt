@@ -7,7 +7,7 @@ import { AdminPublishedPanel } from "@/components/admin-published-panel";
 import { AdminReviewForm } from "@/components/admin-review-form";
 import { AdminStatusBadge, adminPillClassName } from "@/components/admin-status-badge";
 import { AdminSubmission } from "@/components/admin-submission";
-import { PageShell, adminShellClassName } from "@/components/page-shell";
+import { PageShell } from "@/components/page-shell";
 import { requireAdmin } from "@/lib/auth/admin";
 import { hasCommunityWebhook } from "@/lib/discord";
 import {
@@ -28,7 +28,8 @@ export default async function AdminReviewPage({
 }: PageProps<"/admin/[id]">) {
   await requireAdmin();
   const { id } = await params;
-  const discordParam = firstSearchParam((await searchParams).discord);
+  const query = await searchParams;
+  const discordParam = firstSearchParam(query.discord);
 
   if (!id) {
     notFound();
@@ -43,7 +44,7 @@ export default async function AdminReviewPage({
       <PageShell
         title="No se pudo cargar"
         description={result.message}
-        className={adminShellClassName}
+        fullWidth
         titleStart={<BackToInbox />}
       />
     );
@@ -59,6 +60,7 @@ export default async function AdminReviewPage({
     hasCommunityWebhook();
   const context = adminContextLine(testimonial);
   const submission = <AdminSubmission testimonial={testimonial} />;
+  const titleStart = <BackToInbox />;
 
   const titleAddon = (
     <span className="ml-auto flex flex-wrap items-center gap-xs">
@@ -81,7 +83,7 @@ export default async function AdminReviewPage({
         testimonial={testimonial}
         submission={submission}
         title={testimonial.fullName}
-        titleStart={<BackToInbox />}
+        titleStart={titleStart}
         titleAddon={titleAddon}
         metaLine={metaLine}
       />
@@ -90,13 +92,13 @@ export default async function AdminReviewPage({
 
   return (
     <PageShell
-      className={adminShellClassName}
+      fullWidth
       title={testimonial.fullName}
-      titleStart={<BackToInbox />}
+      titleStart={titleStart}
       titleAddon={titleAddon}
     >
       <p className="mt-sm text-body-small text-text-secondary">{metaLine}</p>
-      <div className="mt-lg grid items-start gap-lg lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div className="mt-lg flex min-w-0 flex-col gap-lg">
         {submission}
         <AdminPublishedPanel
           testimonial={testimonial}
@@ -113,7 +115,7 @@ function BackToInbox() {
     <Link
       href="/admin"
       aria-label="Volver al inbox"
-      className="grid size-8 shrink-0 place-items-center rounded-button text-text-secondary hover:bg-bg-white-a5 hover:text-text-primary"
+      className="grid size-8 shrink-0 place-items-center rounded-button text-text-secondary hover:bg-bg-white-a5 hover:text-text-primary md:hidden"
     >
       <ArrowLeft className="size-6" />
     </Link>
