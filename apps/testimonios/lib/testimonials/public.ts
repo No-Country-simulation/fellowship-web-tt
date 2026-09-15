@@ -106,9 +106,11 @@ export const getPublishedTestimonialBySlug = cache(
 );
 
 export function formatPublishedAt(iso: string) {
-  return new Date(iso).toLocaleDateString("es-AR", {
-    dateStyle: "medium",
-  });
+  return new Date(iso)
+    .toLocaleDateString("es-AR", {
+      dateStyle: "medium",
+    })
+    .replace(/[\u00a0\u202f]/g, " ");
 }
 
 function toPublicTestimonial(

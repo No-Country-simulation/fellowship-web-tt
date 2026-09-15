@@ -91,10 +91,14 @@ export function toInboxItem(row: TestimonialRow): AdminInboxItem {
 }
 
 export function formatSubmittedAt(iso: string) {
-  return new Date(iso).toLocaleString("es-AR", {
+  return formatEsAr(new Date(iso).toLocaleString("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
-  });
+  }));
+}
+
+function formatEsAr(value: string) {
+  return value.replace(/[\u00a0\u202f]/g, " ");
 }
 
 export function adminContextLine(testimonial: AdminTestimonial) {

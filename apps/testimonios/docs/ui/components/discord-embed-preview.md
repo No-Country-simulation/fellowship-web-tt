@@ -4,7 +4,7 @@ Recreación visual del embed que manda el webhook al canal de comunidad.
 
 **Archivo:** `components/discord-embed-preview.tsx`
 
-Uso previsto: preview en `/admin/[id]` (revisión y publicado). El payload real lo arma `buildCommunityEmbed` / `communityEmbedFromRow` (`lib/testimonials/community-embed.ts`); este componente solo lo pinta.
+Uso previsto: preview en `/admin/[id]` (revisión y publicado), tab Discord (por defecto). El panel limita el embed a `max-w-lg` (512px) para que no crezca en pantallas anchas. El payload real lo arma `buildCommunityEmbed` / `communityEmbedFromRow` (`lib/testimonials/community-embed.ts`); este componente solo lo pinta.
 
 Para un `AdminTestimonial` + quote en vivo usá `DiscordPublishPreview` (wrapper, misma carpeta).
 
@@ -36,6 +36,7 @@ No es el webhook. No mandar este markup a Discord.
 <DiscordPublishPreview
   testimonial={testimonial}
   quote={quote || testimonial.quote}
+  hideLabel
 />
 ```
 

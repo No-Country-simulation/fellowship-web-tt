@@ -15,6 +15,8 @@ type PageShellProps = {
   className?: string;
   /** Centra el bloque en el viewport (login). */
   centered?: boolean;
+  /** Llena el pane (detalle admin): sin tope de ancho y con menos padding horizontal. */
+  fullWidth?: boolean;
 };
 
 /** `<main>` de página: eyebrow, H1 y cuerpo. Un solo por ruta. */
@@ -27,17 +29,23 @@ export function PageShell({
   children,
   className,
   centered = false,
+  fullWidth = false,
 }: PageShellProps) {
   return (
     <main
       className={cn(
-        "flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-md py-md",
+        "flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto py-md",
+        fullWidth ? "px-sm" : "px-md",
         centered && "items-center justify-center",
       )}
     >
       <div
         className={cn(
-          centered ? "w-full max-w-sm" : "container-content max-w-3xl",
+          fullWidth
+            ? "w-full min-w-0"
+            : centered
+              ? "w-full max-w-sm"
+              : "container-content max-w-3xl",
           className,
         )}
       >

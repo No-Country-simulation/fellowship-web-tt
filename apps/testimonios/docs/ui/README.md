@@ -6,7 +6,7 @@ Documentación de los componentes reutilizables de `apps/testimonios`.
 
 Tokens y type scale: [design system de la landing](../../../landing-contratar/docs/ui/design-system.md). Compartidos en `@repo/ui`: [Button](../../../../packages/ui/docs/button.md), [BrandLogo](../../../../packages/ui/docs/brand-logo.md).
 
-Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-form`, `admin-session`, `admin-published-panel`, `admin-submission`, `admin-discord-retry`) no se documentan acá: son de una ruta, no primitivos.
+Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-form`, `admin-session`, `admin-published-panel`, `admin-submission`, `admin-discord-retry`, `admin-inbox-shell`, `admin-inbox-list`, `admin-share-tabs`, `admin-detail-loading`) no se documentan acá: son de una ruta, no primitivos.
 
 ## Índice
 
@@ -16,7 +16,7 @@ Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-for
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [SiteHeader](./components/site-header.md) | Chrome del layout (logo, nav, sesión) |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
-| [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha, inbox) |
+| [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha) |
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
 | [Field](./components/field.md) | Label, hint, error y classes de input |
 | [AdminStatusBadge](./components/admin-status-badge.md) | Pill de estado (en revisión / publicado / rechazado) |
@@ -49,4 +49,4 @@ No documentar formularios de una sola ruta ni utilidades no-UI (`lib/`).
 | `@/components` | componentes de producto |
 | `@/lib/utils` | `cn()` |
 
-Tokens y utilidades visuales viven en `app/globals.css`.
+Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fino: thumb `border`, hover cyan).
