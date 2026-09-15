@@ -39,6 +39,13 @@ export default async function HomePage() {
         </div>
       ) : (
         <>
+        <p className="text-body text-text-secondary">
+            Si estuviste en un Demo Day, también podés{" "}
+            <Link href="/enviar" className="text-accent-cyan hover:underline">
+              dejar tu testimonio
+            </Link>
+            .
+          </p>
           <ul className="mt-lg grid gap-md sm:grid-cols-2">
             {testimonials.map((testimonial) => (
               <li key={testimonial.id}>
@@ -54,13 +61,6 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
-          <p className="mt-lg text-body text-text-secondary">
-            Si estuviste en un Demo Day, también podés{" "}
-            <Link href="/enviar" className="text-accent-cyan hover:underline">
-              dejar tu testimonio
-            </Link>
-            .
-          </p>
         </>
       )}
     </PageShell>

@@ -104,7 +104,7 @@ const missingServiceRole =
   "Falta SUPABASE_SERVICE_ROLE_KEY. El inbox no puede leer ni publicar todavía.";
 
 export async function listTestimonials(
-  status: TestimonialStatus,
+  status?: TestimonialStatus,
 ): Promise<
   | { ok: true; testimonials: TestimonialRow[] }
   | { ok: false; message: string }
@@ -114,11 +114,14 @@ export async function listTestimonials(
   }
 
   const supabase = createServiceRoleClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("testimonials")
     .select("*")
-    .eq("status", status)
     .order("submitted_at", { ascending: false });
+  if (status) {
+    query = query.eq("status", status);
+  }
+  const { data, error } = await query;
 
   if (error) {
     return {

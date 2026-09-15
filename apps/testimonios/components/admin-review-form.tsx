@@ -4,9 +4,10 @@ import { useActionState, useId, useState, type ReactNode } from "react";
 import { buttonVariants } from "@repo/ui/button";
 
 import { AdminIgShare } from "@/components/admin-ig-share";
+import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
-import { Field, textareaClassName } from "@/components/enviar-fields";
-import { PageShell, adminShellClassName } from "@/components/page-shell";
+import { textareaClassName } from "@/components/enviar-fields";
+import { PageShell } from "@/components/page-shell";
 import { reviewTestimonial } from "@/lib/testimonials/admin-actions";
 import { adminContextLine, type AdminTestimonial } from "@/lib/testimonials/admin-view";
 import { initialReviewState } from "@/lib/testimonials/review-state";
@@ -21,7 +22,7 @@ type Intent = "save" | "publish" | "reject";
 
 type AdminReviewFormProps = {
   testimonial: AdminTestimonial;
-  /** `<AdminSubmission>` renderizado en el server; va en la columna izquierda. */
+  /** `<AdminSubmission>` renderizado en el server; va arriba, plegado. */
   submission: ReactNode;
   title: string;
   titleStart: ReactNode;
@@ -30,9 +31,8 @@ type AdminReviewFormProps = {
 };
 
 /**
- * Revisión: envío a la izquierda, edición + vista previa a la derecha.
- * El form llena la página: el contenido scrollea y los botones quedan
- * anclados al borde inferior, fuera del área con padding.
+ * Revisión: envío plegado, quote, y preview por tabs (Discord / Instagram).
+ * El caption se edita en el tab de Instagram, al lado de la card.
  */
 export function AdminReviewForm({
   testimonial,
@@ -75,126 +75,88 @@ export function AdminReviewForm({
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
       <PageShell
-        className={adminShellClassName}
+        fullWidth
         title={title}
         titleStart={titleStart}
         titleAddon={titleAddon}
       >
         <p className="mt-sm text-body-small text-text-secondary">{metaLine}</p>
-        <div className="mt-lg grid items-start gap-lg lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+
+        <div className="mt-lg flex min-w-0 flex-col gap-lg">
           {submission}
 
-          <div className="flex min-w-0 flex-col gap-lg">
-            <section
-              aria-labelledby="admin-edit-title"
-              className="flex flex-col gap-md rounded-md border border-border bg-card p-md"
-            >
-              <header className="flex flex-col gap-xs">
-                <h2
-                  id="admin-edit-title"
-                  className="text-overline text-text-secondary"
-                >
-                  1 · Editar
-                </h2>
-                <p className="text-body-small text-text-secondary">
-                  El quote, el tipo y (si aplica) el puesto o la reconversión
-                  salen en Discord y en la card de Instagram. El caption se
-                  arma solo; retocalo si hace falta.
-                </p>
-              </header>
-
-              <Field
-                label="Quote"
-                hint="Una o dos frases de la historia. Corto y con impacto."
+          <section
+            aria-labelledby="admin-edit-title"
+            className="flex flex-col gap-md rounded-md border border-border bg-card p-md"
+          >
+            <header className="flex flex-col gap-xs">
+              <h2
+                id="admin-edit-title"
+                className="text-overline text-text-secondary"
               >
-                {({ id, describedBy }) => (
-                  <>
-                    <textarea
-                      id={id}
-                      name="quote"
-                      value={quote}
-                      maxLength={QUOTE_EDIT_MAX_CHARS}
-                      aria-describedby={describedBy}
-                      aria-invalid={quoteEmpty || undefined}
-                      className={cn(textareaClassName, "min-h-28")}
-                      onChange={(event) => onQuoteChange(event.target.value)}
-                    />
-                    <p
-                      className={cn(
-                        "mt-xs text-body-small",
-                        quoteEmpty ? "text-destructive" : "text-text-muted",
-                      )}
-                    >
-                      {quoteEmpty
-                        ? "El quote no puede estar vacío."
-                        : `${quote.length}/${QUOTE_EDIT_MAX_CHARS}`}
-                    </p>
-                  </>
+                Quote
+              </h2>
+              <p
+                id="admin-edit-hint"
+                className="text-body-small text-text-secondary"
+              >
+                Una o dos frases, cortas y con impacto. Salen en Discord y en
+                la card de Instagram; si lo cambiás, el caption se ajusta automáticamente.
+              </p>
+            </header>
+
+            <div>
+              <textarea
+                id="admin-quote"
+                name="quote"
+                value={quote}
+                maxLength={QUOTE_EDIT_MAX_CHARS}
+                aria-labelledby="admin-edit-title"
+                aria-describedby="admin-edit-hint"
+                aria-invalid={quoteEmpty || undefined}
+                className={cn(textareaClassName, "min-h-28")}
+                onChange={(event) => onQuoteChange(event.target.value)}
+              />
+              <p
+                className={cn(
+                  "mt-xs text-body-small",
+                  quoteEmpty ? "text-destructive" : "text-text-muted",
                 )}
-              </Field>
+              >
+                {quoteEmpty
+                  ? "El quote no puede estar vacío."
+                  : `${quote.length}/${QUOTE_EDIT_MAX_CHARS}`}
+              </p>
+            </div>
+          </section>
 
-              <div className="flex flex-col gap-xs">
-                <label
-                  htmlFor={captionId}
-                  className="text-body-small font-medium text-text-primary"
-                >
-                  Caption de Instagram
-                </label>
-                <p
-                  id={captionHintId}
-                  className="text-body-small text-text-secondary"
-                >
-                  Se copia tal cual al post. Si cambiás el quote, se vuelve a
-                  armar.
-                </p>
-                <textarea
-                  id={captionId}
-                  name="ig_caption"
-                  value={caption}
-                  maxLength={CAPTION_EDIT_MAX_CHARS}
-                  aria-describedby={captionDescribedBy}
-                  className={cn(
-                    textareaClassName,
-                    "min-h-32 resize-y whitespace-pre-wrap",
-                  )}
-                  onChange={(event) => setCaption(event.target.value)}
-                />
-                <p
-                  id={captionCountId}
-                  className="text-body-small text-text-muted"
-                >
-                  {caption.length}/{CAPTION_EDIT_MAX_CHARS}
-                </p>
-              </div>
-            </section>
+          <section
+            aria-labelledby="admin-preview-title"
+            className="flex flex-col gap-md"
+          >
+            <header className="flex flex-col gap-xs">
+              <h2
+                id="admin-preview-title"
+                className="text-overline text-text-secondary"
+              >
+                Cómo va a quedar
+              </h2>
+              <p className="text-body-small text-text-secondary">
+                Se actualiza mientras escribís. El caption de Instagram se
+                edita en su tab.
+              </p>
+            </header>
 
-            <section
-              aria-labelledby="admin-preview-title"
-              className="flex flex-col gap-md rounded-md border border-border bg-card p-md"
-            >
-              <header className="flex flex-col gap-xs">
-                <h2
-                  id="admin-preview-title"
-                  className="text-overline text-text-secondary"
-                >
-                  2 · Cómo va a quedar
-                </h2>
-                <p className="text-body-small text-text-secondary">
-                  Se actualiza mientras escribís. Después de publicar vas a
-                  poder descargar la imagen y copiar el caption desde esta
-                  misma pantalla.
-                </p>
-              </header>
-
-              <div className="grid items-start gap-md sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            <AdminShareTabs
+              discord={
                 <DiscordPublishPreview
                   testimonial={testimonial}
                   quote={quote || testimonial.quote}
+                  hideLabel
                 />
-                <div className="flex min-w-0 flex-col gap-xs">
-                  <p className="text-body-small text-text-secondary">
-                    Instagram
-                  </p>
+              }
+              instagram={
+                <div className="grid items-start gap-md md:grid-cols-2">
                   <AdminIgShare
                     mode="preview"
                     slug={testimonial.slug}
@@ -206,15 +168,48 @@ export function AdminReviewForm({
                     typeLabel={testimonial.typeLabel}
                     contextLine={adminContextLine(testimonial)}
                   />
+                  <div className="flex flex-col gap-xs">
+                    <label
+                      htmlFor={captionId}
+                      className="text-body-small font-medium text-text-primary"
+                    >
+                      Caption
+                    </label>
+                    <p
+                      id={captionHintId}
+                      className="text-body-small text-text-secondary"
+                    >
+                      Se copia tal cual al post. Si cambiás el quote, se
+                      ajusta automáticamente.
+                    </p>
+                    <textarea
+                      id={captionId}
+                      name="ig_caption"
+                      value={caption}
+                      maxLength={CAPTION_EDIT_MAX_CHARS}
+                      aria-describedby={captionDescribedBy}
+                      className={cn(
+                        textareaClassName,
+                        "min-h-32 resize-y whitespace-pre-wrap",
+                      )}
+                      onChange={(event) => setCaption(event.target.value)}
+                    />
+                    <p
+                      id={captionCountId}
+                      className="text-body-small text-text-muted"
+                    >
+                      {caption.length}/{CAPTION_EDIT_MAX_CHARS}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </section>
-          </div>
+              }
+            />
+          </section>
         </div>
       </PageShell>
 
-      <footer className="shrink-0 border-t border-border bg-bg-base px-md py-sm">
-        <div className="container-content flex max-w-content flex-wrap items-center justify-between gap-sm">
+      <footer className="shrink-0 border-t border-border bg-bg-base px-sm py-sm">
+        <div className="flex flex-wrap items-center justify-between gap-sm">
           <button
             type="submit"
             name="intent"
