@@ -132,6 +132,14 @@ export function canvasToPng(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
+export async function igCardPngBlob(
+  input: Parameters<typeof drawIgCard>[1],
+): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  await drawIgCard(canvas, input);
+  return canvasToPng(canvas);
+}
+
 function drawAvatar(
   ctx: CanvasRenderingContext2D,
   avatar: ImageBitmap | null,

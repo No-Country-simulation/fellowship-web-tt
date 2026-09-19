@@ -38,6 +38,8 @@ export type AdminTestimonial = {
   submittedAt: string;
   publishedAt: string | null;
   discordPostedAt: string | null;
+  bufferInstagramPostedAt: string | null;
+  bufferLinkedinPostedAt: string | null;
 };
 
 export type AdminInboxItem = {
@@ -74,6 +76,8 @@ export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
     submittedAt: row.submitted_at,
     publishedAt: row.published_at,
     discordPostedAt: row.discord_posted_at ?? null,
+    bufferInstagramPostedAt: row.buffer_instagram_posted_at ?? null,
+    bufferLinkedinPostedAt: row.buffer_linkedin_posted_at ?? null,
   };
 }
 

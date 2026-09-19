@@ -10,6 +10,7 @@ import { textareaClassName } from "@/components/enviar-fields";
 import { PageShell } from "@/components/page-shell";
 import { reviewTestimonial } from "@/lib/testimonials/admin-actions";
 import { adminContextLine, type AdminTestimonial } from "@/lib/testimonials/admin-view";
+import { igCardPngBlob } from "@/lib/testimonials/ig-card-canvas";
 import { initialReviewState } from "@/lib/testimonials/review-state";
 import {
   buildIgCaption,
@@ -72,6 +73,38 @@ export function AdminReviewForm({
   return (
     <form
       action={formAction}
+      onSubmit={(event) => {
+        const submitter = (event.nativeEvent as SubmitEvent).submitter;
+        const value =
+          submitter instanceof HTMLButtonElement ? submitter.value : "";
+        if (value !== "publish") {
+          return;
+        }
+        event.preventDefault();
+        const form = event.currentTarget;
+        void (async () => {
+          setIntent("publish");
+          const formData = new FormData(form);
+          formData.set("intent", "publish");
+          try {
+            const blob = await igCardPngBlob({
+              quote,
+              fullName: testimonial.fullName,
+              avatarUrl: testimonial.avatarUrl,
+              instagram: testimonial.instagram,
+              typeLabel: testimonial.typeLabel,
+              contextLine: adminContextLine(testimonial),
+            });
+            formData.set(
+              "ig_card",
+              new File([blob], "instagram.png", { type: "image/png" }),
+            );
+          } catch {
+            // Publica igual; Buffer Instagram falla y se puede reintentar.
+          }
+          formAction(formData);
+        })();
+      }}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
       <PageShell
@@ -261,7 +294,7 @@ export function AdminReviewForm({
               onClick={(event) => {
                 if (
                   !window.confirm(
-                    "¿Publicar este testimonio? Sale en la galería y se postea en Discord.",
+                    "¿Publicar este testimonio? Sale en la galería y se postea en Discord, Instagram y LinkedIn.",
                   )
                 ) {
                   event.preventDefault();

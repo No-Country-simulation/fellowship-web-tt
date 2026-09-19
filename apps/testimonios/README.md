@@ -35,8 +35,13 @@ Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
 | `ADMIN_EMAILS` | Allowlist del equipo, separada por coma. |
 | `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. |
+| `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |
+| `BUFFER_IG_CHANNEL_ID` | Canal Instagram (direct publishing). Si falta, no hay botón IG. |
+| `BUFFER_LI_CHANNEL_ID` | Canal LinkedIn: caption + captura del proyecto si hay + link de YouTube (como Discord). |
 | `META_ACCESS_TOKEN` | Opcional; no se usa en v1 (IG es descargar PNG + copiar caption). |
 | `META_IG_USER_ID` | Opcional; no se usa en v1. |
+
+Los channel IDs se copian del [API Explorer](https://developers.buffer.com/explorer.html) (`account.organizations` → `channels`). El código no los descubre solo.
 
 ## Supabase
 

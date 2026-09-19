@@ -270,6 +270,45 @@ export async function markDiscordPosted(
   return { ok: true };
 }
 
+export async function markBufferPosted(
+  id: string,
+  network: "instagram" | "linkedin",
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!hasSupabaseServiceRoleEnv()) {
+    return { ok: false, message: missingServiceRole };
+  }
+
+  const supabase = createServiceRoleClient();
+  const postedAt = new Date().toISOString();
+  const values =
+    network === "instagram"
+      ? { buffer_instagram_posted_at: postedAt }
+      : { buffer_linkedin_posted_at: postedAt };
+  const { data, error } = await supabase
+    .from("testimonials")
+    .update(values)
+    .eq("id", id)
+    .eq("status", "published")
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return {
+      ok: false,
+      message: "No pudimos marcar el post de Buffer.",
+    };
+  }
+
+  if (!data) {
+    return {
+      ok: false,
+      message: "Este envío no está publicado.",
+    };
+  }
+
+  return { ok: true };
+}
+
 export async function rejectTestimonial(
   id: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
