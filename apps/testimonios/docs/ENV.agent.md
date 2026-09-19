@@ -26,7 +26,7 @@ npx supabase start
 npm run verify:supabase
 ```
 
-Use keys from `npx supabase status`. See [schema-inventory.md](schema-inventory.md).
+Use keys from `npx supabase status`.
 
 ## Remote project
 
