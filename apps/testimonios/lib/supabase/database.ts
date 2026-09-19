@@ -81,6 +81,90 @@ export type Database = {
         };
         Relationships: [];
       };
+      contenido_generado: {
+        Row: {
+          id: string;
+          testimonio_id: string;
+          plataforma: "instagram" | "linkedin";
+          status: string;
+          draft_copy: string | null;
+          draft_title: string | null;
+          media_asset_path: string | null;
+          error_message: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          testimonio_id: string;
+          plataforma: "instagram" | "linkedin";
+          status?: string;
+          draft_copy?: string | null;
+          draft_title?: string | null;
+          media_asset_path?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          testimonio_id?: string;
+          plataforma?: "instagram" | "linkedin";
+          status?: string;
+          draft_copy?: string | null;
+          draft_title?: string | null;
+          media_asset_path?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      media_jobs: {
+        Row: {
+          id: string;
+          job_id: string;
+          testimonio_id: string;
+          plataforma: "instagram" | "linkedin";
+          status: string;
+          source_video_key: string | null;
+          source_audio_key: string | null;
+          media_asset_path: string | null;
+          error_message: string | null;
+          webhook_acked: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          job_id: string;
+          testimonio_id: string;
+          plataforma: "instagram" | "linkedin";
+          status?: string;
+          source_video_key?: string | null;
+          source_audio_key?: string | null;
+          media_asset_path?: string | null;
+          error_message?: string | null;
+          webhook_acked?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          job_id?: string;
+          testimonio_id?: string;
+          plataforma?: "instagram" | "linkedin";
+          status?: string;
+          source_video_key?: string | null;
+          source_audio_key?: string | null;
+          media_asset_path?: string | null;
+          error_message?: string | null;
+          webhook_acked?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       testimonials_public: {
