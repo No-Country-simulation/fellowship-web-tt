@@ -19,12 +19,25 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 | `/` | Galería (publicados) |
 | `/enviar` | Formulario público, sin login |
 | `/admin` | Inbox: lista a la izquierda (filtro local por estado), ficha a la derecha |
-| `/admin/[id]` | Revisar: envío plegado, quote, tabs Discord / Instagram (caption editable). Al publicar: descargar PNG, copiar caption, reintentar Discord |
+| `/admin/[id]` | Revisar: envío, quote, Discord / Instagram, **panel de agente** (Procesar → borradores IG/LI) |
 | `/t/[slug]` | Ficha de un testimonio publicado |
+
+## Agent pipeline (copy + media)
+
+Aditivo al flujo V1. Admin puede **Procesar** un testimonio y revisar borradores IG/LinkedIn generados con Gemini (voz en primera persona, validate/repair). Con media, un worker FFmpeg prepara formatos por plataforma y notifica por webhook HMAC.
+
+| Doc | Contenido |
+| --- | --- |
+| [docs/adr/ADR-002-agent-content-pipeline.md](./docs/adr/ADR-002-agent-content-pipeline.md) | Decisión de arquitectura |
+| [docs/COPY_PIPELINE.md](./docs/COPY_PIPELINE.md) | Understanding → draft → voice rules |
+| [docs/ENV.agent.md](./docs/ENV.agent.md) | Variables Gemini / worker / webhook |
+| [docs/MEDIA_FORMATS.md](./docs/MEDIA_FORMATS.md) | Tamaños IG / LinkedIn |
+
+Migración: `supabase/migrations/20260911150000_agent_contenido_media_jobs.sql`.
 
 ## Variables de entorno
 
-Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
+Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored). Para el agente, ver también [docs/ENV.agent.md](./docs/ENV.agent.md).
 
 | Variable | Para qué |
 | --- | --- |
@@ -35,12 +48,14 @@ Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
 | `ADMIN_EMAILS` | Allowlist del equipo, separada por coma. |
 | `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. |
+| `GEMINI_API_KEY` | Borradores IG/LI (texto). Opcionales: `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, `GEMINI_FIDELITY_LLM`. |
+| `MEDIA_WEBHOOK_SECRET` / `MEDIA_LISTO_WEBHOOK_URL` | Worker FFmpeg ↔ webhook `media-listo`. |
 | `META_ACCESS_TOKEN` | Opcional; no se usa en v1 (IG es descargar PNG + copiar caption). |
 | `META_IG_USER_ID` | Opcional; no se usa en v1. |
 
 ## Supabase
 
-Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at`).
+Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at` + tablas del agente `contenido_generado` / `media_jobs`).
 
 1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`. `discord_posted_at` marca si el webhook de comunidad ya posteó; si falla, el admin reintenta.
 2. En Authentication: desactivá el registro público. Creá un usuario del equipo.

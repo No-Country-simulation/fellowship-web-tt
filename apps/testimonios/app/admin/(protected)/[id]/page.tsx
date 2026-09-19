@@ -3,13 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { AdminAgentPanel } from "@/components/admin-agent-panel";
 import { AdminPublishedPanel } from "@/components/admin-published-panel";
 import { AdminReviewForm } from "@/components/admin-review-form";
 import { AdminStatusBadge, adminPillClassName } from "@/components/admin-status-badge";
 import { AdminSubmission } from "@/components/admin-submission";
 import { PageShell } from "@/components/page-shell";
+import { listContenidoAdmin } from "@/lib/agent/agent-actions";
+import { resolveHasMediaFromDb } from "@/lib/agent/supabase-repo";
 import { requireAdmin } from "@/lib/auth/admin";
 import { hasCommunityWebhook } from "@/lib/discord";
+import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/env";
 import {
   adminContextLine,
   formatSubmittedAt,
@@ -62,6 +66,24 @@ export default async function AdminReviewPage({
   const submission = <AdminSubmission testimonial={testimonial} />;
   const titleStart = <BackToInbox />;
 
+  let agentRows: Awaited<ReturnType<typeof listContenidoAdmin>> = [];
+  let hasMedia = false;
+  if (hasSupabaseServiceRoleEnv()) {
+    try {
+      agentRows = await listContenidoAdmin(id);
+      hasMedia = await resolveHasMediaFromDb(id);
+    } catch {
+      agentRows = [];
+    }
+  }
+  const agentPanel = (
+    <AdminAgentPanel
+      testimonioId={id}
+      initialRows={agentRows}
+      hasMedia={hasMedia}
+    />
+  );
+
   const titleAddon = (
     <span className="ml-auto flex flex-wrap items-center gap-xs">
       <AdminStatusBadge status={testimonial.status} />
@@ -79,14 +101,17 @@ export default async function AdminReviewPage({
 
   if (inReview) {
     return (
-      <AdminReviewForm
-        testimonial={testimonial}
-        submission={submission}
-        title={testimonial.fullName}
-        titleStart={titleStart}
-        titleAddon={titleAddon}
-        metaLine={metaLine}
-      />
+      <>
+        <AdminReviewForm
+          testimonial={testimonial}
+          submission={submission}
+          title={testimonial.fullName}
+          titleStart={titleStart}
+          titleAddon={titleAddon}
+          metaLine={metaLine}
+        />
+        <div className="mx-auto max-w-5xl px-md pb-xl">{agentPanel}</div>
+      </>
     );
   }
 
@@ -105,6 +130,7 @@ export default async function AdminReviewPage({
           discordStatus={discordStatus}
           canRetryDiscord={canRetryDiscord}
         />
+        {agentPanel}
       </div>
     </PageShell>
   );
