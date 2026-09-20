@@ -4,7 +4,7 @@ Preview del post de LinkedIn: caption (texto) + campo Video + captura. Sin card 
 
 **Archivo:** `components/linkedin-publish-preview.tsx`
 
-Uso previsto: `/admin/[id]`, tab LinkedIn. En revisión el caption se edita adentro del preview (`edit`). Después de publicar Buffer lo encola; el preview queda solo lectura + **Copiar caption** por si hay que reintentar a mano.
+Uso previsto: `/admin/[id]`, tab LinkedIn. En revisión el caption se edita adentro del preview (`edit`). Después de publicar Buffer lo envía (ya o a 24h, según `BUFFER_ENV`); el preview queda solo lectura + **Copiar caption** por si hay que reintentar a mano.
 
 ## Import
 

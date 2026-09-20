@@ -24,4 +24,4 @@ Text-only. Gemini writes the No Country intro; the rest of the caption is assemb
 
 ## Publish
 
-Guardar / Publicar writes `ig_caption` and `li_caption`. Discord is the community webhook. Instagram and LinkedIn go through Buffer.
+Guardar / Publicar writes `ig_caption` and `li_caption`. Discord is the community webhook. Instagram and LinkedIn go through Buffer. `BUFFER_ENV=production` uses shareNow; anything else schedules +24h.

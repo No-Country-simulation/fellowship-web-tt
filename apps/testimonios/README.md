@@ -30,7 +30,7 @@ En `/admin/[id]`, Instagram y LinkedIn tienen **Generar con IA**. La respuesta r
 | --- | --- |
 | [docs/COPY_PIPELINE.md](./docs/COPY_PIPELINE.md) | Intro Gemini + plantilla (quote, nombre, IG o LinkedIn, hashtags) |
 | [docs/MEDIA_FORMATS.md](./docs/MEDIA_FORMATS.md) | Avatar, captura y YouTube en Discord / Instagram / LinkedIn |
-| [docs/ENV.agent.md](./docs/ENV.agent.md) | Variables Gemini |
+| [docs/ENV.agent.md](./docs/ENV.agent.md) | Variables (Gemini, Buffer) |
 
 ## Variables de entorno
 

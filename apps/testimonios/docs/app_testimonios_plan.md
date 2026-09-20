@@ -191,7 +191,7 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 **Cómo se publica**
 
 1. En revisión (`/admin/[id]`): tabs Discord / Instagram / LinkedIn. Captions IG/LI se editan o se generan con Gemini. Publicar.
-2. Al publicar: Discord (webhook), Instagram (Buffer: sube el PNG a `share-cards` + `ig_caption`) y LinkedIn (Buffer: `li_caption` + captura si hay + YouTube). Buffer queda programado; no sale en el momento.
+2. Al publicar: Discord (webhook), Instagram (Buffer: sube el PNG a `share-cards` + `ig_caption`) y LinkedIn (Buffer: `li_caption` + captura si hay + YouTube). `BUFFER_ENV=production` publica ya (`shareNow`); `development` o si falta programa a 24h.
 3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. El admin reintenta. Las tabs sirven para copiar a mano si hace falta.
 4. Sin `BUFFER_API_KEY` o sin channel ID, esa red se saltea.
 
@@ -206,7 +206,7 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 - Next 16 en `apps/testimonios`, puerto 3001, UI propia
 - Supabase: Postgres, Auth (admin), Storage (`avatars` + `captures` + `share-cards`), RLS
 - Vercel. Sin worker de video
-- Env: Supabase, Discord webhooks, Buffer (`BUFFER_API_KEY` + channel IDs), `GEMINI_API_KEY` (intro de captions)
+- Env: Supabase, Discord webhooks, Buffer (`BUFFER_ENV`, `BUFFER_API_KEY` + channel IDs), `GEMINI_API_KEY` (intro de captions)
 
 ## Orden de implementación (v1)
 
