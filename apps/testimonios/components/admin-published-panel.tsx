@@ -5,6 +5,7 @@ import { AdminDiscordRetry } from "@/components/admin-discord-retry";
 import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
+import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
 import { adminContextLine, formatSubmittedAt } from "@/lib/testimonials/admin-view";
 import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 
@@ -15,8 +16,7 @@ type AdminPublishedPanelProps = {
 };
 
 /**
- * Después de publicar: Discord e Instagram en tabs.
- * El siguiente paso es subir la card a Instagram a mano.
+ * Después de publicar: Discord, Instagram y LinkedIn en tabs.
  */
 export function AdminPublishedPanel({
   testimonial,
@@ -54,8 +54,8 @@ export function AdminPublishedPanel({
               : null}
           </h2>
           <p className="text-body-small text-text-secondary">
-            Ya está en la galería. Instagram no se publica solo: descargá la
-            imagen (1080×1080), copiá el caption y subilo desde la cuenta.
+            Ya está en la galería. Instagram: descargá la imagen (1080×1080) y
+            copiá el caption. LinkedIn: copiá el texto (sin PNG).
           </p>
         </header>
 
@@ -86,6 +86,13 @@ export function AdminPublishedPanel({
             instagram={testimonial.instagram}
             typeLabel={testimonial.typeLabel}
             contextLine={adminContextLine(testimonial)}
+          />
+        }
+        linkedin={
+          <LinkedInPublishPreview
+            testimonial={testimonial}
+            caption={testimonial.liCaption}
+            showCopy
           />
         }
       />

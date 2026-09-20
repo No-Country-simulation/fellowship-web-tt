@@ -1,50 +1,35 @@
 # Copy pipeline (IG / LinkedIn)
 
-How Gemini drafts become publication-ready captions for testimonios.
+How Gemini fills the caption fields in `/admin/[id]`.
 
 ## Goal
 
-Each draft must sound like the **fellow** telling their story — not a brand essay or community-manager post.
+A post from **No Country** for Instagram or LinkedIn: short brand intro + quoted fellow quote + name + that network + hashtags.
 
 ## Pipeline
 
 ```text
-story + form type
-    → understanding (structured JSON)
-    → narrative strategy (type × platform)
-    → draft (Gemini 3.1 → fallback 2.5)
-    → validate (+ optional fidelity LLM)
-    → repair once if needed
-    → hashtags block (#NoCountry #DemoDay #TalentoIT)
+story + quote + form type
+    → Gemini writes only the intro (1–2 sentences, No Country voice)
+    → code assembles intro + "quote" + name + IG/LI + #NoCountry #DemoDay #TalentoIT
 ```
 
-Entry points: `POST /api/agent/procesar` or admin **Procesar** (`lib/agent/agent-actions.ts`).
+Entry: **Generar con IA** (`lib/testimonials/generate-caption.ts`). Does not persist until Guardar / Publicar (`ig_caption` / `li_caption`).
 
-## Voice (hard rules)
+Discord uses the same default intro, fixed (not generated, not editable). LinkedIn uses `li_caption` + Video + captura; Instagram uses `ig_caption` + PNG card.
 
-| Allowed | Rejected |
-|---------|----------|
-| First person: yo / me / mi / mis | Third-person narrator (“ella consiguió…”, “su historia”) |
-| Hook from lived experience | Impersonal openers (“Entrar al mundo IT…”) |
-| Soft CTA in first person | Brand CTAs (“Te leo en comentarios”, “seguinos”) |
+## Default intro
 
-Validators live in `lib/agent/copy-validator.ts`. Repair prompt rewrites voice errors in first person.
+`Desde No Country compartimos esta historia de nuestro talento`
 
-## Platform notes
+Gemini may rewrite that intro. Quote, name, handle and hashtags stay in code.
 
-| Platform | Rules |
-|----------|--------|
-| Instagram | Short lines, max 2 emojis, first-person CTA |
-| LinkedIn | 2–3 paragraphs, no casual emojis, professional first person |
+## Voice
 
-Hashtags: exactly `#NoCountry #DemoDay #TalentoIT` on a final blank-separated line — no extras, not mid-body.
-
-## Fidelity
-
-- Do not invent jobs, companies, numbers, or outcomes.
-- Affirmative hire language only if the source confirms it; seeking language is fine.
-- Optional second pass: `GEMINI_FIDELITY_LLM=true` (see [ENV.agent.md](./ENV.agent.md)).
+- Intro is the community account, not the fellow in first person.
+- Do not copy the quote, invent jobs, or add extra hashtags.
+- Reply with the intro only — no “acá te dejo opciones”.
 
 ## Human gate
 
-Admin reviews drafts in `/admin/[id]` → approve / edit / reject. Edited text publishes as-is (no auto re-Gemini). Social posting stays manual.
+Admin reviews in `/admin/[id]` → edit / Guardar / Publicar. Social posting stays manual (Buffer on another branch).

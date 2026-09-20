@@ -69,9 +69,11 @@ export async function saveTestimonial(
       full_name: data.fullName,
       email: data.email,
       instagram: data.instagram,
+      linkedin: data.linkedin,
       story: data.story,
       quote: data.quote,
       ig_caption: data.igCaption,
+      li_caption: data.liCaption,
       avatar_path: avatarPath,
       capture_path: capturePath,
       video_url: data.videoUrl,
@@ -207,23 +209,25 @@ export async function getTestimonialById(id: string): Promise<
 
 export async function saveReviewEdits(
   id: string,
-  edits: { quote: string; igCaption: string },
+  edits: { quote: string; igCaption: string; liCaption: string },
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   return updateReviewRow(id, {
     quote: edits.quote,
     ig_caption: edits.igCaption,
+    li_caption: edits.liCaption,
   });
 }
 
 export async function publishTestimonial(
   id: string,
-  edits: { quote: string; igCaption: string },
+  edits: { quote: string; igCaption: string; liCaption: string },
 ): Promise<{ ok: true; slug: string } | { ok: false; message: string }> {
   const updated = await updateReviewRow(
     id,
     {
       quote: edits.quote,
       ig_caption: edits.igCaption,
+      li_caption: edits.liCaption,
       status: "published",
       published_at: new Date().toISOString(),
     },
@@ -282,6 +286,7 @@ async function updateReviewRow(
   values: {
     quote?: string;
     ig_caption?: string;
+    li_caption?: string;
     status?: TestimonialStatus;
     published_at?: string;
   },

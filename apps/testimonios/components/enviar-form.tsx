@@ -13,6 +13,7 @@ import {
   STORY_MIN_CHARS,
   isValidEmail,
   normalizeInstagram,
+  normalizeLinkedIn,
   normalizeYouTubeUrl,
   validateImageFile,
   type FieldErrors,
@@ -60,6 +61,7 @@ export function EnviarForm() {
   const [newRole, setNewRole] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [linkedin, setLinkedin] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [captureFile, setCaptureFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
@@ -145,6 +147,9 @@ export function EnviarForm() {
       }
       if (instagram.trim() && !normalizeInstagram(instagram)) {
         nextErrors.instagram = "Usá tu usuario (@nombre) o el link de Instagram.";
+      }
+      if (linkedin.trim() && !normalizeLinkedIn(linkedin)) {
+        nextErrors.linkedin = "Pegá tu perfil (linkedin.com/in/…) o tu usuario.";
       }
     }
 
@@ -415,27 +420,52 @@ export function EnviarForm() {
             />
           )}
         </Field>
-        <Field
-          label="Instagram"
-          hint="Para mencionarte en el caption si publicamos."
-          error={fieldErrors.instagram}
-          optional
-        >
-          {({ id, describedBy, invalid }) => (
-            <input
-              id={id}
-              name="instagram"
-              type="text"
-              autoComplete="off"
-              placeholder="@tu.usuario"
-              value={instagram}
-              aria-invalid={invalid}
-              aria-describedby={describedBy}
-              className={fieldClassName}
-              onChange={(event) => setInstagram(event.target.value)}
-            />
-          )}
-        </Field>
+        <div className="grid grid-cols-2 gap-md">
+          <Field
+            label="Instagram"
+            hint="Para mencionarte en el caption si publicamos."
+            error={fieldErrors.instagram}
+            optional
+            className="min-w-0"
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="instagram"
+                type="text"
+                autoComplete="off"
+                placeholder="@tu.usuario"
+                value={instagram}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => setInstagram(event.target.value)}
+              />
+            )}
+          </Field>
+          <Field
+            label="LinkedIn"
+            hint="Para mencionarte en el post de LinkedIn si publicamos."
+            error={fieldErrors.linkedin}
+            optional
+            className="min-w-0"
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="linkedin"
+                type="text"
+                autoComplete="off"
+                placeholder="https://www.linkedin.com/in/tu-usuario"
+                value={linkedin}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => setLinkedin(event.target.value)}
+              />
+            )}
+          </Field>
+        </div>
       </fieldset>
 
       <fieldset

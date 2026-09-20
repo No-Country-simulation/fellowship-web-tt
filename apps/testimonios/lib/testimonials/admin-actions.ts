@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
 import { postCommunityTestimonial } from "@/lib/discord";
 
-import { buildIgCaption, CAPTION_EDIT_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "./quote";
+import {
+  buildIgCaption,
+  buildLiCaption,
+  CAPTION_EDIT_MAX_CHARS,
+  QUOTE_EDIT_MAX_CHARS,
+} from "./quote";
 import {
   getTestimonialById,
   markDiscordPosted,
@@ -15,12 +20,6 @@ import {
   saveReviewEdits,
 } from "./store";
 import type { ReviewState } from "./review-state";
-import {
-  careerChangeFields,
-  firstJobFields,
-  storyContextLine,
-  typeOption,
-} from "./types";
 
 export async function reviewTestimonial(
   id: string,
@@ -65,22 +64,32 @@ export async function reviewTestimonial(
       quote,
       fullName: current.testimonial.full_name,
       instagram: current.testimonial.instagram,
-      typeLabel: typeOption(current.testimonial.type).label,
-      contextLine: storyContextLine({
-        firstJob: firstJobFields(current.testimonial.payload),
-        careerChange: careerChangeFields(current.testimonial.payload),
-      }),
     });
   }
   if (igCaption.length > CAPTION_EDIT_MAX_CHARS) {
     return {
       status: "error",
-      message: `El caption puede tener hasta ${CAPTION_EDIT_MAX_CHARS} caracteres.`,
+      message: `El caption de Instagram puede tener hasta ${CAPTION_EDIT_MAX_CHARS} caracteres.`,
+    };
+  }
+
+  let liCaption = readString(formData, "li_caption");
+  if (!liCaption) {
+    liCaption = buildLiCaption({
+      quote,
+      fullName: current.testimonial.full_name,
+      linkedin: current.testimonial.linkedin,
+    });
+  }
+  if (liCaption.length > CAPTION_EDIT_MAX_CHARS) {
+    return {
+      status: "error",
+      message: `El caption de LinkedIn puede tener hasta ${CAPTION_EDIT_MAX_CHARS} caracteres.`,
     };
   }
 
   if (intent === "save") {
-    const saved = await saveReviewEdits(id, { quote, igCaption });
+    const saved = await saveReviewEdits(id, { quote, igCaption, liCaption });
     if (!saved.ok) {
       return { status: "error", message: saved.message };
     }
@@ -88,7 +97,7 @@ export async function reviewTestimonial(
     return { status: "saved" };
   }
 
-  const published = await publishTestimonial(id, { quote, igCaption });
+  const published = await publishTestimonial(id, { quote, igCaption, liCaption });
   if (!published.ok) {
     return { status: "error", message: published.message };
   }

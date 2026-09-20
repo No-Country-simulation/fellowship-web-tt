@@ -1,10 +1,6 @@
-import { excerptQuote, buildIgCaption } from "./quote";
+import { excerptQuote, buildIgCaption, buildLiCaption } from "./quote";
 import {
-  careerChangeFields,
-  firstJobFields,
   isTestimonialType,
-  storyContextLine,
-  typeOption,
   type TestimonialPayload,
   type TestimonialType,
 } from "./types";
@@ -48,6 +44,7 @@ export type FormField =
   | "capture"
   | "video_url"
   | "instagram"
+  | "linkedin"
   | "consent";
 
 export const FIELD_STEP: Record<FormField, number> = {
@@ -63,6 +60,7 @@ export const FIELD_STEP: Record<FormField, number> = {
   capture: 4,
   video_url: 4,
   instagram: 4,
+  linkedin: 4,
   consent: 5,
 };
 
@@ -72,10 +70,12 @@ export type ParsedTestimonial = {
   email: string;
   story: string;
   instagram: string | null;
+  linkedin: string | null;
   videoUrl: string | null;
   payload: TestimonialPayload;
   quote: string;
   igCaption: string;
+  liCaption: string;
   consentAt: string;
   avatar: File;
   capture: File | null;
@@ -195,6 +195,35 @@ export function normalizeInstagram(raw: string): string | null {
   return INSTAGRAM_HANDLE_PATTERN.test(handle) ? `@${handle}` : null;
 }
 
+const LINKEDIN_IN_PATTERN = /^[A-Za-z0-9_-]{3,100}$/;
+
+export function normalizeLinkedIn(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const asUrl = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+  try {
+    const url = new URL(asUrl);
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "linkedin.com") {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "in" && parts[1] && LINKEDIN_IN_PATTERN.test(parts[1])) {
+        return `https://www.linkedin.com/in/${parts[1]}`;
+      }
+      return null;
+    }
+  } catch {
+    // Handle-only input.
+  }
+
+  const handle = trimmed.replace(/^@/, "").replace(/^in\//, "");
+  return LINKEDIN_IN_PATTERN.test(handle)
+    ? `https://www.linkedin.com/in/${handle}`
+    : null;
+}
+
 export function validateImageFile(
   file: File | null,
   options: { required: boolean; maxBytes: number; label: string },
@@ -224,6 +253,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const email = readString(formData, "email");
   const story = readString(formData, "story");
   const instagramRaw = readString(formData, "instagram");
+  const linkedinRaw = readString(formData, "linkedin");
   const videoRaw = readString(formData, "video_url");
   const company = readString(formData, "company");
   const roleAchieved = readString(formData, "role_achieved");
@@ -329,6 +359,14 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     }
   }
 
+  let linkedin: string | null = null;
+  if (linkedinRaw) {
+    linkedin = normalizeLinkedIn(linkedinRaw);
+    if (!linkedin) {
+      fieldErrors.linkedin = "Pegá tu perfil (linkedin.com/in/…) o tu usuario.";
+    }
+  }
+
   if (!consent) {
     fieldErrors.consent = "Tenés que aceptar para enviar.";
   }
@@ -346,11 +384,11 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     quote,
     fullName,
     instagram,
-    typeLabel: typeOption(type).label,
-    contextLine: storyContextLine({
-      firstJob: firstJobFields(payload),
-      careerChange: careerChangeFields(payload),
-    }),
+  });
+  const liCaption = buildLiCaption({
+    quote,
+    fullName,
+    linkedin,
   });
 
   return {
@@ -361,10 +399,12 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
       email,
       story,
       instagram,
+      linkedin,
       videoUrl,
       payload,
       quote,
       igCaption,
+      liCaption,
       consentAt: new Date().toISOString(),
       avatar,
       capture,

@@ -21,7 +21,7 @@ import {
 
 - Cualquier input, textarea o grupo de radios de esta app
 - Upload de avatar o captura (`FileField`)
-- Textareas sueltos que deban verse igual (`textareaClassName` en el caption de Instagram)
+- Textareas sueltos que deban verse igual (`textareaClassName` en quote o captions)
 
 No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 

@@ -41,10 +41,12 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `slug` | `text` | no | | Único. URL `/t/{slug}` |
 | `full_name` | `text` | no | | Público |
 | `email` | `text` | no | | **Solo admin** |
-| `instagram` | `text` | sí | | Handle o URL. El caption puede usarlo |
+| `instagram` | `text` | sí | | Handle o URL. El caption de IG lo menciona |
+| `linkedin` | `text` | sí | | Perfil (`linkedin.com/in/…`) o handle. El caption de LI lo menciona |
 | `story` | `text` | no | | Texto largo (experiencia / cómo ayudó / por qué cambió) |
 | `quote` | `text` | no | | Recorte literal de `story` |
-| `ig_caption` | `text` | no | | Quote + tipo + contexto + nombre + IG si hay + hashtags |
+| `ig_caption` | `text` | no | | Intro No Country + quote entre comillas + nombre + IG + hashtags |
+| `li_caption` | `text` | no | `''` | Igual que IG, con LinkedIn en vez de Instagram. Solo admin |
 | `avatar_path` | `text` | no | | Path en `avatars`. Foto de **perfil**. Obligatorio |
 | `capture_path` | `text` | sí | | Path en `captures`. Screenshot del **proyecto/demo**, no la cara |
 | `video_url` | `text` | sí | | URL de YouTube |
@@ -60,7 +62,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). Validar forma de `payload` en la app y, si se quiere, con un check JSON.
 
-`discord_posted_at` sale de [`supabase/migrations/20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). No va en `testimonials_public`: es estado interno del admin.
+`discord_posted_at` sale de [`supabase/migrations/20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). `linkedin` y `li_caption` salen de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `li_caption` no va en `testimonials_public`: es texto del admin. `linkedin` sí: la galería puede mostrarlo.
 
 ---
 
@@ -117,7 +119,7 @@ type TestimonialPayload =
 
 Galería y `/t/[slug]` (rol `anon`). **Sin** `email`.
 
-Columnas: `id`, `type`, `slug`, `full_name`, `instagram`, `story`, `quote`, `avatar_path`, `capture_path`, `video_url`, `payload`, `published_at`.
+Columnas: `id`, `type`, `slug`, `full_name`, `instagram`, `linkedin`, `story`, `quote`, `avatar_path`, `capture_path`, `video_url`, `payload`, `published_at`.
 
 `where status = 'published'`.
 

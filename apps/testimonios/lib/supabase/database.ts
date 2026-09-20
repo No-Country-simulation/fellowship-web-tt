@@ -21,9 +21,11 @@ export type Database = {
           full_name: string;
           email: string;
           instagram: string | null;
+          linkedin: string | null;
           story: string;
           quote: string;
           ig_caption: string;
+          li_caption: string;
           avatar_path: string;
           capture_path: string | null;
           video_url: string | null;
@@ -43,9 +45,11 @@ export type Database = {
           full_name: string;
           email: string;
           instagram?: string | null;
+          linkedin?: string | null;
           story: string;
           quote: string;
           ig_caption: string;
+          li_caption?: string;
           avatar_path: string;
           capture_path?: string | null;
           video_url?: string | null;
@@ -65,9 +69,11 @@ export type Database = {
           full_name?: string;
           email?: string;
           instagram?: string | null;
+          linkedin?: string | null;
           story?: string;
           quote?: string;
           ig_caption?: string;
+          li_caption?: string;
           avatar_path?: string;
           capture_path?: string | null;
           video_url?: string | null;
@@ -76,90 +82,6 @@ export type Database = {
           submitted_at?: string;
           published_at?: string | null;
           discord_posted_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      contenido_generado: {
-        Row: {
-          id: string;
-          testimonio_id: string;
-          plataforma: "instagram" | "linkedin";
-          status: string;
-          draft_copy: string | null;
-          draft_title: string | null;
-          media_asset_path: string | null;
-          error_message: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          testimonio_id: string;
-          plataforma: "instagram" | "linkedin";
-          status?: string;
-          draft_copy?: string | null;
-          draft_title?: string | null;
-          media_asset_path?: string | null;
-          error_message?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          testimonio_id?: string;
-          plataforma?: "instagram" | "linkedin";
-          status?: string;
-          draft_copy?: string | null;
-          draft_title?: string | null;
-          media_asset_path?: string | null;
-          error_message?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      media_jobs: {
-        Row: {
-          id: string;
-          job_id: string;
-          testimonio_id: string;
-          plataforma: "instagram" | "linkedin";
-          status: string;
-          source_video_key: string | null;
-          source_audio_key: string | null;
-          media_asset_path: string | null;
-          error_message: string | null;
-          webhook_acked: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          job_id: string;
-          testimonio_id: string;
-          plataforma: "instagram" | "linkedin";
-          status?: string;
-          source_video_key?: string | null;
-          source_audio_key?: string | null;
-          media_asset_path?: string | null;
-          error_message?: string | null;
-          webhook_acked?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          job_id?: string;
-          testimonio_id?: string;
-          plataforma?: "instagram" | "linkedin";
-          status?: string;
-          source_video_key?: string | null;
-          source_audio_key?: string | null;
-          media_asset_path?: string | null;
-          error_message?: string | null;
-          webhook_acked?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -174,6 +96,7 @@ export type Database = {
           slug: string;
           full_name: string;
           instagram: string | null;
+          linkedin: string | null;
           story: string;
           quote: string;
           avatar_path: string;
