@@ -10,6 +10,7 @@ Names only — never commit secrets. Copy `.env.example` → `.env.local` (gitig
 | `GEMINI_API_KEY` | Next.js `lib/agent` | Intro de captions IG/LI (texto) |
 | `GEMINI_MODEL` | Next.js `lib/agent` | Optional primary (default `gemini-3.1-flash-lite`) |
 | `GEMINI_FALLBACK_MODEL` | Next.js `lib/agent` | Optional fallback (default `gemini-2.5-flash-lite`) |
+| `BUFFER_ENV` | Next.js `lib/buffer` | `development` = programar 24h; `production` = shareNow. Si falta, se programa |
 | `BUFFER_API_KEY` | Next.js `lib/buffer` | Bearer de Buffer. Sin esto, IG/LI no se ofrecen |
 | `BUFFER_IG_CHANNEL_ID` | Next.js `lib/buffer` | Canal Instagram. Si falta, esa red se saltea |
 | `BUFFER_LI_CHANNEL_ID` | Next.js `lib/buffer` | Canal LinkedIn. Si falta, esa red se saltea |

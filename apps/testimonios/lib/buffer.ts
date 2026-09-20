@@ -22,11 +22,9 @@ mutation CreateScheduledPost($input: CreatePostInput!) {
 }
 `;
 
-/** Pruebas: mañana 12:00 ART. Volver a `shareNow` (sin dueAt) cuando se publique de verdad. */
-const BUFFER_SHARE = {
-  schedulingType: "automatic",
-  mode: "customScheduled",
-} as const;
+export function bufferPublishesImmediately() {
+  return trimEnv(process.env.BUFFER_ENV)?.toLowerCase() === "production";
+}
 
 export type BufferNetwork = "instagram" | "linkedin";
 
@@ -75,8 +73,8 @@ export async function createPost(
   const payload: Record<string, unknown> = {
     text: input.text,
     channelId,
-    ...BUFFER_SHARE,
-    dueAt: tomorrowNoonArtIso(),
+    schedulingType: "automatic",
+    ...bufferShareTiming(),
   };
 
   if (input.network === "instagram") {
@@ -144,19 +142,15 @@ function trimEnv(value: string | undefined) {
   return raw ? raw : null;
 }
 
-function tomorrowNoonArtIso() {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value);
-  // 12:00 ART = 15:00 UTC (sin DST).
-  return new Date(
-    Date.UTC(value("year"), value("month") - 1, value("day") + 1, 15, 0, 0),
-  ).toISOString();
+function bufferShareTiming() {
+  if (bufferPublishesImmediately()) {
+    return { mode: "shareNow" as const };
+  }
+
+  return {
+    mode: "customScheduled" as const,
+    dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+  };
 }
 
 function linkedInText(caption: string, videoUrl: string | null | undefined) {

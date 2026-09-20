@@ -45,6 +45,7 @@ Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored). Gem
 | `ADMIN_EMAILS` | Allowlist del equipo, separada por coma. |
 | `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. |
+| `BUFFER_ENV` | `development` programa Buffer a 24h; `production` publica ya. Si falta, se programa. |
 | `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |
 | `BUFFER_IG_CHANNEL_ID` | Canal Instagram (direct publishing). Si falta, no hay botón IG. |
 | `BUFFER_LI_CHANNEL_ID` | Canal LinkedIn: `li_caption` + captura si hay + link de YouTube. |

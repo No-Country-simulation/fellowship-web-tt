@@ -7,6 +7,7 @@ import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
 import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
+import { bufferPublishesImmediately } from "@/lib/buffer";
 import { adminContextLine, formatSubmittedAt } from "@/lib/testimonials/admin-view";
 import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 
@@ -63,8 +64,11 @@ export function AdminPublishedPanel({
           </h2>
           <p className="text-body-small text-text-secondary">
             Ya está en la galería. Discord, Instagram y LinkedIn se envían al
-            publicar (Buffer queda programado; no sale en el momento). Si falla,
-            reintentá abajo o copiá el post desde las tabs.
+            publicar.
+            {bufferPublishesImmediately()
+              ? " Buffer publica al momento."
+              : " Buffer programa el post para dentro de 24 horas."}{" "}
+            Si falla, reintentá abajo o copiá el post desde las tabs.
           </p>
         </header>
 
