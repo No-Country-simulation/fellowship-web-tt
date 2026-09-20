@@ -15,6 +15,6 @@ Más el quote entre comillas. IG y LI suman nombre, red y `#NoCountry #DemoDay #
 | Avatar | Icono del autor | En la card 1080×1080 | No (post de texto) |
 | Captura del proyecto | Imagen grande del embed | No va en la card | Debajo del caption, se adjunta |
 | YouTube | Campo **Video** (`watch?v=`) | No entra al caption ni a la card | Campo **Video** (`watch?v=`), como Discord |
-| Publicación | Webhook automático al publicar | A mano: descargar PNG + copiar caption | A mano: copiar caption (+ link de video) |
+| Publicación | Webhook automático al publicar | Buffer (PNG en `share-cards` + caption). Reintentar o copiar si falla | Buffer (`li_caption` + captura/YouTube). Reintentar o copiar si falla |
 
 Detalles de copy: [COPY_PIPELINE.md](./COPY_PIPELINE.md).

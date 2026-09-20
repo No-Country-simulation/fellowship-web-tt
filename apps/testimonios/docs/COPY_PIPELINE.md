@@ -32,4 +32,4 @@ Gemini may rewrite that intro. Quote, name, handle and hashtags stay in code.
 
 ## Human gate
 
-Admin reviews in `/admin/[id]` → edit / Guardar / Publicar. Social posting stays manual (Buffer on another branch).
+Admin reviews in `/admin/[id]` → edit / Guardar / Publicar. Discord va por webhook; Instagram y LinkedIn por Buffer (si hay channel IDs).
