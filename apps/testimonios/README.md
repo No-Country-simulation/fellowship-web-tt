@@ -34,7 +34,7 @@ En `/admin/[id]`, Instagram y LinkedIn tienen **Generar con IA**. La respuesta r
 
 ## Variables de entorno
 
-Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored). Para el agente, ver también [docs/ENV.agent.md](./docs/ENV.agent.md).
+Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored). Gemini: [docs/ENV.agent.md](./docs/ENV.agent.md).
 
 | Variable | Para qué |
 | --- | --- |

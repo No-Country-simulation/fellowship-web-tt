@@ -90,7 +90,7 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 Inbox master-detail (`AdminInboxShell` en el layout protegido): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`AdminDetailLoading` / `[id]/loading.tsx`) hasta que carga `/admin/[id]`.
 
-En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (`AdminShareTabs`: Discord por defecto / Instagram / LinkedIn). Los tres tabs usan el mismo marco full width. La card de Instagram no supera `max-w-md` adentro del tab; el caption de IG va al lado (con Generar con IA). LinkedIn edita el caption adentro del preview. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption (IG), copiar caption (LI), y reintentar Discord si falló.
+En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (`AdminShareTabs`: Discord por defecto / Instagram / LinkedIn). Los tres tabs usan el mismo marco full width. La card de Instagram no supera `max-w-md` adentro del tab; el caption de IG va al lado (con Generar con IA). LinkedIn edita el caption adentro del preview. Publicar, guardar borrador o rechazar. Después de publicar: Discord / Buffer se envían solos; si fallan, reintentar. Las tabs siguen para revisar o copiar.
 
 ## Publicar en Discord de comunidad (post validación)
 
@@ -124,7 +124,7 @@ El aviso del Demo Day en el canal **general** es a mano (link `/enviar`). Los we
 
 **Al enviar** (aún `in_review`): `POST` JSON al webhook interno. Aviso corto: nombre, tipo, “nuevo testimonio”, link a `/admin/{id}`. Username del webhook: algo tipo “Testimonios inbox”. La comunidad no ve nada.
 
-**Al publicar:** el server action pasa a `published`, escribe `published_at`, y **después** hace `POST` al webhook de comunidad. El testimonio no espera a Discord para quedar publicado.
+**Al publicar:** el server action pasa a `published`, escribe `published_at`, y **después** postea Discord (webhook) e Instagram/LinkedIn (Buffer). El testimonio no espera a las redes para quedar publicado.
 
 Cuerpo del `POST` (comunidad): solo `embeds[0]` (sin `content`). Username del webhook: No Country. `avatar_url` de la raíz: logo de No Country.
 
@@ -144,7 +144,7 @@ Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `
 Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Cada canal usa distinto el mismo envío.
 
 - **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo. En LinkedIn no se muestra (post de texto).
-- **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram v1 **no entra** al post (la imagen del feed es la card). En LinkedIn va debajo del caption; se adjunta al post a mano.
+- **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram v1 **no entra** al post (la imagen del feed es la card). En LinkedIn Buffer la adjunta si hay.
 - **YouTube** (URL, no un mp4 nuestro, opcional): en Discord y LinkedIn el link `watch?v=` va en un campo **Video**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card IG. El Reel queda para v2.
 
 **Discord, en la práctica**
@@ -177,9 +177,9 @@ flowchart LR
   quote[Quote] --> card[PNG 1080x1080]
   avatar[Avatar] --> card
   logo[Logo] --> card
-  card --> download[Admin descarga]
-  caption[ig_caption] --> igApp[Post a mano en Instagram]
-  download --> igApp
+  card --> storage[share-cards]
+  caption[ig_caption] --> buffer[Buffer Instagram]
+  storage --> buffer
 ```
 
 **LinkedIn, en la práctica (v1)**
@@ -190,24 +190,23 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 
 **Cómo se publica**
 
-1. En revisión (`/admin/[id]`): tabs Discord / Instagram / LinkedIn. El embed de Discord y la card IG se actualizan si cambia el quote. Captions IG/LI se editan o se generan con Gemini. Publicar.
-2. Después de publicar: mismas tabs. En Instagram, **Descargar imagen** + **Copiar caption** (`AdminIgShare` en modo `share`). En LinkedIn, **Copiar caption**. El PNG se genera en el cliente; no hay URL de imagen en el server.
-3. El equipo sube el PNG y pega el caption en Instagram (app o Meta Business). En LinkedIn pega el caption (y adjunta captura / pega el link de video). Discord sí es automático; IG y LI en v1 no.
-4. Graph API / Buffer quedan para después (Buffer está en otra rama).
+1. En revisión (`/admin/[id]`): tabs Discord / Instagram / LinkedIn. Captions IG/LI se editan o se generan con Gemini. Publicar.
+2. Al publicar: Discord (webhook), Instagram (Buffer: sube el PNG a `share-cards` + `ig_caption`) y LinkedIn (Buffer: `li_caption` + captura si hay + YouTube). Buffer queda programado; no sale en el momento.
+3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. El admin reintenta. Las tabs sirven para copiar a mano si hace falta.
+4. Sin `BUFFER_API_KEY` o sin channel ID, esa red se saltea.
 
 **Lo que no se puede en v1**
 
 - Pasar el YouTube a un Reel o a un mp4 con logo (hace falta bajar/procesar el archivo → v2).
 - Que Discord “incruste” el video dentro de la imagen del embed.
-- Meter la captura del proyecto en el mismo post automático de Instagram.
-- Publicar LinkedIn o Instagram por API desde esta app.
+- Meter la captura del proyecto en el post de Instagram (la imagen del feed es la card).
 
 ## Stack v1
 
 - Next 16 en `apps/testimonios`, puerto 3001, UI propia
-- Supabase: Postgres, Auth (admin), Storage (`avatars` + `captures`), RLS
+- Supabase: Postgres, Auth (admin), Storage (`avatars` + `captures` + `share-cards`), RLS
 - Vercel. Sin worker de video
-- Env: Supabase, `DISCORD_INBOX_WEBHOOK_URL`, `DISCORD_COMMUNITY_WEBHOOK_URL`, `GEMINI_API_KEY` (intro de captions). Tokens Meta opcionales (v1 no postea a IG por API)
+- Env: Supabase, Discord webhooks, Buffer (`BUFFER_API_KEY` + channel IDs), `GEMINI_API_KEY` (intro de captions)
 
 ## Orden de implementación (v1)
 
@@ -216,7 +215,7 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 3. Formulario + quote/captions auto (IG + LI) + aviso inbox
 4. Admin validar / publicar
 5. Galería + embed YouTube
-6. Discord webhooks + card IG + preview LinkedIn (descargar PNG / copiar captions)
+6. Discord webhooks + Buffer (IG/LI) + card IG + preview LinkedIn
 
 ---
 

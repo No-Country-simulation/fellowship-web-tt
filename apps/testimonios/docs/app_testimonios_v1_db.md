@@ -8,6 +8,7 @@ Storage (no es tabla):
 
 - bucket `avatars` — `{id}/avatar.{ext}` (obligatorio en v1)
 - bucket `captures` — `{id}/capture.{ext}` (opcional; screenshot del proyecto/demo)
+- bucket `share-cards` — `{slug}/instagram.png` (PNG que Buffer descarga para Instagram)
 
 Los datos que **cambian según el tipo** van en un solo `payload jsonb`. Así `testimonials` no tiene columnas vacías (`company`, `puesto`, `oficio anterior`, etc.).
 
@@ -53,8 +54,10 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `payload` | `jsonb` | no | `'{}'` | Solo campos del tipo (abajo) |
 | `consent_at` | `timestamptz` | no | | |
 | `submitted_at` | `timestamptz` | no | `now()` | |
-| `published_at` | `timestamptz` | sí | | Al publicar. Se escribe aunque Discord falle |
+| `published_at` | `timestamptz` | sí | | Al publicar. Se escribe aunque Discord o Buffer fallen |
 | `discord_posted_at` | `timestamptz` | sí | | Cuando el webhook de comunidad posteó con éxito. Null = pendiente, falló, o no hay webhook |
+| `buffer_instagram_posted_at` | `timestamptz` | sí | | Cuando Buffer encoló Instagram. Null = pendiente, falló, o no hay canal |
+| `buffer_linkedin_posted_at` | `timestamptz` | sí | | Cuando Buffer encoló LinkedIn. Null = pendiente, falló, o no hay canal |
 | `created_at` | `timestamptz` | no | `now()` | |
 | `updated_at` | `timestamptz` | no | `now()` | Trigger `on update` |
 
@@ -62,7 +65,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). Validar forma de `payload` en la app y, si se quiere, con un check JSON.
 
-`discord_posted_at` sale de [`supabase/migrations/20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). `linkedin` y `li_caption` salen de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `li_caption` no va en `testimonials_public`: es texto del admin. `linkedin` sí: la galería puede mostrarlo.
+`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `li_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
 
 ---
 
@@ -129,7 +132,7 @@ Columnas: `id`, `type`, `slug`, `full_name`, `instagram`, `linkedin`, `story`, `
 
 - **anon:** `select` solo `testimonials_public`. El form escribe con server action + `service_role`.
 - **authenticated admin:** `select/update` de toda la fila (incluye `email`).
-- Buckets `avatars` y `captures`: lectura pública de publicados (o signed URL). Escritura solo server.
+- Buckets `avatars`, `captures` y `share-cards`: lectura pública. Escritura solo server.
 
 ---
 

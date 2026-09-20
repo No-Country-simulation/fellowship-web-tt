@@ -18,9 +18,9 @@ import { AdminIgShare } from "@/components/admin-ig-share";
 
 - Preview de la card mientras el admin retoca el quote
 - El caption se edita en el form (columna derecha del tab, con Generar con IA), no adentro de este componente. LinkedIn sí edita adentro del preview (`LinkedInPublishPreview`).
-- Descargar el PNG y copiar el caption para subir a Instagram a mano
+- Después de publicar, Buffer manda el PNG. Descargar / copiar queda por si hay que reintentar a mano.
 
-No usarlo en la galería pública. Instagram en v1 no se postea solo.
+No usarlo en la galería pública.
 
 ## Props
 
