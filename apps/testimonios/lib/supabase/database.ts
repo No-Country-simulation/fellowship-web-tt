@@ -34,6 +34,8 @@ export type Database = {
           submitted_at: string;
           published_at: string | null;
           discord_posted_at: string | null;
+          buffer_instagram_posted_at: string | null;
+          buffer_linkedin_posted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -58,6 +60,8 @@ export type Database = {
           submitted_at?: string;
           published_at?: string | null;
           discord_posted_at?: string | null;
+          buffer_instagram_posted_at?: string | null;
+          buffer_linkedin_posted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -82,6 +86,8 @@ export type Database = {
           submitted_at?: string;
           published_at?: string | null;
           discord_posted_at?: string | null;
+          buffer_instagram_posted_at?: string | null;
+          buffer_linkedin_posted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

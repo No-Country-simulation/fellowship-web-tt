@@ -45,13 +45,18 @@ Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored). Par
 | `ADMIN_EMAILS` | Allowlist del equipo, separada por coma. |
 | `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. |
+| `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |
+| `BUFFER_IG_CHANNEL_ID` | Canal Instagram (direct publishing). Si falta, no hay botón IG. |
+| `BUFFER_LI_CHANNEL_ID` | Canal LinkedIn: `li_caption` + captura si hay + link de YouTube. |
 | `GEMINI_API_KEY` | Intro de captions IG/LI (texto). Opcionales: `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`. |
-| `META_ACCESS_TOKEN` | Opcional; no se usa en v1 (IG es descargar PNG + copiar caption). |
-| `META_IG_USER_ID` | Opcional; no se usa en v1. |
+| `META_ACCESS_TOKEN` | Opcional; no se usa (Buffer publica IG/LI). |
+| `META_IG_USER_ID` | Opcional; no se usa. |
+
+Los channel IDs se copian del [API Explorer](https://developers.buffer.com/explorer.html) (`account.organizations` → `channels`). El código no los descubre solo.
 
 ## Supabase
 
-Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at` + `li_caption`).
+Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at` + Buffer + `li_caption`).
 
 1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`. `discord_posted_at` marca si el webhook de comunidad ya posteó; si falla, el admin reintenta.
 2. En Authentication: desactivá el registro público. Creá un usuario del equipo.

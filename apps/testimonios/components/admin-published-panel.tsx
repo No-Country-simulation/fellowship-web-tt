@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { buttonVariants } from "@repo/ui/button";
 
+import { AdminBufferRetry } from "@/components/admin-buffer-retry";
 import { AdminDiscordRetry } from "@/components/admin-discord-retry";
 import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
@@ -12,16 +13,23 @@ import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 type AdminPublishedPanelProps = {
   testimonial: AdminTestimonial;
   discordStatus: "ok" | "failed" | null;
+  bufferStatus: "ok" | "failed" | null;
   canRetryDiscord: boolean;
+  canRetryInstagram: boolean;
+  canRetryLinkedin: boolean;
 };
 
 /**
- * Después de publicar: Discord, Instagram y LinkedIn en tabs.
+ * Después de publicar: Discord por webhook; Instagram y LinkedIn por Buffer.
+ * Las tabs sirven para revisar o copiar si hay que reintentar a mano.
  */
 export function AdminPublishedPanel({
   testimonial,
   discordStatus,
+  bufferStatus,
   canRetryDiscord,
+  canRetryInstagram,
+  canRetryLinkedin,
 }: AdminPublishedPanelProps) {
   if (testimonial.status !== "published") {
     return (
@@ -54,8 +62,9 @@ export function AdminPublishedPanel({
               : null}
           </h2>
           <p className="text-body-small text-text-secondary">
-            Ya está en la galería. Instagram: descargá la imagen (1080×1080) y
-            copiá el caption. LinkedIn: copiá el texto (sin PNG).
+            Ya está en la galería. Discord, Instagram y LinkedIn se envían al
+            publicar (Buffer queda programado; no sale en el momento). Si falla,
+            reintentá abajo o copiá el post desde las tabs.
           </p>
         </header>
 
@@ -64,6 +73,22 @@ export function AdminPublishedPanel({
           discordPostedAt={testimonial.discordPostedAt}
           discordStatus={discordStatus}
           canRetry={canRetryDiscord}
+        />
+        <AdminBufferRetry
+          id={testimonial.id}
+          instagramPostedAt={testimonial.bufferInstagramPostedAt}
+          linkedinPostedAt={testimonial.bufferLinkedinPostedAt}
+          bufferStatus={bufferStatus}
+          canRetryInstagram={canRetryInstagram}
+          canRetryLinkedin={canRetryLinkedin}
+          igCard={{
+            quote: testimonial.quote,
+            fullName: testimonial.fullName,
+            avatarUrl: testimonial.avatarUrl,
+            instagram: testimonial.instagram,
+            typeLabel: testimonial.typeLabel,
+            contextLine: adminContextLine(testimonial),
+          }}
         />
       </section>
 

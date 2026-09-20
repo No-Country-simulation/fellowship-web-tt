@@ -4,8 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth/admin";
+import type { BufferCreatePostResult } from "@/lib/buffer";
 import { postCommunityTestimonial } from "@/lib/discord";
+import type { DiscordPostStatus } from "@/lib/discord";
 
+import {
+  readIgCard,
+  sharePublishedToBuffer,
+} from "./buffer-share";
 import {
   buildIgCaption,
   buildLiCaption,
@@ -14,6 +20,7 @@ import {
 } from "./quote";
 import {
   getTestimonialById,
+  markBufferPosted,
   markDiscordPosted,
   publishTestimonial,
   rejectTestimonial,
@@ -111,16 +118,16 @@ export async function reviewTestimonial(
     await markDiscordPosted(id);
   }
 
-  revalidateAdmin(id, published.slug);
+  const buffer = latest.ok
+    ? await sharePublishedToBuffer(latest.testimonial, readIgCard(formData))
+    : { instagram: failedBuffer(), linkedin: failedBuffer() };
 
-  // Queda en el testimonio: el siguiente paso es descargar la card y subirla a IG.
-  if (discord === "failed") {
-    redirect(`/admin/${id}?discord=failed`);
+  if (latest.ok) {
+    await recordBufferShare(id, latest.testimonial, buffer);
   }
-  if (discord === "posted") {
-    redirect(`/admin/${id}?discord=ok`);
-  }
-  redirect(`/admin/${id}`);
+
+  revalidateAdmin(id, published.slug);
+  redirectPublished(id, discord, buffer.instagram, buffer.linkedin);
 }
 
 export async function retryCommunityDiscord(id: string) {
@@ -155,6 +162,27 @@ export async function retryCommunityDiscord(id: string) {
   redirect(`/admin/${id}?discord=failed`);
 }
 
+export async function retryBufferShare(id: string, formData: FormData) {
+  await requireAdmin();
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    redirect("/admin");
+  }
+
+  if (current.testimonial.status !== "published") {
+    redirect(`/admin/${id}`);
+  }
+
+  const buffer = await sharePublishedToBuffer(
+    current.testimonial,
+    readIgCard(formData),
+  );
+  await recordBufferShare(id, current.testimonial, buffer);
+  revalidateAdmin(id, current.testimonial.slug);
+  redirectPublished(id, "skipped", buffer.instagram, buffer.linkedin);
+}
+
 function revalidateAdmin(id: string, slug: string) {
   revalidatePath("/admin");
   revalidatePath(`/admin/${id}`);
@@ -165,4 +193,48 @@ function revalidateAdmin(id: string, slug: string) {
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+function failedBuffer(): BufferCreatePostResult {
+  return { status: "failed" };
+}
+
+async function recordBufferShare(
+  id: string,
+  row: {
+    buffer_instagram_posted_at: string | null;
+    buffer_linkedin_posted_at: string | null;
+  },
+  buffer: {
+    instagram: BufferCreatePostResult;
+    linkedin: BufferCreatePostResult;
+  },
+) {
+  if (buffer.instagram.status === "created" && !row.buffer_instagram_posted_at) {
+    await markBufferPosted(id, "instagram");
+  }
+  if (buffer.linkedin.status === "created" && !row.buffer_linkedin_posted_at) {
+    await markBufferPosted(id, "linkedin");
+  }
+}
+
+function redirectPublished(
+  id: string,
+  discord: DiscordPostStatus,
+  instagram: BufferCreatePostResult,
+  linkedin: BufferCreatePostResult,
+): never {
+  const params = new URLSearchParams();
+  if (discord === "failed") {
+    params.set("discord", "failed");
+  } else if (discord === "posted") {
+    params.set("discord", "ok");
+  }
+  if (instagram.status === "failed" || linkedin.status === "failed") {
+    params.set("buffer", "failed");
+  } else if (instagram.status === "created" || linkedin.status === "created") {
+    params.set("buffer", "ok");
+  }
+  const query = params.toString();
+  redirect(query ? `/admin/${id}?${query}` : `/admin/${id}`);
 }
