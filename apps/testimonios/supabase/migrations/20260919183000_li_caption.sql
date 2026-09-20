@@ -11,7 +11,10 @@ comment on column public.testimonials.li_caption is
 comment on column public.testimonials.linkedin is
   'Perfil LinkedIn del fellow. URL o handle. Opcional.';
 
-create or replace view public.testimonials_public
+-- CREATE OR REPLACE no puede insertar una columna en el medio (42P16).
+drop view if exists public.testimonials_public;
+
+create view public.testimonials_public
 with (security_invoker = false)
 as
   select
@@ -30,5 +33,8 @@ as
     published_at
   from public.testimonials
   where status = 'published';
+
+comment on view public.testimonials_public is
+  'Galería y /t/[slug]. Rol anon. Sin email.';
 
 grant select on public.testimonials_public to anon, authenticated;
