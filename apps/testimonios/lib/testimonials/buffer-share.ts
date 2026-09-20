@@ -77,7 +77,7 @@ async function shareLinkedIn(row: TestimonialRow): Promise<BufferCreatePostResul
 
   return createPost({
     network: "linkedin",
-    text: row.ig_caption,
+    text: row.li_caption || row.ig_caption,
     imageUrl: row.capture_path
       ? publicStorageUrl(CAPTURES_BUCKET, row.capture_path)
       : null,

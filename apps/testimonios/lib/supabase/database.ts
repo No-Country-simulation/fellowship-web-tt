@@ -21,9 +21,11 @@ export type Database = {
           full_name: string;
           email: string;
           instagram: string | null;
+          linkedin: string | null;
           story: string;
           quote: string;
           ig_caption: string;
+          li_caption: string;
           avatar_path: string;
           capture_path: string | null;
           video_url: string | null;
@@ -45,9 +47,11 @@ export type Database = {
           full_name: string;
           email: string;
           instagram?: string | null;
+          linkedin?: string | null;
           story: string;
           quote: string;
           ig_caption: string;
+          li_caption?: string;
           avatar_path: string;
           capture_path?: string | null;
           video_url?: string | null;
@@ -69,9 +73,11 @@ export type Database = {
           full_name?: string;
           email?: string;
           instagram?: string | null;
+          linkedin?: string | null;
           story?: string;
           quote?: string;
           ig_caption?: string;
+          li_caption?: string;
           avatar_path?: string;
           capture_path?: string | null;
           video_url?: string | null;
@@ -96,6 +102,7 @@ export type Database = {
           slug: string;
           full_name: string;
           instagram: string | null;
+          linkedin: string | null;
           story: string;
           quote: string;
           avatar_path: string;

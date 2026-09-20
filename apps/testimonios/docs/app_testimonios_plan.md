@@ -1,6 +1,6 @@
 # Plan: sistema de testimonios
 
-Brief: capturar → almacenar → validar → compartir (Discord e Instagram). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Captura del proyecto y YouTube opcionales. Se pide en **Demo Day**.
+Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Captura del proyecto y YouTube opcionales. Se pide en **Demo Day**.
 
 App nueva `apps/testimonios` (Next + Supabase). No se mezcla con la landing de empresas.
 
@@ -11,9 +11,9 @@ App nueva `apps/testimonios` (Next + Supabase). No se mezcla con la landing de e
 ```mermaid
 flowchart LR
   form["1. Talento envía /enviar"] --> db["2. Supabase guarda"]
-  db --> auto["3. Quote caption aviso"]
+  db --> auto["3. Quote captions aviso"]
   auto --> admin["4. Admin publica o rechaza"]
-  admin --> out["5. Discord Instagram galería"]
+  admin --> out["5. Discord Instagram LinkedIn galería"]
 ```
 
 
@@ -39,7 +39,7 @@ Wizard corto, sin login.
 1. Qué querés contar
 2. Nombre y email
 3. Historia según el tipo
-4. **Avatar** (obligatorio) + **captura del proyecto** (opcional) + YouTube e Instagram (opcionales)
+4. **Avatar** (obligatorio) + **captura del proyecto** (opcional) + YouTube, Instagram y LinkedIn (opcionales)
 5. Consentimiento y enviar
 
 **Todos**
@@ -50,7 +50,8 @@ Wizard corto, sin login.
 - **Avatar** — **obligatorio**. Foto de la **persona** (cara / perfil). Es lo que va redondo en la card y en Discord junto al nombre. Sin avatar no se puede enviar.
 - **Captura** — opcional. **No es el avatar.** Imagen del **trabajo** (demo, producto, equipo).
 - Video — opcional: **solo URL de YouTube**
-- Instagram — opcional, para mención en el caption
+- Instagram — opcional, para mención en el caption de IG
+- LinkedIn — opcional, perfil (`linkedin.com/in/…`) o handle, para el caption de LI
 - Consentimiento — obligatorio
 
 **Según el tipo**
@@ -61,12 +62,23 @@ Wizard corto, sin login.
 
 Totales: simulación 6 obligatorios (incluye avatar); empleo y reconversión 8.
 
-Al enviar, el sistema arma dos textos **sin IA**: recorta lo que escribió la persona.
+Al enviar, el sistema arma los textos **sin IA**: recorta lo que escribió la persona.
 
-- **Quote** (card y Discord): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
-- **Caption** de Instagram: quote + tipo + línea de contexto (puesto/empresa o reconversión, si hay) + nombre + @instagram si hay + hashtags fijos (`#NoCountry #DemoDay #TalentoIT`).
+- **Quote** (card IG y Discord): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
+- **Captions** de Instagram y LinkedIn (misma plantilla, distinta red):
 
-El admin puede editar quote y caption antes de publicar. Si cambia el quote, el caption se ajusta automáticamente.
+```
+Desde No Country compartimos esta historia de nuestro talento
+
+"{quote}"
+
+{fullName}
+{instagram | linkedin}
+
+#NoCountry #DemoDay #TalentoIT
+```
+
+El admin puede editar quote y captions antes de publicar. Si cambia el quote y el caption no tiene un intro usable, se regenera la plantilla. En Instagram y LinkedIn, **Generar con IA** (Gemini) reescribe solo el intro; quote, nombre, red y hashtags los arma el código. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
 
 ## Guardar
 
@@ -78,7 +90,7 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 Inbox master-detail (`AdminInboxShell` en el layout protegido): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`AdminDetailLoading` / `[id]/loading.tsx`) hasta que carga `/admin/[id]`.
 
-En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (Discord por defecto / Instagram). Discord topea en `max-w-lg`; la card de Instagram en `max-w-md`, con el caption al lado. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption, y reintentar Discord si falló.
+En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (`AdminShareTabs`: Discord por defecto / Instagram / LinkedIn). Los tres tabs usan el mismo marco full width. La card de Instagram no supera `max-w-md` adentro del tab; el caption de IG va al lado (con Generar con IA). LinkedIn edita el caption adentro del preview. Publicar, guardar borrador o rechazar. Después de publicar: descargar PNG + copiar caption (IG), copiar caption (LI), y reintentar Discord si falló.
 
 ## Publicar en Discord de comunidad (post validación)
 
@@ -120,7 +132,7 @@ Cuerpo del post (embed):
 
 - Autor: `full_name` + avatar. El archivo **no se sube a Discord**. Se manda `embeds[0].author.icon_url` con la URL pública de Storage (`publicStorageUrl("avatars", avatar_path)`), la misma que ya usa el admin. Discord la descarga.
 - Título: tipo (Simulación / Primer empleo / Reconversión)
-- Descripción: `quote`
+- Descripción: intro fijo de No Country + quote entre comillas (`buildDiscordDescription`)
 - Imagen grande: **captura** del proyecto, si hay
 - Campos: empresa/puesto o reconversión si vienen en `payload`. Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube)
 - Color/footer: No Country
@@ -129,18 +141,18 @@ Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `
 
 ### Cómo se usa cada media (sin galería)
 
-Hay tres archivos. Cada canal los usa distinto porque Discord y Instagram no aceptan lo mismo.
+Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Cada canal usa distinto el mismo envío.
 
-- **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo.
-- **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram v1 **no entra** al post (la imagen del feed es la card).
-- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord el link `watch?v=` va en un **campo del embed**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card. El Reel queda para v2.
+- **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo. En LinkedIn no se muestra (post de texto).
+- **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram v1 **no entra** al post (la imagen del feed es la card). En LinkedIn va debajo del caption; se adjunta al post a mano.
+- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord y LinkedIn el link `watch?v=` va en un campo **Video**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card IG. El Reel queda para v2.
 
 **Discord, en la práctica**
 
-1. Siempre: nombre + avatar chico + quote.
+1. Siempre: nombre + avatar chico + intro fijo + quote entre comillas.
 2. Si hay captura: va de imagen grande. Si no hay, el post es solo texto + cara.
 3. Si hay YouTube: el link `watch?v=` va en un campo del embed. Un embed **no** reproduce YouTube; el link queda clickeable. No se manda `content` aparte.
-4. No se sube el video como archivo. No hace falta.
+4. El intro de Discord no se edita. No se sube el video como archivo. No hace falta.
 
 **Instagram, en la práctica (v1)**
 
@@ -153,12 +165,12 @@ La card (PNG 1080×1080) se dibuja **en el browser** (`drawIgCard` sobre un `<ca
 - Barra rosa + logo No Country
 - Avatar redondo
 - Tipo en mayúsculas
-- Quote (el que el admin retocó)
+- Quote entre comillas (el que el admin retocó)
 - Línea de contexto (puesto/empresa o reconversión), si hay
 - Nombre
 - Handle de Instagram, si hay
 
-La captura del proyecto **no va** en esta pieza. Sigue yendo a Discord. YouTube no entra como video.
+La captura del proyecto **no va** en esta pieza. Sigue yendo a Discord y LinkedIn. YouTube no entra como video.
 
 ```mermaid
 flowchart LR
@@ -170,36 +182,41 @@ flowchart LR
   download --> igApp
 ```
 
+**LinkedIn, en la práctica (v1)**
 
+LinkedIn acepta un post de **texto**. No hay card PNG ni chrome de perfil. El preview (`LinkedInPublishPreview`) muestra el caption, un campo **Video** (YouTube, como Discord) y la captura si hay.
+
+El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn en vez del handle de Instagram. En revisión se edita adentro del preview; **Generar con IA** reescribe solo el intro.
 
 **Cómo se publica**
 
-1. En revisión (`/admin/[id]`): tabs Discord / Instagram. El embed de Discord y la card IG se actualizan si cambia el quote; el caption de IG se ajusta automáticamente. Publicar.
-2. Después de publicar: mismas tabs. En Instagram, **Descargar imagen** + **Copiar caption** (`AdminIgShare` en modo `share`, card a la izquierda y caption a la derecha). El PNG se genera en el cliente; no hay URL de imagen en el server.
-3. El equipo sube el PNG y pega el caption en Instagram (app o Meta Business). Discord sí es automático; IG en v1 no.
-4. Graph API queda para después: haría falta una URL pública del PNG (recién cuando está `published`).
+1. En revisión (`/admin/[id]`): tabs Discord / Instagram / LinkedIn. El embed de Discord y la card IG se actualizan si cambia el quote. Captions IG/LI se editan o se generan con Gemini. Publicar.
+2. Después de publicar: mismas tabs. En Instagram, **Descargar imagen** + **Copiar caption** (`AdminIgShare` en modo `share`). En LinkedIn, **Copiar caption**. El PNG se genera en el cliente; no hay URL de imagen en el server.
+3. El equipo sube el PNG y pega el caption en Instagram (app o Meta Business). En LinkedIn pega el caption (y adjunta captura / pega el link de video). Discord sí es automático; IG y LI en v1 no.
+4. Graph API / Buffer quedan para después (Buffer está en otra rama).
 
 **Lo que no se puede en v1**
 
 - Pasar el YouTube a un Reel o a un mp4 con logo (hace falta bajar/procesar el archivo → v2).
 - Que Discord “incruste” el video dentro de la imagen del embed.
 - Meter la captura del proyecto en el mismo post automático de Instagram.
+- Publicar LinkedIn o Instagram por API desde esta app.
 
 ## Stack v1
 
 - Next 16 en `apps/testimonios`, puerto 3001, UI propia
 - Supabase: Postgres, Auth (admin), Storage (`avatars` + `captures`), RLS
 - Vercel. Sin worker de video
-- Env: Supabase, `DISCORD_INBOX_WEBHOOK_URL`, `DISCORD_COMMUNITY_WEBHOOK_URL`. Tokens Meta opcionales (v1 no postea a IG por API)
+- Env: Supabase, `DISCORD_INBOX_WEBHOOK_URL`, `DISCORD_COMMUNITY_WEBHOOK_URL`, `GEMINI_API_KEY` (intro de captions). Tokens Meta opcionales (v1 no postea a IG por API)
 
 ## Orden de implementación (v1)
 
 1. Scaffold de la app
 2. Supabase (tabla, Storage avatares + capturas, Auth, RLS)
-3. Formulario + quote/caption auto + aviso inbox
+3. Formulario + quote/captions auto (IG + LI) + aviso inbox
 4. Admin validar / publicar
 5. Galería + embed YouTube
-6. Discord webhooks + card IG (descargar PNG + copiar caption)
+6. Discord webhooks + card IG + preview LinkedIn (descargar PNG / copiar captions)
 
 ---
 

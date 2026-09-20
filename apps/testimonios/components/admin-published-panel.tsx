@@ -6,6 +6,7 @@ import { AdminDiscordRetry } from "@/components/admin-discord-retry";
 import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
+import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
 import { adminContextLine, formatSubmittedAt } from "@/lib/testimonials/admin-view";
 import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 
@@ -19,7 +20,8 @@ type AdminPublishedPanelProps = {
 };
 
 /**
- * Después de publicar: Discord, Instagram y LinkedIn se envían solos.
+ * Después de publicar: Discord por webhook; Instagram y LinkedIn por Buffer.
+ * Las tabs sirven para revisar o copiar si hay que reintentar a mano.
  */
 export function AdminPublishedPanel({
   testimonial,
@@ -61,7 +63,8 @@ export function AdminPublishedPanel({
           </h2>
           <p className="text-body-small text-text-secondary">
             Ya está en la galería. Discord, Instagram y LinkedIn se envían al
-            publicar (Buffer queda programado; no sale en el momento).
+            publicar (Buffer queda programado; no sale en el momento). Si falla,
+            reintentá abajo o copiá el post desde las tabs.
           </p>
         </header>
 
@@ -108,6 +111,13 @@ export function AdminPublishedPanel({
             instagram={testimonial.instagram}
             typeLabel={testimonial.typeLabel}
             contextLine={adminContextLine(testimonial)}
+          />
+        }
+        linkedin={
+          <LinkedInPublishPreview
+            testimonial={testimonial}
+            caption={testimonial.liCaption}
+            showCopy
           />
         }
       />

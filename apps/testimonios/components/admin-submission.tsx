@@ -105,6 +105,11 @@ export function AdminSubmission({ testimonial }: AdminSubmissionProps) {
           value={testimonial.instagram ?? "No dejó Instagram"}
           muted={!testimonial.instagram}
         />
+        <Fact
+          label="LinkedIn"
+          value={testimonial.linkedin ?? "No dejó LinkedIn"}
+          muted={!testimonial.linkedin}
+        />
         {testimonial.firstJob ? (
           <>
             <Fact label="Empresa" value={testimonial.firstJob.company} />

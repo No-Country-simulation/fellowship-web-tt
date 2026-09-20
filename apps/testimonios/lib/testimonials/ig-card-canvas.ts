@@ -1,4 +1,5 @@
 import { IG_CARD_SIZE } from "./ig-card";
+import { stripWrappingQuotes } from "./quote";
 
 const BG = "#000115";
 const TEXT_PRIMARY = "#ffffff";
@@ -90,7 +91,7 @@ export async function drawIgCard(
   const quoteMaxHeight = footerTop - 32 - y;
   drawQuote(
     ctx,
-    `“${input.quote}”`,
+    `“${stripWrappingQuotes(input.quote)}”`,
     cx,
     y,
     quoteMaxWidth,

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { id: "discord", label: "Discord" },
   { id: "instagram", label: "Instagram" },
+  { id: "linkedin", label: "LinkedIn" },
 ] as const;
 
 type ShareTab = (typeof TABS)[number]["id"];
@@ -14,10 +15,15 @@ type ShareTab = (typeof TABS)[number]["id"];
 type AdminShareTabsProps = {
   discord: ReactNode;
   instagram: ReactNode;
+  linkedin: ReactNode;
 };
 
 /** Tabs de preview por red. Discord primero. Los paneles quedan montados. */
-export function AdminShareTabs({ discord, instagram }: AdminShareTabsProps) {
+export function AdminShareTabs({
+  discord,
+  instagram,
+  linkedin,
+}: AdminShareTabsProps) {
   const [tab, setTab] = useState<ShareTab>("discord");
   const baseId = useId();
   const tabRefs = useRef<Partial<Record<ShareTab, HTMLButtonElement | null>>>({});
@@ -32,7 +38,12 @@ export function AdminShareTabs({ discord, instagram }: AdminShareTabsProps) {
       return;
     }
     event.preventDefault();
-    selectTab(tab === "discord" ? "instagram" : "discord");
+    const index = TABS.findIndex((item) => item.id === tab);
+    const delta = event.key === "ArrowRight" ? 1 : -1;
+    const next = TABS[(index + delta + TABS.length) % TABS.length];
+    if (next) {
+      selectTab(next.id);
+    }
   }
 
   return (
@@ -71,24 +82,24 @@ export function AdminShareTabs({ discord, instagram }: AdminShareTabsProps) {
         })}
       </div>
 
-      <div
-        id={`${baseId}-discord-panel`}
-        role="tabpanel"
-        aria-labelledby={`${baseId}-discord`}
-        hidden={tab !== "discord"}
-        className="min-w-0 rounded-md border border-border bg-card p-md"
-      >
-        <div className="w-full max-w-lg">{discord}</div>
-      </div>
-      <div
-        id={`${baseId}-instagram-panel`}
-        role="tabpanel"
-        aria-labelledby={`${baseId}-instagram`}
-        hidden={tab !== "instagram"}
-        className="min-w-0 rounded-md border border-border bg-card p-md"
-      >
-        <div className="w-full max-w-4xl">{instagram}</div>
-      </div>
+      {(
+        [
+          { id: "discord", content: discord },
+          { id: "instagram", content: instagram },
+          { id: "linkedin", content: linkedin },
+        ] as const
+      ).map(({ id, content }) => (
+        <div
+          key={id}
+          id={`${baseId}-${id}-panel`}
+          role="tabpanel"
+          aria-labelledby={`${baseId}-${id}`}
+          hidden={tab !== id}
+          className="min-w-0 rounded-md border border-border bg-card p-md"
+        >
+          <div className="w-full">{content}</div>
+        </div>
+      ))}
     </div>
   );
 }
