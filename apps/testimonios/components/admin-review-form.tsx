@@ -18,6 +18,7 @@ import {
   buildIgCaption,
   buildLiCaption,
   extractCaptionIntro,
+  followsShareCaptionTemplate,
   QUOTE_EDIT_MAX_CHARS,
 } from "@/lib/testimonials/quote";
 import { cn } from "@/lib/utils";
@@ -59,22 +60,28 @@ export function AdminReviewForm({
 
   function onQuoteChange(value: string) {
     setQuote(value);
-    setCaption(
-      buildIgCaption({
-        intro: extractCaptionIntro(caption) ?? undefined,
+    setCaption((current) => {
+      if (!followsShareCaptionTemplate(current)) {
+        return current;
+      }
+      return buildIgCaption({
+        intro: extractCaptionIntro(current) ?? undefined,
         quote: value,
         fullName: testimonial.fullName,
         instagram: testimonial.instagram,
-      }),
-    );
-    setLiCaption(
-      buildLiCaption({
-        intro: extractCaptionIntro(liCaption) ?? undefined,
+      });
+    });
+    setLiCaption((current) => {
+      if (!followsShareCaptionTemplate(current)) {
+        return current;
+      }
+      return buildLiCaption({
+        intro: extractCaptionIntro(current) ?? undefined,
         quote: value,
         fullName: testimonial.fullName,
         linkedin: testimonial.linkedin,
-      }),
-    );
+      });
+    });
   }
 
   return (
@@ -84,15 +91,23 @@ export function AdminReviewForm({
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         const value =
           submitter instanceof HTMLButtonElement ? submitter.value : "";
-        if (value !== "publish") {
+        if (value === "reject") {
           return;
         }
         event.preventDefault();
         const form = event.currentTarget;
+        const formData = new FormData(form);
+        formData.set("intent", value);
+        formData.set("quote", quote);
+        formData.set("ig_caption", caption);
+        formData.set("li_caption", liCaption);
+        if (value !== "publish") {
+          setIntent("save");
+          formAction(formData);
+          return;
+        }
         void (async () => {
           setIntent("publish");
-          const formData = new FormData(form);
-          formData.set("intent", "publish");
           try {
             const blob = await igCardPngBlob({
               quote,
@@ -114,6 +129,9 @@ export function AdminReviewForm({
       }}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
+      <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="quote" value={quote} />
+      <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="ig_caption" value={caption} />
+      <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="li_caption" value={liCaption} />
       <PageShell
         fullWidth
         title={title}
@@ -149,7 +167,6 @@ export function AdminReviewForm({
             <div>
               <textarea
                 id="admin-quote"
-                name="quote"
                 value={quote}
                 maxLength={QUOTE_EDIT_MAX_CHARS}
                 aria-labelledby="admin-edit-title"
@@ -210,7 +227,6 @@ export function AdminReviewForm({
                     contextLine={contextLine}
                   />
                   <AdminCaptionField
-                    name="ig_caption"
                     plataforma="instagram"
                     testimonioId={testimonial.id}
                     quote={quote}

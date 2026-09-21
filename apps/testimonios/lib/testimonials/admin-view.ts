@@ -6,7 +6,7 @@ import {
 } from "@/lib/supabase/storage";
 
 import { youtubeEmbedSrc } from "./parse";
-import { buildIgCaption, buildLiCaption, extractCaptionIntro } from "./quote";
+import { buildIgCaption, buildLiCaption } from "./quote";
 import {
   careerChangeFields,
   firstJobFields,
@@ -72,22 +72,20 @@ export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
     linkedin: row.linkedin ?? null,
     story: row.story,
     quote: row.quote,
-    igCaption:
-      row.ig_caption.trim() && extractCaptionIntro(row.ig_caption)
-        ? row.ig_caption
-        : buildIgCaption({
-            quote: row.quote,
-            fullName: row.full_name,
-            instagram: row.instagram,
-          }),
-    liCaption:
-      row.li_caption?.trim() && extractCaptionIntro(row.li_caption)
-        ? row.li_caption
-        : buildLiCaption({
-            quote: row.quote,
-            fullName: row.full_name,
-            linkedin: row.linkedin,
-          }),
+    igCaption: row.ig_caption.trim()
+      ? row.ig_caption
+      : buildIgCaption({
+          quote: row.quote,
+          fullName: row.full_name,
+          instagram: row.instagram,
+        }),
+    liCaption: row.li_caption?.trim()
+      ? row.li_caption
+      : buildLiCaption({
+          quote: row.quote,
+          fullName: row.full_name,
+          linkedin: row.linkedin,
+        }),
     avatarUrl: publicStorageUrl(AVATARS_BUCKET, row.avatar_path),
     captureUrl: row.capture_path
       ? publicStorageUrl(CAPTURES_BUCKET, row.capture_path)

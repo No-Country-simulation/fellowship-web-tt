@@ -10,7 +10,6 @@ import { CAPTION_EDIT_MAX_CHARS } from "@/lib/testimonials/quote";
 import { cn } from "@/lib/utils";
 
 type AdminCaptionFieldProps = {
-  name: "ig_caption" | "li_caption";
   plataforma: Plataforma;
   testimonioId: string;
   quote: string;
@@ -21,7 +20,6 @@ type AdminCaptionFieldProps = {
 
 /** Textarea de caption + generar con Gemini. No persiste hasta Guardar / Publicar. */
 export function AdminCaptionField({
-  name,
   plataforma,
   testimonioId,
   quote,
@@ -75,7 +73,6 @@ export function AdminCaptionField({
       ) : null}
       <textarea
         id={captionId}
-        name={name}
         value={value}
         maxLength={CAPTION_EDIT_MAX_CHARS}
         aria-describedby={describedBy}

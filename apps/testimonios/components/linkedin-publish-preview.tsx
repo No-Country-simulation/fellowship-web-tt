@@ -137,7 +137,6 @@ export function LinkedInPublishPreview({
           >
             <textarea
               id={captionId}
-              name="li_caption"
               value={caption}
               maxLength={CAPTION_EDIT_MAX_CHARS}
               aria-describedby={countId}
