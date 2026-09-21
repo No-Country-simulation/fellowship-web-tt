@@ -18,6 +18,7 @@ import {
   buildIgCaption,
   buildLiCaption,
   extractCaptionIntro,
+  followsShareCaptionTemplate,
   QUOTE_EDIT_MAX_CHARS,
 } from "@/lib/testimonials/quote";
 import { cn } from "@/lib/utils";
@@ -59,22 +60,28 @@ export function AdminReviewForm({
 
   function onQuoteChange(value: string) {
     setQuote(value);
-    setCaption(
-      buildIgCaption({
-        intro: extractCaptionIntro(caption) ?? undefined,
+    setCaption((current) => {
+      if (!followsShareCaptionTemplate(current)) {
+        return current;
+      }
+      return buildIgCaption({
+        intro: extractCaptionIntro(current) ?? undefined,
         quote: value,
         fullName: testimonial.fullName,
         instagram: testimonial.instagram,
-      }),
-    );
-    setLiCaption(
-      buildLiCaption({
-        intro: extractCaptionIntro(liCaption) ?? undefined,
+      });
+    });
+    setLiCaption((current) => {
+      if (!followsShareCaptionTemplate(current)) {
+        return current;
+      }
+      return buildLiCaption({
+        intro: extractCaptionIntro(current) ?? undefined,
         quote: value,
         fullName: testimonial.fullName,
         linkedin: testimonial.linkedin,
-      }),
-    );
+      });
+    });
   }
 
   return (

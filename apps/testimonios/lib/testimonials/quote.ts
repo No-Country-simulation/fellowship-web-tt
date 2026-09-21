@@ -102,14 +102,21 @@ export function buildLiCaption(input: {
   });
 }
 
+const SHARE_CAPTION_QUOTE = /^([\s\S]*?)\n\n["“]/;
+
 /** Recupera el intro si el caption sigue el template (antes del quote). */
 export function extractCaptionIntro(caption: string): string | null {
-  const match = caption.match(/^([\s\S]*?)\n\n["“]/);
+  const match = caption.match(SHARE_CAPTION_QUOTE);
   const intro = match?.[1]?.trim();
   if (!intro || LEGACY_DEFAULT_INTROS.has(intro)) {
     return null;
   }
   return intro;
+}
+
+/** True si el caption sigue intro + quote entre comillas. Los libres no. */
+export function followsShareCaptionTemplate(caption: string): boolean {
+  return SHARE_CAPTION_QUOTE.test(caption);
 }
 
 function firstSentences(text: string, count: number): string {

@@ -168,15 +168,40 @@ export function EnviarForm() {
   }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (step !== STEPS) {
-      event.preventDefault();
       goNext();
       return;
     }
 
     if (!validateStep(STEPS)) {
-      event.preventDefault();
+      return;
     }
+
+    const formData = new FormData();
+    if (type) {
+      formData.set("type", type);
+    }
+    formData.set("full_name", fullName);
+    formData.set("email", email);
+    formData.set("story", story);
+    formData.set("company", company);
+    formData.set("role_achieved", roleAchieved);
+    formData.set("previous_profession", previousProfession);
+    formData.set("new_role", newRole);
+    formData.set("video_url", videoUrl);
+    formData.set("instagram", instagram);
+    formData.set("linkedin", linkedin);
+    if (consent) {
+      formData.set("consent", "1");
+    }
+    if (avatarFile) {
+      formData.set("avatar", avatarFile);
+    }
+    if (captureFile) {
+      formData.set("capture", captureFile);
+    }
+    formAction(formData);
   }
 
   return (
