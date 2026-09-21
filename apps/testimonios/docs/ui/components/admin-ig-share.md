@@ -4,7 +4,7 @@ Card de Instagram 1080×1080: preview en canvas, descargar PNG y copiar caption.
 
 **Archivo:** `components/admin-ig-share.tsx`
 
-Uso previsto: `/admin/[id]`, tab Instagram. En revisión (`mode="preview"`) solo el canvas; el caption lo edita el form al lado. Después de publicar (`mode="share"`) suma **Descargar imagen** y **Copiar caption**, con la card a la izquierda y el caption a la derecha.
+Uso previsto: `/admin/[id]`, tab Instagram. En revisión (`mode="preview"`) solo el canvas; el caption lo edita el form al lado (`AdminCaptionField` + Generar con IA). Después de publicar (`mode="share"`) suma **Descargar imagen** y **Copiar caption**, con la card a la izquierda y el caption a la derecha.
 
 El dibujo vive en `lib/testimonials/ig-card-canvas.ts` (`drawIgCard`). Tamaño y nombre de archivo: `lib/testimonials/ig-card.ts`. No hay ruta `/admin/[id]/ig-card` ni `next/og`.
 
@@ -17,10 +17,10 @@ import { AdminIgShare } from "@/components/admin-ig-share";
 ## Cuándo usarlo
 
 - Preview de la card mientras el admin retoca el quote
-- El caption se edita en el form (columna derecha del tab), no adentro de este componente
-- Descargar el PNG y copiar el caption para subir a Instagram a mano
+- El caption se edita en el form (columna derecha del tab, con Generar con IA), no adentro de este componente. LinkedIn sí edita adentro del preview (`LinkedInPublishPreview`).
+- Después de publicar, Buffer manda el PNG. Descargar / copiar queda por si hay que reintentar a mano.
 
-No usarlo en la galería pública. Instagram en v1 no se postea solo.
+No usarlo en la galería pública.
 
 ## Props
 
@@ -62,7 +62,7 @@ No usarlo en la galería pública. Instagram en v1 no se postea solo.
 
 ## Notas
 
-- La card en preview no supera `max-w-md` (448px). El tab de Instagram topea el bloque (card + caption) en `max-w-4xl`.
+- La card en preview no supera `max-w-md` (448px). El tab (Discord / Instagram / LinkedIn) es full width.
 - Layout de la card: barra rosa, logo, tipo, avatar, quote, contexto, nombre, handle.
 - La preview debouncea el quote ~400 ms. Descargar usa el quote actual, no el debounceado.
 - El avatar y el logo se fetchean con CORS. Si Storage no manda headers CORS, el preview puede fallar; el admin ve el error.

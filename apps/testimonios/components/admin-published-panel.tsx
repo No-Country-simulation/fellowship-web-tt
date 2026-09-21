@@ -1,27 +1,36 @@
 import Link from "next/link";
 import { buttonVariants } from "@repo/ui/button";
 
+import { AdminBufferRetry } from "@/components/admin-buffer-retry";
 import { AdminDiscordRetry } from "@/components/admin-discord-retry";
 import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
+import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
+import { bufferPublishesImmediately } from "@/lib/buffer";
 import { adminContextLine, formatSubmittedAt } from "@/lib/testimonials/admin-view";
 import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 
 type AdminPublishedPanelProps = {
   testimonial: AdminTestimonial;
   discordStatus: "ok" | "failed" | null;
+  bufferStatus: "ok" | "failed" | null;
   canRetryDiscord: boolean;
+  canRetryInstagram: boolean;
+  canRetryLinkedin: boolean;
 };
 
 /**
- * Después de publicar: Discord e Instagram en tabs.
- * El siguiente paso es subir la card a Instagram a mano.
+ * Después de publicar: Discord por webhook; Instagram y LinkedIn por Buffer.
+ * Las tabs sirven para revisar o copiar si hay que reintentar a mano.
  */
 export function AdminPublishedPanel({
   testimonial,
   discordStatus,
+  bufferStatus,
   canRetryDiscord,
+  canRetryInstagram,
+  canRetryLinkedin,
 }: AdminPublishedPanelProps) {
   if (testimonial.status !== "published") {
     return (
@@ -54,8 +63,12 @@ export function AdminPublishedPanel({
               : null}
           </h2>
           <p className="text-body-small text-text-secondary">
-            Ya está en la galería. Instagram no se publica solo: descargá la
-            imagen (1080×1080), copiá el caption y subilo desde la cuenta.
+            Ya está en la galería. Discord, Instagram y LinkedIn se envían al
+            publicar.
+            {bufferPublishesImmediately()
+              ? " Buffer publica al momento."
+              : " Buffer programa el post para dentro de 24 horas."}{" "}
+            Si falla, reintentá abajo o copiá el post desde las tabs.
           </p>
         </header>
 
@@ -64,6 +77,22 @@ export function AdminPublishedPanel({
           discordPostedAt={testimonial.discordPostedAt}
           discordStatus={discordStatus}
           canRetry={canRetryDiscord}
+        />
+        <AdminBufferRetry
+          id={testimonial.id}
+          instagramPostedAt={testimonial.bufferInstagramPostedAt}
+          linkedinPostedAt={testimonial.bufferLinkedinPostedAt}
+          bufferStatus={bufferStatus}
+          canRetryInstagram={canRetryInstagram}
+          canRetryLinkedin={canRetryLinkedin}
+          igCard={{
+            quote: testimonial.quote,
+            fullName: testimonial.fullName,
+            avatarUrl: testimonial.avatarUrl,
+            instagram: testimonial.instagram,
+            typeLabel: testimonial.typeLabel,
+            contextLine: adminContextLine(testimonial),
+          }}
         />
       </section>
 
@@ -86,6 +115,13 @@ export function AdminPublishedPanel({
             instagram={testimonial.instagram}
             typeLabel={testimonial.typeLabel}
             contextLine={adminContextLine(testimonial)}
+          />
+        }
+        linkedin={
+          <LinkedInPublishPreview
+            testimonial={testimonial}
+            caption={testimonial.liCaption}
+            showCopy
           />
         }
       />

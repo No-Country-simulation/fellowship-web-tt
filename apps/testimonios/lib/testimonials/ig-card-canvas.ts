@@ -1,4 +1,5 @@
 import { IG_CARD_SIZE } from "./ig-card";
+import { stripWrappingQuotes } from "./quote";
 
 const BG = "#000115";
 const TEXT_PRIMARY = "#ffffff";
@@ -90,7 +91,7 @@ export async function drawIgCard(
   const quoteMaxHeight = footerTop - 32 - y;
   drawQuote(
     ctx,
-    `“${input.quote}”`,
+    `“${stripWrappingQuotes(input.quote)}”`,
     cx,
     y,
     quoteMaxWidth,
@@ -130,6 +131,14 @@ export function canvasToPng(canvas: HTMLCanvasElement): Promise<Blob> {
       reject(new Error("No pudimos generar la imagen."));
     }, "image/png");
   });
+}
+
+export async function igCardPngBlob(
+  input: Parameters<typeof drawIgCard>[1],
+): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  await drawIgCard(canvas, input);
+  return canvasToPng(canvas);
 }
 
 function drawAvatar(

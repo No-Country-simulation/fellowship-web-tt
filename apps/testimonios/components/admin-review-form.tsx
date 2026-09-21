@@ -1,19 +1,23 @@
 "use client";
 
-import { useActionState, useId, useState, type ReactNode } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { buttonVariants } from "@repo/ui/button";
 
+import { AdminCaptionField } from "@/components/admin-caption-field";
 import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
+import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
 import { textareaClassName } from "@/components/enviar-fields";
 import { PageShell } from "@/components/page-shell";
 import { reviewTestimonial } from "@/lib/testimonials/admin-actions";
 import { adminContextLine, type AdminTestimonial } from "@/lib/testimonials/admin-view";
+import { igCardPngBlob } from "@/lib/testimonials/ig-card-canvas";
 import { initialReviewState } from "@/lib/testimonials/review-state";
 import {
   buildIgCaption,
-  CAPTION_EDIT_MAX_CHARS,
+  buildLiCaption,
+  extractCaptionIntro,
   QUOTE_EDIT_MAX_CHARS,
 } from "@/lib/testimonials/quote";
 import { cn } from "@/lib/utils";
@@ -31,8 +35,7 @@ type AdminReviewFormProps = {
 };
 
 /**
- * Revisión: envío plegado, quote, y preview por tabs (Discord / Instagram).
- * El caption se edita en el tab de Instagram, al lado de la card.
+ * Revisión: envío plegado, quote, y preview por tabs (Discord / Instagram / LinkedIn).
  */
 export function AdminReviewForm({
   testimonial,
@@ -49,22 +52,27 @@ export function AdminReviewForm({
   );
   const [quote, setQuote] = useState(testimonial.quote);
   const [caption, setCaption] = useState(testimonial.igCaption);
+  const [liCaption, setLiCaption] = useState(testimonial.liCaption);
   const [intent, setIntent] = useState<Intent | null>(null);
-  const captionId = useId();
-  const captionHintId = `${captionId}-hint`;
-  const captionCountId = `${captionId}-count`;
-  const captionDescribedBy = `${captionHintId} ${captionCountId}`;
   const quoteEmpty = quote.trim().length === 0;
+  const contextLine = adminContextLine(testimonial);
 
   function onQuoteChange(value: string) {
     setQuote(value);
     setCaption(
       buildIgCaption({
+        intro: extractCaptionIntro(caption) ?? undefined,
         quote: value,
         fullName: testimonial.fullName,
         instagram: testimonial.instagram,
-        typeLabel: testimonial.typeLabel,
-        contextLine: adminContextLine(testimonial),
+      }),
+    );
+    setLiCaption(
+      buildLiCaption({
+        intro: extractCaptionIntro(liCaption) ?? undefined,
+        quote: value,
+        fullName: testimonial.fullName,
+        linkedin: testimonial.linkedin,
       }),
     );
   }
@@ -72,6 +80,38 @@ export function AdminReviewForm({
   return (
     <form
       action={formAction}
+      onSubmit={(event) => {
+        const submitter = (event.nativeEvent as SubmitEvent).submitter;
+        const value =
+          submitter instanceof HTMLButtonElement ? submitter.value : "";
+        if (value !== "publish") {
+          return;
+        }
+        event.preventDefault();
+        const form = event.currentTarget;
+        void (async () => {
+          setIntent("publish");
+          const formData = new FormData(form);
+          formData.set("intent", "publish");
+          try {
+            const blob = await igCardPngBlob({
+              quote,
+              fullName: testimonial.fullName,
+              avatarUrl: testimonial.avatarUrl,
+              instagram: testimonial.instagram,
+              typeLabel: testimonial.typeLabel,
+              contextLine: adminContextLine(testimonial),
+            });
+            formData.set(
+              "ig_card",
+              new File([blob], "instagram.png", { type: "image/png" }),
+            );
+          } catch {
+            // Publica igual; Buffer Instagram falla y se puede reintentar.
+          }
+          formAction(formData);
+        })();
+      }}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
       <PageShell
@@ -101,7 +141,8 @@ export function AdminReviewForm({
                 className="text-body-small text-text-secondary"
               >
                 Una o dos frases, cortas y con impacto. Salen en Discord y en
-                la card de Instagram; si lo cambiás, el caption se ajusta automáticamente.
+                la card de Instagram; si lo cambiás, los captions se ajustan
+                automáticamente.
               </p>
             </header>
 
@@ -142,8 +183,8 @@ export function AdminReviewForm({
                 Cómo va a quedar
               </h2>
               <p className="text-body-small text-text-secondary">
-                Se actualiza mientras escribís. El caption de Instagram se
-                edita en su tab.
+                Se actualiza mientras escribís. Instagram y LinkedIn tienen
+                caption editable; podés generarlo con IA.
               </p>
             </header>
 
@@ -166,42 +207,28 @@ export function AdminReviewForm({
                     avatarUrl={testimonial.avatarUrl}
                     instagram={testimonial.instagram}
                     typeLabel={testimonial.typeLabel}
-                    contextLine={adminContextLine(testimonial)}
+                    contextLine={contextLine}
                   />
-                  <div className="flex flex-col gap-xs">
-                    <label
-                      htmlFor={captionId}
-                      className="text-body-small font-medium text-text-primary"
-                    >
-                      Caption
-                    </label>
-                    <p
-                      id={captionHintId}
-                      className="text-body-small text-text-secondary"
-                    >
-                      Se copia tal cual al post. Si cambiás el quote, se
-                      ajusta automáticamente.
-                    </p>
-                    <textarea
-                      id={captionId}
-                      name="ig_caption"
-                      value={caption}
-                      maxLength={CAPTION_EDIT_MAX_CHARS}
-                      aria-describedby={captionDescribedBy}
-                      className={cn(
-                        textareaClassName,
-                        "min-h-32 resize-y whitespace-pre-wrap",
-                      )}
-                      onChange={(event) => setCaption(event.target.value)}
-                    />
-                    <p
-                      id={captionCountId}
-                      className="text-body-small text-text-muted"
-                    >
-                      {caption.length}/{CAPTION_EDIT_MAX_CHARS}
-                    </p>
-                  </div>
+                  <AdminCaptionField
+                    name="ig_caption"
+                    plataforma="instagram"
+                    testimonioId={testimonial.id}
+                    quote={quote}
+                    value={caption}
+                    onChange={setCaption}
+                  />
                 </div>
+              }
+              linkedin={
+                <LinkedInPublishPreview
+                  testimonial={testimonial}
+                  caption={liCaption}
+                  edit={{
+                    testimonioId: testimonial.id,
+                    quote,
+                    onChange: setLiCaption,
+                  }}
+                />
               }
             />
           </section>
@@ -261,7 +288,7 @@ export function AdminReviewForm({
               onClick={(event) => {
                 if (
                   !window.confirm(
-                    "¿Publicar este testimonio? Sale en la galería y se postea en Discord.",
+                    "¿Publicar este testimonio? Sale en la galería y se postea en Discord, Instagram y LinkedIn.",
                   )
                 ) {
                   event.preventDefault();

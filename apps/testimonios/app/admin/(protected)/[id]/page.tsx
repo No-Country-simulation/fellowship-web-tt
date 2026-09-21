@@ -9,6 +9,7 @@ import { AdminStatusBadge, adminPillClassName } from "@/components/admin-status-
 import { AdminSubmission } from "@/components/admin-submission";
 import { PageShell } from "@/components/page-shell";
 import { requireAdmin } from "@/lib/auth/admin";
+import { hasInstagramChannel, hasLinkedInChannel } from "@/lib/buffer";
 import { hasCommunityWebhook } from "@/lib/discord";
 import {
   adminContextLine,
@@ -30,6 +31,7 @@ export default async function AdminReviewPage({
   const { id } = await params;
   const query = await searchParams;
   const discordParam = firstSearchParam(query.discord);
+  const bufferParam = firstSearchParam(query.buffer);
 
   if (!id) {
     notFound();
@@ -54,10 +56,20 @@ export default async function AdminReviewPage({
   const inReview = testimonial.status === "in_review";
   const discordStatus =
     discordParam === "failed" || discordParam === "ok" ? discordParam : null;
+  const bufferStatus =
+    bufferParam === "failed" || bufferParam === "ok" ? bufferParam : null;
   const canRetryDiscord =
     testimonial.status === "published" &&
     !testimonial.discordPostedAt &&
     hasCommunityWebhook();
+  const canRetryInstagram =
+    testimonial.status === "published" &&
+    !testimonial.bufferInstagramPostedAt &&
+    hasInstagramChannel();
+  const canRetryLinkedin =
+    testimonial.status === "published" &&
+    !testimonial.bufferLinkedinPostedAt &&
+    hasLinkedInChannel();
   const context = adminContextLine(testimonial);
   const submission = <AdminSubmission testimonial={testimonial} />;
   const titleStart = <BackToInbox />;
@@ -103,7 +115,10 @@ export default async function AdminReviewPage({
         <AdminPublishedPanel
           testimonial={testimonial}
           discordStatus={discordStatus}
+          bufferStatus={bufferStatus}
           canRetryDiscord={canRetryDiscord}
+          canRetryInstagram={canRetryInstagram}
+          canRetryLinkedin={canRetryLinkedin}
         />
       </div>
     </PageShell>

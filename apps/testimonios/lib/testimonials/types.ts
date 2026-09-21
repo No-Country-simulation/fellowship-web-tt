@@ -75,6 +75,12 @@ export function typeOption(type: TestimonialType): TypeOption {
   return option;
 }
 
+export const TYPE_LABELS: Record<TestimonialType, string> = {
+  simulation: "Simulación",
+  first_job: "Primer empleo",
+  career_change: "Reconversión",
+};
+
 export const STATUS_LABELS: Record<TestimonialStatus, string> = {
   in_review: "En revisión",
   published: "Publicado",

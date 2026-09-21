@@ -7,6 +7,7 @@ import {
 } from "@/lib/supabase/storage";
 
 import { youtubeWatchUrl } from "./parse";
+import { buildDiscordDescription } from "./quote";
 import {
   careerChangeFields,
   firstJobFields,
@@ -72,7 +73,7 @@ export function buildCommunityEmbed(input: {
     authorName: input.fullName,
     authorIconUrl: input.avatarUrl,
     title: input.typeLabel,
-    description: input.quote,
+    description: buildDiscordDescription(input.quote),
     fields,
     imageUrl: input.captureUrl,
     footer: SITE_BRAND,

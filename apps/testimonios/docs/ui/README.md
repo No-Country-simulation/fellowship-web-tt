@@ -22,6 +22,7 @@ Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-for
 | [AdminStatusBadge](./components/admin-status-badge.md) | Pill de estado (en revisión / publicado / rechazado) |
 | [DiscordEmbedPreview](./components/discord-embed-preview.md) | Recreación visual del embed de Discord |
 | [AdminIgShare](./components/admin-ig-share.md) | Card IG 1080×1080: preview, descargar PNG, copiar caption |
+| [LinkedInPublishPreview](./components/linkedin-publish-preview.md) | Post de LinkedIn: caption, Video, captura |
 
 ## Convención al agregar un componente
 
