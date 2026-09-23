@@ -642,10 +642,12 @@ function SuccessCard() {
       </p>
       <div className="mt-md border-t border-border pt-md">
         <p className="text-body text-text-primary">
-          ¿Conocés a alguien más que quiera contar su experiencia?
+          Ahora ayudá a que otra persona se anime
         </p>
         <p className="mt-xs text-body text-text-secondary">
-          Compartile este enlace para que deje su testimonio.
+          Si alguien de tu equipo o de tu simulación todavía no contó su
+          historia, pasale este enlace. Tu invitación puede ser el empujón
+          que necesita para dejarla.
         </p>
         <p className="mt-sm break-all text-body">
           <a
