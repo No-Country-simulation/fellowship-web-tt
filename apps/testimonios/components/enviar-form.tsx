@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState, type FormEvent } from "react";
+import { useActionState, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@repo/ui/button";
 
+import { getSiteUrl } from "@/lib/site";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
 import {
@@ -613,6 +614,23 @@ function StepProgress({ step }: { step: number }) {
 }
 
 function SuccessCard() {
+  const [inviteUrl, setInviteUrl] = useState(`${getSiteUrl()}/enviar`);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setInviteUrl(`${window.location.origin}/enviar`);
+  }, []);
+
+  async function copyInviteLink() {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
     <div className="mt-lg rounded-md border border-border bg-card p-md">
       <p className="text-overline text-accent-mint">Listo</p>
@@ -622,10 +640,29 @@ function SuccessCard() {
       <p className="mt-sm text-body text-text-secondary">
         Ya lo tenemos. Gracias por tomarte el tiempo de contarlo.
       </p>
-      <div className="mt-md">
-        <Link href="/" className={buttonVariants({ variant: "outline" })}>
-          Volver al inicio
-        </Link>
+      <div className="mt-md border-t border-border pt-md">
+        <p className="text-body text-text-primary">
+          ¿Conocés a alguien más que quiera contar su experiencia?
+        </p>
+        <p className="mt-xs text-body text-text-secondary">
+          Compartile este enlace para que deje su testimonio.
+        </p>
+        <p className="mt-sm break-all text-body">
+          <a
+            href={inviteUrl}
+            className="text-accent-cyan hover:underline"
+          >
+            {inviteUrl}
+          </a>
+        </p>
+        <div className="mt-sm flex flex-wrap gap-sm">
+          <Button type="button" variant="outline" onClick={copyInviteLink}>
+            {copied ? "Enlace copiado" : "Copiar enlace"}
+          </Button>
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+            Volver al inicio
+          </Link>
+        </div>
       </div>
     </div>
   );
