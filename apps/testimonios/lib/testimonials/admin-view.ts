@@ -10,10 +10,12 @@ import { buildIgCaption, buildLiCaption } from "./quote";
 import {
   careerChangeFields,
   firstJobFields,
+  simulationFields,
   storyContextLine,
   typeOption,
   type CareerChangePayload,
   type FirstJobPayload,
+  type SimulationPayload,
   type TestimonialStatus,
   type TestimonialType,
 } from "./types";
@@ -25,6 +27,7 @@ export type AdminTestimonial = {
   typeLabel: string;
   status: TestimonialStatus;
   fullName: string;
+  country: string | null;
   email: string;
   instagram: string | null;
   linkedin: string | null;
@@ -36,6 +39,7 @@ export type AdminTestimonial = {
   captureUrl: string | null;
   videoUrl: string | null;
   youtubeEmbedUrl: string | null;
+  simulation: SimulationPayload | null;
   firstJob: FirstJobPayload | null;
   careerChange: CareerChangePayload | null;
   submittedAt: string;
@@ -57,6 +61,7 @@ export type AdminInboxItem = {
 
 export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
   const typeLabel = typeOption(row.type).label;
+  const simulation = simulationFields(row.payload);
   const firstJob = firstJobFields(row.payload);
   const careerChange = careerChangeFields(row.payload);
 
@@ -67,6 +72,7 @@ export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
     typeLabel,
     status: row.status,
     fullName: row.full_name,
+    country: row.country,
     email: row.email,
     instagram: row.instagram,
     linkedin: row.linkedin ?? null,
@@ -92,6 +98,7 @@ export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
       : null,
     videoUrl: row.video_url,
     youtubeEmbedUrl: row.video_url ? youtubeEmbedSrc(row.video_url) : null,
+    simulation,
     firstJob,
     careerChange,
     submittedAt: row.submitted_at,
@@ -128,6 +135,7 @@ function formatEsAr(value: string) {
 
 export function adminContextLine(testimonial: AdminTestimonial) {
   return storyContextLine({
+    simulation: testimonial.simulation,
     firstJob: testimonial.firstJob,
     careerChange: testimonial.careerChange,
   });

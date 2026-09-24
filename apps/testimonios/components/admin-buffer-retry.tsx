@@ -5,17 +5,9 @@ import { buttonVariants } from "@repo/ui/button";
 
 import { retryBufferShare } from "@/lib/testimonials/admin-actions";
 import { formatSubmittedAt } from "@/lib/testimonials/admin-view";
+import type { IgCardContent } from "@/lib/testimonials/ig-card";
 import { igCardPngBlob } from "@/lib/testimonials/ig-card-canvas";
 import { cn } from "@/lib/utils";
-
-type IgCardInput = {
-  quote: string;
-  fullName: string;
-  avatarUrl: string;
-  instagram: string | null;
-  typeLabel: string;
-  contextLine: string | null;
-};
 
 type AdminBufferRetryProps = {
   id: string;
@@ -24,7 +16,7 @@ type AdminBufferRetryProps = {
   bufferStatus: "ok" | "failed" | null;
   canRetryInstagram: boolean;
   canRetryLinkedin: boolean;
-  igCard: IgCardInput;
+  igCard: IgCardContent;
 };
 
 /** Estado de Instagram/LinkedIn en Buffer, con reintento si falló. */

@@ -11,7 +11,8 @@ import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
 import { textareaClassName } from "@/components/enviar-fields";
 import { PageShell } from "@/components/page-shell";
 import { reviewTestimonial } from "@/lib/testimonials/admin-actions";
-import { adminContextLine, type AdminTestimonial } from "@/lib/testimonials/admin-view";
+import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
+import { igCardContent } from "@/lib/testimonials/ig-card";
 import { igCardPngBlob } from "@/lib/testimonials/ig-card-canvas";
 import { initialReviewState } from "@/lib/testimonials/review-state";
 import {
@@ -56,7 +57,6 @@ export function AdminReviewForm({
   const [liCaption, setLiCaption] = useState(testimonial.liCaption);
   const [intent, setIntent] = useState<Intent | null>(null);
   const quoteEmpty = quote.trim().length === 0;
-  const contextLine = adminContextLine(testimonial);
 
   function onQuoteChange(value: string) {
     setQuote(value);
@@ -109,14 +109,7 @@ export function AdminReviewForm({
         void (async () => {
           setIntent("publish");
           try {
-            const blob = await igCardPngBlob({
-              quote,
-              fullName: testimonial.fullName,
-              avatarUrl: testimonial.avatarUrl,
-              instagram: testimonial.instagram,
-              typeLabel: testimonial.typeLabel,
-              contextLine: adminContextLine(testimonial),
-            });
+            const blob = await igCardPngBlob(igCardContent(testimonial, quote));
             formData.set(
               "ig_card",
               new File([blob], "instagram.png", { type: "image/png" }),
@@ -218,13 +211,8 @@ export function AdminReviewForm({
                   <AdminIgShare
                     mode="preview"
                     slug={testimonial.slug}
-                    quote={quote}
                     caption={caption}
-                    fullName={testimonial.fullName}
-                    avatarUrl={testimonial.avatarUrl}
-                    instagram={testimonial.instagram}
-                    typeLabel={testimonial.typeLabel}
-                    contextLine={contextLine}
+                    {...igCardContent(testimonial, quote)}
                   />
                   <AdminCaptionField
                     plataforma="instagram"

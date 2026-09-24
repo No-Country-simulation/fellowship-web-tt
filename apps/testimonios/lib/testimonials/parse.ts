@@ -34,9 +34,11 @@ export type FieldErrors = Partial<Record<FormField, string>>;
 export type FormField =
   | "type"
   | "full_name"
+  | "country"
   | "email"
   | "story"
   | "company"
+  | "primary_role"
   | "role_achieved"
   | "previous_profession"
   | "new_role"
@@ -50,10 +52,12 @@ export type FormField =
 export const FIELD_STEP: Record<FormField, number> = {
   type: 1,
   full_name: 2,
+  country: 2,
   email: 2,
   avatar: 2,
   story: 3,
   company: 3,
+  primary_role: 3,
   role_achieved: 3,
   previous_profession: 3,
   new_role: 3,
@@ -67,6 +71,7 @@ export const FIELD_STEP: Record<FormField, number> = {
 export type ParsedTestimonial = {
   type: TestimonialType;
   fullName: string;
+  country: string;
   email: string;
   story: string;
   instagram: string | null;
@@ -250,12 +255,14 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const fieldErrors: FieldErrors = {};
   const typeRaw = readString(formData, "type");
   const fullName = readString(formData, "full_name");
+  const country = readString(formData, "country");
   const email = readString(formData, "email");
   const story = readString(formData, "story");
   const instagramRaw = readString(formData, "instagram");
   const linkedinRaw = readString(formData, "linkedin");
   const videoRaw = readString(formData, "video_url");
   const company = readString(formData, "company");
+  const primaryRole = readString(formData, "primary_role");
   const roleAchieved = readString(formData, "role_achieved");
   const previousProfession = readString(formData, "previous_profession");
   const newRole = readString(formData, "new_role");
@@ -271,6 +278,12 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     fieldErrors.full_name = "El nombre es obligatorio.";
   } else if (fullName.length > NAME_MAX_CHARS) {
     fieldErrors.full_name = `Máximo ${NAME_MAX_CHARS} caracteres.`;
+  }
+
+  if (!country) {
+    fieldErrors.country = "El país es obligatorio.";
+  } else if (country.length > FIELD_MAX_CHARS) {
+    fieldErrors.country = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
   }
 
   if (!email) {
@@ -289,6 +302,14 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   const type = isTestimonialType(typeRaw) ? typeRaw : null;
   let payload: TestimonialPayload = {};
+
+  if (type === "simulation" && primaryRole) {
+    if (primaryRole.length > FIELD_MAX_CHARS) {
+      fieldErrors.primary_role = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+    } else {
+      payload = { primary_role: primaryRole };
+    }
+  }
 
   if (type === "first_job") {
     if (!company) {
@@ -396,6 +417,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     data: {
       type,
       fullName,
+      country,
       email,
       story,
       instagram,

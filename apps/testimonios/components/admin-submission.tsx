@@ -99,6 +99,7 @@ export function AdminSubmission({ testimonial }: AdminSubmissionProps) {
       ) : null}
 
       <dl className="grid gap-sm border-t border-border pt-md sm:grid-cols-2">
+        <Fact label="País" value={testimonial.country ?? "No indicó país"} muted={!testimonial.country} />
         <Fact label="Email" value={testimonial.email} />
         <Fact
           label="Instagram"
@@ -110,6 +111,9 @@ export function AdminSubmission({ testimonial }: AdminSubmissionProps) {
           value={testimonial.linkedin ?? "No dejó LinkedIn"}
           muted={!testimonial.linkedin}
         />
+        {testimonial.simulation?.primary_role ? (
+          <Fact label="Puesto principal" value={testimonial.simulation.primary_role} />
+        ) : null}
         {testimonial.firstJob ? (
           <>
             <Fact label="Empresa" value={testimonial.firstJob.company} />

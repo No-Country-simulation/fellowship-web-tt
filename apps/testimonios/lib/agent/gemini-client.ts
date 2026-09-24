@@ -1,10 +1,10 @@
 /**
  * Primary: Gemini 3.1 Flash-Lite (better quality when available).
- * Fallback: 2.5 Flash-Lite when 3.x returns 503/429/empty text.
+ * Fallback: 3.5 Flash-Lite when 3.1 returns 503/429/empty text or other errors.
  * Override primary with GEMINI_MODEL; fallback with GEMINI_FALLBACK_MODEL.
  */
 export const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite";
-export const DEFAULT_GEMINI_FALLBACK_MODEL = "gemini-2.5-flash-lite";
+export const DEFAULT_GEMINI_FALLBACK_MODEL = "gemini-3.5-flash-lite";
 
 const DEFAULT_TEMPERATURE = 0.4;
 
@@ -40,6 +40,12 @@ export function resolveFallbackModel(primary: string): string | null {
     DEFAULT_GEMINI_FALLBACK_MODEL;
   if (!fallback || fallback === primary) return null;
   return fallback;
+}
+
+export function resolveModelChain(primaryOverride?: string): string[] {
+  const primary = resolvePrimaryModel(primaryOverride);
+  const fallback = resolveFallbackModel(primary);
+  return fallback ? [primary, fallback] : [primary];
 }
 
 function extractText(data: GeminiGenerateResponse): string {
@@ -99,37 +105,25 @@ export async function geminiGenerateText(
   },
 ): Promise<string> {
   const apiKey = opts?.apiKey ?? requireApiKey();
-  const primary = resolvePrimaryModel(opts?.model);
-  const fallback = resolveFallbackModel(primary);
+  const models = resolveModelChain(opts?.model);
   const onceOpts = {
     temperature: opts?.temperature,
     maxOutputTokens: opts?.maxOutputTokens,
   };
 
-  try {
-    return await geminiGenerateTextOnce(prompt, {
-      apiKey,
-      model: primary,
-      ...onceOpts,
-    });
-  } catch (primaryErr) {
-    if (!fallback) throw primaryErr;
+  const failures: string[] = [];
+  for (const model of models) {
     try {
       return await geminiGenerateTextOnce(prompt, {
         apiKey,
-        model: fallback,
+        model,
         ...onceOpts,
       });
-    } catch (fallbackErr) {
-      const primaryMsg =
-        primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
-      const fallbackMsg =
-        fallbackErr instanceof Error
-          ? fallbackErr.message
-          : String(fallbackErr);
-      throw new Error(
-        `Gemini falló en ${primary} (${primaryMsg}) y en fallback ${fallback} (${fallbackMsg})`,
-      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      failures.push(`${model} (${message})`);
     }
   }
+
+  throw new Error(`Gemini falló en ${failures.join(" y en fallback ")}`);
 }
