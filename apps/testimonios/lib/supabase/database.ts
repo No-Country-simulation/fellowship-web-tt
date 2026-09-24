@@ -19,6 +19,7 @@ export type Database = {
           status: TestimonialStatus;
           slug: string;
           full_name: string;
+          country: string | null;
           email: string;
           instagram: string | null;
           linkedin: string | null;
@@ -45,6 +46,7 @@ export type Database = {
           status?: TestimonialStatus;
           slug: string;
           full_name: string;
+          country?: string | null;
           email: string;
           instagram?: string | null;
           linkedin?: string | null;
@@ -71,6 +73,7 @@ export type Database = {
           status?: TestimonialStatus;
           slug?: string;
           full_name?: string;
+          country?: string | null;
           email?: string;
           instagram?: string | null;
           linkedin?: string | null;
@@ -101,6 +104,7 @@ export type Database = {
           type: TestimonialType;
           slug: string;
           full_name: string;
+          country: string | null;
           instagram: string | null;
           linkedin: string | null;
           story: string;

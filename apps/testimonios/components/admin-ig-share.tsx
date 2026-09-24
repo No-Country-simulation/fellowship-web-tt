@@ -4,18 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { buttonVariants } from "@repo/ui/button";
 
 import { canvasToPng, drawIgCard } from "@/lib/testimonials/ig-card-canvas";
-import { igCardFilename, IG_CARD_SIZE } from "@/lib/testimonials/ig-card";
+import {
+  igCardFilename,
+  IG_CARD_HEIGHT,
+  IG_CARD_WIDTH,
+  type IgCardContent,
+} from "@/lib/testimonials/ig-card";
 import { cn } from "@/lib/utils";
 
-type AdminIgShareProps = {
+type AdminIgShareProps = IgCardContent & {
   slug: string;
-  quote: string;
   caption: string;
-  fullName: string;
-  avatarUrl: string;
-  instagram: string | null;
-  typeLabel: string;
-  contextLine: string | null;
   /**
    * `preview`: solo el canvas, para ver cómo queda mientras se edita.
    * `share`: canvas + caption + descargar/copiar, para subir a Instagram.
@@ -23,16 +22,19 @@ type AdminIgShareProps = {
   mode?: "preview" | "share";
 };
 
-/** Preview, descarga PNG 1080×1080 y copia el caption de Instagram. */
+/** Preview, descarga PNG 1080×1350 y copia el caption de Instagram. */
 export function AdminIgShare({
   slug,
   quote,
   caption,
+  type,
   fullName,
+  country,
   avatarUrl,
-  instagram,
-  typeLabel,
-  contextLine,
+  captureUrl,
+  company,
+  role,
+  previousRole,
   mode = "share",
 }: AdminIgShareProps) {
   const previewOnly = mode === "preview";
@@ -71,12 +73,15 @@ export function AdminIgShare({
     let cancelled = false;
     setPreviewFailed(false);
     void drawIgCard(canvas, {
+      type,
       quote: previewQuote,
       fullName,
+      country,
       avatarUrl,
-      instagram,
-      typeLabel,
-      contextLine,
+      captureUrl,
+      company,
+      role,
+      previousRole,
     }).then(
       () => {
         if (!cancelled) {
@@ -93,7 +98,17 @@ export function AdminIgShare({
     return () => {
       cancelled = true;
     };
-  }, [previewQuote, fullName, avatarUrl, instagram, typeLabel, contextLine]);
+  }, [
+    previewQuote,
+    type,
+    fullName,
+    country,
+    avatarUrl,
+    captureUrl,
+    company,
+    role,
+    previousRole,
+  ]);
 
   async function downloadCard() {
     setDownloadError(null);
@@ -101,12 +116,15 @@ export function AdminIgShare({
     try {
       const canvas = document.createElement("canvas");
       await drawIgCard(canvas, {
+        type,
         quote: quote || previewQuote,
         fullName,
+        country,
         avatarUrl,
-        instagram,
-        typeLabel,
-        contextLine,
+        captureUrl,
+        company,
+        role,
+        previousRole,
       });
       const blob = await canvasToPng(canvas);
       const url = URL.createObjectURL(blob);
@@ -134,7 +152,7 @@ export function AdminIgShare({
   const canvas = (
     <div className="w-full max-w-md">
       {previewFailed ? (
-        <div className="grid aspect-square w-full place-items-center rounded-md border border-border bg-bg-surface-3 p-md text-center">
+        <div className="grid aspect-4/5 w-full place-items-center rounded-md border border-border bg-bg-surface-3 p-md text-center">
           <p className="text-body-small text-destructive">
             No pudimos generar la card. Probá descargar de nuevo.
           </p>
@@ -142,11 +160,11 @@ export function AdminIgShare({
       ) : null}
       <canvas
         ref={canvasRef}
-        width={IG_CARD_SIZE}
-        height={IG_CARD_SIZE}
+        width={IG_CARD_WIDTH}
+        height={IG_CARD_HEIGHT}
         aria-label={`Card de Instagram de ${fullName}`}
         className={cn(
-          "aspect-square w-full rounded-md border border-border bg-bg-surface-3",
+          "aspect-4/5 w-full rounded-md border border-border bg-bg-surface-3",
           previewFailed && "hidden",
         )}
       />

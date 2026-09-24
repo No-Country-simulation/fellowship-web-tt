@@ -67,6 +67,7 @@ export async function saveTestimonial(
       status: "in_review",
       slug,
       full_name: data.fullName,
+      country: data.country,
       email: data.email,
       instagram: data.instagram,
       linkedin: data.linkedin,

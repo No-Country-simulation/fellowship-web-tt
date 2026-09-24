@@ -41,6 +41,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `status` | `testimonial_status` | no | `in_review` | |
 | `slug` | `text` | no | | Único. URL `/t/{slug}` |
 | `full_name` | `text` | no | | Público |
+| `country` | `text` | sí | | País. Se muestra junto al nombre. Null en envíos anteriores |
 | `email` | `text` | no | | **Solo admin** |
 | `instagram` | `text` | sí | | Handle o URL. El caption de IG lo menciona |
 | `linkedin` | `text` | sí | | Perfil (`linkedin.com/in/…`) o handle. El caption de LI lo menciona |
@@ -65,16 +66,20 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). Validar forma de `payload` en la app y, si se quiere, con un check JSON.
 
-`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `li_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
+`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `li_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
 
 ---
 
 ## Forma de `payload` según `type`
 
-**`simulation`** — no hay extras; la historia está en `story`.
+**`simulation`** — el puesto principal es opcional. Sin puesto, el payload queda vacío.
 
 ```json
 {}
+```
+
+```json
+{ "primary_role": "Frontend Developer" }
 ```
 
 **`first_job`**
@@ -98,7 +103,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 En TypeScript:
 
 ```ts
-type SimulationPayload = Record<string, never>
+type SimulationPayload = { primary_role?: string }
 
 type FirstJobPayload = {
   company: string
@@ -122,7 +127,7 @@ type TestimonialPayload =
 
 Galería y `/t/[slug]` (rol `anon`). **Sin** `email`.
 
-Columnas: `id`, `type`, `slug`, `full_name`, `instagram`, `linkedin`, `story`, `quote`, `avatar_path`, `capture_path`, `video_url`, `payload`, `published_at`.
+Columnas: `id`, `type`, `slug`, `full_name`, `country`, `instagram`, `linkedin`, `story`, `quote`, `avatar_path`, `capture_path`, `video_url`, `payload`, `published_at`.
 
 `where status = 'published'`.
 

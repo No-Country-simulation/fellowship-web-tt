@@ -50,6 +50,6 @@ No es el webhook. No mandar este markup a Discord.
 
 - Colores de Discord (`#2b2d31`, barra `brand-pink`), no tokens de la app.
 - La descripción es intro fijo de No Country + quote entre comillas (no se edita en este tab).
-- Campos inline en dos columnas; el de Video (YouTube) va en bloque.
+- Campos inline en dos columnas (país, puesto de simulación, empresa/puesto o reconversión). El de Video (YouTube) va en bloque.
 - La captura, si hay, es `<img>` de Storage (misma URL que usa el webhook).
 - Es Server Component (sin `"use client"`).

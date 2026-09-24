@@ -17,7 +17,7 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 | Ruta | Qué es |
 | --- | --- |
 | `/` | Galería (publicados) |
-| `/enviar` | Formulario público, sin login (avatar + captura, YouTube, Instagram y LinkedIn opcionales) |
+| `/enviar` | Formulario público, sin login (país y avatar obligatorios; captura, YouTube, Instagram y LinkedIn opcionales) |
 | `/admin` | Inbox: lista a la izquierda (filtro local por estado), ficha a la derecha |
 | `/admin/[id]` | Revisar: envío, quote, tabs Discord / Instagram / LinkedIn. Caption IG y LI se pueden generar con Gemini |
 | `/t/[slug]` | Ficha de un testimonio publicado |
@@ -57,7 +57,7 @@ Los channel IDs se copian del [API Explorer](https://developers.buffer.com/explo
 
 ## Supabase
 
-Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at` + Buffer + `li_caption`).
+Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at` + Buffer + `li_caption` + `country` y puesto de simulación).
 
 1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`. `discord_posted_at` marca si el webhook de comunidad ya posteó; si falla, el admin reintenta.
 2. En Authentication: desactivá el registro público. Creá un usuario del equipo.

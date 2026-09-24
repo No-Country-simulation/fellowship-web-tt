@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ type FieldProps = {
   error?: string;
   optional?: boolean;
   labelAs?: "label" | "span";
+  hideLabel?: boolean;
   className?: string;
   children: (control: {
     id: string;
@@ -39,6 +40,7 @@ export function Field({
   error,
   optional,
   labelAs = "label",
+  hideLabel,
   className,
   children,
 }: FieldProps) {
@@ -47,7 +49,10 @@ export function Field({
   const hintId = hint ? `${fieldId}-hint` : undefined;
   const errorId = error ? `${fieldId}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
-  const labelClassName = "text-body-small font-medium text-text-primary";
+  const labelClassName = cn(
+    "text-body-small font-medium text-text-primary",
+    hideLabel && "sr-only",
+  );
   const labelContent = (
     <>
       {label}
@@ -58,7 +63,7 @@ export function Field({
   );
 
   return (
-    <div className={cn("flex flex-col gap-xs", className)}>
+    <div className={cn("flex flex-col gap-1", className)}>
       {labelAs === "span" ? (
         <span className={labelClassName}>{labelContent}</span>
       ) : (
@@ -87,6 +92,8 @@ type FileFieldProps = {
   hint: string;
   error?: string;
   optional?: boolean;
+  hideLabel?: boolean;
+  className?: string;
   accept: string;
   preview: "avatar" | "capture";
   onFileChange: (file: File | null) => void;
@@ -99,11 +106,27 @@ export function FileField({
   hint,
   error,
   optional,
+  hideLabel,
+  className,
   accept,
   preview,
   onFileChange,
 }: FileFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+  function clearFile() {
+    setObjectUrl((current) => {
+      if (current) {
+        URL.revokeObjectURL(current);
+      }
+      return null;
+    });
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+    onFileChange(null);
+  }
 
   useEffect(() => {
     return () => {
@@ -119,14 +142,23 @@ export function FileField({
       hint={hint}
       error={error}
       optional={optional}
+      hideLabel={hideLabel}
       labelAs="span"
+      className={cn(
+        preview === "avatar" || preview === "capture" ? "w-full" : undefined,
+        className,
+      )}
     >
       {({ id, describedBy, invalid }) => (
+        <div className="relative">
         <label
           htmlFor={id}
           className={cn(
-            "flex cursor-pointer items-center gap-md rounded-md border border-dashed border-border bg-bg-base p-md",
+            "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base",
             "hover:border-accent-cyan/70 hover:bg-bg-white-a5",
+            preview === "avatar" || preview === "capture"
+              ? "relative aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-2xl p-md text-center"
+              : "items-center gap-md p-md",
             invalid && "border-destructive",
           )}
         >
@@ -138,29 +170,18 @@ export function FileField({
               alt=""
               className={cn(
                 "shrink-0 object-cover",
-                preview === "avatar"
-                  ? "size-16 rounded-full"
+                preview === "avatar" || preview === "capture"
+                  ? "absolute inset-0 size-full"
                   : "h-16 w-24 rounded-sm",
               )}
             />
           ) : (
-            <span
-              className={cn(
-                "grid shrink-0 place-items-center bg-bg-surface-3 text-overline text-text-muted",
-                preview === "avatar"
-                  ? "size-16 rounded-full"
-                  : "h-16 w-24 rounded-sm",
-              )}
-            >
-              {preview === "avatar" ? "Foto" : "Demo"}
+            <span className="text-body text-text-muted">
+              {preview === "avatar" ? "Foto" : "Captura"}
             </span>
           )}
-          <span className="text-body-small text-text-secondary">
-            {objectUrl
-              ? "Cambiar imagen"
-              : "Elegí un archivo jpg, png o webp"}
-          </span>
           <input
+            ref={inputRef}
             id={id}
             name={name}
             type="file"
@@ -180,6 +201,17 @@ export function FileField({
             }}
           />
         </label>
+        {objectUrl ? (
+          <button
+            type="button"
+            aria-label={preview === "avatar" ? "Quitar foto" : "Quitar captura"}
+            className="absolute top-sm right-sm grid size-8 place-items-center rounded-full bg-bg-base text-body text-text-primary shadow-sm"
+            onClick={clearFile}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        ) : null}
+        </div>
       )}
     </Field>
   );

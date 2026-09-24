@@ -14,7 +14,9 @@ export const TESTIMONIAL_STATUSES = [
 
 export type TestimonialStatus = (typeof TESTIMONIAL_STATUSES)[number];
 
-export type SimulationPayload = Record<string, never>;
+export type SimulationPayload = {
+  primary_role?: string;
+};
 
 export type FirstJobPayload = {
   company: string;
@@ -91,6 +93,17 @@ export function isTestimonialStatus(value: string): value is TestimonialStatus {
   return (TESTIMONIAL_STATUSES as readonly string[]).includes(value);
 }
 
+export function simulationFields(payload: unknown): SimulationPayload | null {
+  if (!isRecord(payload)) {
+    return null;
+  }
+  const primaryRole = readPayloadString(payload, "primary_role");
+  if (!primaryRole) {
+    return null;
+  }
+  return { primary_role: primaryRole };
+}
+
 export function firstJobFields(payload: unknown): FirstJobPayload | null {
   if (!isRecord(payload)) {
     return null;
@@ -120,9 +133,13 @@ export function careerChangeFields(payload: unknown): CareerChangePayload | null
 
 /** Línea corta para galería, Discord e Instagram. */
 export function storyContextLine(input: {
+  simulation: SimulationPayload | null;
   firstJob: FirstJobPayload | null;
   careerChange: CareerChangePayload | null;
 }): string | null {
+  if (input.simulation?.primary_role) {
+    return input.simulation.primary_role;
+  }
   if (input.firstJob) {
     return `${input.firstJob.role_achieved} en ${input.firstJob.company}`;
   }

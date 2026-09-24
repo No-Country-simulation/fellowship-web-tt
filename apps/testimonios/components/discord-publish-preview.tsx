@@ -20,6 +20,8 @@ export function DiscordPublishPreview({
     avatarUrl: testimonial.avatarUrl,
     typeLabel: testimonial.typeLabel,
     quote,
+    country: testimonial.country,
+    simulation: testimonial.simulation,
     firstJob: testimonial.firstJob,
     careerChange: testimonial.careerChange,
     captureUrl: testimonial.captureUrl,

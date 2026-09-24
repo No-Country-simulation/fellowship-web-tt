@@ -1,6 +1,6 @@
 # AdminIgShare
 
-Card de Instagram 1080×1080: preview en canvas, descargar PNG y copiar caption.
+Card de Instagram 1080×1350 (4:5): preview en canvas, descargar PNG y copiar caption.
 
 **Archivo:** `components/admin-ig-share.tsx`
 
@@ -29,11 +29,14 @@ No usarlo en la galería pública.
 | `slug` | `string` | — | Nombre del PNG (`testimonio-{slug}.png`) |
 | `quote` | `string` | — | Texto de la card |
 | `caption` | `string` | — | Caption a copiar / mostrar |
-| `fullName` | `string` | — | Nombre al pie |
+| `type` | `TestimonialType` | — | Elige la variante: simulación, primer empleo o reconversión |
+| `fullName` | `string` | — | Nombre en la ficha del autor |
+| `country` | `string \| null` | — | País junto al nombre (`Nombre · país`) |
 | `avatarUrl` | `string` | — | URL pública del avatar |
-| `instagram` | `string \| null` | — | Handle (`@nombre`) o null |
-| `typeLabel` | `string` | — | Tipo debajo del logo, en mayúsculas |
-| `contextLine` | `string \| null` | — | Puesto/empresa o reconversión |
+| `captureUrl` | `string \| null` | — | Foto de arriba; la captura que subió la persona |
+| `company` | `string \| null` | — | Empresa, en la pastilla de primer empleo |
+| `role` | `string \| null` | — | Puesto o rol nuevo, bajo el nombre |
+| `previousRole` | `string \| null` | — | Oficio anterior, en la pastilla de reconversión |
 | `mode` | `"preview" \| "share"` | `"share"` | Solo canvas, o canvas + descargar/copiar caption |
 
 ## Ejemplos
@@ -44,13 +47,8 @@ No usarlo en la galería pública.
 <AdminIgShare
   mode="preview"
   slug={testimonial.slug}
-  quote={quote}
   caption={caption}
-  fullName={testimonial.fullName}
-  avatarUrl={testimonial.avatarUrl}
-  instagram={testimonial.instagram}
-  typeLabel={testimonial.typeLabel}
-  contextLine={adminContextLine(testimonial)}
+  {...igCardContent(testimonial, quote)}
 />
 ```
 
@@ -63,6 +61,6 @@ No usarlo en la galería pública.
 ## Notas
 
 - La card en preview no supera `max-w-md` (448px). El tab (Discord / Instagram / LinkedIn) es full width.
-- Layout de la card: barra rosa, logo, tipo, avatar, quote, contexto, nombre, handle.
+- Layout según el tipo. Simulación: degradado horizontal magenta → índigo (más oscuro que el de marca), “Lo que aprendí”, y el bloque del autor con fondo oscuro semitransparente. Primer empleo: fondo claro y “Contratado por”. Reconversión: fondo oscuro y pastillas Antes → Ahora. La foto de arriba es la captura; si no hay, usa `public/brand/ig-fallback.jpg`. No incluye peer review, reseñas, equipos ni semanas.
 - La preview debouncea el quote ~400 ms. Descargar usa el quote actual, no el debounceado.
-- El avatar y el logo se fetchean con CORS. Si Storage no manda headers CORS, el preview puede fallar; el admin ve el error.
+- Avatar, captura y logo se fetchean con CORS. Si Storage no manda headers CORS, el preview puede fallar; el admin ve el error.
