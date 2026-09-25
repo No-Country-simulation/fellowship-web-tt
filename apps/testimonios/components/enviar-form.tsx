@@ -10,13 +10,15 @@ import { initialSubmitState } from "@/lib/testimonials/submit-state";
 import {
   AVATAR_MAX_BYTES,
   CAPTURE_MAX_BYTES,
+  VIDEO_MAX_BYTES,
   STORY_MAX_CHARS,
   STORY_MIN_CHARS,
   isValidEmail,
   normalizeInstagram,
   normalizeLinkedIn,
-  normalizeYouTubeUrl,
   validateImageFile,
+  validateVideoFile,
+  normalizeYouTubeUrl,
   type FieldErrors,
   type FormField,
 } from "@/lib/testimonials/parse";
@@ -37,6 +39,7 @@ import {
 
 const STEPS = 5;
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp";
+const VIDEO_ACCEPT = "video/mp4,video/quicktime,.mp4,.mov,.m4v";
 
 const STEP_TITLES = [
   "Qué querés contar",
@@ -62,6 +65,7 @@ export function EnviarForm() {
   const [roleAchieved, setRoleAchieved] = useState("");
   const [previousProfession, setPreviousProfession] = useState("");
   const [newRole, setNewRole] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [instagram, setInstagram] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -151,6 +155,13 @@ export function EnviarForm() {
       if (captureError) {
         nextErrors.capture = captureError;
       }
+      const videoError = validateVideoFile(videoFile, {
+        required: false,
+        maxBytes: VIDEO_MAX_BYTES,
+      });
+      if (videoError) {
+        nextErrors.video = videoError;
+      }
       if (videoUrl.trim() && !normalizeYouTubeUrl(videoUrl)) {
         nextErrors.video_url = "Pegá un link de YouTube (youtube.com o youtu.be).";
       }
@@ -211,6 +222,9 @@ export function EnviarForm() {
     }
     if (captureFile) {
       formData.set("capture", captureFile);
+    }
+    if (videoFile) {
+      formData.set("video", videoFile);
     }
     formAction(formData);
   }
@@ -464,7 +478,7 @@ export function EnviarForm() {
         <legend className="sr-only">Captura y links</legend>
         <p className="text-body-small text-text-secondary">
           Todo este paso es opcional. La captura es de tu proyecto o de la
-          demo.
+          demo. Podés sumar un mp4 para que el equipo lo procese.
         </p>
         <div className="grid items-start gap-md sm:grid-cols-[minmax(0,4fr)_minmax(0,6fr)]">
           <FileField
@@ -479,9 +493,19 @@ export function EnviarForm() {
             onFileChange={setCaptureFile}
           />
           <div className="flex flex-col gap-md">
+            <FileField
+              name="video"
+              label="Video (mp4)"
+              hint={`Opcional. Máximo ${Math.round(VIDEO_MAX_BYTES / (1024 * 1024))} MB. Marca de agua + subtítulos en revisión.`}
+              error={fieldErrors.video}
+              optional
+              accept={VIDEO_ACCEPT}
+              preview="none"
+              onFileChange={setVideoFile}
+            />
             <Field
               label="Video de YouTube"
-              hint="Solo un link de YouTube. No se sube un archivo."
+              hint="Opcional. Link público; no reemplaza el mp4."
               error={fieldErrors.video_url}
               optional
             >
@@ -585,9 +609,13 @@ export function EnviarForm() {
               </span>
             </li>
             <li>
-              YouTube:{" "}
+              Video:{" "}
               <span className="text-text-primary">
-                {videoUrl.trim() ? "Link cargado" : "Sin video"}
+                {videoFile
+                  ? videoFile.name
+                  : videoUrl.trim()
+                    ? "Link de YouTube"
+                    : "Sin video"}
               </span>
             </li>
           </ul>

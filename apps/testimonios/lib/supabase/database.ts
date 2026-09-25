@@ -8,6 +8,13 @@ export type Json =
 
 export type TestimonialType = "simulation" | "first_job" | "career_change";
 export type TestimonialStatus = "in_review" | "published" | "rejected";
+export type VideoStatus =
+  | "none"
+  | "original"
+  | "processing"
+  | "processed"
+  | "approved"
+  | "rejected";
 
 export type Database = {
   public: {
@@ -30,6 +37,14 @@ export type Database = {
           avatar_path: string;
           capture_path: string | null;
           video_url: string | null;
+          video_status: VideoStatus;
+          video_original_url: string | null;
+          video_original_asset_id: string | null;
+          video_processed_url: string | null;
+          video_processed_asset_id: string | null;
+          video_share_url: string | null;
+          video_ffmpeg_job_id: string | null;
+          video_error: string | null;
           payload: Json;
           consent_at: string;
           submitted_at: string;
@@ -57,6 +72,14 @@ export type Database = {
           avatar_path: string;
           capture_path?: string | null;
           video_url?: string | null;
+          video_status?: VideoStatus;
+          video_original_url?: string | null;
+          video_original_asset_id?: string | null;
+          video_processed_url?: string | null;
+          video_processed_asset_id?: string | null;
+          video_share_url?: string | null;
+          video_ffmpeg_job_id?: string | null;
+          video_error?: string | null;
           payload?: Json;
           consent_at: string;
           submitted_at?: string;
@@ -84,6 +107,14 @@ export type Database = {
           avatar_path?: string;
           capture_path?: string | null;
           video_url?: string | null;
+          video_status?: VideoStatus;
+          video_original_url?: string | null;
+          video_original_asset_id?: string | null;
+          video_processed_url?: string | null;
+          video_processed_asset_id?: string | null;
+          video_share_url?: string | null;
+          video_ffmpeg_job_id?: string | null;
+          video_error?: string | null;
           payload?: Json;
           consent_at?: string;
           submitted_at?: string;
@@ -112,6 +143,7 @@ export type Database = {
           avatar_path: string;
           capture_path: string | null;
           video_url: string | null;
+          video_share_url: string | null;
           payload: Json;
           published_at: string | null;
         };
@@ -127,6 +159,7 @@ export type Database = {
     Enums: {
       testimonial_type: TestimonialType;
       testimonial_status: TestimonialStatus;
+      video_status: VideoStatus;
     };
     CompositeTypes: {
       [_ in never]: never;

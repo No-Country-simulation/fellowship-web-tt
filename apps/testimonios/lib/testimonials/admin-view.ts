@@ -1,4 +1,4 @@
-import type { TestimonialRow } from "@/lib/supabase/database";
+import type { TestimonialRow, VideoStatus } from "@/lib/supabase/database";
 import {
   AVATARS_BUCKET,
   CAPTURES_BUCKET,
@@ -39,6 +39,11 @@ export type AdminTestimonial = {
   captureUrl: string | null;
   videoUrl: string | null;
   youtubeEmbedUrl: string | null;
+  videoStatus: VideoStatus;
+  videoOriginalUrl: string | null;
+  videoProcessedUrl: string | null;
+  videoShareUrl: string | null;
+  videoError: string | null;
   simulation: SimulationPayload | null;
   firstJob: FirstJobPayload | null;
   careerChange: CareerChangePayload | null;
@@ -98,6 +103,11 @@ export function toAdminTestimonial(row: TestimonialRow): AdminTestimonial {
       : null,
     videoUrl: row.video_url,
     youtubeEmbedUrl: row.video_url ? youtubeEmbedSrc(row.video_url) : null,
+    videoStatus: row.video_status ?? "none",
+    videoOriginalUrl: row.video_original_url ?? null,
+    videoProcessedUrl: row.video_processed_url ?? null,
+    videoShareUrl: row.video_share_url ?? null,
+    videoError: row.video_error ?? null,
     simulation,
     firstJob,
     careerChange,

@@ -11,10 +11,16 @@ export const NAME_MAX_CHARS = 120;
 export const FIELD_MAX_CHARS = 120;
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 export const CAPTURE_MAX_BYTES = 8 * 1024 * 1024;
+export const VIDEO_MAX_BYTES = 100 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
+] as const;
+export const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/x-m4v",
 ] as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,6 +50,7 @@ export type FormField =
   | "new_role"
   | "avatar"
   | "capture"
+  | "video"
   | "video_url"
   | "instagram"
   | "linkedin"
@@ -62,6 +69,7 @@ export const FIELD_STEP: Record<FormField, number> = {
   previous_profession: 3,
   new_role: 3,
   capture: 4,
+  video: 4,
   video_url: 4,
   instagram: 4,
   linkedin: 4,
@@ -77,6 +85,7 @@ export type ParsedTestimonial = {
   instagram: string | null;
   linkedin: string | null;
   videoUrl: string | null;
+  video: File | null;
   payload: TestimonialPayload;
   quote: string;
   igCaption: string;
@@ -251,6 +260,26 @@ export function validateImageFile(
   return undefined;
 }
 
+export function validateVideoFile(
+  file: File | null,
+  options: { required: boolean; maxBytes: number },
+): string | undefined {
+  if (!file) {
+    return options.required ? "El video es obligatorio." : undefined;
+  }
+
+  if (!isAllowedVideo(file)) {
+    return "Video: usá mp4 (o mov).";
+  }
+
+  if (file.size > options.maxBytes) {
+    const maxMb = Math.round(options.maxBytes / (1024 * 1024));
+    return `Video: máximo ${maxMb} MB (límite free de FFmpeg Micro).`;
+  }
+
+  return undefined;
+}
+
 export function parseTestimonialForm(formData: FormData): ParseResult {
   const fieldErrors: FieldErrors = {};
   const typeRaw = readString(formData, "type");
@@ -269,6 +298,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const consent = formData.get("consent") === "1";
   const avatar = readFile(formData, "avatar");
   const capture = readFile(formData, "capture");
+  const video = readFile(formData, "video");
 
   if (!isTestimonialType(typeRaw)) {
     fieldErrors.type = "Elegí qué querés contar.";
@@ -364,6 +394,14 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     fieldErrors.capture = captureError;
   }
 
+  const videoError = validateVideoFile(video, {
+    required: false,
+    maxBytes: VIDEO_MAX_BYTES,
+  });
+  if (videoError) {
+    fieldErrors.video = videoError;
+  }
+
   let videoUrl: string | null = null;
   if (videoRaw) {
     videoUrl = normalizeYouTubeUrl(videoRaw);
@@ -423,6 +461,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
       instagram,
       linkedin,
       videoUrl,
+      video,
       payload,
       quote,
       igCaption,
@@ -439,6 +478,18 @@ export function firstErrorStep(fieldErrors: FieldErrors): number {
     .map((key) => FIELD_STEP[key as FormField])
     .filter((step): step is number => typeof step === "number");
   return steps.length ? Math.min(...steps) : 1;
+}
+
+function isAllowedVideo(file: File): boolean {
+  if (
+    ALLOWED_VIDEO_TYPES.includes(
+      file.type as (typeof ALLOWED_VIDEO_TYPES)[number],
+    )
+  ) {
+    return true;
+  }
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return extension === "mp4" || extension === "mov" || extension === "m4v";
 }
 
 function isAllowedImage(file: File): boolean {

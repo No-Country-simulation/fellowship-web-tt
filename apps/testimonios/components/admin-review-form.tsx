@@ -6,6 +6,7 @@ import { buttonVariants } from "@repo/ui/button";
 import { AdminCaptionField } from "@/components/admin-caption-field";
 import { AdminIgShare } from "@/components/admin-ig-share";
 import { AdminShareTabs } from "@/components/admin-share-tabs";
+import { AdminVideoPanel } from "@/components/admin-video-panel";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
 import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
 import { textareaClassName } from "@/components/enviar-fields";
@@ -135,6 +136,8 @@ export function AdminReviewForm({
 
         <div className="mt-lg flex min-w-0 flex-col gap-lg">
           {submission}
+
+          <AdminVideoPanel testimonial={testimonial} />
 
           <section
             aria-labelledby="admin-edit-title"

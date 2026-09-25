@@ -2,6 +2,7 @@ import type { TestimonialRow } from "@/lib/supabase/database";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/env";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { AVATARS_BUCKET, CAPTURES_BUCKET } from "@/lib/supabase/storage";
+import { deleteSanityAsset, uploadVideoToSanity } from "@/lib/sanity/video-assets";
 
 import type { ParsedTestimonial } from "./parse";
 import { TESTIMONIAL_STATUSES, type TestimonialStatus } from "./types";
@@ -57,6 +58,27 @@ export async function saveTestimonial(
     }
   }
 
+  let videoOriginalUrl: string | null = null;
+  let videoOriginalAssetId: string | null = null;
+  let videoStatus: TestimonialRow["video_status"] = "none";
+
+  if (data.video) {
+    const videoUpload = await uploadVideoToSanity(
+      data.video,
+      `${id}-original.mp4`,
+    );
+    if (!videoUpload.ok) {
+      await removeUploaded(supabase, AVATARS_BUCKET, avatarPath);
+      if (capturePath) {
+        await removeUploaded(supabase, CAPTURES_BUCKET, capturePath);
+      }
+      return videoUpload;
+    }
+    videoOriginalUrl = videoUpload.asset.url;
+    videoOriginalAssetId = videoUpload.asset.assetId;
+    videoStatus = "original";
+  }
+
   let lastError: string | null = null;
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -78,6 +100,9 @@ export async function saveTestimonial(
       avatar_path: avatarPath,
       capture_path: capturePath,
       video_url: data.videoUrl,
+      video_status: videoStatus,
+      video_original_url: videoOriginalUrl,
+      video_original_asset_id: videoOriginalAssetId,
       payload: data.payload,
       consent_at: data.consentAt,
     });
@@ -95,6 +120,9 @@ export async function saveTestimonial(
   await removeUploaded(supabase, AVATARS_BUCKET, avatarPath);
   if (capturePath) {
     await removeUploaded(supabase, CAPTURES_BUCKET, capturePath);
+  }
+  if (videoOriginalAssetId) {
+    await deleteSanityAsset(videoOriginalAssetId);
   }
 
   return {

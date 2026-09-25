@@ -11,6 +11,7 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@repo/ui": "workspace:*",
+    "@sanity/client": "^8.7.0",
     "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.115.0",
     "class-variance-authority": "^0.7.1",

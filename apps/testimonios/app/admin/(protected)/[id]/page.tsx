@@ -7,6 +7,7 @@ import { AdminPublishedPanel } from "@/components/admin-published-panel";
 import { AdminReviewForm } from "@/components/admin-review-form";
 import { AdminStatusBadge, adminPillClassName } from "@/components/admin-status-badge";
 import { AdminSubmission } from "@/components/admin-submission";
+import { AdminVideoPanel } from "@/components/admin-video-panel";
 import { PageShell } from "@/components/page-shell";
 import { requireAdmin } from "@/lib/auth/admin";
 import { hasInstagramChannel, hasLinkedInChannel } from "@/lib/buffer";
@@ -112,6 +113,7 @@ export default async function AdminReviewPage({
       <p className="mt-sm text-body-small text-text-secondary">{metaLine}</p>
       <div className="mt-lg flex min-w-0 flex-col gap-lg">
         {submission}
+        <AdminVideoPanel testimonial={testimonial} />
         <AdminPublishedPanel
           testimonial={testimonial}
           discordStatus={discordStatus}

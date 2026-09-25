@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@repo/ui"],
   experimental: {
     serverActions: {
-      bodySizeLimit: "15mb",
+      bodySizeLimit: "100mb",
     },
   },
   images: {
@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: "/files/**",
       },
     ],
   },

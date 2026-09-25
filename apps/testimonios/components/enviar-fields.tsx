@@ -95,11 +95,11 @@ type FileFieldProps = {
   hideLabel?: boolean;
   className?: string;
   accept: string;
-  preview: "avatar" | "capture";
+  preview: "avatar" | "capture" | "none";
   onFileChange: (file: File | null) => void;
 };
 
-/** Upload de imagen con preview local. `preview="avatar"` redondo; `"capture"` rectangular. */
+/** Upload con preview local. `none` = sin thumbnail (p. ej. video). */
 export function FileField({
   name,
   label,
@@ -114,8 +114,10 @@ export function FileField({
 }: FileFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   function clearFile() {
+    setFileName(null);
     setObjectUrl((current) => {
       if (current) {
         URL.revokeObjectURL(current);
@@ -135,6 +137,8 @@ export function FileField({
       }
     };
   }, [objectUrl]);
+
+  const isVideo = preview === "none";
 
   return (
     <Field
@@ -162,7 +166,7 @@ export function FileField({
             invalid && "border-destructive",
           )}
         >
-          {objectUrl ? (
+          {objectUrl && !isVideo ? (
             // Preview of the file the user just picked (not a remote asset).
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -176,10 +180,25 @@ export function FileField({
               )}
             />
           ) : (
-            <span className="text-body text-text-muted">
-              {preview === "avatar" ? "Foto" : "Captura"}
+            <span
+              className={cn(
+                "text-body text-text-muted",
+                isVideo &&
+                  "grid size-16 shrink-0 place-items-center rounded-sm bg-bg-surface-3 text-overline",
+              )}
+            >
+              {preview === "avatar"
+                ? "Foto"
+                : preview === "capture"
+                  ? "Captura"
+                  : "Video"}
             </span>
           )}
+          {isVideo ? (
+            <span className="min-w-0 break-all text-body-small text-text-secondary">
+              {fileName ?? "Elegí un archivo mp4"}
+            </span>
+          ) : null}
           <input
             ref={inputRef}
             id={id}
@@ -191,11 +210,15 @@ export function FileField({
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0] ?? null;
+              setFileName(file?.name ?? null);
               setObjectUrl((current) => {
                 if (current) {
                   URL.revokeObjectURL(current);
                 }
-                return file ? URL.createObjectURL(file) : null;
+                if (!file || isVideo) {
+                  return null;
+                }
+                return URL.createObjectURL(file);
               });
               onFileChange(file);
             }}

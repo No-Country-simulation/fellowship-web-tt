@@ -10,7 +10,12 @@ type AdminSubmissionProps = {
 /** Lo que mandó el talento: historia, media y datos. Va en un desplegable. */
 export function AdminSubmission({ testimonial }: AdminSubmissionProps) {
   const hasMedia = Boolean(
-    testimonial.captureUrl || testimonial.youtubeEmbedUrl || testimonial.videoUrl,
+    testimonial.captureUrl ||
+      testimonial.youtubeEmbedUrl ||
+      testimonial.videoUrl ||
+      testimonial.videoOriginalUrl ||
+      testimonial.videoProcessedUrl ||
+      testimonial.videoShareUrl,
   );
 
   return (
