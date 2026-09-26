@@ -17,7 +17,7 @@ import { TestimonialCard } from "@/components/testimonial-card";
 - Listar testimonios (galería)
 - Quote destacado en la ficha pública
 
-No usarlo para la captura del proyecto ni para el embed de YouTube: esos van aparte. No meter email ni historia completa adentro. No usarlo como preview de Discord, Instagram o LinkedIn.
+No usarlo para la foto testimonial ni para el embed de YouTube: esos van aparte. No meter email ni historia completa adentro. No usarlo como preview de Discord, Instagram o LinkedIn.
 
 ## Props
 

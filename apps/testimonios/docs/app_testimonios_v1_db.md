@@ -7,7 +7,7 @@ Auth de admin: `auth.users` de Supabase (no se crea tabla de usuarios). Un email
 Storage (no es tabla):
 
 - bucket `avatars` — `{id}/avatar.{ext}` (obligatorio en v1)
-- bucket `captures` — `{id}/capture.{ext}` (opcional; screenshot del proyecto/demo)
+- bucket `captures` — `{id}/capture.{ext}` (opcional; foto del entorno de trabajo, no la cara)
 - bucket `share-cards` — `{slug}/instagram.png` (PNG que Buffer descarga para Instagram)
 
 Los datos que **cambian según el tipo** van en un solo `payload jsonb`. Así `testimonials` no tiene columnas vacías (`company`, `puesto`, `oficio anterior`, etc.).
@@ -50,7 +50,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `ig_caption` | `text` | no | | Intro No Country + quote entre comillas + nombre + IG + hashtags |
 | `li_caption` | `text` | no | `''` | Igual que IG, con LinkedIn en vez de Instagram. Solo admin |
 | `avatar_path` | `text` | no | | Path en `avatars`. Foto de **perfil**. Obligatorio |
-| `capture_path` | `text` | sí | | Path en `captures`. Screenshot del **proyecto/demo**, no la cara |
+| `capture_path` | `text` | sí | | Path en `captures`. Foto del **entorno de trabajo** (equipo, oficina, reunión), no la cara ni una captura del proyecto |
 | `video_url` | `text` | sí | | URL de YouTube |
 | `payload` | `jsonb` | no | `'{}'` | Solo campos del tipo (abajo) |
 | `consent_at` | `timestamptz` | no | | |

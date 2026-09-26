@@ -1,10 +1,14 @@
-import { IG_CARD_HEIGHT, IG_CARD_WIDTH, type IgCardContent } from "./ig-card";
+import {
+  IG_CARD_HEIGHT,
+  IG_CARD_WIDTH,
+  IG_PHOTO_HEIGHT,
+  type IgCardContent,
+} from "./ig-card";
 import { stripWrappingQuotes } from "./quote";
 import type { TestimonialType } from "./types";
 
 const LOGO_SRC = "/brand/logo-no-country.png";
 const FALLBACK_PHOTO_SRC = "/brand/ig-fallback.jpg";
-const PHOTO_H = 620;
 const PAD = 52;
 const AUTHOR_H = 168;
 
@@ -52,7 +56,7 @@ export async function drawIgCard(
   const hasPhoto = Boolean(photo);
   ctx.imageSmoothingQuality = "high";
   if (photo) {
-    drawPhoto(ctx, photo);
+    drawPhoto(ctx, photo, variant);
     drawTopScrim(ctx);
   } else {
     drawBody(ctx, variant, 0);
@@ -65,7 +69,7 @@ export async function drawIgCard(
   );
   drawBadge(ctx, copy.badge, variant, fontFamily);
   if (hasPhoto) {
-    drawBody(ctx, variant, PHOTO_H);
+    drawBody(ctx, variant, IG_PHOTO_HEIGHT);
   }
 
   const authorTop = IG_CARD_HEIGHT - PAD - AUTHOR_H;
@@ -73,9 +77,9 @@ export async function drawIgCard(
   const headerBottom = 156;
   let contentTop = headerBottom;
   if (hasPhoto) {
-    contentTop = PHOTO_H + (variant === "job" ? 72 : 44);
+    contentTop = IG_PHOTO_HEIGHT + (variant === "job" ? 72 : 44);
     if (variant === "job") {
-      drawHiredPill(ctx, input.company, fontFamily, PHOTO_H - 38);
+      drawHiredPill(ctx, input.company, fontFamily, IG_PHOTO_HEIGHT - 38);
     }
   } else if (variant === "job" && input.company?.trim()) {
     drawHiredPill(ctx, input.company, fontFamily, headerBottom);
@@ -159,13 +163,20 @@ function variantOf(type: TestimonialType): Variant {
   return "learning";
 }
 
-function drawPhoto(ctx: CanvasRenderingContext2D, capture: ImageBitmap) {
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, 0, IG_CARD_WIDTH, PHOTO_H);
-  ctx.clip();
-  drawCover(ctx, capture, 0, 0, IG_CARD_WIDTH, PHOTO_H);
-  ctx.restore();
+function drawPhoto(
+  ctx: CanvasRenderingContext2D,
+  capture: ImageBitmap,
+  variant: Variant,
+) {
+  if (variant === "job") {
+    ctx.fillStyle = "#f4f2f6";
+  } else if (variant === "change") {
+    ctx.fillStyle = "#070b18";
+  } else {
+    ctx.fillStyle = learningGradient(ctx, 0, 0, IG_CARD_WIDTH);
+  }
+  ctx.fillRect(0, 0, IG_CARD_WIDTH, IG_PHOTO_HEIGHT);
+  drawContain(ctx, capture, 0, 0, IG_CARD_WIDTH, IG_PHOTO_HEIGHT);
 }
 
 function drawTopScrim(ctx: CanvasRenderingContext2D) {
@@ -603,7 +614,7 @@ function drawHexAvatar(
   ctx.stroke();
 }
 
-function drawCover(
+function drawContain(
   ctx: CanvasRenderingContext2D,
   image: ImageBitmap,
   x: number,
@@ -611,7 +622,7 @@ function drawCover(
   width: number,
   height: number,
 ) {
-  const scale = Math.max(width / image.width, height / image.height);
+  const scale = Math.min(width / image.width, height / image.height);
   const w = image.width * scale;
   const h = image.height * scale;
   ctx.drawImage(image, x + (width - w) / 2, y + (height - h) / 2, w, h);

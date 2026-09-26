@@ -1,6 +1,6 @@
 # Plan: sistema de testimonios
 
-Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Captura del proyecto y YouTube opcionales. Se pide en **Demo Day**.
+Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Foto testimonial y YouTube opcionales. Se pide en **Demo Day**.
 
 App nueva `apps/testimonios` (Next + Supabase). No se mezcla con la landing de empresas.
 
@@ -39,7 +39,7 @@ Wizard corto, sin login.
 1. Qué querés contar
 2. Nombre, país, email y foto de perfil
 3. Historia según el tipo
-4. Captura del proyecto (opcional) + YouTube, Instagram y LinkedIn (opcionales)
+4. Foto testimonial (opcional) + YouTube, Instagram y LinkedIn (opcionales)
 5. Consentimiento y enviar
 
 **Todos**
@@ -49,7 +49,7 @@ Wizard corto, sin login.
 - País — obligatorio en el form. En DB puede ser null (envíos anteriores). Se muestra junto al nombre en `/t/[slug]`, Discord e Instagram
 - Email — obligatorio (no sale en público)
 - **Avatar** — **obligatorio**. Foto de la **persona** (cara / perfil). Va redondo en la card IG y en Discord junto al nombre. Sin avatar no se puede enviar.
-- **Captura** — opcional. **No es el avatar.** Imagen del **trabajo** (demo, producto). En Instagram es la foto de arriba de la card; si no hay, se usa `public/brand/ig-fallback.jpg`
+- **Foto testimonial** — opcional. **No es el avatar.** Foto del **entorno de trabajo** (equipo, oficina, reunión), no una captura del proyecto. En Instagram es la foto de arriba de la card; si no hay, se usa `public/brand/ig-fallback.jpg`
 - Video — opcional: **solo URL de YouTube**
 - Instagram — opcional, para mención en el caption de IG
 - LinkedIn — opcional, perfil (`linkedin.com/in/…`) o handle, para el caption de LI
@@ -145,7 +145,7 @@ Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `
 Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Cada canal usa distinto el mismo envío.
 
 - **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo. En LinkedIn no se muestra (post de texto).
-- **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram es la foto de arriba de la card (si no hay, fallback de marca). En LinkedIn Buffer la adjunta si hay.
+- **Foto testimonial** (entorno de trabajo, opcional): en Discord es la imagen grande del embed. En Instagram es la foto de arriba de la card (si no hay, fallback de marca). En LinkedIn Buffer la adjunta si hay.
 - **YouTube** (URL, no un mp4 nuestro, opcional): en Discord y LinkedIn el link `watch?v=` va en un campo **Video**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card IG. El Reel queda para v2.
 
 **Discord, en la práctica**

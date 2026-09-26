@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useState, type FormEvent } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@repo/ui/button";
 
@@ -212,7 +218,9 @@ export function EnviarForm() {
     if (captureFile) {
       formData.set("capture", captureFile);
     }
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   }
 
   return (
@@ -280,12 +288,13 @@ export function EnviarForm() {
           <FileField
             name="avatar"
             label="Foto de perfil"
-            hint="Una foto tuya, para ponerle cara a tu historia."
+            hint="Al subirla vas a recortar en cuadrado."
             className="max-w-48"
             error={fieldErrors.avatar}
             accept={IMAGE_ACCEPT}
             preview="avatar"
             onFileChange={setAvatarFile}
+            onInvalid={(message) => setError("avatar", message)}
           />
           <div className="flex flex-col gap-md">
             <Field label="Nombre completo" error={fieldErrors.full_name}>
@@ -463,20 +472,19 @@ export function EnviarForm() {
       >
         <legend className="sr-only">Captura y links</legend>
         <p className="text-body-small text-text-secondary">
-          Todo este paso es opcional. La captura es de tu proyecto o de la
-          demo.
+          Todo este paso es opcional.
         </p>
-        <div className="grid items-start gap-md sm:grid-cols-[minmax(0,4fr)_minmax(0,6fr)]">
+        <div className="grid items-start gap-md sm:grid-cols-2">
           <FileField
             name="capture"
             label="Foto testimonial"
-            hint="Del proyecto o de la demo."
-            className="max-w-48 sm:max-w-none"
+            hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión. Ayuda a mostrar cómo se vivió, más allá del proyecto."
             error={fieldErrors.capture}
             optional
             accept={IMAGE_ACCEPT}
             preview="capture"
             onFileChange={setCaptureFile}
+            onInvalid={(message) => setError("capture", message)}
           />
           <div className="flex flex-col gap-md">
             <Field

@@ -19,6 +19,7 @@ Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-for
 | [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha) |
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
 | [Field](./components/field.md) | Label, hint, error y classes de input |
+| [CaptureCropDialog](./components/capture-crop-dialog.md) | Recorte de foto: 16:9 o cuadrado |
 | [AdminStatusBadge](./components/admin-status-badge.md) | Pill de estado (en revisión / publicado / rechazado) |
 | [DiscordEmbedPreview](./components/discord-embed-preview.md) | Recreación visual del embed de Discord |
 | [AdminIgShare](./components/admin-ig-share.md) | Card IG 1080×1350: preview, descargar PNG, copiar caption |

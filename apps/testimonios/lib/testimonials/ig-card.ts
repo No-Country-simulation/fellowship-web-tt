@@ -8,6 +8,8 @@ import type {
 /** Instagram feed portrait, 4:5. */
 export const IG_CARD_WIDTH = 1080;
 export const IG_CARD_HEIGHT = 1350;
+/** Franja de foto arriba de la card. 16:9 sobre 1080 de ancho. */
+export const IG_PHOTO_HEIGHT = Math.round((IG_CARD_WIDTH * 9) / 16);
 
 export type IgCardContent = {
   type: TestimonialType;

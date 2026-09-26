@@ -1,5 +1,8 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import type { Area } from "react-easy-crop";
 
+import { CaptureCropDialog } from "./capture-crop-dialog";
+import { cropAvatarFile, cropCaptureFile } from "@/lib/testimonials/prepare-image";
 import { cn } from "@/lib/utils";
 
 export const fieldClassName = cn(
@@ -97,9 +100,10 @@ type FileFieldProps = {
   accept: string;
   preview: "avatar" | "capture";
   onFileChange: (file: File | null) => void;
+  onInvalid?: (message: string | undefined) => void;
 };
 
-/** Upload de imagen con preview local. `preview="avatar"` redondo; `"capture"` rectangular. */
+/** Upload de imagen con preview local. Al elegir archivo, recorte cuadrado (avatar) o 16:9 (captura). */
 export function FileField({
   name,
   label,
@@ -111,21 +115,75 @@ export function FileField({
   accept,
   preview,
   onFileChange,
+  onInvalid,
 }: FileFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [cropSource, setCropSource] = useState<{
+    file: File;
+    url: string;
+  } | null>(null);
+  const [cropping, setCropping] = useState(false);
 
-  function clearFile() {
+  function replacePreview(nextUrl: string | null) {
     setObjectUrl((current) => {
       if (current) {
         URL.revokeObjectURL(current);
       }
-      return null;
+      return nextUrl;
     });
+  }
+
+  function clearFile() {
+    replacePreview(null);
+    closeCrop();
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     onFileChange(null);
+    onInvalid?.(undefined);
+  }
+
+  function closeCrop() {
+    setCropping(false);
+    setCropSource((current) => {
+      if (current) {
+        URL.revokeObjectURL(current.url);
+      }
+      return null;
+    });
+  }
+
+  function cancelCrop() {
+    closeCrop();
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+    onFileChange(null);
+    onInvalid?.(undefined);
+  }
+
+  function confirmCrop(area: Area) {
+    if (!cropSource) {
+      return;
+    }
+    setCropping(true);
+    onInvalid?.(undefined);
+    const cropFile = preview === "avatar" ? cropAvatarFile : cropCaptureFile;
+    void cropFile(cropSource.file, area)
+      .then((prepared) => {
+        replacePreview(URL.createObjectURL(prepared));
+        onFileChange(prepared);
+        closeCrop();
+      })
+      .catch(() => {
+        onInvalid?.("No pudimos recortar la foto.");
+        closeCrop();
+        if (inputRef.current) {
+          inputRef.current.value = "";
+        }
+        onFileChange(null);
+      });
   }
 
   useEffect(() => {
@@ -156,9 +214,11 @@ export function FileField({
           className={cn(
             "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base",
             "hover:border-accent-cyan/70 hover:bg-bg-white-a5",
-            preview === "avatar" || preview === "capture"
+            preview === "avatar"
               ? "relative aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-2xl p-md text-center"
-              : "items-center gap-md p-md",
+              : preview === "capture"
+                ? "relative aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-md p-md text-center"
+                : "items-center gap-md p-md",
             invalid && "border-destructive",
           )}
         >
@@ -169,15 +229,21 @@ export function FileField({
               src={objectUrl}
               alt=""
               className={cn(
-                "shrink-0 object-cover",
-                preview === "avatar" || preview === "capture"
-                  ? "absolute inset-0 size-full"
-                  : "h-16 w-24 rounded-sm",
+                "shrink-0",
+                preview === "avatar"
+                  ? "absolute inset-0 size-full object-cover"
+                  : preview === "capture"
+                    ? "absolute inset-0 size-full object-cover"
+                    : "h-16 w-24 rounded-sm object-cover",
               )}
             />
           ) : (
             <span className="text-body text-text-muted">
-              {preview === "avatar" ? "Foto" : "Captura"}
+              {cropSource
+                ? "Recortando…"
+                : preview === "avatar"
+                  ? "Foto"
+                  : "Captura"}
             </span>
           )}
           <input
@@ -191,13 +257,20 @@ export function FileField({
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0] ?? null;
-              setObjectUrl((current) => {
+              if (!file) {
+                clearFile();
+                return;
+              }
+              replacePreview(null);
+              onFileChange(null);
+              onInvalid?.(undefined);
+              setCropping(false);
+              setCropSource((current) => {
                 if (current) {
-                  URL.revokeObjectURL(current);
+                  URL.revokeObjectURL(current.url);
                 }
-                return file ? URL.createObjectURL(file) : null;
+                return { file, url: URL.createObjectURL(file) };
               });
-              onFileChange(file);
             }}
           />
         </label>
@@ -210,6 +283,15 @@ export function FileField({
           >
             <span aria-hidden="true">×</span>
           </button>
+        ) : null}
+        {cropSource ? (
+          <CaptureCropDialog
+            imageUrl={cropSource.url}
+            kind={preview}
+            confirming={cropping}
+            onCancel={cancelCrop}
+            onConfirm={confirmCrop}
+          />
         ) : null}
         </div>
       )}

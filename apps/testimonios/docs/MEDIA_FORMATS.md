@@ -13,7 +13,7 @@ Más el quote entre comillas. IG y LI suman nombre, red y `#NoCountry #DemoDay #
 | Intro No Country | Fijo en el embed | En el caption (editable / Gemini) | En el caption (editable / Gemini) |
 | Quote | Entre comillas, en la descripción | Entre comillas en la card PNG y en el caption | Entre comillas en el caption |
 | Avatar | Icono del autor | En la card 1080×1350 | No (post de texto) |
-| Captura del proyecto | Imagen grande del embed | Foto de la card (si no hay, una foto de respaldo) | Debajo del caption, se adjunta |
+| Foto testimonial | Imagen grande del embed | Foto de la card (si no hay, una foto de respaldo) | Debajo del caption, se adjunta |
 | YouTube | Campo **Video** (`watch?v=`) | No entra al caption ni a la card | Campo **Video** (`watch?v=`), como Discord |
 | Publicación | Webhook automático al publicar | Buffer (PNG en `share-cards` + caption). Reintentar o copiar si falla | Buffer (`li_caption` + captura/YouTube). Reintentar o copiar si falla |
 

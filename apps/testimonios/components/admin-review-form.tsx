@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
+import { startTransition, useActionState, useState, type ReactNode } from "react";
 import { buttonVariants } from "@repo/ui/button";
 
 import { AdminCaptionField } from "@/components/admin-caption-field";
@@ -103,7 +103,9 @@ export function AdminReviewForm({
         formData.set("li_caption", liCaption);
         if (value !== "publish") {
           setIntent("save");
-          formAction(formData);
+          startTransition(() => {
+            formAction(formData);
+          });
           return;
         }
         void (async () => {
@@ -117,7 +119,9 @@ export function AdminReviewForm({
           } catch {
             // Publica igual; Buffer Instagram falla y se puede reintentar.
           }
-          formAction(formData);
+          startTransition(() => {
+            formAction(formData);
+          });
         })();
       }}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
