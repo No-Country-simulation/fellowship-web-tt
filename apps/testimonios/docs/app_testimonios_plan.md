@@ -1,6 +1,6 @@
 # Plan: sistema de testimonios
 
-Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Captura del proyecto y YouTube opcionales. Se pide en **Demo Day**.
+Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Foto testimonial y YouTube opcionales. Se pide en **Demo Day**.
 
 App nueva `apps/testimonios` (Next + Supabase). No se mezcla con la landing de empresas.
 
@@ -37,18 +37,19 @@ Cadencia: cada simulación / al menos un lote al mes.
 Wizard corto, sin login.
 
 1. Qué querés contar
-2. Nombre y email
+2. Nombre, país, email y foto de perfil
 3. Historia según el tipo
-4. **Avatar** (obligatorio) + **captura del proyecto** (opcional) + YouTube, Instagram y LinkedIn (opcionales)
+4. Foto testimonial (opcional) + YouTube, Instagram y LinkedIn (opcionales)
 5. Consentimiento y enviar
 
 **Todos**
 
 - Qué querés contar — obligatorio
 - Nombre completo — obligatorio
+- País — obligatorio en el form. En DB puede ser null (envíos anteriores). Se muestra junto al nombre en `/t/[slug]`, Discord e Instagram
 - Email — obligatorio (no sale en público)
-- **Avatar** — **obligatorio**. Foto de la **persona** (cara / perfil). Es lo que va redondo en la card y en Discord junto al nombre. Sin avatar no se puede enviar.
-- **Captura** — opcional. **No es el avatar.** Imagen del **trabajo** (demo, producto, equipo).
+- **Avatar** — **obligatorio**. Foto de la **persona** (cara / perfil). Va redondo en la card IG y en Discord junto al nombre. Sin avatar no se puede enviar.
+- **Foto testimonial** — opcional. **No es el avatar.** Foto del **entorno de trabajo** (equipo, oficina, reunión), no una captura del proyecto. En Instagram es la foto de arriba de la card; si no hay, se usa `public/brand/ig-fallback.jpg`
 - Video — opcional: **solo URL de YouTube**
 - Instagram — opcional, para mención en el caption de IG
 - LinkedIn — opcional, perfil (`linkedin.com/in/…`) o handle, para el caption de LI
@@ -56,11 +57,11 @@ Wizard corto, sin login.
 
 **Según el tipo**
 
-- Simulación: *Contanos tu experiencia en la simulación*
+- Simulación: puesto principal (opcional) + *Contanos tu experiencia en la simulación*
 - Primer empleo: empresa, puesto, *Cómo te ayudó la simulación*
 - Reconversión: oficio anterior, rol nuevo, *Por qué cambiaste y cómo te está ayudando No Country*
 
-Totales: simulación 6 obligatorios (incluye avatar); empleo y reconversión 8.
+Totales: simulación 7 obligatorios (incluye país y avatar); empleo y reconversión 9.
 
 Al enviar, el sistema arma los textos **sin IA**: recorta lo que escribió la persona.
 
@@ -134,7 +135,7 @@ Cuerpo del post (embed):
 - Título: tipo (Simulación / Primer empleo / Reconversión)
 - Descripción: intro fijo de No Country + quote entre comillas (`buildDiscordDescription`)
 - Imagen grande: **captura** del proyecto, si hay
-- Campos: empresa/puesto o reconversión si vienen en `payload`. Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube)
+- Campos: país si hay; puesto principal en simulación si lo cargaron; empresa/puesto o reconversión si vienen en `payload`. Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube)
 - Color/footer: No Country
 
 Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `discord_posted_at` queda null. El admin ve el error y un botón **Reintentar Discord**. Si el POST sale bien, se escribe `discord_posted_at`.
@@ -144,37 +145,35 @@ Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `
 Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Cada canal usa distinto el mismo envío.
 
 - **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo. En LinkedIn no se muestra (post de texto).
-- **Captura** (screenshot del proyecto, opcional): en Discord es la imagen grande del embed. En Instagram v1 **no entra** al post (la imagen del feed es la card). En LinkedIn Buffer la adjunta si hay.
+- **Foto testimonial** (entorno de trabajo, opcional): en Discord es la imagen grande del embed. En Instagram es la foto de arriba de la card (si no hay, fallback de marca). En LinkedIn Buffer la adjunta si hay.
 - **YouTube** (URL, no un mp4 nuestro, opcional): en Discord y LinkedIn el link `watch?v=` va en un campo **Video**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card IG. El Reel queda para v2.
 
 **Discord, en la práctica**
 
-1. Siempre: nombre + avatar chico + intro fijo + quote entre comillas.
+1. Siempre: nombre + avatar chico + intro fijo + quote entre comillas. País y puesto de simulación van en campos si hay.
 2. Si hay captura: va de imagen grande. Si no hay, el post es solo texto + cara.
 3. Si hay YouTube: el link `watch?v=` va en un campo del embed. Un embed **no** reproduce YouTube; el link queda clickeable. No se manda `content` aparte.
 4. El intro de Discord no se edita. No se sube el video como archivo. No hace falta.
 
 **Instagram, en la práctica (v1)**
 
-Instagram no acepta un post de solo texto. El post es **una imagen cuadrada + un caption**. La imagen **se genera** en la app: no se sube la captura ni el avatar crudo.
+Instagram no acepta un post de solo texto. El post es **una imagen 4:5 (1080×1350) + un caption**. La imagen **se genera** en la app: no se postea la captura ni el avatar crudos.
 
-La card (PNG 1080×1080) se dibuja **en el browser** (`drawIgCard` sobre un `<canvas>`), con los mismos tokens que la app (fondo oscuro, DM Sans). No hay `ImageResponse` ni ruta `/admin/[id]/ig-card`.
+La card (PNG 1080×1350, 4:5) se dibuja **en el browser** (`drawIgCard` sobre un `<canvas>`). El diseño cambia según el tipo: simulación (aprendizaje), primer empleo y reconversión. La foto de arriba es la captura que subió la persona; si no hay, `public/brand/ig-fallback.jpg`. No hay `ImageResponse` ni ruta `/admin/[id]/ig-card`.
 
 **Logo:** el chrome y la card de Instagram usan el mismo PNG (`public/brand/logo-no-country.png`). El header usa [`BrandLogo`](../../../packages/ui/docs/brand-logo.md) (`@repo/ui`); el PNG es el default del componente. No hay SVG en esta app.
 
-- Barra rosa + logo No Country
-- Avatar redondo
-- Tipo en mayúsculas
-- Quote entre comillas (el que el admin retocó)
-- Línea de contexto (puesto/empresa o reconversión), si hay
-- Nombre
-- Handle de Instagram, si hay
+- Simulación: degradado magenta → índigo, “Lo que aprendí”, bloque del autor semitransparente
+- Primer empleo: fondo claro y “Contratado por” + empresa
+- Reconversión: fondo oscuro y pastillas Antes → Ahora
+- Foto de arriba (captura o fallback), avatar, quote, nombre · país, puesto/rol si hay
 
-La captura del proyecto **no va** en esta pieza. Sigue yendo a Discord y LinkedIn. YouTube no entra como video.
+YouTube no entra como video. El handle de Instagram va en el caption, no en la card.
 
 ```mermaid
 flowchart LR
-  quote[Quote] --> card[PNG 1080x1080]
+  capture[Captura o fallback] --> card[PNG 1080x1350]
+  quote[Quote] --> card
   avatar[Avatar] --> card
   logo[Logo] --> card
   card --> storage[share-cards]
@@ -199,7 +198,7 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 
 - Pasar el YouTube a un Reel o a un mp4 con logo (hace falta bajar/procesar el archivo → v2).
 - Que Discord “incruste” el video dentro de la imagen del embed.
-- Meter la captura del proyecto en el post de Instagram (la imagen del feed es la card).
+- Postear la captura cruda en Instagram (la imagen del feed es la card, que ya la usa como foto de arriba).
 
 ## Stack v1
 

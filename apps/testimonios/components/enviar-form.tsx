@@ -1,9 +1,16 @@
 "use client";
 
-import { useActionState, useState, type FormEvent } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@repo/ui/button";
 
+import { getSiteUrl } from "@/lib/site";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
 import {
@@ -39,7 +46,7 @@ const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp";
 
 const STEP_TITLES = [
   "Qué querés contar",
-  "Nombre, email y foto",
+  "Nombre, país, email y foto",
   "Tu historia",
   "Captura y links",
   "Consentimiento",
@@ -53,9 +60,11 @@ export function EnviarForm() {
   const [step, setStep] = useState(1);
   const [type, setType] = useState<TestimonialType | "">("");
   const [fullName, setFullName] = useState("");
+  const [country, setCountry] = useState("");
   const [email, setEmail] = useState("");
   const [story, setStory] = useState("");
   const [company, setCompany] = useState("");
+  const [primaryRole, setPrimaryRole] = useState("");
   const [roleAchieved, setRoleAchieved] = useState("");
   const [previousProfession, setPreviousProfession] = useState("");
   const [newRole, setNewRole] = useState("");
@@ -96,6 +105,9 @@ export function EnviarForm() {
       if (!fullName.trim()) {
         nextErrors.full_name = "El nombre es obligatorio.";
       }
+      if (!country.trim()) {
+        nextErrors.country = "El país es obligatorio.";
+      }
       if (!email.trim()) {
         nextErrors.email = "El email es obligatorio. No se muestra en público.";
       } else if (!isValidEmail(email)) {
@@ -112,6 +124,9 @@ export function EnviarForm() {
     }
 
     if (current === 3) {
+      if (type === "simulation" && primaryRole.trim().length > 120) {
+        nextErrors.primary_role = "Máximo 120 caracteres.";
+      }
       if (type === "first_job") {
         if (!company.trim()) {
           nextErrors.company = "La empresa es obligatoria.";
@@ -183,9 +198,11 @@ export function EnviarForm() {
       formData.set("type", type);
     }
     formData.set("full_name", fullName);
+    formData.set("country", country);
     formData.set("email", email);
     formData.set("story", story);
     formData.set("company", company);
+    formData.set("primary_role", primaryRole);
     formData.set("role_achieved", roleAchieved);
     formData.set("previous_profession", previousProfession);
     formData.set("new_role", newRole);
@@ -201,7 +218,9 @@ export function EnviarForm() {
     if (captureFile) {
       formData.set("capture", captureFile);
     }
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   }
 
   return (
@@ -264,48 +283,70 @@ export function EnviarForm() {
         hidden={step !== 2}
         className={cn(step === 2 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Nombre, email y foto</legend>
-        <div className="grid grid-cols-2 gap-md">
-          <Field label="Nombre completo" error={fieldErrors.full_name}>
-            {({ id, describedBy, invalid }) => (
-              <input
-                id={id}
-                name="full_name"
-                type="text"
-                autoComplete="name"
-                value={fullName}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={fieldClassName}
-                onChange={(event) => setFullName(event.target.value)}
-              />
-            )}
-          </Field>
-          <Field label="Email" error={fieldErrors.email}>
-            {({ id, describedBy, invalid }) => (
-              <input
-                id={id}
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={fieldClassName}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            )}
-          </Field>
+        <legend className="sr-only">Nombre, país, email y foto</legend>
+        <div className="grid items-start gap-md sm:grid-cols-[12rem_minmax(0,1fr)]">
+          <FileField
+            name="avatar"
+            label="Foto de perfil"
+            hint="Al subirla vas a recortar en cuadrado."
+            className="max-w-48"
+            error={fieldErrors.avatar}
+            accept={IMAGE_ACCEPT}
+            preview="avatar"
+            onFileChange={setAvatarFile}
+            onInvalid={(message) => setError("avatar", message)}
+          />
+          <div className="flex flex-col gap-md">
+            <Field label="Nombre completo" error={fieldErrors.full_name}>
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="full_name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="María López"
+                  value={fullName}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => setFullName(event.target.value)}
+                />
+              )}
+            </Field>
+            <Field label="País" error={fieldErrors.country}>
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="country"
+                  type="text"
+                  autoComplete="country-name"
+                  placeholder="Argentina"
+                  value={country}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => setCountry(event.target.value)}
+                />
+              )}
+            </Field>
+            <Field label="Email" error={fieldErrors.email}>
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              )}
+            </Field>
+          </div>
         </div>
-        <FileField
-          name="avatar"
-          label="Foto de perfil"
-          hint="Una foto tuya, ayuda a darle identidad a tu testimonio."
-          error={fieldErrors.avatar}
-          accept={IMAGE_ACCEPT}
-          preview="avatar"
-          onFileChange={setAvatarFile}
-        />
       </fieldset>
 
       <fieldset
@@ -313,6 +354,26 @@ export function EnviarForm() {
         className={cn(step === 3 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">Tu historia</legend>
+        {type === "simulation" ? (
+          <Field
+            label="Puesto principal"
+            hint="Opcional. El rol que tuviste en la simulación."
+            error={fieldErrors.primary_role}
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="primary_role"
+                type="text"
+                value={primaryRole}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => setPrimaryRole(event.target.value)}
+              />
+            )}
+          </Field>
+        ) : null}
         {type === "first_job" ? (
           <div className="grid grid-cols-2 gap-md">
             <Field label="Empresa" error={fieldErrors.company}>
@@ -411,85 +472,85 @@ export function EnviarForm() {
       >
         <legend className="sr-only">Captura y links</legend>
         <p className="text-body-small text-text-secondary">
-          Todo este paso es opcional. Si no tenés captura ni links, seguí al
-          consentimiento.
+          Todo este paso es opcional.
         </p>
-        <FileField
-          name="capture"
-          label="Captura del proyecto"
-          hint="Subí una captura de tu proyecto o de la demo (no tu foto de perfil)."
-          error={fieldErrors.capture}
-          optional
-          accept={IMAGE_ACCEPT}
-          preview="capture"
-          onFileChange={setCaptureFile}
-        />
-        <Field
-          label="Video de YouTube"
-          hint="Solo un link de YouTube. No se sube un archivo."
-          error={fieldErrors.video_url}
-          optional
-        >
-          {({ id, describedBy, invalid }) => (
-            <input
-              id={id}
-              name="video_url"
-              type="url"
-              inputMode="url"
-              placeholder="https://www.youtube.com/watch?v="
-              value={videoUrl}
-              aria-invalid={invalid}
-              aria-describedby={describedBy}
-              className={fieldClassName}
-              onChange={(event) => setVideoUrl(event.target.value)}
-            />
-          )}
-        </Field>
-        <div className="grid grid-cols-2 gap-md">
-          <Field
-            label="Instagram"
-            hint="Para mencionarte en el caption si publicamos."
-            error={fieldErrors.instagram}
+        <div className="grid items-start gap-md sm:grid-cols-2">
+          <FileField
+            name="capture"
+            label="Foto testimonial"
+            hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión. Ayuda a mostrar cómo se vivió, más allá del proyecto."
+            error={fieldErrors.capture}
             optional
-            className="min-w-0"
-          >
-            {({ id, describedBy, invalid }) => (
-              <input
-                id={id}
-                name="instagram"
-                type="text"
-                autoComplete="off"
-                placeholder="@tu.usuario"
-                value={instagram}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={fieldClassName}
-                onChange={(event) => setInstagram(event.target.value)}
-              />
-            )}
-          </Field>
-          <Field
-            label="LinkedIn"
-            hint="Para mencionarte en el post de LinkedIn si publicamos."
-            error={fieldErrors.linkedin}
-            optional
-            className="min-w-0"
-          >
-            {({ id, describedBy, invalid }) => (
-              <input
-                id={id}
-                name="linkedin"
-                type="text"
-                autoComplete="off"
-                placeholder="https://www.linkedin.com/in/tu-usuario"
-                value={linkedin}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={fieldClassName}
-                onChange={(event) => setLinkedin(event.target.value)}
-              />
-            )}
-          </Field>
+            accept={IMAGE_ACCEPT}
+            preview="capture"
+            onFileChange={setCaptureFile}
+            onInvalid={(message) => setError("capture", message)}
+          />
+          <div className="flex flex-col gap-md">
+            <Field
+              label="Video de YouTube"
+              hint="Solo un link de YouTube. No se sube un archivo."
+              error={fieldErrors.video_url}
+              optional
+            >
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="video_url"
+                  type="url"
+                  inputMode="url"
+                  placeholder="https://www.youtube.com/watch?v="
+                  value={videoUrl}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => setVideoUrl(event.target.value)}
+                />
+              )}
+            </Field>
+            <Field
+              label="Instagram"
+              hint="Para mencionarte en el caption si publicamos."
+              error={fieldErrors.instagram}
+              optional
+            >
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="instagram"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="@tu.usuario"
+                  value={instagram}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => setInstagram(event.target.value)}
+                />
+              )}
+            </Field>
+            <Field
+              label="LinkedIn"
+              hint="Para mencionarte en el post de LinkedIn si publicamos."
+              error={fieldErrors.linkedin}
+              optional
+            >
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="linkedin"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="https://www.linkedin.com/in/tu-usuario"
+                  value={linkedin}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => setLinkedin(event.target.value)}
+                />
+              )}
+            </Field>
+          </div>
         </div>
       </fieldset>
 
@@ -514,13 +575,19 @@ export function EnviarForm() {
               </span>
             </li>
             <li>
+              País:{" "}
+              <span className="text-text-primary">
+                {country.trim() || "—"}
+              </span>
+            </li>
+            <li>
               Foto de perfil:{" "}
               <span className="text-text-primary">
                 {avatarFile ? "Lista" : "Falta"}
               </span>
             </li>
             <li>
-              Captura del proyecto:{" "}
+              Foto testimonial:{" "}
               <span className="text-text-primary">
                 {captureFile ? "Adjunta" : "Sin captura"}
               </span>
@@ -619,25 +686,37 @@ function StepProgress({ step }: { step: number }) {
       <p className="text-overline text-text-secondary">
         Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
       </p>
-      <ol className="mt-xs flex gap-1" aria-hidden="true">
-        {Array.from({ length: STEPS }, (_, index) => {
-          const current = index + 1;
-          return (
-            <li
-              key={current}
-              className={cn(
-                "h-1 flex-1 rounded-full bg-bg-surface-4",
-                current <= step && "bg-brand-gradient",
-              )}
-            />
-          );
-        })}
-      </ol>
+      <div
+        className="mt-xs h-1 overflow-hidden rounded-full bg-bg-surface-4"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full bg-brand-gradient transition-[width]"
+          style={{ width: `${(step / STEPS) * 100}%` }}
+        />
+      </div>
     </div>
   );
 }
 
 function SuccessCard() {
+  const [inviteUrl, setInviteUrl] = useState(`${getSiteUrl()}/enviar`);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setInviteUrl(`${window.location.origin}/enviar`);
+  }, []);
+
+  async function copyInviteLink() {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
     <div className="mt-lg rounded-md border border-border bg-card p-md">
       <p className="text-overline text-accent-mint">Listo</p>
@@ -647,10 +726,31 @@ function SuccessCard() {
       <p className="mt-sm text-body text-text-secondary">
         Ya lo tenemos. Gracias por tomarte el tiempo de contarlo.
       </p>
-      <div className="mt-md">
-        <Link href="/" className={buttonVariants({ variant: "outline" })}>
-          Volver al inicio
-        </Link>
+      <div className="mt-md border-t border-border pt-md">
+        <p className="text-body text-text-primary">
+          Ahora ayudá a que otra persona se anime
+        </p>
+        <p className="mt-xs text-body text-text-secondary">
+          Si alguien de tu equipo o de tu simulación todavía no contó su
+          historia, pasale este enlace. Tu invitación puede ser el empujón
+          que necesita para dejarla.
+        </p>
+        <p className="mt-sm break-all text-body">
+          <a
+            href={inviteUrl}
+            className="text-accent-cyan hover:underline"
+          >
+            {inviteUrl}
+          </a>
+        </p>
+        <div className="mt-sm flex flex-wrap gap-sm">
+          <Button type="button" variant="outline" onClick={copyInviteLink}>
+            {copied ? "Enlace copiado" : "Copiar enlace"}
+          </Button>
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+            Volver al inicio
+          </Link>
+        </div>
       </div>
     </div>
   );

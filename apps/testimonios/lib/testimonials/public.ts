@@ -13,10 +13,12 @@ import { youtubeEmbedSrc } from "./parse";
 import {
   careerChangeFields,
   firstJobFields,
+  simulationFields,
   isTestimonialType,
   typeOption,
   type CareerChangePayload,
   type FirstJobPayload,
+  type SimulationPayload,
   type TestimonialType,
 } from "./types";
 
@@ -26,12 +28,14 @@ export type PublicTestimonial = {
   type: TestimonialType;
   typeLabel: string;
   fullName: string;
+  country: string | null;
   story: string;
   quote: string;
   avatarUrl: string;
   captureUrl: string | null;
   videoUrl: string | null;
   youtubeEmbedUrl: string | null;
+  simulation: SimulationPayload | null;
   firstJob: FirstJobPayload | null;
   careerChange: CareerChangePayload | null;
   publishedAt: string | null;
@@ -135,6 +139,7 @@ function toPublicTestimonial(
     type: row.type,
     typeLabel: typeOption(row.type).label,
     fullName: row.full_name,
+    country: row.country,
     story: row.story,
     quote: row.quote,
     avatarUrl: publicStorageUrl(AVATARS_BUCKET, row.avatar_path),
@@ -143,6 +148,7 @@ function toPublicTestimonial(
       : null,
     videoUrl: row.video_url,
     youtubeEmbedUrl: row.video_url ? youtubeEmbedSrc(row.video_url) : null,
+    simulation: simulationFields(row.payload),
     firstJob: firstJobFields(row.payload),
     careerChange: careerChangeFields(row.payload),
     publishedAt: row.published_at,

@@ -8,7 +8,8 @@ import { AdminShareTabs } from "@/components/admin-share-tabs";
 import { DiscordPublishPreview } from "@/components/discord-publish-preview";
 import { LinkedInPublishPreview } from "@/components/linkedin-publish-preview";
 import { bufferPublishesImmediately } from "@/lib/buffer";
-import { adminContextLine, formatSubmittedAt } from "@/lib/testimonials/admin-view";
+import { formatSubmittedAt } from "@/lib/testimonials/admin-view";
+import { igCardContent } from "@/lib/testimonials/ig-card";
 import type { AdminTestimonial } from "@/lib/testimonials/admin-view";
 
 type AdminPublishedPanelProps = {
@@ -85,14 +86,7 @@ export function AdminPublishedPanel({
           bufferStatus={bufferStatus}
           canRetryInstagram={canRetryInstagram}
           canRetryLinkedin={canRetryLinkedin}
-          igCard={{
-            quote: testimonial.quote,
-            fullName: testimonial.fullName,
-            avatarUrl: testimonial.avatarUrl,
-            instagram: testimonial.instagram,
-            typeLabel: testimonial.typeLabel,
-            contextLine: adminContextLine(testimonial),
-          }}
+          igCard={igCardContent(testimonial, testimonial.quote)}
         />
       </section>
 
@@ -108,13 +102,8 @@ export function AdminPublishedPanel({
           <AdminIgShare
             mode="share"
             slug={testimonial.slug}
-            quote={testimonial.quote}
             caption={testimonial.igCaption}
-            fullName={testimonial.fullName}
-            avatarUrl={testimonial.avatarUrl}
-            instagram={testimonial.instagram}
-            typeLabel={testimonial.typeLabel}
-            contextLine={adminContextLine(testimonial)}
+            {...igCardContent(testimonial, testimonial.quote)}
           />
         }
         linkedin={

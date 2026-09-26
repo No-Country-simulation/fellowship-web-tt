@@ -38,6 +38,7 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 | `error` | `string` | — | Mensaje `role="alert"` |
 | `optional` | `boolean` | `false` | Sufijo “Opcional” muted |
 | `labelAs` | `"label" \| "span"` | `"label"` | `span` si el click lo maneja un hijo (file, radios) |
+| `hideLabel` | `boolean` | `false` | Label `sr-only` (sigue anunciado) |
 | `className` | `string` | — | Clases del wrapper |
 
 `children` debe aplicar `id`, `aria-describedby={describedBy}` y `aria-invalid={invalid}` al control.
@@ -48,12 +49,15 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 | --- | --- | --- | --- |
 | `name` | `string` | — | `name` del `<input type="file">` |
 | `label` | `string` | — | Texto del label |
-| `hint` | `string` | — | Qué foto pedir (cara vs captura del proyecto) |
+| `hint` | `string` | — | Qué foto pedir (cara vs entorno de trabajo) |
 | `accept` | `string` | — | p. ej. `"image/jpeg,image/png,image/webp"` |
-| `preview` | `"avatar" \| "capture"` | — | Avatar redondo 64px o captura 96×64 |
-| `onFileChange` | `(file: File \| null) => void` | — | Archivo elegido (para validar en cliente) |
+| `preview` | `"avatar" \| "capture"` | — | Avatar cuadrado; captura 16:9 |
+| `onFileChange` | `(file: File \| null) => void` | — | Archivo elegido o `null` si lo quitan |
+| `onInvalid` | `(message?: string) => void` | — | Error de recorte o lectura |
 | `error` | `string` | — | Mensaje de error |
-| `optional` | `boolean` | `false` | Captura del proyecto; el avatar no |
+| `optional` | `boolean` | `false` | Foto testimonial; el avatar no |
+| `hideLabel` | `boolean` | `false` | Label `sr-only` |
+| `className` | `string` | — | Clases del wrapper |
 
 ## Classes
 
@@ -113,8 +117,8 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 
 <FileField
   name="capture"
-  label="Captura del proyecto"
-  hint="Screenshot de la demo o el producto."
+  label="Foto testimonial"
+  hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión."
   accept="image/jpeg,image/png,image/webp"
   preview="capture"
   optional
@@ -125,6 +129,6 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 ## Notas
 
 - `labelAs="span"` cuando el control clickeable no es el label nativo (`FileField`, radios).
-- El preview de `FileField` es un `objectURL` local; se revoca al cambiar o desmontar. No es la URL de Storage.
-- El input file es `sr-only`; el hit area es el label dashed.
+- El preview de `FileField` es un `objectURL` local; se revoca al cambiar o desmontar. No es la URL de Storage. Avatar y captura abren [`CaptureCropDialog`](./capture-crop-dialog.md) al elegir el archivo (cuadrado o 16:9).
+- El input file es `sr-only`; el hit area es el label dashed. Avatar es cuadrado; captura es 16:9. Con una imagen cargada, una X la quita.
 - Hint y error se anidan en `aria-describedby` en ese orden.

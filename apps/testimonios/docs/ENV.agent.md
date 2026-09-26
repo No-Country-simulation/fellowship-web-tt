@@ -9,7 +9,7 @@ Names only — never commit secrets. Copy `.env.example` → `.env.local` (gitig
 | `SUPABASE_SERVICE_ROLE_KEY` | Next.js server | Privileged DB + Storage (never in browser) |
 | `GEMINI_API_KEY` | Next.js `lib/agent` | Intro de captions IG/LI (texto) |
 | `GEMINI_MODEL` | Next.js `lib/agent` | Optional primary (default `gemini-3.1-flash-lite`) |
-| `GEMINI_FALLBACK_MODEL` | Next.js `lib/agent` | Optional fallback (default `gemini-2.5-flash-lite`) |
+| `GEMINI_FALLBACK_MODEL` | Next.js `lib/agent` | Optional fallback (default `gemini-3.5-flash-lite`) |
 | `BUFFER_ENV` | Next.js `lib/buffer` | `development` = programar 24h; `production` = shareNow. Si falta, se programa |
 | `BUFFER_API_KEY` | Next.js `lib/buffer` | Bearer de Buffer. Sin esto, IG/LI no se ofrecen |
 | `BUFFER_IG_CHANNEL_ID` | Next.js `lib/buffer` | Canal Instagram. Si falta, esa red se saltea |
@@ -20,7 +20,7 @@ Names only — never commit secrets. Copy `.env.example` → `.env.local` (gitig
 
 ## Gemini
 
-Text-only. Gemini writes the No Country intro; the rest of the caption is assembled in code. Video is a YouTube URL on the testimonial. Primary model falls back to 2.5 Flash-Lite on 503/429/empty.
+Text-only. Gemini writes the No Country intro; the rest of the caption is assembled in code. Video is a YouTube URL on the testimonial. Primary model falls back to 3.5 Flash-Lite on 503/429/empty or other errors.
 
 ## Publish
 

@@ -11,6 +11,7 @@ import { buildDiscordDescription } from "./quote";
 import {
   careerChangeFields,
   firstJobFields,
+  simulationFields,
   typeOption,
   type CareerChangePayload,
   type FirstJobPayload,
@@ -37,12 +38,26 @@ export function buildCommunityEmbed(input: {
   avatarUrl: string;
   typeLabel: string;
   quote: string;
+  country: string | null;
+  simulation: { primary_role?: string } | null;
   firstJob: FirstJobPayload | null;
   careerChange: CareerChangePayload | null;
   captureUrl: string | null;
   videoUrl: string | null;
 }): CommunityEmbed {
   const fields: CommunityEmbedField[] = [
+    ...(input.country
+      ? [{ name: "País", value: input.country, inline: true }]
+      : []),
+    ...(input.simulation?.primary_role
+      ? [
+          {
+            name: "Puesto principal",
+            value: input.simulation.primary_role,
+            inline: true,
+          },
+        ]
+      : []),
     ...(input.firstJob
       ? [
           { name: "Empresa", value: input.firstJob.company, inline: true },
@@ -86,6 +101,8 @@ export function communityEmbedFromRow(row: TestimonialRow): CommunityEmbed {
     avatarUrl: publicStorageUrl(AVATARS_BUCKET, row.avatar_path),
     typeLabel: typeOption(row.type).label,
     quote: row.quote,
+    country: row.country,
+    simulation: simulationFields(row.payload),
     firstJob: firstJobFields(row.payload),
     careerChange: careerChangeFields(row.payload),
     captureUrl: row.capture_path

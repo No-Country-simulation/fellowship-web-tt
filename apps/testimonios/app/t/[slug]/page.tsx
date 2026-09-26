@@ -127,8 +127,10 @@ export default async function TestimonyPage({
 }
 
 function extraLine(testimonial: PublicTestimonial) {
-  return storyContextLine({
+  const context = storyContextLine({
+    simulation: testimonial.simulation,
     firstJob: testimonial.firstJob,
     careerChange: testimonial.careerChange,
   });
+  return [context, testimonial.country].filter(Boolean).join(" · ") || null;
 }
