@@ -16,6 +16,7 @@ Código compartido vive en `packages/` y las apps lo instalan con `"@repo/ui": "
 | --- | --- | --- |
 | [`landing-contratar`](./apps/landing-contratar) | Landing para contratar talento | 3000 |
 | [`testimonios`](./apps/testimonios) | Captura, validación y galería de testimonios | 3001 |
+| [`panel-admin`](./apps/panel-admin) | Esqueleto del panel de admin, con datos mock (sin back) | 3002 |
 
 ## Comandos
 
