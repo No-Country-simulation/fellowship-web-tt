@@ -4,7 +4,7 @@ Card de un testimonio: avatar, tipo, nombre, quote y slots opcionales.
 
 **Archivo:** `components/testimonial-card.tsx`
 
-Uso previsto: grilla de galería y bloque de quote en la ficha. El inbox admin usa filas en `AdminInboxList`, no esta card. El preview al revisar es Discord / Instagram / LinkedIn (`DiscordPublishPreview`, `AdminIgShare`, `LinkedInPublishPreview`) en tabs (`AdminShareTabs`).
+Uso previsto: grilla de galería y bloque de quote en la ficha.
 
 ## Import
 

@@ -1,6 +1,6 @@
 # SiteHeader
 
-Chrome de la app: logo a la izquierda, nav al centro, sesión admin a la derecha.
+Chrome de la app: logo a la izquierda, nav al centro.
 
 **Archivo:** `components/site-header.tsx`
 
@@ -20,7 +20,7 @@ No copiar el markup del header en una página. Para el wordmark aislado usá `Br
 
 ## Props
 
-Ninguna. Labels y hrefs salen de `lib/nav.ts` (`publicNav`, `staffNav`). El subtítulo junto al logo sale de `SITE_NAME` en `lib/site.ts`. Si hay sesión admin, `getAdminUser()` monta `AdminSession` a la derecha.
+Ninguna. Labels y hrefs salen de `lib/nav.ts` (`publicNav`). El subtítulo junto al logo sale de `SITE_NAME` en `lib/site.ts`.
 
 ## Uso
 
@@ -36,9 +36,8 @@ Ninguna. Labels y hrefs salen de `lib/nav.ts` (`publicNav`, `staffNav`). El subt
 SiteHeader (grid 1fr | auto | 1fr)
 ├── BrandLogo (eager) + SITE_NAME
 ├── nav (aria-label="Principal")
-│   ├── publicNav (Galería, Enviar)
-│   └── staffNav (Admin, estilo muted)
-└── AdminSession (solo si hay admin logueado)
+│   └── publicNav (Galería, Enviar)
+└── columna vacía (mantiene el nav centrado)
 ```
 
 ## Cómo cambiar copy o rutas
@@ -48,7 +47,6 @@ Editar `lib/nav.ts` o `lib/site.ts`, no el componente:
 | Export | Qué controla |
 | --- | --- |
 | `publicNav` | Links de galería y envío |
-| `staffNav` | Link al admin |
 | `SITE_NAME` | Texto al lado del logo |
 
 ## Notas
@@ -56,4 +54,3 @@ Editar `lib/nav.ts` o `lib/site.ts`, no el componente:
 - Es Server Component (sin `"use client"`).
 - `shrink-0` + `border-b`: el `<body>` es columna flex a altura completa; el header no scrollea, el `PageShell` sí.
 - Frame: `px-md` + `container-content`. Hover de links: `bg-bg-white-a5`.
-- “Admin” va más apagado (`text-text-muted`) que Galería y Enviar.

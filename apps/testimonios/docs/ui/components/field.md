@@ -4,7 +4,7 @@ Label, hint, error y wiring a11y para un control. También exporta `FileField` y
 
 **Archivo:** `components/enviar-fields.tsx`
 
-Uso previsto: `/enviar` y el form de revisión del admin. El control lo pasa el caller (render prop).
+Uso previsto: `/enviar`. El control lo pasa el caller (render prop).
 
 ## Import
 

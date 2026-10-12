@@ -1,5 +1,7 @@
 # Plan: sistema de testimonios
 
+El inbox ya no vive en esta app. Galería y `/enviar` quedan en `apps/testimonios`. Revisar y publicar está en `apps/panel-admin` (`/testimonials`). Quote y captions salen de la plantilla; no hay generación con IA.
+
 Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Foto testimonial y YouTube opcionales. Se pide en **Demo Day**.
 
 App nueva `apps/testimonios` (Next + Supabase). No se mezcla con la landing de empresas.
@@ -79,7 +81,7 @@ Desde No Country compartimos esta historia de nuestro talento
 #NoCountry #DemoDay #TalentoIT
 ```
 
-El admin puede editar quote y captions antes de publicar. Si cambia el quote y el caption no tiene un intro usable, se regenera la plantilla. En Instagram y LinkedIn, **Generar con IA** (Gemini) reescribe solo el intro; quote, nombre, red y hashtags los arma el código. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
+El equipo edita quote y captions a mano en el panel (`/testimonials/[id]`) antes de guardar o publicar. Si el caption sigue la plantilla y cambia el quote, se rearma con el mismo intro. Quote, nombre, red y hashtags los arma el código. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
 
 ## Guardar
 
@@ -87,11 +89,13 @@ Supabase: una fila (`in_review`). Avatar obligatorio y captura opcional en Stora
 
 Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
-## Validar — `/admin`
+## Validar — panel (`/testimonials`)
 
-Inbox master-detail (`AdminInboxShell` en el layout protegido): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`AdminDetailLoading` / `[id]/loading.tsx`) hasta que carga `/admin/[id]`.
+Revisar y publicar está en `apps/panel-admin`, en `/testimonials` y `/testimonials/[id]`, dentro del mismo shell que el resto del panel. No hay login propio ni generación con IA: el quote y los captions salen de la plantilla y se editan a mano.
 
-En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (`AdminShareTabs`: Discord por defecto / Instagram / LinkedIn). Los tres tabs usan el mismo marco full width. La card de Instagram no supera `max-w-md` adentro del tab; el caption de IG va al lado (con Generar con IA). LinkedIn edita el caption adentro del preview. Publicar, guardar borrador o rechazar. Después de publicar: Discord / Buffer se envían solos; si fallan, reintentar. Las tabs siguen para revisar o copiar.
+Inbox master-detail (`InboxShell`): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`DetailLoading` / `[id]/loading.tsx`) hasta que carga `/testimonials/[id]`.
+
+En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (`ShareTabs`: Discord por defecto / Instagram / LinkedIn). Los tres tabs usan el mismo marco full width. La card de Instagram no supera `max-w-md` adentro del tab; el caption de IG va al lado y se edita a mano. LinkedIn edita el caption adentro del preview. Publicar, guardar borrador o rechazar. Después de publicar: Discord / Buffer se envían solos; si fallan, reintentar. Las tabs siguen para revisar o copiar.
 
 ## Publicar en Discord de comunidad (post validación)
 
@@ -123,7 +127,7 @@ No hace falta ser dueño ni “Admin” del servidor. Hace falta el permiso **Ma
 
 El aviso del Demo Day en el canal **general** es a mano (link `/enviar`). Los webhooks son otro canal: inbox del equipo y publicación a la comunidad.
 
-**Al enviar** (aún `in_review`): `POST` JSON al webhook interno. Aviso corto: nombre, tipo, “nuevo testimonio”, link a `/admin/{id}`. Username del webhook: algo tipo “Testimonios inbox”. La comunidad no ve nada.
+**Al enviar** (aún `in_review`): `POST` JSON al webhook interno. Aviso corto: nombre, tipo, “nuevo testimonio”, link a `{ADMIN_PANEL_URL}/testimonials/{id}`. Username del webhook: algo tipo “Testimonios inbox”. La comunidad no ve nada.
 
 **Al publicar:** el server action pasa a `published`, escribe `published_at`, y **después** postea Discord (webhook) e Instagram/LinkedIn (Buffer). El testimonio no espera a las redes para quedar publicado.
 
@@ -157,9 +161,9 @@ Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Cada canal usa distinto e
 
 **Instagram, en la práctica (v1)**
 
-Instagram no acepta un post de solo texto. El post es **una imagen 4:5 (1080×1350) + un caption**. La imagen **se genera** en la app: no se postea la captura ni el avatar crudos.
+Instagram no acepta un post de solo texto. El post es **una imagen 4:5 (1080×1350) + un caption**. La imagen **se genera** en el panel: no se postea la captura ni el avatar crudos.
 
-La card (PNG 1080×1350, 4:5) se dibuja **en el browser** (`drawIgCard` sobre un `<canvas>`). El diseño cambia según el tipo: simulación (aprendizaje), primer empleo y reconversión. La foto de arriba es la captura que subió la persona; si no hay, `public/brand/ig-fallback.jpg`. No hay `ImageResponse` ni ruta `/admin/[id]/ig-card`.
+La card (PNG 1080×1350, 4:5) se dibuja en el panel, en el browser (`drawIgCard` sobre un `<canvas>` en `apps/panel-admin`). El diseño cambia según el tipo: simulación (aprendizaje), primer empleo y reconversión. La foto de arriba es la captura que subió la persona; si no hay, `public/brand/ig-fallback.jpg` del panel. No existe la ruta `/admin/[id]/ig-card`.
 
 **Logo:** el chrome y la card de Instagram usan el mismo PNG (`public/brand/logo-no-country.png`). El header usa [`BrandLogo`](../../../packages/ui/docs/brand-logo.md) (`@repo/ui`); el PNG es el default del componente. No hay SVG en esta app.
 
@@ -185,13 +189,13 @@ flowchart LR
 
 LinkedIn acepta un post de **texto**. No hay card PNG ni chrome de perfil. El preview (`LinkedInPublishPreview`) muestra el caption, un campo **Video** (YouTube, como Discord) y la captura si hay.
 
-El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn en vez del handle de Instagram. En revisión se edita adentro del preview; **Generar con IA** reescribe solo el intro.
+El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn en vez del handle de Instagram. En `/testimonials/[id]` se edita a mano adentro del preview.
 
 **Cómo se publica**
 
-1. En revisión (`/admin/[id]`): tabs Discord / Instagram / LinkedIn. Captions IG/LI se editan o se generan con Gemini. Publicar.
+1. En revisión (`/testimonials/[id]`): tabs Discord / Instagram / LinkedIn. Los captions se editan a mano. Publicar.
 2. Al publicar: Discord (webhook), Instagram (Buffer: sube el PNG a `share-cards` + `ig_caption`) y LinkedIn (Buffer: `li_caption` + captura si hay + YouTube). `BUFFER_ENV=production` publica ya (`shareNow`); `development` o si falta programa a 24h.
-3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. El admin reintenta. Las tabs sirven para copiar a mano si hace falta.
+3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. El admin reintenta desde la ficha. Las tabs sirven para copiar a mano si hace falta.
 4. Sin `BUFFER_API_KEY` o sin channel ID, esa red se saltea.
 
 **Lo que no se puede en v1**
@@ -202,15 +206,17 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 
 ## Stack v1
 
-- Next 16 en `apps/testimonios`, puerto 3001, UI propia
-- Supabase: Postgres, Auth (admin), Storage (`avatars` + `captures` + `share-cards`), RLS
+- Next 16 en `apps/testimonios`, puerto 3001: galería, `/enviar` y `/t/[slug]`
+- Inbox en `apps/panel-admin`, puerto 3002: `/testimonials` y `/testimonials/[id]`. Sin login propio
+- Supabase: Postgres, Storage (`avatars` + `captures` + `share-cards`), RLS. Escrituras con `service_role`
 - Vercel. Sin worker de video
-- Env: Supabase, Discord webhooks, Buffer (`BUFFER_ENV`, `BUFFER_API_KEY` + channel IDs), `GEMINI_API_KEY` (intro de captions)
+- Env de testimonios: Supabase, `DISCORD_INBOX_WEBHOOK_URL`, `ADMIN_PANEL_URL`
+- Env del panel: service role, `DISCORD_COMMUNITY_WEBHOOK_URL`, Buffer (`BUFFER_ENV`, `BUFFER_API_KEY` + channel IDs)
 
 ## Orden de implementación (v1)
 
 1. Scaffold de la app
-2. Supabase (tabla, Storage avatares + capturas, Auth, RLS)
+2. Supabase (tabla, Storage avatares + capturas, RLS)
 3. Formulario + quote/captions auto (IG + LI) + aviso inbox
 4. Admin validar / publicar
 5. Galería + embed YouTube
