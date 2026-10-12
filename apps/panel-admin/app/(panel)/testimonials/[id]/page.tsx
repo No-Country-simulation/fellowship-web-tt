@@ -5,12 +5,6 @@ import { DetailHeader } from "@features/testimonials/components/DetailHeader";
 import { PublishedPanel } from "@features/testimonials/components/PublishedPanel";
 import { ReviewForm } from "@features/testimonials/components/ReviewForm";
 import { Submission } from "@features/testimonials/components/Submission";
-import { hasInstagramChannel, hasLinkedInChannel } from "@features/testimonials/infrastructure/buffer";
-import { hasCommunityWebhook } from "@features/testimonials/infrastructure/discord";
-import {
-  adminContextLine,
-  formatSubmittedAt,
-} from "@features/testimonials/infrastructure/mappers/testimonialMapper";
 import { getTestimonialById } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
 import { PageHeader, PageHeaderDescription, PageHeaderTitle, PageBackLink } from "@shared/ui/patterns/PageHeader";
 
@@ -50,24 +44,12 @@ export default async function TestimonialDetailPage({
     );
   }
 
-  const testimonial = result.testimonial;
+  const { testimonial, metaLine, canRetryDiscord, canRetryInstagram, canRetryLinkedin } = result;
   const inReview = testimonial.status === "in_review";
   const discordStatus =
     discordParam === "failed" || discordParam === "ok" ? discordParam : null;
   const bufferStatus = bufferParam === "failed" || bufferParam === "ok" ? bufferParam : null;
-  const canRetryDiscord =
-    testimonial.status === "published" && !testimonial.discordPostedAt && hasCommunityWebhook();
-  const canRetryInstagram =
-    testimonial.status === "published" &&
-    !testimonial.bufferInstagramPostedAt &&
-    hasInstagramChannel();
-  const canRetryLinkedin =
-    testimonial.status === "published" &&
-    !testimonial.bufferLinkedinPostedAt &&
-    hasLinkedInChannel();
-  const context = adminContextLine(testimonial);
   const submission = <Submission testimonial={testimonial} />;
-  const metaLine = `Enviado el ${formatSubmittedAt(testimonial.submittedAt)}${context ? ` · ${context}` : ""}`;
 
   if (inReview) {
     return <ReviewForm testimonial={testimonial} submission={submission} metaLine={metaLine} />;

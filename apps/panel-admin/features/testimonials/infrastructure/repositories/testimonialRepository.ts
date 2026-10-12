@@ -1,6 +1,12 @@
 import type { AdminInboxData, AdminTestimonial, TestimonialStatus } from "../../types/testimonial";
+import { hasInstagramChannel, hasLinkedInChannel } from "../buffer";
 import type { TestimonialDto } from "../dtos/testimonialDto";
-import { TestimonialMapper } from "../mappers/testimonialMapper";
+import { hasCommunityWebhook } from "../discord";
+import {
+  adminContextLine,
+  formatSubmittedAt,
+  TestimonialMapper,
+} from "../mappers/testimonialMapper";
 import { hasSupabaseServiceRoleEnv } from "../supabase/env";
 import { createServiceRoleClient } from "../supabase/service-role";
 import {
@@ -28,7 +34,14 @@ export async function loadAdminInbox(): Promise<AdminInboxData> {
 }
 
 export async function getTestimonialById(id: string): Promise<
-  | { ok: true; testimonial: AdminTestimonial }
+  | {
+      ok: true;
+      testimonial: AdminTestimonial;
+      metaLine: string;
+      canRetryDiscord: boolean;
+      canRetryInstagram: boolean;
+      canRetryLinkedin: boolean;
+    }
   | { ok: false; message: string; notFound?: boolean }
 > {
   const row = await getTestimonialRow(id);
@@ -36,7 +49,19 @@ export async function getTestimonialById(id: string): Promise<
     return row;
   }
 
-  return { ok: true, testimonial: mapTestimonial(row.testimonial) };
+  const testimonial = mapTestimonial(row.testimonial);
+  const published = testimonial.status === "published";
+  const context = adminContextLine(testimonial);
+
+  return {
+    ok: true,
+    testimonial,
+    metaLine: `Enviado el ${formatSubmittedAt(testimonial.submittedAt)}${context ? ` · ${context}` : ""}`,
+    canRetryDiscord: published && !testimonial.discordPostedAt && hasCommunityWebhook(),
+    canRetryInstagram:
+      published && !testimonial.bufferInstagramPostedAt && hasInstagramChannel(),
+    canRetryLinkedin: published && !testimonial.bufferLinkedinPostedAt && hasLinkedInChannel(),
+  };
 }
 
 export async function saveReviewEdits(
