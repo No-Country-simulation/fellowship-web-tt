@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardCheck, FolderKanban, Gauge, Layers, Users } from "lucide-react";
+import { ClipboardCheck, FolderKanban, Gauge, Layers, MessageSquareQuote, Users } from "lucide-react";
 import { cn } from "@repo/ui/utils";
 import { NAV_ITEMS, type NavIcon } from "@core/config/navigation";
 
@@ -12,6 +12,7 @@ const ICONS: Record<NavIcon, typeof Gauge> = {
   clipboard: ClipboardCheck,
   folder: FolderKanban,
   users: Users,
+  quote: MessageSquareQuote,
 };
 
 export function Sidebar() {

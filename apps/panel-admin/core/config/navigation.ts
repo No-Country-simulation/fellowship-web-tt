@@ -5,6 +5,7 @@ export const NAV_ITEMS = [
   { href: "/completion", label: "Completitud", icon: "clipboard" },
   { href: "/projects", label: "Proyectos", icon: "folder" },
   { href: "/staffing", label: "Staffing", icon: "users" },
+  { href: "/testimonials", label: "Testimonios", icon: "quote" },
 ] as const;
 
 export type NavIcon = (typeof NAV_ITEMS)[number]["icon"];

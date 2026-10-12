@@ -2,7 +2,7 @@
 
 Solo lo que hace falta para la v1: texto, avatar, link de YouTube, admin. Sin jobs de video.
 
-Auth de admin: `auth.users` de Supabase (no se crea tabla de usuarios). Un email allowlist o `app_metadata.role = admin`.
+La app no inicia sesión en Supabase. El panel real cubre la pantalla con su JWT. Las policies `is_admin()` siguen en la base.
 
 Storage (no es tabla):
 

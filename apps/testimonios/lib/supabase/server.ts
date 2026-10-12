@@ -1,26 +1,15 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "./database";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 
+/** Lectura anon de `testimonials_public`. Esta app no tiene sesión. */
 export async function createClient() {
-  const cookieStore = await cookies();
-
-  return createServerClient<Database>(getSupabaseUrl(), getSupabaseAnonKey(), {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
-        } catch {
-          // Server Component no puede escribir cookies. El proxy refresca la sesión.
-        }
-      },
+  return createSupabaseClient<Database>(getSupabaseUrl(), getSupabaseAnonKey(), {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
   });
 }

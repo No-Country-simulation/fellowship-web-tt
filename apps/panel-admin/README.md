@@ -1,15 +1,54 @@
 # panel-admin
 
 Esqueleto del **panel de administración de No Country** (`admin-panel-v2` del monorepo principal),
-reducido a lo mínimo para entender cómo está armado. **No habla con ningún back**: todos los datos
-salen de mocks en memoria. Puerto **3002**.
+reducido a lo mínimo para entender cómo está armado. Dashboard, simulaciones, proyectos, staffing
+y completion salen de mocks en memoria. **Testimonios** usa el mismo Supabase que `apps/testimonios`.
+Puerto **3002**.
 
 ```bash
 pnpm install                                   # una vez, desde la raíz del repo
+cp .env.example .env.local                     # hace falta para /testimonials
 pnpm turbo run dev --filter=panel-admin        # http://localhost:3002
 ```
 
-No hay login: `/` redirige directo a `/dashboard`. La idea es usarlo de base para armar algo propio.
+No hay login en este mock: `/` redirige directo a `/dashboard`. `/testimonials` queda detrás del
+mismo shell, sin un chequeo propio.
+
+## Testimonios
+
+Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código vive en
+`features/testimonials` (`components/` y `lib/`). Las páginas leen Supabase y las mutaciones son
+Server Actions en `lib/actions.ts`. No pasa por mocks, DTO ni repository. El resto del panel sigue
+en mock.
+
+No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
+
+| Ruta | Qué es |
+| --- | --- |
+| `/testimonials` | Inbox: lista de envíos y, al elegir uno, la ficha al lado |
+| `/testimonials/[id]` | Ficha: envío, quote editable, tabs Discord / Instagram / LinkedIn |
+
+Quote y captions llegan armados por la plantilla del formulario y se editan a mano. No hay
+generación con IA. El video es solo un link de YouTube: en Discord y LinkedIn se muestra como embed
+o link `watch?v=`. Instagram no lo postea.
+
+Publicar escribe la fila con `service_role` (`published` y `published_at`) y después manda el webhook
+de Discord comunidad y el post a Buffer (Instagram con la card PNG, LinkedIn con el caption y la
+captura si hay). Si una red falla, el testimonio queda publicado y se reintenta desde la ficha.
+
+| Variable | Para qué |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Mismo proyecto que testimonios. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Lee el inbox y publica. |
+| `NEXT_PUBLIC_SITE_URL` | App pública, para “Ver en la galería”. En local: `http://localhost:3001`. |
+| `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. Vacío = no se manda. |
+| `BUFFER_ENV` | `development` programa a 24h; `production` publica ya. Si falta, se programa. |
+| `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |
+| `BUFFER_IG_CHANNEL_ID` | Canal Instagram. Si falta, esa red se saltea. |
+| `BUFFER_LI_CHANNEL_ID` | Canal LinkedIn. Si falta, esa red se saltea. |
+
+El aviso de inbox (al enviar) lo manda la app pública con `DISCORD_INBOX_WEBHOOK_URL` y
+`ADMIN_PANEL_URL` (`http://localhost:3002/testimonials/{id}`).
 
 ## Arquitectura: feature-first
 
@@ -18,15 +57,18 @@ app/                              routing. Cada page es un Server Component que 
   layout.tsx                      html/body + estilos globales
   (panel)/                        route group: todo lo que va dentro del shell (sidebar + topbar)
     layout.tsx                    monta el AdminShell
-    dashboard/ simulations/ completion/ projects/ staffing/
+    dashboard/ simulations/ completion/ projects/ staffing/ testimonials/
     simulations/[id]/layout.tsx   layout anidado: header + pestañas de una simulación
-features/<feature>/
+features/<feature>/               dashboard, simulations, projects, staffing, completion (mock)
   components/                     UI de la feature ('use client' solo si hace falta)
   types/                          tipos de dominio de la feature
   infrastructure/
     mocks/                        datos de ejemplo (en el panel real no existe)
     dtos/ mappers/                forma del back (snake_case) → tipo de dominio (ver `projects`)
-    repositories/                 ÚNICO lugar que "pide datos"
+    repositories/                 ÚNICO lugar que "pide datos" en esas features
+features/testimonials/            excepción: Server Actions + Supabase. Sin mocks, DTO ni repository
+  components/                     inbox, ficha, tabs Discord / Instagram / LinkedIn
+  lib/                            actions, service_role, Discord comunidad y Buffer
 shared/
   lib/                            helpers sin dominio (formatDate)
   ui/patterns/                    PageHeader, SectionCard, MetricCard, StatusBadge, DataTable
@@ -58,8 +100,11 @@ page.tsx (Server Component)
   └─ componente de la feature (recibe el tipo de dominio)
 ```
 
-`features/projects` tiene el flujo completo (mock con forma de DTO → mapper → dominio). Las demás
-features devuelven el tipo de dominio directo del mock para no sumar ruido.
+`features/projects` tiene el flujo completo (mock con forma de DTO → mapper → dominio). Simulaciones,
+staffing, completion y dashboard devuelven el tipo de dominio directo del mock.
+
+`features/testimonials` no entra en este flujo. Lee y escribe Supabase con `service_role` y publica
+con Server Actions. El resto del panel sigue en mock.
 
 ### Conectar un back real
 
@@ -81,7 +126,12 @@ export async function listProjects() {
 
 ## Qué tiene el panel real que acá no
 
-Auth con JWT en cookie httpOnly + middleware, cambio de entorno dev/prod, Server Actions para
-mutaciones (`actions/` + hooks con `useTransition`), formularios con react-hook-form + zod, gráficos
-con ECharts, tests (Vitest + RTL + MSW, Playwright) y muchas más pantallas dentro de una simulación
-(inscripciones, eventos, Discord, Demo Day, auto-asignación de equipos…).
+Auth con JWT en cookie httpOnly + middleware. En el panel real, Testimonios queda detrás de ese
+JWT, el mismo que cubre el shell. También faltan el cambio de entorno dev/prod, las Server Actions
+del resto de las features (`actions/` + hooks con `useTransition`), los formularios con
+react-hook-form + zod, los gráficos con ECharts, los tests (Vitest + RTL + MSW, Playwright) y
+muchas más pantallas dentro de una simulación (inscripciones, eventos, Discord, Demo Day,
+auto-asignación de equipos…).
+
+En este esqueleto, `features/testimonials` sí usa Server Actions y Supabase. Dashboard,
+simulaciones, proyectos, staffing y completion siguen en mock.

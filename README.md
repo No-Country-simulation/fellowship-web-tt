@@ -15,8 +15,8 @@ Código compartido vive en `packages/` y las apps lo instalan con `"@repo/ui": "
 | App | Qué es | Puerto |
 | --- | --- | --- |
 | [`landing-contratar`](./apps/landing-contratar) | Landing para contratar talento | 3000 |
-| [`testimonios`](./apps/testimonios) | Captura, validación y galería de testimonios | 3001 |
-| [`panel-admin`](./apps/panel-admin) | Esqueleto del panel de admin, con datos mock (sin back) | 3002 |
+| [`testimonios`](./apps/testimonios) | Formulario público y galería de testimonios | 3001 |
+| [`panel-admin`](./apps/panel-admin) | Panel de admin. Testimonios habla con Supabase; el resto es mock | 3002 |
 
 ## Comandos
 

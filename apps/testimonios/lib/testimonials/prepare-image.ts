@@ -1,4 +1,6 @@
-import { IG_CARD_WIDTH, IG_PHOTO_HEIGHT } from "./ig-card";
+/** Ancho de la card de Instagram. La captura se guarda a ese tamaño. */
+const CAPTURE_WIDTH = 1080;
+const CAPTURE_HEIGHT = Math.round((CAPTURE_WIDTH * 9) / 16);
 
 export const CAPTURE_ASPECT = 16 / 9;
 export const AVATAR_ASPECT = 1;
@@ -13,7 +15,7 @@ export type ImageCropArea = {
 
 /** Recorta el área 16:9 y la deja en 1080 de ancho, para la card. */
 export function cropCaptureFile(file: File, area: ImageCropArea) {
-  return cropImageFile(file, area, IG_CARD_WIDTH, IG_PHOTO_HEIGHT, "foto-testimonial");
+  return cropImageFile(file, area, CAPTURE_WIDTH, CAPTURE_HEIGHT, "foto-testimonial");
 }
 
 /** Recorta el área cuadrada de la foto de perfil. */
