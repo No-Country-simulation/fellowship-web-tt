@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-import type { Database } from "./database";
+import type { Database } from "../dtos/testimonialDto";
 import { getSupabaseServiceRoleKey, getSupabaseUrl } from "./env";
 
 export function createServiceRoleClient() {

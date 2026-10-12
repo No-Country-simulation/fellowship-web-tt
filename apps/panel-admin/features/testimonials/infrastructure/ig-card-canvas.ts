@@ -5,7 +5,7 @@ import {
   type IgCardContent,
 } from "./ig-card";
 import { stripWrappingQuotes } from "./quote";
-import type { TestimonialType } from "./types";
+import type { TestimonialType } from "../types/testimonial";
 
 const LOGO_SRC = "/brand/logo-no-country.png";
 const FALLBACK_PHOTO_SRC = "/brand/ig-fallback.jpg";

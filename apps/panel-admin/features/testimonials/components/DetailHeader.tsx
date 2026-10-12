@@ -4,7 +4,7 @@ import {
   PageHeaderTitle,
   PageBackLink,
 } from "@shared/ui/patterns/PageHeader";
-import type { AdminTestimonial } from "../lib/view";
+import type { AdminTestimonial } from "../types/testimonial";
 import { TestimonialStatusBadge, TypePill } from "./TestimonialStatusBadge";
 
 export function DetailHeader({

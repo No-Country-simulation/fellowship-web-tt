@@ -1,4 +1,4 @@
-import type { CommunityEmbed } from "../lib/community-embed";
+import type { CommunityEmbed } from "../infrastructure/community-embed";
 
 /** Recreación visual del embed que manda el webhook a Discord. */
 export function DiscordEmbedPreview({ embed }: { embed: CommunityEmbed }) {

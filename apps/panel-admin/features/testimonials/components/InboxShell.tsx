@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@repo/ui/utils";
 
-import type { AdminInboxData } from "../lib/inbox";
+import type { AdminInboxData } from "../types/testimonial";
 import { DetailLoading } from "./DetailLoading";
 import { InboxList } from "./InboxList";
 

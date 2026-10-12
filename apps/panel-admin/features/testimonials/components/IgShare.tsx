@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { canvasToPng, drawIgCard } from "../lib/ig-card-canvas";
+import { canvasToPng, drawIgCard } from "../infrastructure/ig-card-canvas";
 import {
   igCardFilename,
   IG_CARD_HEIGHT,
   IG_CARD_WIDTH,
   type IgCardContent,
-} from "../lib/ig-card";
+} from "../infrastructure/ig-card";
 
 type IgShareProps = IgCardContent & {
   slug: string;

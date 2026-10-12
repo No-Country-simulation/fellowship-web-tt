@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 
-import type { AdminTestimonial } from "../lib/view";
+import type { AdminTestimonial } from "../types/testimonial";
 import { YoutubeEmbed } from "./YoutubeEmbed";
 
 /** Lo que mandó el talento: historia, media y datos. Va en un desplegable. */

@@ -1,8 +1,8 @@
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { retryCommunityDiscord } from "../lib/actions";
-import { formatSubmittedAt } from "../lib/view";
+import { retryCommunityDiscord } from "../actions/testimonialActions";
+import { formatSubmittedAt } from "../infrastructure/mappers/testimonialMapper";
 
 /** Estado del post al canal de comunidad, con reintento si falló. */
 export function DiscordRetry({

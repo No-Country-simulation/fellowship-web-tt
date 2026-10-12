@@ -134,7 +134,8 @@ export type Database = {
   };
 };
 
-export type TestimonialRow =
+/** Fila de `testimonials` tal como la devuelve Supabase (snake_case). */
+export type TestimonialDto =
   Database["public"]["Tables"]["testimonials"]["Row"];
 export type TestimonialInsert =
   Database["public"]["Tables"]["testimonials"]["Insert"];

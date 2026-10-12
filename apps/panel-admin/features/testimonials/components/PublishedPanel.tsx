@@ -1,9 +1,10 @@
 import { buttonVariants } from "@repo/ui/button";
 
-import { bufferPublishesImmediately } from "../lib/buffer";
-import { formatSubmittedAt, type AdminTestimonial } from "../lib/view";
-import { igCardContent } from "../lib/ig-card";
-import { publicTestimonialHref } from "../lib/site";
+import { bufferPublishesImmediately } from "../infrastructure/buffer";
+import { formatSubmittedAt } from "../infrastructure/mappers/testimonialMapper";
+import { igCardContent } from "../infrastructure/ig-card";
+import { publicTestimonialHref } from "../infrastructure/site";
+import type { AdminTestimonial } from "../types/testimonial";
 import { BufferRetry } from "./BufferRetry";
 import { DiscordPublishPreview } from "./DiscordPublishPreview";
 import { DiscordRetry } from "./DiscordRetry";

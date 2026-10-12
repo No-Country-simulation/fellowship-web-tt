@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { InboxShell } from "@features/testimonials/components/InboxShell";
-import { loadAdminInbox } from "@features/testimonials/lib/inbox";
+import { loadAdminInbox } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
 
 export const dynamic = "force-dynamic";
 

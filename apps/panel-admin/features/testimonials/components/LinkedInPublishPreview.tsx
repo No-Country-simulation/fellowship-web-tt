@@ -4,9 +4,9 @@ import { useId, useState } from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { youtubeWatchUrl } from "../lib/youtube";
-import { CAPTION_EDIT_MAX_CHARS } from "../lib/quote";
-import type { AdminTestimonial } from "../lib/view";
+import { youtubeWatchUrl } from "../infrastructure/youtube";
+import { CAPTION_EDIT_MAX_CHARS } from "../infrastructure/quote";
+import type { AdminTestimonial } from "../types/testimonial";
 
 function composeBody(caption: string, video: string | null) {
   return [caption.trim(), video && !caption.includes(video) ? video : null]

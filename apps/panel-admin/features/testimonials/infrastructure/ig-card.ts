@@ -3,7 +3,7 @@ import type {
   FirstJobPayload,
   SimulationPayload,
   TestimonialType,
-} from "./types";
+} from "../types/testimonial";
 
 /** Instagram feed portrait, 4:5. */
 export const IG_CARD_WIDTH = 1080;

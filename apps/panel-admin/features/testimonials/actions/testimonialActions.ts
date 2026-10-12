@@ -3,17 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import type { BufferCreatePostResult } from "./buffer";
-import { readIgCard, sharePublishedToBuffer } from "./buffer-share";
-import { postCommunityTestimonial } from "./discord";
-import type { DiscordPostStatus } from "./discord";
+import type { BufferCreatePostResult } from "../infrastructure/buffer";
+import { readIgCard, sharePublishedToBuffer } from "../infrastructure/buffer-share";
+import { postCommunityTestimonial } from "../infrastructure/discord";
+import type { DiscordPostStatus } from "../infrastructure/discord";
 import {
   buildIgCaption,
   buildLiCaption,
   CAPTION_EDIT_MAX_CHARS,
   QUOTE_EDIT_MAX_CHARS,
-} from "./quote";
-import type { ReviewState } from "./review-state";
+} from "../infrastructure/quote";
 import {
   getTestimonialById,
   markBufferPosted,
@@ -21,7 +20,9 @@ import {
   publishTestimonial,
   rejectTestimonial,
   saveReviewEdits,
-} from "./store";
+} from "../infrastructure/repositories/testimonialRepository";
+import type { ReviewState } from "../types/reviewState";
+import type { AdminTestimonial } from "../types/testimonial";
 
 export async function reviewTestimonial(
   id: string,
@@ -62,7 +63,7 @@ export async function reviewTestimonial(
   if (!igCaption) {
     igCaption = buildIgCaption({
       quote,
-      fullName: current.testimonial.full_name,
+      fullName: current.testimonial.fullName,
       instagram: current.testimonial.instagram,
     });
   }
@@ -77,7 +78,7 @@ export async function reviewTestimonial(
   if (!liCaption) {
     liCaption = buildLiCaption({
       quote,
-      fullName: current.testimonial.full_name,
+      fullName: current.testimonial.fullName,
       linkedin: current.testimonial.linkedin,
     });
   }
@@ -103,9 +104,7 @@ export async function reviewTestimonial(
   }
 
   const latest = await getTestimonialById(id);
-  const discord = latest.ok
-    ? await postCommunityTestimonial(latest.testimonial)
-    : "failed";
+  const discord = latest.ok ? await postCommunityTestimonial(latest.testimonial) : "failed";
 
   if (discord === "posted") {
     await markDiscordPosted(id);
@@ -133,7 +132,7 @@ export async function retryCommunityDiscord(id: string) {
     redirect(`/testimonials/${id}`);
   }
 
-  if (current.testimonial.discord_posted_at) {
+  if (current.testimonial.discordPostedAt) {
     redirect(`/testimonials/${id}?discord=ok`);
   }
 
@@ -163,10 +162,7 @@ export async function retryBufferShare(id: string, formData: FormData) {
     redirect(`/testimonials/${id}`);
   }
 
-  const buffer = await sharePublishedToBuffer(
-    current.testimonial,
-    readIgCard(formData),
-  );
+  const buffer = await sharePublishedToBuffer(current.testimonial, readIgCard(formData));
   await recordBufferShare(id, current.testimonial, buffer);
   revalidateTestimonials(id);
   redirectPublished(id, "skipped", buffer.instagram, buffer.linkedin);
@@ -188,19 +184,16 @@ function failedBuffer(): BufferCreatePostResult {
 
 async function recordBufferShare(
   id: string,
-  row: {
-    buffer_instagram_posted_at: string | null;
-    buffer_linkedin_posted_at: string | null;
-  },
+  testimonial: Pick<AdminTestimonial, "bufferInstagramPostedAt" | "bufferLinkedinPostedAt">,
   buffer: {
     instagram: BufferCreatePostResult;
     linkedin: BufferCreatePostResult;
   },
 ) {
-  if (buffer.instagram.status === "created" && !row.buffer_instagram_posted_at) {
+  if (buffer.instagram.status === "created" && !testimonial.bufferInstagramPostedAt) {
     await markBufferPosted(id, "instagram");
   }
-  if (buffer.linkedin.status === "created" && !row.buffer_linkedin_posted_at) {
+  if (buffer.linkedin.status === "created" && !testimonial.bufferLinkedinPostedAt) {
     await markBufferPosted(id, "linkedin");
   }
 }

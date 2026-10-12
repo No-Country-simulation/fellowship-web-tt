@@ -4,18 +4,18 @@ import { startTransition, useActionState, useState, type ReactNode } from "react
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { reviewTestimonial } from "../lib/actions";
-import type { AdminTestimonial } from "../lib/view";
-import { igCardContent } from "../lib/ig-card";
-import { igCardPngBlob } from "../lib/ig-card-canvas";
-import { initialReviewState } from "../lib/review-state";
+import { reviewTestimonial } from "../actions/testimonialActions";
+import { igCardContent } from "../infrastructure/ig-card";
+import { igCardPngBlob } from "../infrastructure/ig-card-canvas";
 import {
   buildIgCaption,
   buildLiCaption,
   extractCaptionIntro,
   followsShareCaptionTemplate,
   QUOTE_EDIT_MAX_CHARS,
-} from "../lib/quote";
+} from "../infrastructure/quote";
+import { initialReviewState } from "../types/reviewState";
+import type { AdminTestimonial } from "../types/testimonial";
 import { CaptionField } from "./CaptionField";
 import { DetailHeader } from "./DetailHeader";
 import { DiscordPublishPreview } from "./DiscordPublishPreview";

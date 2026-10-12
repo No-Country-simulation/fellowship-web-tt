@@ -1,6 +1,6 @@
+import type { AdminTestimonial } from "../types/testimonial";
+import { buildCommunityEmbed } from "./community-embed";
 import { getPublicSiteUrl, SITE_BRAND } from "./site";
-import type { TestimonialRow } from "./supabase/database";
-import { communityEmbedFromRow } from "./community-embed";
 
 const BRAND_COLOR = 0xfe0096;
 const WEBHOOK_TIMEOUT_MS = 8000;
@@ -13,14 +13,26 @@ export function hasCommunityWebhook() {
 
 /** Post al canal de comunidad. El aviso de inbox se queda en la app pública. */
 export async function postCommunityTestimonial(
-  row: TestimonialRow,
+  testimonial: Pick<
+    AdminTestimonial,
+    | "fullName"
+    | "avatarUrl"
+    | "typeLabel"
+    | "quote"
+    | "country"
+    | "simulation"
+    | "firstJob"
+    | "careerChange"
+    | "captureUrl"
+    | "videoUrl"
+  >,
 ): Promise<DiscordPostStatus> {
   const webhookUrl = communityWebhookUrl();
   if (!webhookUrl) {
     return "skipped";
   }
 
-  const community = communityEmbedFromRow(row);
+  const community = buildCommunityEmbed(testimonial);
   const embed: DiscordEmbed = {
     author: {
       name: community.authorName,

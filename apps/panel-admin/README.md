@@ -17,9 +17,10 @@ mismo shell, sin un chequeo propio.
 ## Testimonios
 
 Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código vive en
-`features/testimonials` (`components/` y `lib/`). Las páginas leen Supabase y las mutaciones son
-Server Actions en `lib/actions.ts`. No pasa por mocks, DTO ni repository. El resto del panel sigue
-en mock.
+`features/testimonials` (`components/`, `types/`, `infrastructure/` y `actions/`). Las páginas
+piden datos al repository. Publicar, guardar, rechazar y reintentar son Server Actions: llaman
+al repository y después a Discord y Buffer. No hay mocks: el repository lee y escribe Supabase
+con `service_role`. El resto del panel sigue en mock.
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
 
@@ -59,16 +60,15 @@ app/                              routing. Cada page es un Server Component que 
     layout.tsx                    monta el AdminShell
     dashboard/ simulations/ completion/ projects/ staffing/ testimonials/
     simulations/[id]/layout.tsx   layout anidado: header + pestañas de una simulación
-features/<feature>/               dashboard, simulations, projects, staffing, completion (mock)
+features/<feature>/               dashboard, simulations, projects, staffing, completion, testimonials
   components/                     UI de la feature ('use client' solo si hace falta)
   types/                          tipos de dominio de la feature
+  actions/                        mutaciones. En este esqueleto, solo testimonios
   infrastructure/
-    mocks/                        datos de ejemplo (en el panel real no existe)
-    dtos/ mappers/                forma del back (snake_case) → tipo de dominio (ver `projects`)
-    repositories/                 ÚNICO lugar que "pide datos" en esas features
-features/testimonials/            excepción: Server Actions + Supabase. Sin mocks, DTO ni repository
-  components/                     inbox, ficha, tabs Discord / Instagram / LinkedIn
-  lib/                            actions, service_role, Discord comunidad y Buffer
+    mocks/                        datos de ejemplo (en el panel real no existe; testimonios no tiene)
+    dtos/ mappers/                forma del back (snake_case) → tipo de dominio (`projects`, `testimonials`)
+    repositories/                 ÚNICO lugar que "pide datos"
+    supabase/                     cliente service_role de testimonios. Solo lo importa su repository
 shared/
   lib/                            helpers sin dominio (formatDate)
   ui/patterns/                    PageHeader, SectionCard, MetricCard, StatusBadge, DataTable
@@ -100,11 +100,12 @@ page.tsx (Server Component)
   └─ componente de la feature (recibe el tipo de dominio)
 ```
 
-`features/projects` tiene el flujo completo (mock con forma de DTO → mapper → dominio). Simulaciones,
+`features/projects` tiene el flujo completo con mock (DTO → mapper → dominio). Simulaciones,
 staffing, completion y dashboard devuelven el tipo de dominio directo del mock.
 
-`features/testimonials` no entra en este flujo. Lee y escribe Supabase con `service_role` y publica
-con Server Actions. El resto del panel sigue en mock.
+`features/testimonials` usa el mismo flujo con el back ya conectado: el repository habla con
+Supabase (`service_role`), el mapper pasa la fila a dominio, y las actions publican en Discord
+y Buffer.
 
 ### Conectar un back real
 
@@ -124,6 +125,8 @@ export async function listProjects() {
 }
 ```
 
+En testimonios ese paso ya está hecho: `testimonialRepository` lee y escribe Supabase en lugar del mock.
+
 ## Qué tiene el panel real que acá no
 
 Auth con JWT en cookie httpOnly + middleware. En el panel real, Testimonios queda detrás de ese
@@ -133,5 +136,5 @@ react-hook-form + zod, los gráficos con ECharts, los tests (Vitest + RTL + MSW,
 muchas más pantallas dentro de una simulación (inscripciones, eventos, Discord, Demo Day,
 auto-asignación de equipos…).
 
-En este esqueleto, `features/testimonials` sí usa Server Actions y Supabase. Dashboard,
+En este esqueleto, testimonios ya está conectado a Supabase y usa Server Actions. Dashboard,
 simulaciones, proyectos, staffing y completion siguen en mock.

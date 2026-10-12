@@ -1,20 +1,7 @@
 import { SITE_BRAND } from "./site";
-import type { TestimonialRow } from "./supabase/database";
-import {
-  AVATARS_BUCKET,
-  CAPTURES_BUCKET,
-  publicStorageUrl,
-} from "./supabase/storage";
 import { youtubeWatchUrl } from "./youtube";
 import { buildDiscordDescription } from "./quote";
-import {
-  careerChangeFields,
-  firstJobFields,
-  simulationFields,
-  typeOption,
-  type CareerChangePayload,
-  type FirstJobPayload,
-} from "./types";
+import type { CareerChangePayload, FirstJobPayload } from "../types/testimonial";
 
 export type CommunityEmbedField = {
   name: string;
@@ -92,21 +79,4 @@ export function buildCommunityEmbed(input: {
     imageUrl: input.captureUrl,
     footer: SITE_BRAND,
   };
-}
-
-export function communityEmbedFromRow(row: TestimonialRow): CommunityEmbed {
-  return buildCommunityEmbed({
-    fullName: row.full_name,
-    avatarUrl: publicStorageUrl(AVATARS_BUCKET, row.avatar_path),
-    typeLabel: typeOption(row.type).label,
-    quote: row.quote,
-    country: row.country,
-    simulation: simulationFields(row.payload),
-    firstJob: firstJobFields(row.payload),
-    careerChange: careerChangeFields(row.payload),
-    captureUrl: row.capture_path
-      ? publicStorageUrl(CAPTURES_BUCKET, row.capture_path)
-      : null,
-    videoUrl: row.video_url,
-  });
 }

@@ -5,14 +5,13 @@ import { DetailHeader } from "@features/testimonials/components/DetailHeader";
 import { PublishedPanel } from "@features/testimonials/components/PublishedPanel";
 import { ReviewForm } from "@features/testimonials/components/ReviewForm";
 import { Submission } from "@features/testimonials/components/Submission";
-import { hasInstagramChannel, hasLinkedInChannel } from "@features/testimonials/lib/buffer";
-import { hasCommunityWebhook } from "@features/testimonials/lib/discord";
-import { getTestimonialById } from "@features/testimonials/lib/store";
+import { hasInstagramChannel, hasLinkedInChannel } from "@features/testimonials/infrastructure/buffer";
+import { hasCommunityWebhook } from "@features/testimonials/infrastructure/discord";
 import {
   adminContextLine,
   formatSubmittedAt,
-  toAdminTestimonial,
-} from "@features/testimonials/lib/view";
+} from "@features/testimonials/infrastructure/mappers/testimonialMapper";
+import { getTestimonialById } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
 import { PageHeader, PageHeaderDescription, PageHeaderTitle, PageBackLink } from "@shared/ui/patterns/PageHeader";
 
 export const metadata: Metadata = {
@@ -51,7 +50,7 @@ export default async function TestimonialDetailPage({
     );
   }
 
-  const testimonial = toAdminTestimonial(result.testimonial);
+  const testimonial = result.testimonial;
   const inReview = testimonial.status === "in_review";
   const discordStatus =
     discordParam === "failed" || discordParam === "ok" ? discordParam : null;

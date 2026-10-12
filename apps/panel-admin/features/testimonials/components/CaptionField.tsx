@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { cn } from "@repo/ui/utils";
 
-import { CAPTION_EDIT_MAX_CHARS } from "../lib/quote";
+import { CAPTION_EDIT_MAX_CHARS } from "../infrastructure/quote";
 import { textareaClassName } from "./fields";
 
 /** Textarea de caption. Se edita a mano; no se persiste hasta Guardar o Publicar. */

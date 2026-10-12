@@ -160,3 +160,47 @@ function readPayloadString(
   const value = payload[key];
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
+
+export type AdminTestimonial = {
+  id: string;
+  slug: string;
+  type: TestimonialType;
+  typeLabel: string;
+  status: TestimonialStatus;
+  fullName: string;
+  country: string | null;
+  email: string;
+  instagram: string | null;
+  linkedin: string | null;
+  story: string;
+  quote: string;
+  igCaption: string;
+  liCaption: string;
+  avatarUrl: string;
+  captureUrl: string | null;
+  videoUrl: string | null;
+  youtubeEmbedUrl: string | null;
+  simulation: SimulationPayload | null;
+  firstJob: FirstJobPayload | null;
+  careerChange: CareerChangePayload | null;
+  submittedAt: string;
+  publishedAt: string | null;
+  discordPostedAt: string | null;
+  bufferInstagramPostedAt: string | null;
+  bufferLinkedinPostedAt: string | null;
+};
+
+export type AdminInboxItem = {
+  id: string;
+  typeLabel: string;
+  status: TestimonialStatus;
+  fullName: string;
+  quote: string;
+  avatarUrl: string;
+  submittedAt: string;
+};
+
+export type AdminInboxData = {
+  items: AdminInboxItem[];
+  loadError: string | null;
+};

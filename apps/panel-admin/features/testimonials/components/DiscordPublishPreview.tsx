@@ -1,5 +1,5 @@
-import { buildCommunityEmbed } from "../lib/community-embed";
-import type { AdminTestimonial } from "../lib/view";
+import { buildCommunityEmbed } from "../infrastructure/community-embed";
+import type { AdminTestimonial } from "../types/testimonial";
 import { DiscordEmbedPreview } from "./DiscordEmbedPreview";
 
 /** Cómo queda el embed en Discord. */

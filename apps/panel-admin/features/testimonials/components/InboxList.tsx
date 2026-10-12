@@ -5,12 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@repo/ui/utils";
 
-import { inboxItemMeta, type AdminInboxItem } from "../lib/view";
+import { inboxItemMeta } from "../infrastructure/mappers/testimonialMapper";
 import {
   STATUS_LABELS,
   TESTIMONIAL_STATUSES,
+  type AdminInboxItem,
   type TestimonialStatus,
-} from "../lib/types";
+} from "../types/testimonial";
 
 export function InboxList({
   items,

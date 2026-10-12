@@ -4,10 +4,10 @@ import { useState, type FormEvent } from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { retryBufferShare } from "../lib/actions";
-import { formatSubmittedAt } from "../lib/view";
-import type { IgCardContent } from "../lib/ig-card";
-import { igCardPngBlob } from "../lib/ig-card-canvas";
+import { retryBufferShare } from "../actions/testimonialActions";
+import { formatSubmittedAt } from "../infrastructure/mappers/testimonialMapper";
+import type { IgCardContent } from "../infrastructure/ig-card";
+import { igCardPngBlob } from "../infrastructure/ig-card-canvas";
 
 /** Estado de Instagram y LinkedIn en Buffer, con reintento si falló. */
 export function BufferRetry({
