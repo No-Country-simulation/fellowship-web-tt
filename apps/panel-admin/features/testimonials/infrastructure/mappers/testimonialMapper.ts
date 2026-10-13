@@ -84,6 +84,7 @@ export function formatSubmittedAt(iso: string) {
     new Date(iso).toLocaleString("es-AR", {
       dateStyle: "medium",
       timeStyle: "short",
+      timeZone: "America/Argentina/Buenos_Aires",
     }),
   );
 }
