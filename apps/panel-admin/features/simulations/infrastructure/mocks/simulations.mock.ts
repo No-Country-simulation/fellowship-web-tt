@@ -1,0 +1,62 @@
+import type { SimTeam, Simulation } from "../../types/simulation";
+
+export const SIMULATIONS_MOCK: Simulation[] = [
+  {
+    id: "sim-1",
+    name: "Simulación Octubre 2026",
+    code: "S-OCT26",
+    status: "ACTIVE",
+    type: "OPEN",
+    isPremium: false,
+    startDate: "2026-09-28T00:00:00.000Z",
+    endDate: "2026-11-08T00:00:00.000Z",
+    talentsCount: 236,
+    teamsCount: 34,
+  },
+  {
+    id: "sim-2",
+    name: "Fellowship B2B · Cohorte 3",
+    code: "B2B-C3",
+    status: "ACTIVE",
+    type: "CLOSED",
+    isPremium: true,
+    startDate: "2026-09-14T00:00:00.000Z",
+    endDate: "2026-10-26T00:00:00.000Z",
+    talentsCount: 96,
+    teamsCount: 14,
+  },
+  {
+    id: "sim-3",
+    name: "Simulación Noviembre 2026",
+    code: "S-NOV26",
+    status: "INSCRIPTION",
+    type: "OPEN",
+    isPremium: false,
+    startDate: "2026-11-16T00:00:00.000Z",
+    endDate: "2026-12-27T00:00:00.000Z",
+    talentsCount: 80,
+    teamsCount: 0,
+  },
+  {
+    id: "sim-4",
+    name: "Simulación Agosto 2026",
+    code: "S-AGO26",
+    status: "CLOSED",
+    type: "OPEN",
+    isPremium: false,
+    startDate: "2026-07-27T00:00:00.000Z",
+    endDate: "2026-09-06T00:00:00.000Z",
+    talentsCount: 251,
+    teamsCount: 37,
+  },
+];
+
+export const TEAMS_MOCK: SimTeam[] = [
+  { id: "t-1", simulationId: "sim-1", name: "s26-01-webapp", vertical: "Web App", project: "Turnos médicos", members: 7, progress: 72 },
+  { id: "t-2", simulationId: "sim-1", name: "s26-02-webapp", vertical: "Web App", project: "Marketplace de oficios", members: 6, progress: 55 },
+  { id: "t-3", simulationId: "sim-1", name: "s26-03-data", vertical: "Data", project: "Churn de e-commerce", members: 5, progress: 40 },
+  { id: "t-4", simulationId: "sim-1", name: "s26-04-mobile", vertical: "Mobile", project: null, members: 6, progress: 12 },
+  { id: "t-5", simulationId: "sim-2", name: "b2b-01-ia", vertical: "IA", project: "Asistente de soporte", members: 7, progress: 88 },
+  { id: "t-6", simulationId: "sim-2", name: "b2b-02-webapp", vertical: "Web App", project: "Portal de proveedores", members: 7, progress: 64 },
+  { id: "t-7", simulationId: "sim-4", name: "s25-01-nocode", vertical: "No-Code", project: "CRM para ONGs", members: 5, progress: 100 },
+];

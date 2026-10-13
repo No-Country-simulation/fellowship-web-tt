@@ -1,6 +1,6 @@
 # testimonios
 
-App Next.js para capturar, validar y publicar testimonios de talento (No Country). Cómo corre el monorepo: [README de la raíz](../../README.md).
+App Next.js pública para recibir testimonios de talento (No Country) y mostrar los publicados. El inbox del equipo está en [`panel-admin`](../panel-admin) (`/testimonials`). Cómo corre el monorepo: [README de la raíz](../../README.md).
 
 No se mezcla con la landing de empresas. Puerto local: **3001**.
 
@@ -18,58 +18,45 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 | --- | --- |
 | `/` | Galería (publicados) |
 | `/enviar` | Formulario público, sin login (país y avatar obligatorios; captura, YouTube, Instagram y LinkedIn opcionales) |
-| `/admin` | Inbox: lista a la izquierda (filtro local por estado), ficha a la derecha |
-| `/admin/[id]` | Revisar: envío, quote, tabs Discord / Instagram / LinkedIn. Caption IG y LI se pueden generar con Gemini |
 | `/t/[slug]` | Ficha de un testimonio publicado |
 
-## Captions con Gemini
+El video del envío es solo un link de YouTube (`youtube.com` o `youtu.be`). No hay upload de mp4.
 
-En `/admin/[id]`, Instagram y LinkedIn tienen **Generar con IA**. La respuesta rellena el textarea; se guarda al Guardar / Publicar (`ig_caption` / `li_caption`). Instagram sigue teniendo card PNG; LinkedIn es post de texto (como Discord). El video del envío es solo un link de YouTube.
+Quote y captions de Instagram y LinkedIn salen de la plantilla en `lib/testimonials/quote.ts` al enviar. El equipo los edita a mano en el panel. No hay generación con IA.
 
 | Doc | Contenido |
 | --- | --- |
-| [docs/COPY_PIPELINE.md](./docs/COPY_PIPELINE.md) | Intro Gemini + plantilla (quote, nombre, IG o LinkedIn, hashtags) |
+| [docs/COPY_PIPELINE.md](./docs/COPY_PIPELINE.md) | Plantilla (quote, nombre, IG o LinkedIn, hashtags) |
 | [docs/MEDIA_FORMATS.md](./docs/MEDIA_FORMATS.md) | Avatar, captura y YouTube en Discord / Instagram / LinkedIn |
-| [docs/ENV.agent.md](./docs/ENV.agent.md) | Variables (Gemini, Buffer) |
+| [docs/ENV.agent.md](./docs/ENV.agent.md) | Variables de esta app |
 
 ## Variables de entorno
 
-Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored). Gemini: [docs/ENV.agent.md](./docs/ENV.agent.md).
+Definidas en `.env.example`. Copiá ese archivo a `.env.local` (gitignored).
 
 | Variable | Para qué |
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Origen canónico. En local: `http://localhost:3001`. |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key (o `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). |
-| `SUPABASE_SERVICE_ROLE_KEY` | Solo server. El form y el admin escriben con esto. |
-| `ADMIN_EMAILS` | Allowlist del equipo, separada por coma. |
-| `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. |
-| `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. |
-| `BUFFER_ENV` | `development` programa Buffer a 24h; `production` publica ya. Si falta, se programa. |
-| `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |
-| `BUFFER_IG_CHANNEL_ID` | Canal Instagram (direct publishing). Si falta, no hay botón IG. |
-| `BUFFER_LI_CHANNEL_ID` | Canal LinkedIn: `li_caption` + captura si hay + link de YouTube. |
-| `GEMINI_API_KEY` | Intro de captions IG/LI (texto). Opcionales: `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`. |
-| `META_ACCESS_TOKEN` | Opcional; no se usa (Buffer publica IG/LI). |
-| `META_IG_USER_ID` | Opcional; no se usa. |
-
-Los channel IDs se copian del [API Explorer](https://developers.buffer.com/explorer.html) (`account.organizations` → `channels`). El código no los descubre solo.
+| `SUPABASE_SERVICE_ROLE_KEY` | Solo server. El form sube avatar y captura y hace el insert. |
+| `DISCORD_INBOX_WEBHOOK_URL` | Aviso interno cuando entra un envío. Si está vacío, no se manda. |
+| `ADMIN_PANEL_URL` | Solo server. Origen del panel. El aviso linkea `{ADMIN_PANEL_URL}/testimonials/{id}`. En local: `http://localhost:3002`. |
 
 ## Supabase
 
-Proyecto aparte de la landing (`testimonials_nc_fellow`). Migraciones en [`supabase/migrations/`](./supabase/migrations/) (init + `discord_posted_at` + Buffer + `li_caption` + `country` y puesto de simulación).
+Proyecto aparte de la landing (`testimonials_nc_fellow`). Las migraciones siguen en [`supabase/migrations/`](./supabase/migrations/). Esta app no es dueña del inbox: el panel usa el mismo proyecto.
 
-1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`. `discord_posted_at` marca si el webhook de comunidad ya posteó; si falla, el admin reintenta.
-2. En Authentication: desactivá el registro público. Creá un usuario del equipo.
-3. En ese usuario, `app_metadata.role = admin`, **o** poné su email en `ADMIN_EMAILS`.
-4. Copiá URL, anon key y service role a `.env.local`.
+1. Desde `apps/testimonios`: `npx supabase link` y `npx supabase db push`.
+2. Copiá URL, anon key y service role a `.env.local`.
+3. El mismo service role, el webhook de comunidad y Buffer van en el panel.
 
-El talento no entra a Auth. `/enviar` inserta con `service_role`. `/admin` pide sesión y `isAdmin`. `anon` solo lee `testimonials_public` (sin email).
+El talento no entra a Auth. `/enviar` inserta con `service_role`. `anon` solo lee `testimonials_public` (sin email). Esta app no tiene login.
 
 Deploy: en Vercel, Root Directory `apps/testimonios`.
 
 ## UI
 
-Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura). Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). Sin chrome de marketing: esta app es operativa (formulario, inbox, galería). Scrollbar fino en `app/globals.css` (thumb de borde, hover cyan).
+Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura). Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). Sin chrome de marketing: esta app es el formulario y la galería. Scrollbar fino en `app/globals.css` (thumb de borde, hover cyan).
 
 Componentes reutilizables (PageShell, TestimonialCard, Field, etc.): [docs/ui](./docs/ui/README.md).

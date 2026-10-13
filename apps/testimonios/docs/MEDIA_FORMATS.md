@@ -10,7 +10,7 @@ Más el quote entre comillas. IG y LI suman nombre, red y `#NoCountry #DemoDay #
 
 | Pieza | Discord | Instagram | LinkedIn |
 | --- | --- | --- | --- |
-| Intro No Country | Fijo en el embed | En el caption (editable / Gemini) | En el caption (editable / Gemini) |
+| Intro No Country | Fijo en el embed | En el caption (plantilla, editable en el panel) | En el caption (plantilla, editable en el panel) |
 | Quote | Entre comillas, en la descripción | Entre comillas en la card PNG y en el caption | Entre comillas en el caption |
 | Avatar | Icono del autor | En la card 1080×1350 | No (post de texto) |
 | Foto testimonial | Imagen grande del embed | Foto de la card (si no hay, una foto de respaldo) | Debajo del caption, se adjunta |

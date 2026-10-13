@@ -2,11 +2,11 @@
 
 Documentación de los componentes reutilizables de `apps/testimonios`.
 
-**Objetivo:** cualquier dev puede armar galería, ficha, form o inbox sin reimplementar chrome ni cards.
+**Objetivo:** cualquier dev puede armar galería, ficha o form sin reimplementar chrome ni cards.
 
 Tokens y type scale: [design system de la landing](../../../landing-contratar/docs/ui/design-system.md). Compartidos en `@repo/ui`: [Button](../../../../packages/ui/docs/button.md), [BrandLogo](../../../../packages/ui/docs/brand-logo.md).
 
-Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-form`, `admin-session`, `admin-published-panel`, `admin-submission`, `admin-discord-retry`, `admin-inbox-shell`, `admin-inbox-list`, `admin-share-tabs`, `admin-detail-loading`) no se documentan acá: son de una ruta, no primitivos.
+El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, no un primitivo.
 
 ## Índice
 
@@ -14,16 +14,12 @@ Los formularios de página (`enviar-form`, `admin-login-form`, `admin-review-for
 | --- | --- |
 | [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` |
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
-| [SiteHeader](./components/site-header.md) | Chrome del layout (logo, nav, sesión) |
+| [SiteHeader](./components/site-header.md) | Chrome del layout (logo y nav) |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
 | [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha) |
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
 | [Field](./components/field.md) | Label, hint, error y classes de input |
 | [CaptureCropDialog](./components/capture-crop-dialog.md) | Recorte de foto: 16:9 o cuadrado |
-| [AdminStatusBadge](./components/admin-status-badge.md) | Pill de estado (en revisión / publicado / rechazado) |
-| [DiscordEmbedPreview](./components/discord-embed-preview.md) | Recreación visual del embed de Discord |
-| [AdminIgShare](./components/admin-ig-share.md) | Card IG 1080×1350: preview, descargar PNG, copiar caption |
-| [LinkedInPublishPreview](./components/linkedin-publish-preview.md) | Post de LinkedIn: caption, Video, captura |
 
 ## Convención al agregar un componente
 
