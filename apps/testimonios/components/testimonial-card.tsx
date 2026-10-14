@@ -24,7 +24,7 @@ const LINE_CLAMP_CLASS = {
   6: "line-clamp-6",
 } as const;
 
-/** Card de testimonio: avatar, tipo, nombre y quote. Con `href` es un link. */
+/** Card de testimonio. Con `href`, enlace con hover y foco de teclado; sin `href`, bloque informativo. */
 export function TestimonialCard({
   name,
   typeLabel,
@@ -50,17 +50,17 @@ export function TestimonialCard({
             className="object-cover"
           />
         </div>
-        <div className="min-w-0">
-          <p className="text-overline text-text-secondary">{typeLabel}</p>
-          <p className="truncate text-body font-medium text-text-primary">
+        <div className="min-w-0 w-0 flex-1">
+          <p className="type-eyebrow text-text-secondary">{typeLabel}</p>
+          <p className="truncate text-base font-semibold text-text-primary">
             {name}
           </p>
         </div>
       </div>
       <blockquote
         className={cn(
-          "mt-sm min-w-0 overflow-hidden break-words text-body-small leading-normal text-text-secondary",
-          clamp ? LINE_CLAMP_CLASS[clamp] : "text-body",
+          "mt-sm min-w-0 overflow-hidden wrap-anywhere text-base leading-relaxed text-text-secondary",
+          clamp && LINE_CLAMP_CLASS[clamp],
         )}
       >
         “{quote}”
@@ -77,13 +77,18 @@ export function TestimonialCard({
   );
 
   const classes = cn(
-    "flex min-w-0 flex-col rounded-md border border-border bg-card p-md",
-    href && "h-full transition-colors hover:border-accent-cyan/70",
+    "flex min-w-0 flex-col rounded-card border border-border bg-card p-md",
+    href && [
+      "h-full transition-[border-color,box-shadow,translate] duration-200 ease-out",
+      "group-hover/card:border-accent-cyan/70 group-hover/card:shadow-card-hover motion-safe:group-hover/card:-translate-y-1",
+      "focus-visible:border-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan",
+      "motion-reduce:transition-none",
+    ],
   );
 
   if (href) {
     return (
-      <article className={cn("h-full min-w-0", className)}>
+      <article className={cn("group/card h-full min-w-0", className)}>
         <Link href={href} className={cn(classes, "h-full")}>
           {content}
         </Link>

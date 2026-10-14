@@ -62,7 +62,12 @@ No usarlo para la foto testimonial ni para el embed de YouTube: esos van aparte.
 
 ## Notas
 
-- Con `href` el `<article>` envuelve un `<Link>` a altura completa y el borde pasa a cyan en hover. En una grilla, el `<li>` no hace falta que sea el link.
+- Ambas variantes usan `rounded-card` (20px), categoría `type-eyebrow`, nombre de 16px semibold y cita `text-base leading-relaxed` (16px, interlineado 1.625). Estas utilidades de Tailwind mantienen el tamaño y el color al pasar por `cn()`. El clamp conserva su comportamiento anterior.
+- La columna del nombre usa `w-0 flex-1 min-w-0` para ocupar el espacio restante junto al avatar y conservar el truncado. La cita usa `wrap-anywhere` para que URLs o palabras extensas no ensanchen la tarjeta en mobile.
+- Con `href` el `<article>` envuelve un único `<Link>` a altura completa. El hover del contenedor (`group/card`) mantiene un área estable mientras el enlace se eleva 4px, cambia el borde a cyan y aplica `shadow-card-hover`. Las transiciones duran 200ms. En una grilla, el `<li>` no hace falta que sea el link.
+- El enlace muestra un contorno cyan de 2px, separado 4px de la tarjeta, con `focus-visible`. El CTA es texto dentro de ese enlace, no un segundo control.
+- Con `prefers-reduced-motion: reduce` se desactivan el desplazamiento y las transiciones; los indicadores de hover y foco se conservan. El hover se aplica en dispositivos que lo permiten.
+- Sin `href`, la tarjeta es informativa: no recibe estos estilos interactivos ni se agrega un tab stop.
 - El avatar lleva `alt=""`: el nombre va al lado, no hace falta anunciarlo dos veces.
 - El quote se envuelve en comillas tipográficas adentro del componente. No las pongas en el string.
 - Avatar siempre hay (el form lo exige). No hay estado vacío de foto.
