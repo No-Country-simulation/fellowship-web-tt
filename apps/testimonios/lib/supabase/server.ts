@@ -11,5 +11,9 @@ export async function createClient() {
       autoRefreshToken: false,
       detectSessionInUrl: false,
     },
+    global: {
+      // El fetch por defecto se congela en el build. La galería tiene que ver publicados nuevos.
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
   });
 }
