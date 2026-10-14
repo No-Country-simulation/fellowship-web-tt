@@ -5,6 +5,9 @@ import { PageShell } from "@/components/page-shell";
 import { TestimonialCard } from "@/components/testimonial-card";
 import { listPublishedTestimonials } from "@/lib/testimonials/public";
 
+// Sin esto Next prerenderiza `/` en el build y los publicados después no aparecen.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const listed = await listPublishedTestimonials();
   const testimonials = listed.ok ? listed.testimonials : [];
