@@ -16,9 +16,18 @@ export default async function HomePage() {
   return (
     <PageShell
       className="max-w-5xl"
+      variant="featured"
       eyebrow="Galería"
       title="Historias de talento"
       description="Simulación, primer empleo y reconversión. El equipo valida cada historia antes de que salga acá o en Discord."
+      actions={
+        <Link
+          href="/enviar"
+          className={buttonVariants({ variant: "gradient", size: "lg" })}
+        >
+          Enviar testimonio
+        </Link>
+      }
     >
       {loadError ? (
         <p className="mt-lg text-body text-destructive" role="alert">
@@ -31,23 +40,11 @@ export default async function HomePage() {
             dejar el tuyo ahora. El equipo lo revisa antes de que salga acá o en
             Discord.
           </p>
-          <div className="mt-md">
-            <Link
-              href="/enviar"
-              className={buttonVariants({ variant: "gradient", size: "lg" })}
-            >
-              Enviar testimonio
-            </Link>
-          </div>
         </div>
       ) : (
         <>
-        <p className="text-body text-text-secondary">
-            Si estuviste en un Demo Day, también podés{" "}
-            <Link href="/enviar" className="text-accent-cyan hover:underline">
-              dejar tu testimonio
-            </Link>
-            .
+          <p className="text-body text-text-secondary">
+            Si estuviste en un Demo Day, también podés dejar tu testimonio.
           </p>
           <ul className="mt-lg grid gap-md sm:grid-cols-2">
             {testimonials.map((testimonial) => (

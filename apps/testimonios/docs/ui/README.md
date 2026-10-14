@@ -6,6 +6,8 @@ Documentación de los componentes reutilizables de `apps/testimonios`.
 
 Tokens y type scale: [design system de la landing](../../../landing-contratar/docs/ui/design-system.md). Compartidos en `@repo/ui`: [Button](../../../../packages/ui/docs/button.md), [BrandLogo](../../../../packages/ui/docs/brand-logo.md).
 
+El design system de Landing es una referencia interna. Los tokens y utilities vigentes de Testimonios se definen en su propio [`app/globals.css`](../../app/globals.css), actualizado parcialmente según la identidad actual de No Country.
+
 El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, no un primitivo.
 
 ## Índice
