@@ -41,7 +41,7 @@ captura si hay). Si una red falla, el testimonio queda publicado y se reintenta 
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Mismo proyecto que testimonios. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Lee el inbox y publica. |
-| `NEXT_PUBLIC_SITE_URL` | App pública, para “Ver en la galería”. En local: `http://localhost:3001`. |
+| `GALLERY_URL` | Solo server. Galería pública (`apps/testimonios`), para “Ver ficha pública” y el logo de Discord. En local: `http://localhost:3001`. Obligatoria en producción. No es la URL del panel. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. Vacío = no se manda. |
 | `BUFFER_ENV` | `development` programa a 24h; `production` publica ya. Si falta, se programa. |
 | `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |
