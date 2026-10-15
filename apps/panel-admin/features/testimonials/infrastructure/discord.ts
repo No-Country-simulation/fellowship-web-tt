@@ -1,6 +1,6 @@
 import type { AdminTestimonial } from "../types/testimonial";
 import { buildCommunityEmbed } from "./community-embed";
-import { getPublicSiteUrl, SITE_BRAND } from "./site";
+import { getGalleryUrl, SITE_BRAND } from "./site";
 
 const BRAND_COLOR = 0xfe0096;
 const WEBHOOK_TIMEOUT_MS = 8000;
@@ -82,8 +82,14 @@ function communityWebhookUrl() {
   return parseWebhookUrl(process.env.DISCORD_COMMUNITY_WEBHOOK_URL);
 }
 
+/** Sin galería configurada, el post sale con el avatar default: no frena la publicación. */
 function brandLogoUrl() {
-  return `${getPublicSiteUrl()}/brand/logo-no-country.png`;
+  try {
+    return `${getGalleryUrl()}/brand/logo-no-country.png`;
+  } catch (error) {
+    console.error("Discord community:", error);
+    return undefined;
+  }
 }
 
 function parseWebhookUrl(value: string | undefined) {

@@ -3,7 +3,7 @@ import { buttonVariants } from "@repo/ui/button";
 import { bufferPublishesImmediately } from "../infrastructure/buffer";
 import { formatSubmittedAt } from "../infrastructure/mappers/testimonialMapper";
 import { igCardContent } from "../infrastructure/ig-card";
-import { publicTestimonialHref } from "../infrastructure/site";
+import { galleryTestimonialHref } from "../infrastructure/site";
 import type { AdminTestimonial } from "../types/testimonial";
 import { BufferRetry } from "./BufferRetry";
 import { DiscordPublishPreview } from "./DiscordPublishPreview";
@@ -96,7 +96,7 @@ export function PublishedPanel({
 
       <div className="flex flex-wrap gap-2">
         <a
-          href={publicTestimonialHref(testimonial.slug)}
+          href={galleryTestimonialHref(testimonial.slug)}
           className={buttonVariants({ variant: "outline", size: "lg" })}
         >
           Ver ficha pública
