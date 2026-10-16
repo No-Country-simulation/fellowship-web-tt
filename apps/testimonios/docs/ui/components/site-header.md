@@ -52,5 +52,5 @@ Editar `lib/nav.ts` o `lib/site.ts`, no el componente:
 ## Notas
 
 - Es Server Component (sin `"use client"`).
-- `shrink-0` + `border-b`: el `<body>` es columna flex a altura completa; el header no scrollea, el `PageShell` sí.
+- `shrink-0` + `border-b`: el `<body>` es columna flex a altura completa; el header no scrollea. El scroll lo proporciona el `<main>` de cada página: propio en la galería y de `PageShell` en el formulario y la ficha.
 - Frame: `px-md` + `container-content`. Hover de links: `bg-bg-white-a5`.

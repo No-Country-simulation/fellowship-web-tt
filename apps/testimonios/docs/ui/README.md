@@ -17,6 +17,8 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` |
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [SiteHeader](./components/site-header.md) | Chrome del layout (logo y nav) |
+| [GalleryHero](./components/gallery-hero.md) | Presentación estática y CTA de la galería |
+| [TestimonialsGallery](./components/testimonials-gallery.md) | Filtros, contador y grilla de historias |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
 | [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha) |
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
@@ -50,3 +52,11 @@ No documentar formularios de una sola ruta ni utilidades no-UI (`lib/`).
 | `@/lib/utils` | `cn()` |
 
 Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fino: thumb `border`, hover cyan).
+
+## Composición de la galería
+
+`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el formulario y la ficha.
+
+`GalleryHero` es estático. `TestimonialsGallery` es el límite cliente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; filtra en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
+
+La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Los textos provisionales están agrupados en constantes locales en la página y sus componentes. Las historias y avatares provienen de los datos publicados.
