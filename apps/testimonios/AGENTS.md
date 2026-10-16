@@ -43,3 +43,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - No afirmar que una prueba pasó si no se ejecutó.
 - Al terminar, explicar qué cambió, qué archivos se modificaron, qué se validó y qué riesgos quedan.
 - Detenerse al completar la etapa solicitada para permitir revisión humana.
+- No dejar servidores de desarrollo ni procesos de prueba
+  ejecutándose al terminar una tarea. Si se inician para
+  validaciones, detenerlos antes de finalizar, sin afectar
+  procesos iniciados por el usuario.

@@ -17,7 +17,8 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` |
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [SiteHeader](./components/site-header.md) | Chrome del layout (logo y nav) |
-| [GalleryHero](./components/gallery-hero.md) | Presentación estática y CTA de la galería |
+| [GalleryHero](./components/gallery-hero.md) | Presentación de servidor, CTA y composición del hero |
+| [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Carrusel cliente de tres historias ilustrativas apiladas |
 | [TestimonialsGallery](./components/testimonials-gallery.md) | Filtros, contador y grilla de historias |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
 | [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha) |
@@ -57,6 +58,6 @@ Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fi
 
 `app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el formulario y la ficha.
 
-`GalleryHero` es estático. `TestimonialsGallery` es el límite cliente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; filtra en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
+`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente con ejemplos locales identificados como ilustrativos, pendientes de reemplazo por historias autorizadas antes de producción. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; filtra en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
 
-La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Los textos provisionales están agrupados en constantes locales en la página y sus componentes. Las historias y avatares provienen de los datos publicados.
+La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Los textos provisionales están agrupados en constantes locales en la página y sus componentes. Las historias y avatares de la grilla provienen de los datos publicados.

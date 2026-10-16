@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { UsersRound } from "lucide-react";
 import { buttonVariants } from "@repo/ui/button";
 
+import { GalleryHeroCarousel } from "@/components/gallery-hero-carousel";
 import { cn } from "@/lib/utils";
 
 // Copy provisional para revisar junto con la composición de la galería.
@@ -14,18 +14,16 @@ const HERO_COPY = {
   moderation:
     "El equipo valida cada historia antes de que salga acá o en Discord.",
   action: "Enviar testimonio",
-  communityTitle: "Historias que inspiran nuevas oportunidades.",
-  communityDescription: "Simulación · Primer empleo · Reconversión profesional",
 } as const;
 
-/** Presentación estática de la galería y enlace al formulario de envío. */
+/** Hero de servidor con presentación, CTA y un carrusel cliente independiente. */
 export function GalleryHero() {
   return (
     <section
       aria-labelledby="gallery-title"
       className="border-b border-border-subtle px-md py-xl md:px-lg md:py-3xl"
     >
-      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center lg:gap-3xl">
+      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-2xl">
         <div className="min-w-0">
           <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
             <span
@@ -59,25 +57,7 @@ export function GalleryHero() {
             {HERO_COPY.action}
           </Link>
         </div>
-        <aside
-          aria-labelledby="gallery-community-title"
-          className="rounded-card border border-border bg-card p-md md:p-lg"
-        >
-          <UsersRound
-            aria-hidden="true"
-            className="size-10 text-accent-cyan"
-            strokeWidth={1.5}
-          />
-          <h2
-            id="gallery-community-title"
-            className="mt-md text-lg font-bold leading-snug text-text-primary"
-          >
-            {HERO_COPY.communityTitle}
-          </h2>
-          <p className="mt-sm text-sm leading-relaxed text-text-secondary">
-            {HERO_COPY.communityDescription}
-          </p>
-        </aside>
+        <GalleryHeroCarousel />
       </div>
     </section>
   );
