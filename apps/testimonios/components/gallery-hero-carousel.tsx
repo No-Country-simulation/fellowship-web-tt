@@ -168,9 +168,8 @@ export function GalleryHeroCarousel() {
             </button>
           </div>
         </div>
-        <p id={`${id}-notice`} className="mt-sm text-xs text-text-secondary">
-          Ejemplo ilustrativo
-          <span aria-hidden="true"> · {activeIndex + 1} / {total}</span>
+        <p id={`${id}-notice`} className="sr-only">
+          Ejemplos ilustrativos para desarrollo y revisión.
         </p>
       </div>
       <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">

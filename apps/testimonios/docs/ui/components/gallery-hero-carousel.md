@@ -18,7 +18,7 @@ No recibe props. Es un Client Component pequeño integrado por `GalleryHero`, qu
 
 `HERO_STORIES` contiene tres entradas locales tipadas con `id`, `quote`, `displayName` y `category`, una por categoría. Los participantes tienen identificaciones genéricas y una representación neutra con `UserRound`; no se usan fotografías ni enlaces a fichas.
 
-La indicación visible **«Ejemplo ilustrativo»** identifica estos contenidos. El `TODO` junto al array exige reemplazarlos por historias reales autorizadas antes de producción. No deben presentarse como testimonios auténticos.
+La aclaración **«Ejemplos ilustrativos para desarrollo y revisión»** permanece solo para lectores de pantalla (`sr-only`), referenciada por `aria-describedby`. No hay pie ni índice visual debajo de las tarjetas. Estos datos locales son exclusivamente para desarrollo y revisión: el `TODO` junto al array exige reemplazarlos por historias reales autorizadas antes de producción. No deben presentarse como testimonios auténticos en un despliegue público.
 
 Cada tarjeta incluye comillas tipográficas decorativas con `text-brand-gradient`, cita, autor y categoría. Las superficies, borde degradado tenue, radio y sombra utilizan los tokens locales. No modifica `TestimonialCard`.
 
@@ -45,5 +45,5 @@ Con movimiento reducido, `navigate` actualiza el índice sin crear `motion` ni e
 - Citas y nombres pueden envolver; todas las tarjetas contribuyen a una altura común.
 - Región identificada como carrusel; solo la diapositiva activa se expone a tecnologías asistivas. Las posteriores usan `aria-hidden` e `inert` booleano de React 19 y no reciben interacción.
 - Botones de 44×44px, etiquetas «Testimonio anterior» / «Siguiente testimonio», `aria-controls`, hover cyan y foco visible inmediato.
-- Estado `aria-live="polite"` inicialmente vacío. Tras una acción anuncia únicamente «Testimonio N de 3»; no repite las tres citas. Hay un indicador visual de posición junto a la aclaración ilustrativa.
+- Estado `aria-live="polite"` inicialmente vacío. Tras una acción anuncia únicamente «Testimonio N de 3»; no repite las tres citas. La posición no agrega una línea visual debajo del carrusel.
 - `prefers-reduced-motion` desactiva transiciones y animaciones de tarjetas, contenido y controles; la navegación sigue funcionando.

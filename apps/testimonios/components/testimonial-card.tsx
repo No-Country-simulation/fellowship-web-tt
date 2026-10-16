@@ -105,7 +105,7 @@ export function TestimonialCard({
 
   const classes = cn(
     "flex min-w-0 flex-col rounded-card border border-border bg-card p-md",
-    gallery && "min-h-[17rem]",
+    gallery && "md:min-h-[17rem]",
     href && [
       "h-full transition-[border-color,box-shadow,translate] duration-200 ease-out",
       "group-hover/card:border-accent-cyan/70 group-hover/card:shadow-card-hover motion-safe:group-hover/card:-translate-y-1",
