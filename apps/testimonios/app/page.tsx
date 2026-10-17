@@ -1,71 +1,64 @@
-import Link from "next/link";
-import { buttonVariants } from "@repo/ui/button";
-
-import { PageShell } from "@/components/page-shell";
-import { TestimonialCard } from "@/components/testimonial-card";
+import { GalleryHero } from "@/components/gallery-hero";
+import { TestimonialsGallery } from "@/components/testimonials-gallery";
 import { listPublishedTestimonials } from "@/lib/testimonials/public";
 
 // Sin esto Next prerenderiza `/` en el build y los publicados después no aparecen.
 export const dynamic = "force-dynamic";
 
+// Copy provisional de la sección de exploración.
+const GALLERY_COPY = {
+  heading: "Explorá las historias",
+  description: "Elegí el tipo de experiencia que te interesa conocer.",
+} as const;
+
 export default async function HomePage() {
   const listed = await listPublishedTestimonials();
-  const testimonials = listed.ok ? listed.testimonials : [];
+  const testimonials = listed.ok
+    ? listed.testimonials.map(
+        ({ id, slug, type, typeLabel, fullName, quote, avatarUrl }) => ({
+          id,
+          slug,
+          type,
+          typeLabel,
+          fullName,
+          quote,
+          avatarUrl,
+        }),
+      )
+    : [];
   const loadError = listed.ok ? null : listed.message;
 
   return (
-    <PageShell
-      className="max-w-5xl"
-      eyebrow="Galería"
-      title="Historias de talento"
-      description="Simulación, primer empleo y reconversión. El equipo valida cada historia antes de que salga acá o en Discord."
-    >
-      {loadError ? (
-        <p className="mt-lg text-body text-destructive" role="alert">
-          {loadError}
-        </p>
-      ) : testimonials.length === 0 ? (
-        <div className="mt-lg rounded-md border border-border bg-card p-md">
-          <p className="text-body text-text-secondary">
-            Todavía no hay envíos publicados. Si estuviste en un Demo Day, podés
-            dejar el tuyo ahora. El equipo lo revisa antes de que salga acá o en
-            Discord.
-          </p>
-          <div className="mt-md">
-            <Link
-              href="/enviar"
-              className={buttonVariants({ variant: "gradient", size: "lg" })}
+    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-bg-base">
+      <GalleryHero />
+      <section
+        aria-labelledby="gallery-stories-title"
+        className="px-md py-lg md:px-lg md:py-xl"
+      >
+        <div className="mx-auto w-full max-w-[70rem]">
+          <div className="mb-md flex flex-col gap-xs md:flex-row md:items-end md:justify-between md:gap-md">
+            <h2
+              id="gallery-stories-title"
+              className="text-2xl font-bold tracking-tight text-text-primary"
             >
-              Enviar testimonio
-            </Link>
+              {GALLERY_COPY.heading}
+            </h2>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {GALLERY_COPY.description}
+            </p>
           </div>
+          {loadError ? (
+            <p
+              className="rounded-card border border-border bg-card p-md text-base leading-relaxed text-destructive"
+              role="alert"
+            >
+              {loadError}
+            </p>
+          ) : (
+            <TestimonialsGallery testimonials={testimonials} />
+          )}
         </div>
-      ) : (
-        <>
-        <p className="text-body text-text-secondary">
-            Si estuviste en un Demo Day, también podés{" "}
-            <Link href="/enviar" className="text-accent-cyan hover:underline">
-              dejar tu testimonio
-            </Link>
-            .
-          </p>
-          <ul className="mt-lg grid gap-md sm:grid-cols-2">
-            {testimonials.map((testimonial) => (
-              <li key={testimonial.id}>
-                <TestimonialCard
-                  name={testimonial.fullName}
-                  typeLabel={testimonial.typeLabel}
-                  quote={testimonial.quote}
-                  avatarUrl={testimonial.avatarUrl}
-                  href={`/t/${testimonial.slug}`}
-                  lineClamp={3}
-                  cta="Ver historia"
-                />
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </PageShell>
+      </section>
+    </main>
   );
 }

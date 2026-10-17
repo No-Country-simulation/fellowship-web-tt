@@ -6,6 +6,8 @@ Documentación de los componentes reutilizables de `apps/testimonios`.
 
 Tokens y type scale: [design system de la landing](../../../landing-contratar/docs/ui/design-system.md). Compartidos en `@repo/ui`: [Button](../../../../packages/ui/docs/button.md), [BrandLogo](../../../../packages/ui/docs/brand-logo.md).
 
+El design system de Landing es una referencia interna. Los tokens y utilities vigentes de Testimonios se definen en su propio [`app/globals.css`](../../app/globals.css), actualizado parcialmente según la identidad actual de No Country.
+
 El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, no un primitivo.
 
 ## Índice
@@ -15,6 +17,9 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` |
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [SiteHeader](./components/site-header.md) | Chrome del layout (logo y nav) |
+| [GalleryHero](./components/gallery-hero.md) | Presentación de servidor, CTA y composición del hero |
+| [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Carrusel cliente de tres historias ilustrativas apiladas |
+| [TestimonialsGallery](./components/testimonials-gallery.md) | Filtros, contador y grilla de historias |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
 | [TestimonialCard](./components/testimonial-card.md) | Card de testimonio (galería, ficha) |
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
@@ -48,3 +53,11 @@ No documentar formularios de una sola ruta ni utilidades no-UI (`lib/`).
 | `@/lib/utils` | `cn()` |
 
 Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fino: thumb `border`, hover cyan).
+
+## Composición de la galería
+
+`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el formulario y la ficha.
+
+`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente con ejemplos locales identificados como ilustrativos, pendientes de reemplazo por historias autorizadas antes de producción. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; filtra en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
+
+La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Los textos provisionales están agrupados en constantes locales en la página y sus componentes. Las historias y avatares de la grilla provienen de los datos publicados.
