@@ -4,7 +4,7 @@ Card de un testimonio: avatar, tipo, nombre, quote y slots opcionales.
 
 **Archivo:** `components/testimonial-card.tsx`
 
-Uso previsto: grilla de galería y bloque de quote en la ficha.
+Uso previsto: grilla de galería y resúmenes independientes. La ficha `/t/[slug]` usa [`TestimonialDetail`](./testimonial-detail.md), sin esta card ni una cita adicional.
 
 ## Import
 
@@ -15,7 +15,7 @@ import { TestimonialCard } from "@/components/testimonial-card";
 ## Cuándo usarlo
 
 - Listar testimonios (galería)
-- Quote destacado en la ficha pública
+- Presentar un resumen estático en otras composiciones
 
 No usarlo para la foto testimonial ni para el embed de YouTube: esos van aparte. No meter email ni historia completa adentro. No usarlo como preview de Discord, Instagram o LinkedIn.
 
@@ -32,7 +32,7 @@ No usarlo para la foto testimonial ni para el embed de YouTube: esos van aparte.
 | `footer` | `ReactNode` | — | Meta muted al fondo |
 | `lineClamp` | `2 \| 3 \| 4 \| 5 \| 6` | `3` si hay `href` | Cortes del quote. Sin `href` y sin valor: quote completo |
 | `className` | `string` | — | Clases del `<article>` |
-| `variant` | `"default" \| "gallery"` | `"default"` | `gallery` separa la categoría y destaca el CTA; `default` conserva la presentación de la ficha |
+| `variant` | `"default" \| "gallery"` | `"default"` | `gallery` separa la categoría y destaca el CTA; `default` conserva su presentación original |
 
 ## Ejemplos
 
@@ -51,7 +51,7 @@ No usarlo para la foto testimonial ni para el embed de YouTube: esos van aparte.
 />
 ```
 
-### Ficha o preview estático (sin link)
+### Resumen estático (sin link)
 
 ```tsx
 <TestimonialCard
@@ -75,4 +75,4 @@ No usarlo para la foto testimonial ni para el embed de YouTube: esos van aparte.
 - El avatar lleva `alt=""`: el nombre va al lado, no hace falta anunciarlo dos veces.
 - El quote se envuelve en comillas tipográficas adentro del componente. No las pongas en el string.
 - Avatar siempre hay (el form lo exige). No hay estado vacío de foto.
-- No declara `"use client"`: en la ficha se renderiza desde el servidor y, al importarse desde `TestimonialsGallery`, integra el bundle cliente de la galería. Sus imports de runtime son compatibles con ese uso; no consulta Supabase.
+- No declara `"use client"`: puede renderizarse desde el servidor y, al importarse desde `TestimonialsGallery`, integra el bundle cliente de la galería. La ficha individual ya no lo utiliza. Sus imports de runtime son compatibles con ambos contextos; no consulta Supabase.

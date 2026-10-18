@@ -4,7 +4,7 @@ Wrapper de página: `<main>` scrolleable + eyebrow, título y descripción.
 
 **Archivo:** `components/page-shell.tsx`
 
-Uso actual: `/enviar` y ficha `/t/[slug]`. La galería usa un `<main>` propio con `GalleryHero` y `TestimonialsGallery` para extender el fondo del hero sin cambiar este componente compartido.
+Uso actual: `/enviar` y estado de error de `/t/[slug]`. La ficha exitosa usa la composición propia de [`TestimonialDetail`](./testimonial-detail.md). La galería usa un `<main>` propio con `GalleryHero` y `TestimonialsGallery` para extender el fondo del hero sin cambiar este componente compartido.
 
 ## Import
 
@@ -34,7 +34,7 @@ El default del contenedor es `max-w-3xl`.
 
 ## Variantes
 
-- `default`: conserva el eyebrow `text-overline`, el título `text-heading-3` y la descripción con `ml-auto`. Es la presentación actual de `/enviar` y `/t/[slug]`.
+- `default`: conserva el eyebrow `text-overline`, el título `text-heading-3` y la descripción con `ml-auto`. Es la presentación actual de `/enviar` y del estado de error de `/t/[slug]`. La variante y su comportamiento permanecen disponibles sin cambios.
 - `featured`: usa `type-eyebrow` y `type-section`. La descripción queda alineada a la izquierda, con ancho máximo de `45rem` (720px con base de 16px). Sigue disponible como variante opcional; la galería ya no la utiliza.
 
 ## Ejemplos

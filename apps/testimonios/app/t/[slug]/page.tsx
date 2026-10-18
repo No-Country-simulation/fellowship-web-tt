@@ -4,14 +4,8 @@ import { notFound } from "next/navigation";
 import { buttonVariants } from "@repo/ui/button";
 
 import { PageShell } from "@/components/page-shell";
-import { TestimonialCard } from "@/components/testimonial-card";
-import { YoutubeEmbed } from "@/components/youtube-embed";
-import {
-  formatPublishedAt,
-  getPublishedTestimonialBySlug,
-  type PublicTestimonial,
-} from "@/lib/testimonials/public";
-import { storyContextLine } from "@/lib/testimonials/types";
+import { TestimonialDetail } from "@/components/testimonial-detail";
+import { getPublishedTestimonialBySlug } from "@/lib/testimonials/public";
 
 export async function generateMetadata({
   params,
@@ -55,82 +49,5 @@ export default async function TestimonyPage({
     );
   }
 
-  const testimonial = result.testimonial;
-  const extra = extraLine(testimonial);
-
-  return (
-    <PageShell
-      eyebrow={testimonial.typeLabel}
-      title={testimonial.fullName}
-      description={
-        testimonial.publishedAt
-          ? `Publicado el ${formatPublishedAt(testimonial.publishedAt)}`
-          : undefined
-      }
-    >
-      <div className="mt-lg flex flex-col gap-lg">
-        <TestimonialCard
-          name={testimonial.fullName}
-          typeLabel={testimonial.typeLabel}
-          quote={testimonial.quote}
-          avatarUrl={testimonial.avatarUrl}
-        />
-
-        {extra ? (
-          <p className="text-body text-text-secondary">{extra}</p>
-        ) : null}
-
-        {testimonial.story !== testimonial.quote ? (
-          <section>
-            <p className="text-overline text-text-secondary">Historia</p>
-            <p className="mt-xs whitespace-pre-wrap text-body text-text-secondary">
-              {testimonial.story}
-            </p>
-          </section>
-        ) : null}
-
-        {testimonial.captureUrl ? (
-          <figure>
-            <p className="text-overline text-text-secondary">
-              Captura del proyecto
-            </p>
-            {/* Unknown screenshot aspect; keep the native ratio. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={testimonial.captureUrl}
-              alt={`Captura del proyecto de ${testimonial.fullName}`}
-              className="mt-xs max-h-72 w-auto max-w-full rounded-md border border-border object-contain"
-            />
-          </figure>
-        ) : null}
-
-        {testimonial.youtubeEmbedUrl ? (
-          <section>
-            <p className="text-overline text-text-secondary">YouTube</p>
-            <div className="mt-xs">
-              <YoutubeEmbed
-                src={testimonial.youtubeEmbedUrl}
-                title={`Video de ${testimonial.fullName}`}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        <div>
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
-            Volver a la galería
-          </Link>
-        </div>
-      </div>
-    </PageShell>
-  );
-}
-
-function extraLine(testimonial: PublicTestimonial) {
-  const context = storyContextLine({
-    simulation: testimonial.simulation,
-    firstJob: testimonial.firstJob,
-    careerChange: testimonial.careerChange,
-  });
-  return [context, testimonial.country].filter(Boolean).join(" · ") || null;
+  return <TestimonialDetail testimonial={result.testimonial} />;
 }
