@@ -1,4 +1,3 @@
-import { cn } from "@repo/ui/utils";
 import type { VisualTone } from "./visualTone";
 
 const TONE_CLASSES: Record<VisualTone, string> = {
@@ -12,10 +11,7 @@ const TONE_CLASSES: Record<VisualTone, string> = {
 export function StatusBadge({ tone, children }: { tone: VisualTone; children: React.ReactNode }) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center rounded border px-1.5 py-0.5 text-admin-micro font-medium uppercase tracking-wide",
-        TONE_CLASSES[tone],
-      )}
+      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-admin-micro font-medium uppercase tracking-wide ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

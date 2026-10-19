@@ -8,44 +8,52 @@ import { reviewTestimonial } from "../actions/testimonialActions";
 import { igCardContent } from "../infrastructure/ig-card";
 import { igCardPngBlob } from "../infrastructure/ig-card-canvas";
 import {
-  buildIgCaption,
-  buildLiCaption,
+  buildPostCaption,
   extractCaptionIntro,
   followsShareCaptionTemplate,
   QUOTE_EDIT_MAX_CHARS,
 } from "../infrastructure/quote";
 import { initialReviewState } from "../types/reviewState";
-import type { AdminTestimonial } from "../types/testimonial";
+import { formatNetworkList, SHARE_NETWORKS, type ShareChannels } from "../types/share";
+import type { AdminTestimonial, CardDesign } from "../types/testimonial";
 import { CaptionField } from "./CaptionField";
+import { CardDesignField } from "./CardDesignField";
 import { DetailHeader } from "./DetailHeader";
-import { DiscordPublishPreview } from "./DiscordPublishPreview";
 import { IgShare } from "./IgShare";
-import { LinkedInPublishPreview } from "./LinkedInPublishPreview";
-import { ShareTabs } from "./ShareTabs";
+import { ShareTargets } from "./ShareTargets";
 import { textareaClassName } from "./fields";
 
 type Intent = "save" | "publish" | "reject";
 
 /**
- * Revisión: envío plegado, quote, y preview por tabs (Discord / Instagram / LinkedIn).
- * El quote y los captions se editan a mano.
+ * Revisión: envío plegado y una sola publicación (card + texto) para Discord, Instagram y LinkedIn.
+ * El quote y el texto se editan a mano.
  */
 export function ReviewForm({
   testimonial,
   submission,
-  metaLine,
+  channels,
 }: {
   testimonial: AdminTestimonial;
   submission: ReactNode;
-  metaLine: string;
+  channels: ShareChannels;
 }) {
   const action = reviewTestimonial.bind(null, testimonial.id);
   const [state, formAction, pending] = useActionState(action, initialReviewState);
   const [quote, setQuote] = useState(testimonial.quote);
-  const [caption, setCaption] = useState(testimonial.igCaption);
-  const [liCaption, setLiCaption] = useState(testimonial.liCaption);
+  const [caption, setCaption] = useState(testimonial.caption);
+  const [cardDesign, setCardDesign] = useState<CardDesign>("photo");
   const [intent, setIntent] = useState<Intent | null>(null);
   const quoteEmpty = quote.trim().length === 0;
+  const quoteTooLong = quote.length > QUOTE_EDIT_MAX_CHARS;
+  const quoteInvalid = quoteEmpty || quoteTooLong;
+  const templateCaption = buildPostCaption({
+    quote,
+    fullName: testimonial.fullName,
+    instagram: testimonial.instagram,
+    linkedin: testimonial.linkedin,
+  });
+  const targets = SHARE_NETWORKS.filter((network) => channels[network]);
 
   function onQuoteChange(value: string) {
     setQuote(value);
@@ -53,21 +61,11 @@ export function ReviewForm({
       if (!followsShareCaptionTemplate(current)) {
         return current;
       }
-      return buildIgCaption({
+      return buildPostCaption({
         intro: extractCaptionIntro(current) ?? undefined,
         quote: value,
         fullName: testimonial.fullName,
         instagram: testimonial.instagram,
-      });
-    });
-    setLiCaption((current) => {
-      if (!followsShareCaptionTemplate(current)) {
-        return current;
-      }
-      return buildLiCaption({
-        intro: extractCaptionIntro(current) ?? undefined,
-        quote: value,
-        fullName: testimonial.fullName,
         linkedin: testimonial.linkedin,
       });
     });
@@ -87,8 +85,7 @@ export function ReviewForm({
         const formData = new FormData(form);
         formData.set("intent", value);
         formData.set("quote", quote);
-        formData.set("ig_caption", caption);
-        formData.set("li_caption", liCaption);
+        formData.set("caption", caption);
         if (value !== "publish") {
           setIntent("save");
           startTransition(() => {
@@ -99,10 +96,10 @@ export function ReviewForm({
         void (async () => {
           setIntent("publish");
           try {
-            const blob = await igCardPngBlob(igCardContent(testimonial, quote));
-            formData.set("ig_card", new File([blob], "instagram.png", { type: "image/png" }));
+            const blob = await igCardPngBlob(igCardContent(testimonial, quote, cardDesign));
+            formData.set("share_card", new File([blob], "instagram.png", { type: "image/png" }));
           } catch {
-            // Publica igual; Buffer Instagram falla y se puede reintentar.
+            // Publica igual; las redes fallan sin card y se reintentan desde la ficha.
           }
           startTransition(() => {
             formAction(formData);
@@ -112,86 +109,99 @@ export function ReviewForm({
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
       <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="quote" value={quote} />
-      <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="ig_caption" value={caption} />
-      <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="li_caption" value={liCaption} />
+      <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="caption" value={caption} />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-        <DetailHeader testimonial={testimonial} metaLine={metaLine} />
+        <DetailHeader testimonial={testimonial} />
 
         <div className="mt-6 flex min-w-0 flex-col gap-6">
           {submission}
 
           <section
-            aria-labelledby="admin-edit-title"
-            className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
+            aria-labelledby="admin-post-title"
+            className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4"
           >
-            <header className="flex flex-col gap-1">
-              <h2 id="admin-edit-title" className="text-admin-heading font-semibold text-foreground">
-                Quote
-              </h2>
-              <p id="admin-edit-hint" className="text-admin-caption text-muted-foreground">
-                Una o dos frases, cortas y con impacto. Salen en Discord y en la card de
-                Instagram; si lo cambiás, los captions se ajustan automáticamente.
-              </p>
-            </header>
-
-            <div>
-              <textarea
-                id="admin-quote"
-                value={quote}
-                maxLength={QUOTE_EDIT_MAX_CHARS}
-                aria-labelledby="admin-edit-title"
-                aria-describedby="admin-edit-hint"
-                aria-invalid={quoteEmpty || undefined}
-                className={cn(textareaClassName, "min-h-28")}
-                onChange={(event) => onQuoteChange(event.target.value)}
-              />
-              <p
-                className={cn(
-                  "mt-1 text-admin-caption",
-                  quoteEmpty ? "text-destructive" : "text-muted-foreground",
-                )}
-              >
-                {quoteEmpty
-                  ? "El quote no puede estar vacío."
-                  : `${quote.length}/${QUOTE_EDIT_MAX_CHARS}`}
-              </p>
-            </div>
-          </section>
-
-          <section aria-labelledby="admin-preview-title" className="flex flex-col gap-3">
-            <header className="flex flex-col gap-1">
-              <h2 id="admin-preview-title" className="text-admin-heading font-semibold text-foreground">
-                Cómo va a quedar
+            <header className="flex flex-col gap-2">
+              <h2 id="admin-post-title" className="text-admin-heading font-semibold text-foreground">
+                Publicación
               </h2>
               <p className="text-admin-caption text-muted-foreground">
-                Se actualiza mientras escribís. Instagram y LinkedIn tienen caption editable.
+                Una sola publicación para todas las redes: la misma imagen y el mismo texto. La
+                imagen se actualiza mientras escribís y al cambiar el diseño.
               </p>
+              <ShareTargets channels={channels} />
             </header>
 
-            <ShareTabs
-              discord={
-                <DiscordPublishPreview testimonial={testimonial} quote={quote || testimonial.quote} />
-              }
-              instagram={
-                <div className="grid items-start gap-4 md:grid-cols-2">
-                  <IgShare
-                    mode="preview"
-                    slug={testimonial.slug}
-                    caption={caption}
-                    {...igCardContent(testimonial, quote)}
-                  />
-                  <CaptionField label="Caption de Instagram" value={caption} onChange={setCaption} />
-                </div>
-              }
-              linkedin={
-                <LinkedInPublishPreview
-                  testimonial={testimonial}
-                  caption={liCaption}
-                  onChange={setLiCaption}
+            <div className="grid items-start gap-5 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+              <figure className="flex min-w-0 flex-col gap-2 md:sticky md:top-0">
+                <CardDesignField
+                  type={testimonial.type}
+                  value={cardDesign}
+                  onChange={setCardDesign}
                 />
-              }
-            />
+                <IgShare
+                  mode="preview"
+                  slug={testimonial.slug}
+                  caption={caption}
+                  {...igCardContent(testimonial, quote, cardDesign)}
+                />
+                <figcaption className="text-admin-caption text-muted-foreground">
+                  Imagen 1080×1350. Se genera al publicar.
+                </figcaption>
+              </figure>
+
+              <div className="flex min-w-0 flex-col gap-5">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <label htmlFor="admin-quote" className="text-admin-caption text-foreground">
+                      Frase de la imagen
+                    </label>
+                    <p
+                      className={`text-admin-caption ${quoteInvalid ? "text-destructive" : "text-muted-foreground"}`}
+                    >
+                      {quoteEmpty
+                        ? "No puede estar vacía"
+                        : `${quote.length}/${QUOTE_EDIT_MAX_CHARS}${quoteTooLong ? " · Acortala" : ""}`}
+                    </p>
+                  </div>
+                  <p id="admin-quote-hint" className="text-admin-caption text-muted-foreground">
+                    Una o dos frases, cortas y con impacto. Si el texto sigue la plantilla, se ajusta
+                    solo.
+                  </p>
+                  <textarea
+                    id="admin-quote"
+                    value={quote}
+                    maxLength={QUOTE_EDIT_MAX_CHARS}
+                    aria-describedby="admin-quote-hint"
+                    aria-invalid={quoteInvalid || undefined}
+                    className={cn(textareaClassName, "min-h-28")}
+                    onChange={(event) => onQuoteChange(event.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <CaptionField
+                    label="Texto del post"
+                    hint={
+                      testimonial.videoUrl
+                        ? "Mismo texto en todas las redes. En Discord y LinkedIn se suma el link del video."
+                        : "Mismo texto en todas las redes."
+                    }
+                    value={caption}
+                    onChange={setCaption}
+                  />
+                  {caption !== templateCaption ? (
+                    <button
+                      type="button"
+                      className="self-start cursor-pointer text-admin-caption text-primary hover:underline"
+                      onClick={() => setCaption(templateCaption)}
+                    >
+                      Volver a la plantilla
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
           </section>
         </div>
       </div>
@@ -207,7 +217,7 @@ export function ReviewForm({
             onClick={(event) => {
               if (
                 !window.confirm(
-                  "¿Rechazar este testimonio? No sale en la galería ni en Discord.",
+                  "¿Rechazar este testimonio? No sale en la galería ni en las redes.",
                 )
               ) {
                 event.preventDefault();
@@ -234,7 +244,7 @@ export function ReviewForm({
               type="submit"
               name="intent"
               value="save"
-              disabled={pending || quoteEmpty}
+              disabled={pending || quoteInvalid}
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               onClick={() => setIntent("save")}
             >
@@ -244,14 +254,13 @@ export function ReviewForm({
               type="submit"
               name="intent"
               value="publish"
-              disabled={pending || quoteEmpty}
+              disabled={pending || quoteInvalid}
               className={cn(buttonVariants({ variant: "default", size: "lg" }))}
               onClick={(event) => {
-                if (
-                  !window.confirm(
-                    "¿Publicar este testimonio? Sale en la galería y se postea en Discord, Instagram y LinkedIn.",
-                  )
-                ) {
+                const where = targets.length
+                  ? ` y se publica en ${formatNetworkList(targets)} con la misma imagen y texto`
+                  : "";
+                if (!window.confirm(`¿Publicar este testimonio? Sale en la galería${where}.`)) {
                   event.preventDefault();
                   return;
                 }

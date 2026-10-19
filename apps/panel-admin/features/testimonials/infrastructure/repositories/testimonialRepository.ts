@@ -1,12 +1,13 @@
-import type { AdminInboxData, AdminTestimonial, TestimonialStatus } from "../../types/testimonial";
+import type { ShareChannels } from "../../types/share";
+import type {
+  AdminInboxData,
+  AdminTestimonial,
+  TestimonialStatus,
+} from "../../types/testimonial";
 import { hasInstagramChannel, hasLinkedInChannel } from "../buffer";
 import type { TestimonialDto } from "../dtos/testimonialDto";
 import { hasCommunityWebhook } from "../discord";
-import {
-  adminContextLine,
-  formatSubmittedAt,
-  TestimonialMapper,
-} from "../mappers/testimonialMapper";
+import { TestimonialMapper } from "../mappers/testimonialMapper";
 import { hasSupabaseServiceRoleEnv } from "../supabase/env";
 import { createServiceRoleClient } from "../supabase/service-role";
 import {
@@ -37,10 +38,7 @@ export async function getTestimonialById(id: string): Promise<
   | {
       ok: true;
       testimonial: AdminTestimonial;
-      metaLine: string;
-      canRetryDiscord: boolean;
-      canRetryInstagram: boolean;
-      canRetryLinkedin: boolean;
+      channels: ShareChannels;
     }
   | { ok: false; message: string; notFound?: boolean }
 > {
@@ -50,41 +48,40 @@ export async function getTestimonialById(id: string): Promise<
   }
 
   const testimonial = mapTestimonial(row.testimonial);
-  const published = testimonial.status === "published";
-  const context = adminContextLine(testimonial);
 
   return {
     ok: true,
     testimonial,
-    metaLine: `Enviado el ${formatSubmittedAt(testimonial.submittedAt)}${context ? ` · ${context}` : ""}`,
-    canRetryDiscord: published && !testimonial.discordPostedAt && hasCommunityWebhook(),
-    canRetryInstagram:
-      published && !testimonial.bufferInstagramPostedAt && hasInstagramChannel(),
-    canRetryLinkedin: published && !testimonial.bufferLinkedinPostedAt && hasLinkedInChannel(),
+    channels: {
+      discord: hasCommunityWebhook(),
+      instagram: hasInstagramChannel(),
+      linkedin: hasLinkedInChannel(),
+    },
   };
 }
 
+/** `li_caption` guarda el mismo texto: hay una sola publicación para las tres redes. */
 export async function saveReviewEdits(
   id: string,
-  edits: { quote: string; igCaption: string; liCaption: string },
+  edits: { quote: string; caption: string },
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   return updateReviewRow(id, {
     quote: edits.quote,
-    ig_caption: edits.igCaption,
-    li_caption: edits.liCaption,
+    ig_caption: edits.caption,
+    li_caption: edits.caption,
   });
 }
 
 export async function publishTestimonial(
   id: string,
-  edits: { quote: string; igCaption: string; liCaption: string },
+  edits: { quote: string; caption: string },
 ): Promise<{ ok: true; slug: string } | { ok: false; message: string }> {
   const updated = await updateReviewRow(
     id,
     {
       quote: edits.quote,
-      ig_caption: edits.igCaption,
-      li_caption: edits.liCaption,
+      ig_caption: edits.caption,
+      li_caption: edits.caption,
       status: "published",
       published_at: new Date().toISOString(),
     },
@@ -177,7 +174,13 @@ export async function rejectTestimonial(
   return updated.ok ? { ok: true } : updated;
 }
 
-/** Sube la card de Instagram o confirma que ya está. Devuelve la URL pública. */
+/** URL pública de la card que se guardó al publicar, o `null` si no quedó ninguna. */
+export async function storedShareCardUrl(slug: string): Promise<string | null> {
+  const path = `${slug}/${SHARE_CARD_NAME}`;
+  return (await shareCardExists(path)) ? publicStorageUrl(SHARE_CARDS_BUCKET, path) : null;
+}
+
+/** Sube la card del post (la misma para las tres redes) o confirma que ya está. Devuelve la URL pública. */
 export async function prepareShareCard(slug: string, file: File | null): Promise<string | null> {
   const path = `${slug}/${SHARE_CARD_NAME}`;
   if (file) {
@@ -186,7 +189,7 @@ export async function prepareShareCard(slug: string, file: File | null): Promise
       return null;
     }
   } else if (!(await shareCardExists(path))) {
-    console.error("Buffer Instagram failed: missing share card");
+    console.error("Share failed: missing share card");
     return null;
   }
 
@@ -325,7 +328,7 @@ async function uploadShareCard(path: string, file: File) {
   });
 
   if (error) {
-    console.error("Buffer share-cards upload failed");
+    console.error("Share card upload failed");
     return false;
   }
 

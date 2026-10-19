@@ -12,11 +12,3 @@ export function TestimonialStatusBadge({ status }: { status: TestimonialStatus }
   const { label, tone } = STATUS[status];
   return <StatusBadge tone={tone}>{label}</StatusBadge>;
 }
-
-export function TypePill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded border border-border px-1.5 py-0.5 text-admin-micro font-medium uppercase tracking-wide text-muted-foreground">
-      {children}
-    </span>
-  );
-}

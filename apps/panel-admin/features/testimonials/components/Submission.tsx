@@ -82,6 +82,7 @@ export function Submission({ testimonial }: { testimonial: AdminTestimonial }) {
         ) : null}
 
         <dl className="grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+          <Fact label="Tipo" value={testimonial.typeLabel} />
           <Fact label="País" value={testimonial.country ?? "No indicó país"} muted={!testimonial.country} />
           <Fact label="Email" value={testimonial.email} />
           <Fact

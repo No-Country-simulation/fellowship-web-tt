@@ -161,6 +161,49 @@ function readPayloadString(
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+export const CARD_DESIGNS = [
+  "photo",
+  "quote",
+  "portrait",
+  "offer",
+  "journey",
+  "shift",
+  "cover",
+] as const;
+
+export type CardDesign = (typeof CARD_DESIGNS)[number];
+
+export type CardDesignOption = { value: CardDesign; label: string; description: string };
+
+const PHOTO_OPTION: CardDesignOption = {
+  value: "photo",
+  label: "Foto arriba",
+  description: "Foto en la franja de arriba y la frase abajo.",
+};
+
+/** `photo` es el diseño base de todos los tipos; los otros dos son propios de cada tipo. */
+export const CARD_DESIGN_OPTIONS: Record<TestimonialType, CardDesignOption[]> = {
+  simulation: [
+    PHOTO_OPTION,
+    { value: "quote", label: "Cita", description: "Sin foto. La frase grande es la protagonista." },
+    { value: "portrait", label: "Retrato", description: "La persona al centro y la frase debajo." },
+  ],
+  first_job: [
+    PHOTO_OPTION,
+    { value: "offer", label: "Empresa", description: "La empresa que lo contrató en grande." },
+    {
+      value: "journey",
+      label: "Recorrido",
+      description: "El camino desde la simulación hasta el puesto, con la frase abajo.",
+    },
+  ],
+  career_change: [
+    PHOTO_OPTION,
+    { value: "shift", label: "Antes y ahora", description: "El oficio de antes y el rol de ahora." },
+    { value: "cover", label: "Foto completa", description: "La foto de fondo y la frase encima." },
+  ],
+};
+
 export type AdminTestimonial = {
   id: string;
   slug: string;
@@ -174,8 +217,8 @@ export type AdminTestimonial = {
   linkedin: string | null;
   story: string;
   quote: string;
-  igCaption: string;
-  liCaption: string;
+  /** Texto del post, igual en las tres redes. */
+  caption: string;
   avatarUrl: string;
   captureUrl: string | null;
   videoUrl: string | null;
@@ -192,6 +235,7 @@ export type AdminTestimonial = {
 
 export type AdminInboxItem = {
   id: string;
+  type: TestimonialType;
   typeLabel: string;
   status: TestimonialStatus;
   fullName: string;

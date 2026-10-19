@@ -1,4 +1,5 @@
 import type {
+  CardDesign,
   CareerChangePayload,
   FirstJobPayload,
   SimulationPayload,
@@ -13,6 +14,7 @@ export const IG_PHOTO_HEIGHT = Math.round((IG_CARD_WIDTH * 9) / 16);
 
 export type IgCardContent = {
   type: TestimonialType;
+  design: CardDesign;
   quote: string;
   fullName: string;
   country: string | null;
@@ -39,9 +41,11 @@ export function igCardContent(
     careerChange: CareerChangePayload | null;
   },
   quote: string,
+  design: CardDesign,
 ): IgCardContent {
   return {
     type: source.type,
+    design,
     quote,
     fullName: source.fullName,
     country: source.country,

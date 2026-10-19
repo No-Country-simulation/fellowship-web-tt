@@ -1,28 +1,25 @@
-import {
-  PageHeader,
-  PageHeaderDescription,
-  PageHeaderTitle,
-  PageBackLink,
-} from "@shared/ui/patterns/PageHeader";
+import { PageHeader, PageHeaderTitle, PageBackLink } from "@shared/ui/patterns/PageHeader";
+import { formatShortDate, formatSubmittedAt } from "../infrastructure/mappers/testimonialMapper";
 import type { AdminTestimonial } from "../types/testimonial";
-import { TestimonialStatusBadge, TypePill } from "./TestimonialStatusBadge";
+import { TestimonialStatusBadge } from "./TestimonialStatusBadge";
 
-export function DetailHeader({
-  testimonial,
-  metaLine,
-}: {
-  testimonial: AdminTestimonial;
-  metaLine: string;
-}) {
+export function DetailHeader({ testimonial }: { testimonial: AdminTestimonial }) {
   return (
     <PageHeader>
-      <PageBackLink href="/testimonials">Testimonios</PageBackLink>
+      <div className="md:hidden">
+        <PageBackLink href="/testimonials">Testimonios</PageBackLink>
+      </div>
       <div className="flex flex-wrap items-center gap-3">
         <PageHeaderTitle>{testimonial.fullName}</PageHeaderTitle>
         <TestimonialStatusBadge status={testimonial.status} />
-        <TypePill>{testimonial.typeLabel}</TypePill>
+        <time
+          dateTime={testimonial.submittedAt}
+          title={`Enviado el ${formatSubmittedAt(testimonial.submittedAt)}`}
+          className="ml-auto text-admin-caption text-muted-foreground"
+        >
+          {formatShortDate(testimonial.submittedAt)}
+        </time>
       </div>
-      <PageHeaderDescription>{metaLine}</PageHeaderDescription>
     </PageHeader>
   );
 }
