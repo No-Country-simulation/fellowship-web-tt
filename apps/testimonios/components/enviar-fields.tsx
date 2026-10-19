@@ -30,12 +30,13 @@ type FieldProps = {
   className?: string;
   children: (control: {
     id: string;
+    labelledBy: string;
     describedBy?: string;
     invalid: boolean;
   }) => ReactNode;
 };
 
-/** Label, hint y error. El control lo arma `children` con `{ id, describedBy, invalid }`. */
+/** Label, hint y error; `children` recibe id, labelledBy, describedBy e invalid. */
 export function Field({
   id,
   label,
@@ -49,6 +50,7 @@ export function Field({
 }: FieldProps) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
+  const labelId = `${fieldId}-label`;
   const hintId = hint ? `${fieldId}-hint` : undefined;
   const errorId = error ? `${fieldId}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
@@ -66,11 +68,11 @@ export function Field({
   );
 
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    <div data-field="" className={cn("flex flex-col gap-1", className)}>
       {labelAs === "span" ? (
-        <span className={labelClassName}>{labelContent}</span>
+        <span id={labelId} className={labelClassName}>{labelContent}</span>
       ) : (
-        <label htmlFor={fieldId} className={labelClassName}>
+        <label id={labelId} htmlFor={fieldId} className={labelClassName}>
           {labelContent}
         </label>
       )}
@@ -79,9 +81,9 @@ export function Field({
           {hint}
         </p>
       ) : null}
-      {children({ id: fieldId, describedBy, invalid: Boolean(error) })}
+      {children({ id: fieldId, labelledBy: labelId, describedBy, invalid: Boolean(error) })}
       {error ? (
-        <p id={errorId} className="text-body-small text-destructive" role="alert">
+        <p id={errorId} className="text-body-small text-destructive">
           {error}
         </p>
       ) : null}
@@ -142,6 +144,7 @@ export function FileField({
     }
     onFileChange(null);
     onInvalid?.(undefined);
+    inputRef.current?.focus({ preventScroll: true });
   }
 
   function closeCrop() {
@@ -207,13 +210,14 @@ export function FileField({
         className,
       )}
     >
-      {({ id, describedBy, invalid }) => (
+      {({ id, labelledBy, describedBy, invalid }) => (
         <div className="relative">
         <label
           htmlFor={id}
           className={cn(
             "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base",
             "hover:border-accent-cyan/70 hover:bg-bg-white-a5",
+            "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
             preview === "avatar"
               ? "relative aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-2xl p-md text-center"
               : preview === "capture"
@@ -252,6 +256,7 @@ export function FileField({
             name={name}
             type="file"
             accept={accept}
+            aria-labelledby={labelledBy}
             aria-invalid={invalid}
             aria-describedby={describedBy}
             className="sr-only"
@@ -278,7 +283,7 @@ export function FileField({
           <button
             type="button"
             aria-label={preview === "avatar" ? "Quitar foto" : "Quitar captura"}
-            className="absolute top-sm right-sm grid size-8 place-items-center rounded-full bg-bg-base text-body text-text-primary shadow-sm"
+            className="absolute top-sm right-sm grid size-11 place-items-center rounded-full bg-bg-base text-body text-text-primary shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
             onClick={clearFile}
           >
             <span aria-hidden="true">×</span>
@@ -289,6 +294,7 @@ export function FileField({
             imageUrl={cropSource.url}
             kind={preview}
             confirming={cropping}
+            returnFocusRef={inputRef}
             onCancel={cancelCrop}
             onConfirm={confirmCrop}
           />

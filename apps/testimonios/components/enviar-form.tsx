@@ -4,6 +4,8 @@ import {
   startTransition,
   useActionState,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -56,6 +58,19 @@ const STEP_TITLES = [
   "Consentimiento",
 ] as const;
 
+function focusAndReveal(control: HTMLElement | null) {
+  if (!control) return;
+  control.focus({ preventScroll: true });
+  const main = control.closest("main");
+  if (!main) return;
+  const anchor = control.closest<HTMLElement>("[data-field], label") ?? control;
+  main.scrollTo({
+    top: main.scrollTop + anchor.getBoundingClientRect().top -
+      main.getBoundingClientRect().top - 16,
+    behavior: "instant",
+  });
+}
+
 export function EnviarForm() {
   const [state, formAction, pending] = useActionState(
     submitTestimonial,
@@ -82,6 +97,29 @@ export function EnviarForm() {
     response: initialSubmitState,
     overrides: {},
   });
+  const formRef = useRef<HTMLFormElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const focusRequest = useRef<{ errors?: FieldErrors } | null>(null);
+
+  function focusFirstError(errors: FieldErrors) {
+    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      "input[name], textarea[name]",
+    );
+    const first = Array.from(controls ?? []).find((control) =>
+      errors[control.name as FormField] && !control.disabled &&
+      !control.closest("fieldset")?.hidden,
+    );
+    focusAndReveal(first ?? null);
+  }
+
+  // El DOM ya muestra el paso y sus mensajes; no hay foco automático al cargar.
+  useLayoutEffect(() => {
+    const request = focusRequest.current;
+    if (!request) return;
+    focusRequest.current = null;
+    if (request.errors) focusFirstError(request.errors);
+    else focusAndReveal(headingRef.current);
+  }, [step, validation]);
 
   if (state.status === "success") {
     return <SuccessCard />;
@@ -155,12 +193,23 @@ export function EnviarForm() {
       }
     }
     updateErrors(nextErrors);
-    return !Object.values(nextErrors).some(Boolean);
+    const valid = !Object.values(nextErrors).some(Boolean);
+    if (!valid) focusRequest.current = { errors: nextErrors };
+    return valid;
+  }
+
+  function navigateTo(nextStep: number, errors?: FieldErrors) {
+    if (nextStep === step) {
+      if (errors) focusFirstError(errors);
+      return;
+    }
+    focusRequest.current = { errors };
+    setStep(nextStep);
   }
 
   function goNext() {
     if (validateStep(step) && step < STEPS) {
-      setStep(step + 1);
+      navigateTo(step + 1);
     }
   }
 
@@ -209,17 +258,17 @@ export function EnviarForm() {
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       onSubmit={onSubmit}
       className="mt-lg flex flex-col gap-lg"
       noValidate
     >
-      <StepProgress step={step} />
+      <StepProgress step={step} headingRef={headingRef} />
 
       <fieldset
         hidden={step !== 1}
         aria-invalid={Boolean(fieldErrors.type)}
-        aria-describedby={fieldErrors.type ? "type-error" : undefined}
         className={cn(step === 1 && "flex flex-col gap-sm")}
       >
         <legend className="sr-only">Qué querés contar</legend>
@@ -232,6 +281,7 @@ export function EnviarForm() {
                 className={cn(
                   "flex cursor-pointer flex-col gap-xs rounded-md border border-border bg-card p-md",
                   "hover:border-accent-cyan/70",
+                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-mint",
                   checked && "border-accent-cyan ring-2 ring-accent-cyan/40",
                 )}
               >
@@ -240,6 +290,11 @@ export function EnviarForm() {
                   name="type"
                   value={option.value}
                   checked={checked}
+                  aria-labelledby={`type-${option.value}-label`}
+                  aria-describedby={[
+                    `type-${option.value}-description`,
+                    fieldErrors.type ? "type-error" : undefined,
+                  ].filter(Boolean).join(" ")}
                   className="sr-only"
                   onChange={() => {
                     if (isTestimonialType(option.value)) {
@@ -247,10 +302,10 @@ export function EnviarForm() {
                     }
                   }}
                 />
-                <span className="text-body font-medium text-text-primary">
+                <span id={`type-${option.value}-label`} className="text-body font-medium text-text-primary">
                   {option.label}
                 </span>
-                <span className="text-body-small text-text-secondary">
+                <span id={`type-${option.value}-description`} className="text-body-small text-text-secondary">
                   {option.description}
                 </span>
               </label>
@@ -258,7 +313,7 @@ export function EnviarForm() {
           })}
         </div>
         {fieldErrors.type ? (
-          <p id="type-error" className="text-body-small text-destructive" role="alert">
+          <p id="type-error" className="text-body-small text-destructive">
             {fieldErrors.type}
           </p>
         ) : null}
@@ -639,7 +694,7 @@ export function EnviarForm() {
             checked={consent}
             aria-invalid={Boolean(fieldErrors.consent)}
             aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
-            className="mt-1 size-4 rounded-sm border-border accent-accent-cyan"
+            className="mt-1 size-4 rounded-sm border-border accent-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
             onChange={(event) => {
               setConsent(event.target.checked);
               revalidateField("consent", event.target.checked);
@@ -652,7 +707,7 @@ export function EnviarForm() {
           </span>
         </label>
         {fieldErrors.consent ? (
-          <p id="consent-error" className="text-body-small text-destructive" role="alert">
+          <p id="consent-error" className="text-body-small text-destructive">
             {fieldErrors.consent}
           </p>
         ) : null}
@@ -678,7 +733,7 @@ export function EnviarForm() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setStep(correctionStep)}
+                onClick={() => navigateTo(correctionStep, serverErrors)}
               >
                 Ir a corregir
               </Button>
@@ -693,7 +748,7 @@ export function EnviarForm() {
           variant="outline"
           size="lg"
           disabled={step === 1 || pending}
-          onClick={() => setStep((current) => Math.max(1, current - 1))}
+          onClick={() => navigateTo(Math.max(1, step - 1))}
         >
           Atrás
         </Button>
@@ -723,18 +778,21 @@ export function EnviarForm() {
   );
 }
 
-function StepProgress({ step }: { step: number }) {
+function StepProgress({ step, headingRef }: {
+  step: number;
+  headingRef: React.RefObject<HTMLHeadingElement | null>;
+}) {
   return (
     <div>
-      <p className="text-overline text-text-secondary">
+      <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
         Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
-      </p>
+      </h2>
       <div
         className="mt-xs h-1 overflow-hidden rounded-full bg-bg-surface-4"
         aria-hidden="true"
       >
         <div
-          className="h-full bg-brand-gradient transition-[width]"
+          className="h-full bg-brand-gradient transition-[width] motion-reduce:transition-none"
           style={{ width: `${(step / STEPS) * 100}%` }}
         />
       </div>
@@ -745,6 +803,11 @@ function StepProgress({ step }: { step: number }) {
 function SuccessCard() {
   const [inviteUrl, setInviteUrl] = useState(`${getSiteUrl()}/enviar`);
   const [copied, setCopied] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    focusAndReveal(headingRef.current);
+  }, []);
 
   useEffect(() => {
     setInviteUrl(`${window.location.origin}/enviar`);
@@ -763,7 +826,7 @@ function SuccessCard() {
   return (
     <div className="mt-lg rounded-md border border-border bg-card p-md">
       <p className="text-overline text-accent-mint">Listo</p>
-      <h2 className="mt-xs text-heading-3 text-text-primary">
+      <h2 ref={headingRef} tabIndex={-1} className="mt-xs text-heading-3 text-text-primary">
         Gracias por tu testimonio
       </h2>
       <p className="mt-sm text-body text-text-secondary">

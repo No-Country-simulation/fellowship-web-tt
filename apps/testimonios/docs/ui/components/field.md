@@ -32,16 +32,18 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 | Prop | Tipo | Default | Descripción |
 | --- | --- | --- | --- |
 | `label` | `string` | — | Texto del label |
-| `children` | `(control) => ReactNode` | — | Render prop: recibe `{ id, describedBy, invalid }` |
+| `children` | `(control) => ReactNode` | — | Render prop: recibe `{ id, labelledBy, describedBy, invalid }` |
 | `id` | `string` | `useId()` | Id del control |
 | `hint` | `string` | — | Ayuda bajo el label |
-| `error` | `string` | — | Mensaje `role="alert"` |
+| `error` | `string` | — | Mensaje asociado al control mediante `describedBy` |
 | `optional` | `boolean` | `false` | Sufijo “Opcional” muted |
 | `labelAs` | `"label" \| "span"` | `"label"` | `span` si el click lo maneja un hijo (file, radios) |
 | `hideLabel` | `boolean` | `false` | Label `sr-only` (sigue anunciado) |
 | `className` | `string` | — | Clases del wrapper |
 
 `children` debe aplicar `id`, `aria-describedby={describedBy}` y `aria-invalid={invalid}` al control.
+`labelledBy` identifica el nombre visible estable; usar `aria-labelledby={labelledBy}`
+cuando el control necesita esa asociación explícita, como el input de `FileField`.
 
 `error` recibe un único mensaje vigente, sea local o devuelto por el servidor.
 El formulario decide cuándo validarlo: al intentar avanzar y, si el campo tiene
@@ -53,6 +55,11 @@ campo.
 
 Revalidar un paso o volver a una categoría conserva los errores del servidor de
 campos sin editar. Esos errores siguen impidiendo avanzar hasta corregirlos.
+
+Los errores de campo no son regiones de alerta independientes. Al fallar una
+validación, el formulario enfoca el primer control inválido en orden de DOM y su
+`aria-describedby` incluye el error, evitando anunciar a la vez todos los campos.
+Los errores generales del servidor mantienen su región de alerta separada.
 
 ## Props — `FileField`
 
@@ -143,3 +150,11 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 - El preview de `FileField` es un `objectURL` local; se revoca al cambiar o desmontar. No es la URL de Storage. Avatar y captura abren [`CaptureCropDialog`](./capture-crop-dialog.md) al elegir el archivo (cuadrado o 16:9).
 - El input file es `sr-only`; el hit area es el label dashed. Avatar es cuadrado; captura es 16:9. Con una imagen cargada, una X la quita.
 - Hint y error se anidan en `aria-describedby` en ese orden.
+- El input de archivo conserva el nombre del label visible al cargar o reemplazar
+  una imagen. El recuadro muestra un contorno cyan cuando el input recibe foco con
+  teclado; Enter o Espacio abre el selector nativo.
+- La acción de quitar tiene un área de 44×44 px y contorno de foco. Al quitar una
+  imagen, el foco vuelve al input sin abrir el selector.
+- El diálogo de recorte recibe la referencia del input para devolverle el foco al
+  cerrar. Esto no modifica la conservación de la imagen al cancelar un reemplazo,
+  pendiente del bloque 3.
