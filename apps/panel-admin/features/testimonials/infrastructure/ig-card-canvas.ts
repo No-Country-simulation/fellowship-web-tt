@@ -10,6 +10,8 @@ import type { CardDesign, TestimonialType } from "../types/testimonial";
 const LOGO_SRC = "/brand/logo-no-country.png";
 const FALLBACK_PHOTO_SRC = "/brand/ig-fallback.jpg";
 const PAD = 52;
+/** Las fotos testimoniales se recortan en 16:9 al subirlas. */
+const PHOTO_ASPECT = 16 / 9;
 const AUTHOR_H = 168;
 const INLINE_AUTHOR_H = 132;
 
@@ -72,7 +74,7 @@ const DESIGNS: Record<CardDesign, (scene: Scene) => void> = {
   offer: drawOfferDesign,
   journey: drawJourneyDesign,
   shift: drawShiftDesign,
-  cover: drawCoverDesign,
+  profile: drawProfileDesign,
 };
 
 type Scene = {
@@ -242,68 +244,167 @@ function drawQuoteDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }
   });
 }
 
-/** Foto a sangre completa con velo del color del tipo y el texto encima. */
-function drawCoverDesign({ ctx, input, variant, copy, logo, avatar, photo, fontFamily }: Scene) {
-  if (photo) {
-    drawCover(ctx, photo);
-  } else {
-    drawBody(ctx, variant, 0);
-  }
-  drawTopScrim(ctx);
-  drawCoverScrim(ctx, variant);
+/** Reconversión: tarjeta de perfil con la foto como portada 16:9, avatar, rol nuevo y la frase. */
+function drawProfileDesign({ ctx, input, variant, copy, logo, avatar, photo, fontFamily }: Scene) {
+  const bg = ctx.createLinearGradient(0, 0, 0, IG_CARD_HEIGHT);
+  bg.addColorStop(0, "#150a33");
+  bg.addColorStop(1, "#1b0d3f");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, IG_CARD_WIDTH, IG_CARD_HEIGHT);
+  drawGlow(ctx, 0, 760, 520, "255, 61, 154", 0.3);
+  drawGlow(ctx, IG_CARD_WIDTH, 620, 520, "139, 92, 246", 0.26);
   drawLogo(ctx, logo, fontFamily, "#ffffff");
   drawBadge(ctx, copy.badge, variant, fontFamily);
 
-  const barH = 12;
-  ctx.fillStyle = accentGradient(ctx, variant, 0, IG_CARD_WIDTH);
-  ctx.fillRect(0, IG_CARD_HEIGHT - barH, IG_CARD_WIDTH, barH);
+  const cardX = PAD;
+  const cardY = 150;
+  const cardW = IG_CARD_WIDTH - PAD * 2;
+  const cardH = IG_CARD_HEIGHT - PAD - cardY;
+  ctx.beginPath();
+  roundRect(ctx, cardX, cardY, cardW, cardH, 36);
+  ctx.fillStyle = "rgba(255,255,255,0.04)";
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.stroke();
 
-  const authorTop = IG_CARD_HEIGHT - barH - 44 - INLINE_AUTHOR_H;
-  const minTop = 560;
-  const kickerBlock = 26 + 28;
-  const company = variant === "job" ? input.company?.trim() || null : null;
-  const hiredBlock = company ? 76 + 36 : 0;
-  const showPills = variant === "change" && Boolean(input.previousRole && input.role);
-  const pillsBlock = showPills ? 28 + 56 : 0;
-  const quoteBottom = authorTop - 48 - pillsBlock;
-  const quoteMaxWidth = IG_CARD_WIDTH - PAD * 2;
+  const inset = 20;
+  const bannerX = cardX + inset;
+  const bannerY = cardY + inset;
+  const bannerW = cardW - inset * 2;
+  const bannerH = Math.round(bannerW / PHOTO_ASPECT);
+  ctx.save();
+  ctx.beginPath();
+  roundRect(ctx, bannerX, bannerY, bannerW, bannerH, 24);
+  ctx.clip();
+  ctx.fillStyle = "#0d0722";
+  ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
+  if (photo) {
+    drawContain(ctx, photo, bannerX, bannerY, bannerW, bannerH);
+  }
+  ctx.restore();
+  const bannerBottom = bannerY + bannerH;
+
+  const r = 112;
+  const hexHalfW = r * (Math.sqrt(3) / 2);
+  const avatarX = bannerX + 36 + hexHalfW;
+  const avatarY = bannerBottom;
+  const ring = ctx.createLinearGradient(avatarX - r, avatarY - r, avatarX + r, avatarY + r);
+  ring.addColorStop(0, PINK);
+  ring.addColorStop(0.5, "#8b5cf6");
+  ring.addColorStop(1, "#38bdf8");
+  hexPath(ctx, avatarX, avatarY, r + 12);
+  ctx.fillStyle = ring;
+  ctx.fill();
+  hexPath(ctx, avatarX, avatarY, r + 5);
+  ctx.fillStyle = "#150a33";
+  ctx.fill();
+  drawHexAvatar(ctx, avatar, input.fullName, avatarX, avatarY, r, fontFamily);
+
+  const innerX = cardX + 40;
+  const innerW = cardW - 80;
+  const sideX = avatarX + hexHalfW + 40;
+  const sideW = cardX + cardW - 40 - sideX;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const nameSize = fitFont(ctx, input.fullName, sideW, 52, 34, 800, fontFamily);
+  ctx.font = `800 ${nameSize}px ${fontFamily}`;
+  ctx.fillStyle = "#ffffff";
+  const nameY = bannerBottom + 22;
+  ctx.fillText(truncateToWidth(ctx, input.fullName, sideW), sideX, nameY);
+  drawPreviousLine(ctx, {
+    previous: input.previousRole?.trim() || null,
+    country: input.country?.trim() || null,
+    x: sideX,
+    y: nameY + nameSize + 14,
+    maxWidth: sideW,
+    fontFamily,
+  });
+
+  const role = input.role?.trim() || "Nuevo rol";
+  const roleTop = avatarY + r + 36;
+  const roleFit = fitLines(ctx, role, innerW, 76, 44, 800, fontFamily, 2);
+  const roleLineH = roleFit.size * 1.08;
+  ctx.font = `800 ${roleFit.size}px ${fontFamily}`;
+  const roleFill = ctx.createLinearGradient(innerX, 0, innerX + innerW, 0);
+  roleFill.addColorStop(0, "#ff5fae");
+  roleFill.addColorStop(0.55, "#8b5cf6");
+  roleFill.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = roleFill;
+  roleFit.lines.forEach((line, i) => ctx.fillText(line, innerX, roleTop + i * roleLineH));
+  const roleBottom = roleTop + roleFit.lines.length * roleLineH;
+
+  const dividerY = roleBottom + 26;
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.fillRect(innerX, dividerY, innerW, 2);
+
+  const quoteTop = dividerY + 30;
+  const quoteRoom = cardY + cardH - 40 - quoteTop;
   const quoteLayout = layoutQuote(
     ctx,
     `“${stripWrappingQuotes(input.quote)}”`,
-    quoteMaxWidth,
-    Math.max(80, quoteBottom - kickerBlock - hiredBlock - minTop),
+    innerW,
+    Math.max(60, quoteRoom),
     fontFamily,
-    56,
+    44,
   );
-  const quoteTop = quoteBottom - quoteLayout.height;
-  const kickerY = quoteTop - kickerBlock;
-
-  if (company) {
-    drawHiredPill(ctx, company, fontFamily, kickerY - hiredBlock, PAD);
-  }
-  drawKicker(ctx, copy.kicker, variant, PAD, kickerY, fontFamily);
-  paintQuote(ctx, quoteLayout, PAD, quoteTop, quoteMaxWidth, "#ffffff", fontFamily);
-  if (showPills && input.previousRole && input.role) {
-    drawTransition(
-      ctx,
-      input.previousRole,
-      input.role,
-      PAD,
-      quoteBottom + 28,
-      quoteMaxWidth,
-      fontFamily,
-    );
-  }
-
-  drawAuthorInline(ctx, {
-    fullName: input.fullName,
-    country: input.country,
-    role: input.role,
-    avatar,
+  paintQuote(
+    ctx,
+    quoteLayout,
+    innerX,
+    quoteTop + Math.max(0, (quoteRoom - quoteLayout.height) / 2),
+    innerW,
+    "#ffffff",
     fontFamily,
-    y: authorTop,
-    light: false,
-  });
+  );
+}
+
+/** "Antes: rol tachado · país", recortado al ancho. */
+function drawPreviousLine(
+  ctx: CanvasRenderingContext2D,
+  {
+    previous,
+    country,
+    x,
+    y,
+    maxWidth,
+    fontFamily,
+  }: {
+    previous: string | null;
+    country: string | null;
+    x: number;
+    y: number;
+    maxWidth: number;
+    fontFamily: string;
+  },
+) {
+  const size = 30;
+  ctx.font = `500 ${size}px ${fontFamily}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  if (!previous) {
+    if (country) {
+      ctx.fillText(truncateToWidth(ctx, country, maxWidth), x, y);
+    }
+    return;
+  }
+
+  const label = "Antes: ";
+  const labelW = ctx.measureText(label).width;
+  const withCountry = country ? ` · ${country}` : "";
+  const fitsAll = labelW + ctx.measureText(`${previous}${withCountry}`).width <= maxWidth;
+  const suffix = fitsAll ? withCountry : "";
+  const shown = truncateToWidth(ctx, previous, maxWidth - labelW);
+  const shownW = ctx.measureText(shown).width;
+  ctx.fillText(label, x, y);
+  ctx.fillText(shown, x + labelW, y);
+  if (suffix) {
+    ctx.fillText(suffix, x + labelW + shownW, y);
+  }
+
+  ctx.fillStyle = PINK;
+  ctx.fillRect(x + labelW - 2, y + size * 0.56, shownW + 4, 3);
 }
 
 /** Simulación: la persona al centro en un hexágono grande y la frase debajo. */
@@ -807,52 +908,6 @@ function drawPhoto(
   }
   ctx.fillRect(0, 0, IG_CARD_WIDTH, IG_PHOTO_HEIGHT);
   drawContain(ctx, capture, 0, 0, IG_CARD_WIDTH, IG_PHOTO_HEIGHT);
-}
-
-function drawCover(ctx: CanvasRenderingContext2D, image: ImageBitmap) {
-  ctx.fillStyle = INK;
-  ctx.fillRect(0, 0, IG_CARD_WIDTH, IG_CARD_HEIGHT);
-  const scale = Math.max(IG_CARD_WIDTH / image.width, IG_CARD_HEIGHT / image.height);
-  const w = image.width * scale;
-  const h = image.height * scale;
-  ctx.drawImage(image, (IG_CARD_WIDTH - w) / 2, (IG_CARD_HEIGHT - h) / 2, w, h);
-}
-
-const COVER_TINT: Record<Variant, string> = {
-  learning: "42, 10, 92",
-  job: "22, 19, 43",
-  change: "7, 11, 24",
-};
-
-function drawCoverScrim(ctx: CanvasRenderingContext2D, variant: Variant) {
-  const top = Math.round(IG_CARD_HEIGHT * 0.22);
-  const tint = COVER_TINT[variant];
-  const fill = ctx.createLinearGradient(0, top, 0, IG_CARD_HEIGHT);
-  fill.addColorStop(0, `rgba(${tint}, 0)`);
-  fill.addColorStop(0.4, `rgba(${tint}, 0.78)`);
-  fill.addColorStop(1, `rgba(${tint}, 0.97)`);
-  ctx.fillStyle = fill;
-  ctx.fillRect(0, top, IG_CARD_WIDTH, IG_CARD_HEIGHT - top);
-}
-
-function accentGradient(
-  ctx: CanvasRenderingContext2D,
-  variant: Variant,
-  x: number,
-  width: number,
-) {
-  const fill = ctx.createLinearGradient(x, 0, x + width, 0);
-  if (variant === "change") {
-    fill.addColorStop(0, "#c026d3");
-    fill.addColorStop(1, "#7c3aed");
-  } else if (variant === "job") {
-    fill.addColorStop(0, PINK);
-    fill.addColorStop(1, "#38bdf8");
-  } else {
-    fill.addColorStop(0, "#e63292");
-    fill.addColorStop(1, "#6366f1");
-  }
-  return fill;
 }
 
 function drawHexDecoration(ctx: CanvasRenderingContext2D, variant: Variant) {

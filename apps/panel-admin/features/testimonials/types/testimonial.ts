@@ -168,7 +168,7 @@ export const CARD_DESIGNS = [
   "offer",
   "journey",
   "shift",
-  "cover",
+  "profile",
 ] as const;
 
 export type CardDesign = (typeof CARD_DESIGNS)[number];
@@ -200,7 +200,7 @@ export const CARD_DESIGN_OPTIONS: Record<TestimonialType, CardDesignOption[]> = 
   career_change: [
     PHOTO_OPTION,
     { value: "shift", label: "Antes y ahora", description: "El oficio de antes y el rol de ahora." },
-    { value: "cover", label: "Foto completa", description: "La foto de fondo y la frase encima." },
+    { value: "profile", label: "Perfil", description: "Tarjeta de perfil con la foto como portada." },
   ],
 };
 
