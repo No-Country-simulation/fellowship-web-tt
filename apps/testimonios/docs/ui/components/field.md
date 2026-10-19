@@ -43,6 +43,17 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 
 `children` debe aplicar `id`, `aria-describedby={describedBy}` y `aria-invalid={invalid}` al control.
 
+`error` recibe un único mensaje vigente, sea local o devuelto por el servidor.
+El formulario decide cuándo validarlo: al intentar avanzar y, si el campo tiene
+un error, al editarlo. La corrección local reemplaza el mensaje anterior o lo
+retira, sin borrar los errores de otros controles. `Field` solo presenta ese
+resultado y actualiza `invalid` y `describedBy`; no ejecuta validaciones ni
+administra los intentos de envío. Los errores generales se muestran fuera del
+campo.
+
+Revalidar un paso o volver a una categoría conserva los errores del servidor de
+campos sin editar. Esos errores siguen impidiendo avanzar hasta corregirlos.
+
 ## Props — `FileField`
 
 | Prop | Tipo | Default | Descripción |
