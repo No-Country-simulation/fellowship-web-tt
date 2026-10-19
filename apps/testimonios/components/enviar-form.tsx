@@ -93,6 +93,7 @@ export function EnviarForm() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [captureFile, setCaptureFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState(() => `${getSiteUrl()}/enviar`);
   const [validation, setValidation] = useState<FormValidation>({
     response: initialSubmitState,
     overrides: {},
@@ -122,7 +123,7 @@ export function EnviarForm() {
   }, [step, validation]);
 
   if (state.status === "success") {
-    return <SuccessCard />;
+    return <SuccessCard inviteUrl={inviteUrl} />;
   }
 
   const selected = type ? typeOption(type) : null;
@@ -232,11 +233,15 @@ export function EnviarForm() {
     formData.set("country", country);
     formData.set("email", email);
     formData.set("story", story);
-    formData.set("company", company);
-    formData.set("primary_role", primaryRole);
-    formData.set("role_achieved", roleAchieved);
-    formData.set("previous_profession", previousProfession);
-    formData.set("new_role", newRole);
+    if (type === "simulation") {
+      formData.set("primary_role", primaryRole);
+    } else if (type === "first_job") {
+      formData.set("company", company);
+      formData.set("role_achieved", roleAchieved);
+    } else if (type === "career_change") {
+      formData.set("previous_profession", previousProfession);
+      formData.set("new_role", newRole);
+    }
     formData.set("video_url", videoUrl);
     formData.set("instagram", instagram);
     formData.set("linkedin", linkedin);
@@ -249,6 +254,7 @@ export function EnviarForm() {
     if (captureFile) {
       formData.set("capture", captureFile);
     }
+    setInviteUrl(`${window.location.origin}/enviar`);
     // Retirar la respuesta anterior antes de iniciar el siguiente envío.
     setValidation({ response: state, overrides: {}, retired: true });
     startTransition(() => {
@@ -800,17 +806,12 @@ function StepProgress({ step, headingRef }: {
   );
 }
 
-function SuccessCard() {
-  const [inviteUrl, setInviteUrl] = useState(`${getSiteUrl()}/enviar`);
+function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
   const [copied, setCopied] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     focusAndReveal(headingRef.current);
-  }, []);
-
-  useEffect(() => {
-    setInviteUrl(`${window.location.origin}/enviar`);
   }, []);
 
   async function copyInviteLink() {

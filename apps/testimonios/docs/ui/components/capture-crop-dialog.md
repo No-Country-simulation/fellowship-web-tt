@@ -56,3 +56,6 @@ import { CaptureCropDialog } from "@/components/capture-crop-dialog";
   puedan interrumpir una confirmación.
 - El panel tiene scroll propio limitado al viewport. El recuadro no se comprime
   para ocultar los controles; las acciones pueden envolver en ventanas estrechas.
+- `FileField` conserva la foto confirmada mientras este diálogo prepara un
+  reemplazo. Cancelar o fallar el procesamiento conserva esa foto y su preview;
+  la sustitución se aplica después de generar el nuevo archivo correctamente.

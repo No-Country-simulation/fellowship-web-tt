@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { Area } from "react-easy-crop";
 
 import { CaptureCropDialog } from "./capture-crop-dialog";
@@ -105,7 +105,7 @@ type FileFieldProps = {
   onInvalid?: (message: string | undefined) => void;
 };
 
-/** Upload de imagen con preview local. Al elegir archivo, recorte cuadrado (avatar) o 16:9 (captura). */
+/** Imagen confirmada con preview local; el reemplazo solo se aplica tras recortarlo. */
 export function FileField({
   name,
   label,
@@ -126,18 +126,18 @@ export function FileField({
     url: string;
   } | null>(null);
   const [cropping, setCropping] = useState(false);
+  const objectUrls = useRef(new Set<string>());
+  const operation = useRef(0);
+  const processing = useRef(false);
 
-  function replacePreview(nextUrl: string | null) {
-    setObjectUrl((current) => {
-      if (current) {
-        URL.revokeObjectURL(current);
-      }
-      return nextUrl;
-    });
+  function createObjectUrl(file: File) {
+    const url = URL.createObjectURL(file);
+    objectUrls.current.add(url);
+    return url;
   }
 
   function clearFile() {
-    replacePreview(null);
+    setObjectUrl(null);
     closeCrop();
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -148,13 +148,10 @@ export function FileField({
   }
 
   function closeCrop() {
+    operation.current += 1;
+    processing.current = false;
     setCropping(false);
-    setCropSource((current) => {
-      if (current) {
-        URL.revokeObjectURL(current.url);
-      }
-      return null;
-    });
+    setCropSource(null);
   }
 
   function cancelCrop() {
@@ -162,40 +159,51 @@ export function FileField({
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-    onFileChange(null);
-    onInvalid?.(undefined);
   }
 
   function confirmCrop(area: Area) {
-    if (!cropSource) {
+    if (!cropSource || processing.current) {
       return;
     }
+    const currentOperation = operation.current;
+    processing.current = true;
     setCropping(true);
-    onInvalid?.(undefined);
     const cropFile = preview === "avatar" ? cropAvatarFile : cropCaptureFile;
     void cropFile(cropSource.file, area)
       .then((prepared) => {
-        replacePreview(URL.createObjectURL(prepared));
+        if (currentOperation !== operation.current) return;
+        setObjectUrl(createObjectUrl(prepared));
         onFileChange(prepared);
         closeCrop();
       })
       .catch(() => {
+        if (currentOperation !== operation.current) return;
         onInvalid?.("No pudimos recortar la foto.");
         closeCrop();
         if (inputRef.current) {
           inputRef.current.value = "";
         }
-        onFileChange(null);
       });
   }
 
+  // Liberar solo URLs que el DOM ya dejó de usar; nunca desde un updater.
   useEffect(() => {
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+    for (const url of objectUrls.current) {
+      if (url !== objectUrl && url !== cropSource?.url) {
+        URL.revokeObjectURL(url);
+        objectUrls.current.delete(url);
       }
+    }
+  }, [objectUrl, cropSource]);
+
+  useLayoutEffect(() => {
+    const urls = objectUrls.current;
+    return () => {
+      operation.current += 1;
+      for (const url of urls) URL.revokeObjectURL(url);
+      urls.clear();
     };
-  }, [objectUrl]);
+  }, []);
 
   return (
     <Field
@@ -262,20 +270,11 @@ export function FileField({
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0] ?? null;
-              if (!file) {
-                clearFile();
-                return;
-              }
-              replacePreview(null);
-              onFileChange(null);
-              onInvalid?.(undefined);
-              setCropping(false);
-              setCropSource((current) => {
-                if (current) {
-                  URL.revokeObjectURL(current.url);
-                }
-                return { file, url: URL.createObjectURL(file) };
-              });
+              // Permitir elegir el mismo original otra vez, incluso tras cancelar.
+              event.target.value = "";
+              if (!file) return;
+              closeCrop();
+              setCropSource({ file, url: createObjectUrl(file) });
             }}
           />
         </label>
@@ -291,6 +290,7 @@ export function FileField({
         ) : null}
         {cropSource ? (
           <CaptureCropDialog
+            key={cropSource.url}
             imageUrl={cropSource.url}
             kind={preview}
             confirming={cropping}
