@@ -43,7 +43,7 @@ export function CaptionField({
         value={value}
         maxLength={CAPTION_EDIT_MAX_CHARS}
         aria-describedby={describedBy}
-        className={cn(textareaClassName, "min-h-32 resize-y whitespace-pre-wrap")}
+        className={cn(textareaClassName, "min-h-48 resize-y whitespace-pre-wrap [field-sizing:content]")}
         onChange={(event) => onChange(event.target.value)}
       />
     </div>
