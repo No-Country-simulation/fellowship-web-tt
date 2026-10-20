@@ -115,6 +115,7 @@ export function validateField(
     case "avatar":
       return validateImageFile(values.avatar, {
         required: true,
+        requiredMessage: "Seleccioná una foto de perfil.",
         maxBytes: AVATAR_MAX_BYTES,
         label: "La foto de perfil",
       });

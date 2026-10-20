@@ -37,6 +37,9 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 | `hint` | `string` | — | Ayuda bajo el label |
 | `error` | `string` | — | Mensaje asociado al control mediante `describedBy` |
 | `optional` | `boolean` | `false` | Sufijo “Opcional” muted |
+| `required` | `boolean` | `false` | Asterisco rosa decorativo y texto accesible “(obligatorio)” |
+| `reserveErrorSpace` | `boolean` | `!hint` | Reserva mínima de 24px debajo del control para el error |
+| `trailingInfo` | `ReactNode` | — | Información al extremo derecho de la fila del error, por ejemplo un contador |
 | `labelAs` | `"label" \| "span"` | `"label"` | `span` si el click lo maneja un hijo (file, radios) |
 | `hideLabel` | `boolean` | `false` | Label `sr-only` (sigue anunciado) |
 | `className` | `string` | — | Clases del wrapper |
@@ -61,6 +64,25 @@ validación, el formulario enfoca el primer control inválido en orden de DOM y 
 `aria-describedby` incluye el error, evitando anunciar a la vez todos los campos.
 Los errores generales del servidor mantienen su región de alerta separada.
 
+`required` identifica visualmente la obligatoriedad sin añadir restricciones
+nativas ni cambiar la validación. `/enviar` mantiene una única explicación del
+asterisco en el encabezado; los campos opcionales no repiten un sufijo.
+
+La reserva de errores está en el flujo normal: usa `min-height`, sin posición
+absoluta ni altura fija. Un mensaje habitual de una línea ocupa los 24px ya
+reservados; si necesita más líneas, el campo crece sin recortarlo. No se crean
+IDs ni mensajes vacíos cuando no hay error. Los campos con hint no reservan por
+defecto otra fila vacía; el caller puede activarla, como en Historia. En “Otro
+país” solo se reserva bajo el input activo, para evitar dos espacios de error.
+Esta presentación no cambia cuándo se valida ni cuándo se retira un mensaje.
+`trailingInfo` comparte esa fila con el error: el mensaje ocupa la columna
+izquierda flexible y la información permanece a la derecha, incluso sin error.
+Los mensajes largos crecen y envuelven su texto sin recortarse ni superponerse
+al contador. Historia utiliza esta variante con reserva de 24px; los demás
+controles y `FileField` mantienen su distribución habitual.
+El wrapper es relativo para contener los textos `sr-only` del label y evitar
+que amplíen el área de scroll exterior de la página.
+
 En el paso 2 de `/enviar`, País usa un `select` nativo con `fieldClassName`.
 Las opciones de `lib/testimonials/countries.ts` son provisionales, pendientes de
 la lista oficial de No Country. “Otro país” muestra el input “Especificá tu país”
@@ -81,13 +103,14 @@ habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provision
 | --- | --- | --- | --- |
 | `name` | `string` | — | `name` del `<input type="file">` |
 | `label` | `string` | — | Texto del label |
-| `hint` | `string` | — | Qué foto pedir (cara vs entorno de trabajo) |
+| `hint` | `string` | — | Ayuda opcional sobre qué foto pedir |
 | `accept` | `string` | — | p. ej. `"image/jpeg,image/png,image/webp"` |
 | `preview` | `"avatar" \| "capture"` | — | Avatar cuadrado; captura 16:9 |
 | `onFileChange` | `(file: File \| null) => void` | — | Archivo recortado confirmado o `null` al quitarlo explícitamente |
 | `onInvalid` | `(message?: string) => void` | — | Error de recorte o lectura |
 | `error` | `string` | — | Mensaje de error |
-| `optional` | `boolean` | `false` | Foto testimonial; el avatar no |
+| `optional` | `boolean` | `false` | Sufijo “Opcional” disponible para otros usos; `/enviar` no lo repite |
+| `required` | `boolean` | `false` | Marca accesible de obligatoriedad; no cambia las reglas de archivo |
 | `hideLabel` | `boolean` | `false` | Label `sr-only` |
 | `className` | `string` | — | Clases del wrapper |
 
@@ -96,7 +119,7 @@ habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provision
 | Export | Uso |
 | --- | --- |
 | `fieldClassName` | `<input>` de una línea o `<select>` nativo (alto 44px) |
-| `textareaClassName` | `<textarea>` (min-height 144px, resize vertical) |
+| `textareaClassName` | `<textarea>` (min-height 224px; 256px desde `sm`, resize vertical) |
 
 Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 
@@ -105,7 +128,7 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 ### Input de texto
 
 ```tsx
-<Field label="Nombre completo" error={errors.full_name}>
+<Field label="Nombre completo" required error={errors.full_name}>
   {({ id, describedBy, invalid }) => (
     <input
       id={id}
@@ -139,8 +162,8 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 ```tsx
 <FileField
   name="avatar"
-  label="Tu foto"
-  hint="Cara o perfil. Va redonda en la card."
+  label="Foto de perfil"
+  required
   accept="image/jpeg,image/png,image/webp"
   preview="avatar"
   error={errors.avatar}
@@ -153,7 +176,6 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
   hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión."
   accept="image/jpeg,image/png,image/webp"
   preview="capture"
-  optional
   onFileChange={setCapture}
 />
 ```
@@ -165,13 +187,23 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
   Las URLs se liberan cuando el DOM deja de usarlas y al desmontar. No son URLs
   de Storage. Avatar y captura abren [`CaptureCropDialog`](./capture-crop-dialog.md)
   al elegir el archivo (cuadrado o 16:9).
-- El input file es `sr-only`; el hit area es el label dashed. Avatar es cuadrado; captura es 16:9. Con una imagen cargada, una X la quita.
+- El input file es `sr-only`; el hit area es el label dashed. Avatar es cuadrado;
+  la foto testimonial conserva 16:9 y muestra “Agregar fotografía” cuando está
+  vacía. Un ícono decorativo acompaña la selección. El avatar no necesita repetir
+  instrucciones de recorte: las presenta el diálogo al elegir el archivo.
 - Hint y error se anidan en `aria-describedby` en ese orden.
 - El input de archivo conserva el nombre del label visible al cargar o reemplazar
   una imagen. El recuadro muestra un contorno cyan cuando el input recibe foco con
   teclado; Enter o Espacio abre el selector nativo.
-- La acción de quitar tiene un área de 44×44 px y contorno de foco. Al quitar una
-  imagen, el foco vuelve al input sin abrir el selector.
+- La acción de quitar tiene un área transparente de 44×44 px, contorno de foco y
+  una superficie visible de 24×24 px con el ícono `X`. Sus nombres accesibles son
+  “Quitar foto” y “Quitar foto testimonial”. Al quitar una imagen, el foco vuelve
+  al input sin abrir el selector.
+- En `/enviar`, el avatar ocupa hasta 144px en mobile y 192px desde `md`. Los
+  datos se apilan debajo en mobile y forman una segunda columna desde `md`.
+  Los pares profesionales usan una columna y pasan a dos desde `sm`; la foto
+  testimonial y los enlaces se separan en dos áreas desde `md`. Los controles
+  admiten reducción de ancho sin desbordar la grilla.
 - El diálogo de recorte recibe la referencia del input para devolverle el foco al
   cerrar. Durante un reemplazo, el archivo confirmado y su preview se conservan
   hasta generar correctamente el nuevo recorte. Cancelar no cambia el archivo ni
