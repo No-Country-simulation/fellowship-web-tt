@@ -241,13 +241,19 @@ export function normalizeLinkedIn(raw: string): string | null {
     : null;
 }
 
+/** Valida presencia, formato y tamaño; permite personalizar el mensaje de obligatoriedad. */
 export function validateImageFile(
   file: File | null,
-  options: { required: boolean; maxBytes: number; label: string },
+  options: {
+    required: boolean;
+    requiredMessage?: string;
+    maxBytes: number;
+    label: string;
+  },
 ): string | undefined {
   if (!file) {
     return options.required
-      ? `${options.label} es obligatorio.`
+      ? (options.requiredMessage ?? `${options.label} es obligatorio.`)
       : undefined;
   }
 
@@ -357,6 +363,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   const avatarError = validateImageFile(avatar, {
     required: true,
+    requiredMessage: "Seleccioná una foto de perfil.",
     maxBytes: AVATAR_MAX_BYTES,
     label: "La foto de perfil",
   });

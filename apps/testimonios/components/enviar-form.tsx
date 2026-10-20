@@ -10,7 +10,7 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react";
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
@@ -59,6 +59,13 @@ const STEP_TITLES = [
   "Captura y links",
   "Consentimiento",
 ] as const;
+
+const STEP_LABELS = ["Tipo", "Datos", "Historia", "Links", "Consentimiento"] as const;
+const TYPE_ICONS = {
+  simulation: Laptop,
+  first_job: BriefcaseBusiness,
+  career_change: TrendingUp,
+} satisfies Record<TestimonialType, typeof Laptop>;
 
 function focusAndReveal(control: HTMLElement | null) {
   if (!control) return;
@@ -280,21 +287,29 @@ export function EnviarForm() {
       <fieldset
         hidden={step !== 1}
         aria-invalid={Boolean(fieldErrors.type)}
-        className={cn(step === 1 && "flex flex-col gap-sm")}
+        className={cn(step === 1 && "flex flex-col")}
       >
-        <legend className="sr-only">Qué querés contar</legend>
-        <div className="grid gap-sm sm:grid-cols-3">
+        <legend className="mb-sm text-lg font-semibold text-text-primary">
+          Elegí el tipo de experiencia <span aria-hidden="true" className="text-brand-pink">*</span>
+          <span className="sr-only"> (obligatorio)</span>
+        </legend>
+        <div className="grid gap-sm md:grid-cols-3">
           {TYPE_OPTIONS.map((option) => {
             const checked = type === option.value;
+            const Icon = TYPE_ICONS[option.value];
             return (
               <label
                 key={option.value}
                 className={cn(
-                  "flex cursor-pointer flex-col gap-xs rounded-md border border-border bg-card p-md",
-                  "hover:border-accent-cyan/70",
-                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-mint",
-                  checked && "border-accent-cyan ring-2 ring-accent-cyan/40",
+                  "group relative grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-card border p-sm transition-colors motion-reduce:transition-none md:flex md:flex-col md:items-start md:gap-md md:p-md",
+                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
+                  checked
+                    ? "border-transparent bg-bg-surface-2"
+                    : "border-border bg-card hover:border-accent-cyan/60 hover:bg-bg-surface-3",
                 )}
+                style={checked ? {
+                  background: "linear-gradient(var(--bg-surface-2), var(--bg-surface-2)) padding-box, var(--gradient-brand) border-box",
+                } : undefined}
               >
                 <input
                   type="radio"
@@ -313,21 +328,43 @@ export function EnviarForm() {
                     }
                   }}
                 />
-                <span id={`type-${option.value}-label`} className="text-body font-medium text-text-primary">
-                  {option.label}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-md border md:size-12",
+                    checked
+                      ? "border-accent-cyan/25 bg-accent-cyan/10 text-accent-cyan"
+                      : "border-border bg-bg-surface-3 text-accent-indigo-light group-hover:text-accent-cyan",
+                  )}
+                >
+                  <Icon className="size-5 md:size-6" />
                 </span>
-                <span id={`type-${option.value}-description`} className="text-body-small text-text-secondary">
-                  {option.description}
+                <span className="min-w-0">
+                  <span id={`type-${option.value}-label`} className="block text-body font-semibold text-text-primary md:text-lg">
+                    {option.label}
+                  </span>
+                  <span id={`type-${option.value}-description`} className="mt-1 block text-body-small leading-relaxed text-text-secondary">
+                    {option.description}
+                  </span>
                 </span>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full md:absolute md:top-md md:right-md",
+                    checked ? "bg-brand-gradient" : "border border-border",
+                  )}
+                />
               </label>
             );
           })}
         </div>
-        {fieldErrors.type ? (
-          <p id="type-error" className="text-body-small text-destructive">
-            {fieldErrors.type}
-          </p>
-        ) : null}
+        <div className="mt-1 min-h-6">
+          {fieldErrors.type ? (
+            <p id="type-error" className="text-body-small leading-relaxed text-destructive">
+              {fieldErrors.type}
+            </p>
+          ) : null}
+        </div>
       </fieldset>
 
       <fieldset
@@ -335,12 +372,12 @@ export function EnviarForm() {
         className={cn(step === 2 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">Nombre, país, email y foto</legend>
-        <div className="grid items-start gap-md sm:grid-cols-[12rem_minmax(0,1fr)]">
+        <div className="grid items-start gap-md md:grid-cols-[12rem_minmax(0,1fr)] md:gap-lg">
           <FileField
             name="avatar"
             label="Foto de perfil"
-            hint="Al subirla vas a recortar en cuadrado."
-            className="max-w-48"
+            required
+            className="max-w-36 md:max-w-48"
             error={fieldErrors.avatar}
             accept={IMAGE_ACCEPT}
             preview="avatar"
@@ -352,8 +389,8 @@ export function EnviarForm() {
               if (message) setError("avatar", message);
             }}
           />
-          <div className="flex flex-col gap-md">
-            <Field label="Nombre completo" error={fieldErrors.full_name}>
+          <div className="flex min-w-0 flex-col gap-xs">
+            <Field label="Nombre completo" required error={fieldErrors.full_name}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -372,7 +409,7 @@ export function EnviarForm() {
                 />
               )}
             </Field>
-            <Field label="País" error={isOtherCountry ? undefined : fieldErrors.country}>
+            <Field label="País" required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldErrors.country}>
               {({ id, describedBy, invalid }) => (
                 <div className="relative">
                   <select
@@ -403,7 +440,7 @@ export function EnviarForm() {
               )}
             </Field>
             {isOtherCountry ? (
-              <Field label="Especificá tu país" error={fieldErrors.country}>
+              <Field label="Especificá tu país" required error={fieldErrors.country}>
                 {({ id, describedBy, invalid }) => (
                   <input
                     id={id}
@@ -422,7 +459,7 @@ export function EnviarForm() {
                 )}
               </Field>
             ) : null}
-            <Field label="Email" error={fieldErrors.email}>
+            <Field label="Email" required error={fieldErrors.email}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -453,7 +490,7 @@ export function EnviarForm() {
         {type === "simulation" ? (
           <Field
             label="Puesto principal"
-            hint="Opcional. El rol que tuviste en la simulación."
+            hint="El rol que tuviste en la simulación."
             error={fieldErrors.primary_role}
           >
             {({ id, describedBy, invalid }) => (
@@ -474,8 +511,8 @@ export function EnviarForm() {
           </Field>
         ) : null}
         {type === "first_job" ? (
-          <div className="grid grid-cols-2 gap-md">
-            <Field label="Empresa" error={fieldErrors.company}>
+          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
+            <Field label="Empresa" required error={fieldErrors.company}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -492,7 +529,7 @@ export function EnviarForm() {
                 />
               )}
             </Field>
-            <Field label="Puesto" error={fieldErrors.role_achieved}>
+            <Field label="Puesto" required error={fieldErrors.role_achieved}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -512,9 +549,10 @@ export function EnviarForm() {
           </div>
         ) : null}
         {type === "career_change" ? (
-          <div className="grid grid-cols-2 gap-md">
+          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
             <Field
               label="Oficio anterior"
+              required
               error={fieldErrors.previous_profession}
             >
               {({ id, describedBy, invalid }) => (
@@ -533,7 +571,7 @@ export function EnviarForm() {
                 />
               )}
             </Field>
-            <Field label="Rol nuevo" error={fieldErrors.new_role}>
+            <Field label="Rol nuevo" required error={fieldErrors.new_role}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -554,28 +592,31 @@ export function EnviarForm() {
         ) : null}
         <Field
           label={selected?.storyLabel ?? "Tu historia"}
+          required
+          reserveErrorSpace
+          className="gap-xs"
           hint={selected?.storyHint}
           error={fieldErrors.story}
+          trailingInfo={(
+            <span className="text-xs text-text-secondary tabular-nums">
+              {story.trim().length}/{STORY_MAX_CHARS}
+            </span>
+          )}
         >
           {({ id, describedBy, invalid }) => (
-            <>
-              <textarea
-                id={id}
-                name="story"
-                value={story}
-                maxLength={STORY_MAX_CHARS}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={textareaClassName}
-                onChange={(event) => {
-                  setStory(event.target.value);
-                  revalidateField("story", event.target.value);
-                }}
-              />
-              <p className="mt-xs text-body-small text-text-muted">
-                {story.trim().length}/{STORY_MAX_CHARS}
-              </p>
-            </>
+            <textarea
+              id={id}
+              name="story"
+              value={story}
+              maxLength={STORY_MAX_CHARS}
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
+              className={textareaClassName}
+              onChange={(event) => {
+                setStory(event.target.value);
+                revalidateField("story", event.target.value);
+              }}
+            />
           )}
         </Field>
       </fieldset>
@@ -588,13 +629,12 @@ export function EnviarForm() {
         <p className="text-body-small text-text-secondary">
           Todo este paso es opcional.
         </p>
-        <div className="grid items-start gap-md sm:grid-cols-2">
+        <div className="grid items-start gap-md md:grid-cols-2 md:gap-lg">
           <FileField
             name="capture"
             label="Foto testimonial"
-            hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión. Ayuda a mostrar cómo se vivió, más allá del proyecto."
+            hint="Una foto real de tu experiencia: trabajando, con tu equipo o en una reunión."
             error={fieldErrors.capture}
-            optional
             accept={IMAGE_ACCEPT}
             preview="capture"
             onFileChange={(file) => {
@@ -605,12 +645,11 @@ export function EnviarForm() {
               if (message) setError("capture", message);
             }}
           />
-          <div className="flex flex-col gap-md">
+          <div className="flex min-w-0 flex-col gap-md">
             <Field
               label="Video de YouTube"
               hint="Solo un link de YouTube. No se sube un archivo."
               error={fieldErrors.video_url}
-              optional
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -634,7 +673,6 @@ export function EnviarForm() {
               label="Instagram"
               hint="Para mencionarte en el caption si publicamos."
               error={fieldErrors.instagram}
-              optional
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -658,7 +696,6 @@ export function EnviarForm() {
               label="LinkedIn"
               hint="Para mencionarte en el post de LinkedIn si publicamos."
               error={fieldErrors.linkedin}
-              optional
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -687,74 +724,65 @@ export function EnviarForm() {
         className={cn(step === 5 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">Consentimiento</legend>
-        <div className="rounded-md border border-border bg-card p-md">
-          <p className="text-overline text-text-secondary">Resumen</p>
-          <ul className="mt-xs space-y-1 text-body-small text-text-secondary">
-            <li>
-              Tipo:{" "}
-              <span className="text-text-primary">
-                {selected?.label ?? "—"}
-              </span>
-            </li>
-            <li>
-              Nombre:{" "}
-              <span className="text-text-primary">
-                {fullName.trim() || "—"}
-              </span>
-            </li>
-            <li>
-              País:{" "}
-              <span className="text-text-primary">
-                {country.trim() || "—"}
-              </span>
-            </li>
-            <li>
-              Foto de perfil:{" "}
-              <span className="text-text-primary">
-                {avatarFile ? "Lista" : "Falta"}
-              </span>
-            </li>
-            <li>
-              Foto testimonial:{" "}
-              <span className="text-text-primary">
-                {captureFile ? "Adjunta" : "Sin captura"}
-              </span>
-            </li>
-            <li>
-              YouTube:{" "}
-              <span className="text-text-primary">
-                {videoUrl.trim() ? "Link cargado" : "Sin video"}
-              </span>
-            </li>
-          </ul>
-        </div>
-        <label className="flex items-start gap-sm text-body-small text-text-secondary">
-          <input
-            type="checkbox"
-            name="consent"
-            value="1"
-            checked={consent}
-            aria-invalid={Boolean(fieldErrors.consent)}
-            aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
-            className="mt-1 size-4 rounded-sm border-border accent-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
-            onChange={(event) => {
-              setConsent(event.target.checked);
-              revalidateField("consent", event.target.checked);
-            }}
-          />
-          <span>
-            Acepto que No Country publique mi testimonio (nombre, foto y texto)
-            en la galería y en Discord. El email no se muestra en público. El
-            equipo lo revisa antes de publicarlo.
-          </span>
-        </label>
-        {fieldErrors.consent ? (
-          <p id="consent-error" className="text-body-small text-destructive">
-            {fieldErrors.consent}
+        <div>
+          <h3 className="text-heading-3 text-text-primary">Revisá tu testimonio</h3>
+          <p className="mt-xs text-body-small leading-relaxed text-text-secondary">
+            Comprobá que los datos estén correctos antes de enviarlo.
           </p>
-        ) : null}
+        </div>
+        <section aria-labelledby="testimonial-summary-title" className="rounded-card border border-border bg-card p-sm sm:p-md">
+          <h4 id="testimonial-summary-title" className="text-body font-semibold text-text-primary">Resumen</h4>
+          <dl className="mt-sm grid gap-x-md sm:grid-cols-2">
+            {[
+              ["Tipo", selected?.label ?? "—"],
+              ["Nombre", fullName.trim() || "—"],
+              ["País", country.trim() || "—"],
+              ["Foto de perfil", avatarFile ? "Lista" : "Falta"],
+              ["Foto testimonial", captureFile ? "Adjunta" : "Sin captura"],
+              ["YouTube", videoUrl.trim() ? "Link cargado" : "Sin video"],
+            ].map(([label, value]) => (
+              <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                <dt className="text-body-small text-text-secondary">{label}</dt>
+                <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+        <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
+          <h4 id="testimonial-consent-title" className="mb-sm text-body font-semibold text-text-primary">
+            Consentimiento<span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
+          </h4>
+          <label className="relative flex min-h-11 cursor-pointer items-start gap-sm text-body-small leading-relaxed text-text-secondary">
+            <input
+              type="checkbox"
+              name="consent"
+              value="1"
+              checked={consent}
+              aria-invalid={Boolean(fieldErrors.consent)}
+              aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
+              className="mt-1 size-5 shrink-0 rounded-sm border-border accent-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+              onChange={(event) => {
+                setConsent(event.target.checked);
+                revalidateField("consent", event.target.checked);
+              }}
+            />
+            <span>
+              Acepto que No Country publique mi testimonio (nombre, foto y texto)
+              en la galería y en Discord. El email no se muestra en público. El
+              equipo lo revisa antes de publicarlo.
+              <span className="sr-only"> (obligatorio)</span>
+            </span>
+          </label>
+          <div className="mt-1 min-h-6">
+            {fieldErrors.consent ? (
+              <p id="consent-error" className="text-body-small leading-relaxed text-destructive">
+                {fieldErrors.consent}
+              </p>
+            ) : null}
+          </div>
+        </section>
         {serverMessage || correctionStep || unknownErrors.length > 0 ? (
-          <div className="flex flex-col gap-xs" role="alert">
+          <div className="flex flex-col gap-xs rounded-card border border-destructive/30 bg-destructive/5 p-sm" role="alert">
             {serverMessage ? (
               <p className="text-body-small text-destructive">{serverMessage}</p>
             ) : null}
@@ -775,6 +803,7 @@ export function EnviarForm() {
                 type="button"
                 variant="outline"
                 size="sm"
+                className="min-h-11 self-start px-sm"
                 onClick={() => navigateTo(correctionStep, serverErrors)}
               >
                 Ir a corregir
@@ -784,22 +813,26 @@ export function EnviarForm() {
         ) : null}
       </fieldset>
 
-      <div className="flex flex-wrap items-center justify-between gap-sm">
-        <Button
-          type="button"
-          variant="outline"
-          size="lg"
-          disabled={step === 1 || pending}
-          onClick={() => navigateTo(Math.max(1, step - 1))}
-        >
-          Atrás
-        </Button>
+      <div className={cn("flex flex-wrap items-center gap-sm", step === 1 ? "justify-end" : "justify-between border-t border-border pt-md")}>
+        {step > 1 ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="min-h-11 px-sm"
+            disabled={step === 1 || pending}
+            onClick={() => navigateTo(Math.max(1, step - 1))}
+          >
+            Atrás
+          </Button>
+        ) : null}
         {step < STEPS ? (
           <Button
             key="next"
             type="button"
             variant="gradient"
             size="lg"
+            className={step === 1 ? "min-h-11 w-full px-md sm:w-auto" : "min-h-11 px-md"}
             onClick={goNext}
           >
             Siguiente
@@ -810,6 +843,7 @@ export function EnviarForm() {
             type="submit"
             variant="gradient"
             size="lg"
+            className="min-h-11 px-sm sm:px-md"
             disabled={pending}
           >
             {pending ? "Enviando…" : "Enviar testimonio"}
@@ -829,15 +863,33 @@ function StepProgress({ step, headingRef }: {
       <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
         Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
       </h2>
-      <div
-        className="mt-xs h-1 overflow-hidden rounded-full bg-bg-surface-4"
-        aria-hidden="true"
-      >
-        <div
-          className="h-full bg-brand-gradient transition-[width] motion-reduce:transition-none"
-          style={{ width: `${(step / STEPS) * 100}%` }}
-        />
-      </div>
+      {/* El h2 enfocado comunica el progreso; los círculos son solo visuales, sin barra duplicada. */}
+      <ol aria-hidden="true" className="mt-md grid grid-cols-5">
+        {STEP_LABELS.map((label, index) => {
+          const current = step === index + 1;
+          const completed = step > index + 1;
+          return (
+            <li key={label} className="relative flex min-w-0 flex-col items-center gap-xs text-center">
+              {index < STEPS - 1 ? (
+                <span className={cn("absolute top-5 left-1/2 h-px w-full", completed ? "bg-accent-cyan/60" : "bg-border")} />
+              ) : null}
+              <span className={cn(
+                "relative flex size-10 items-center justify-center rounded-full text-body-small font-semibold",
+                current
+                  ? "bg-brand-gradient text-white ring-4 ring-brand-pink/10"
+                  : completed
+                    ? "border border-accent-cyan bg-bg-surface-2 text-accent-cyan"
+                    : "border border-border bg-bg-base text-text-secondary",
+              )}>
+                {index + 1}
+              </span>
+              <span className={cn("hidden text-body-small md:block", current ? "font-medium text-text-primary" : "text-text-secondary")}>
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
@@ -861,9 +913,9 @@ function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
   }
 
   return (
-    <div className="mt-lg rounded-md border border-border bg-card p-md">
-      <p className="text-overline text-accent-mint">Listo</p>
-      <h2 ref={headingRef} tabIndex={-1} className="mt-xs text-heading-3 text-text-primary">
+    <div className="mt-lg rounded-card border border-border bg-card p-md sm:p-lg">
+      <p className="text-overline text-accent-cyan">Listo</p>
+      <h2 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
         Gracias por tu testimonio
       </h2>
       <p className="mt-sm text-body text-text-secondary">
@@ -886,11 +938,11 @@ function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
             {inviteUrl}
           </a>
         </p>
-        <div className="mt-sm flex flex-wrap gap-sm">
-          <Button type="button" variant="outline" onClick={copyInviteLink}>
+        <div className="mt-md flex flex-col gap-sm sm:flex-row sm:flex-wrap">
+          <Button type="button" variant="gradient" className="min-h-11 px-sm" onClick={copyInviteLink}>
             {copied ? "Enlace copiado" : "Copiar enlace"}
           </Button>
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>
             Volver al inicio
           </Link>
         </div>
