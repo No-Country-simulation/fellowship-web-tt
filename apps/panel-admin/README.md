@@ -35,10 +35,19 @@ formulario y se editan a mano. No hay generación con IA. El texto se guarda en 
 copia a `li_caption`. El video es solo un link de YouTube: Discord y LinkedIn lo suman al post;
 Instagram no admite links.
 
-Publicar escribe la fila con `service_role` (`published` y `published_at`), sube la card al bucket
-`share-cards` y manda el mismo post al webhook de Discord comunidad y a Buffer (Instagram y
-LinkedIn). La ficha muestra el estado por red. Si alguna falla, el testimonio queda publicado y
-un solo botón reintenta las que falten.
+Publicar primero arma la card en el browser y la sube al bucket `share-cards`
+(`{slug}/instagram.png`). Si el PNG no se genera, pesa más de 8 MB o no se puede subir, el
+testimonio sigue en revisión y se puede reintentar. Recién con la card guardada escribe la fila
+con `service_role` (`published` y `published_at`) y manda el mismo post al webhook de Discord
+comunidad y a Buffer (Instagram y LinkedIn). Si el envío ya no está en revisión (por ejemplo,
+desde una pestaña vieja), no toca Storage. El límite de 8 MB es `SHARE_CARD_MAX_BYTES`
+(`types/share.ts`); `serverActions.bodySizeLimit` está en 12mb para que entren la card y el texto.
+
+La ficha publicada muestra el estado por red. Para Instagram y LinkedIn se guarda el id del post
+de Buffer y, al abrir la ficha, se consulta el estado real (Programado, Enviando, Publicado,
+Falló). Cuando Buffer lo publicó, aparece **Ver post** con el link. Los envíos sin id muestran la
+hora guardada. Si alguna red falla, el testimonio queda publicado y un solo botón reintenta las
+que falten.
 
 | Variable | Para qué |
 | --- | --- |

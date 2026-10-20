@@ -231,6 +231,8 @@ export type AdminTestimonial = {
   discordPostedAt: string | null;
   bufferInstagramPostedAt: string | null;
   bufferLinkedinPostedAt: string | null;
+  bufferInstagramPostId: string | null;
+  bufferLinkedinPostId: string | null;
 };
 
 export type AdminInboxItem = {

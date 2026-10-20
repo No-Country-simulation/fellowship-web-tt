@@ -19,4 +19,4 @@ Quote, nombre, handle y hashtags los arma `lib/testimonials/quote.ts`. El video 
 
 ## Dónde se edita
 
-`/enviar` guarda `quote`, `ig_caption` y `li_caption`. El equipo los retoca a mano en el panel (`/testimonials/[id]`) antes de guardar o publicar. Discord comunidad, Instagram y LinkedIn salen de ahí.
+`/enviar` guarda `quote`, `ig_caption` y `li_caption`. En el panel (`/testimonials/[id]`) el equipo retoca la frase de la card (`quote`) y un solo **Texto del post**, que parte de `ig_caption`. Si sigue la plantilla, el panel lo rearma con el Instagram y el LinkedIn de la persona (los que haya). Al guardar o publicar se escribe en `ig_caption` y se copia a `li_caption`. Discord comunidad, Instagram y LinkedIn reciben ese mismo texto.

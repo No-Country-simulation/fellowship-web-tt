@@ -16,7 +16,7 @@ import {
 } from "../infrastructure/repositories/testimonialRepository";
 import { readShareCard, sharePublished } from "../infrastructure/share";
 import type { ReviewState } from "../types/reviewState";
-import type { ShareResult } from "../types/share";
+import type { ShareReport, ShareResult } from "../types/share";
 
 export async function reviewTestimonial(
   id: string,
@@ -78,24 +78,36 @@ export async function reviewTestimonial(
     return { status: "saved" };
   }
 
+  if (current.testimonial.status !== "in_review") {
+    return { status: "error", message: "Este envío ya no está en revisión." };
+  }
+
+  const card = readShareCard(formData);
+  if (!card) {
+    return { status: "error", message: "No llegó la imagen. El testimonio no se publicó." };
+  }
+
+  const cardUrl = await prepareShareCard(current.testimonial.slug, card);
+  if (!cardUrl) {
+    return { status: "error", message: "No pudimos guardar la imagen. El testimonio no se publicó." };
+  }
+
   const published = await publishTestimonial(id, { quote, caption });
   if (!published.ok) {
     return { status: "error", message: published.message };
   }
 
-  const card = readShareCard(formData);
-  if (card) {
-    await prepareShareCard(published.slug, card);
-  }
-
   const latest = await getTestimonialById(id);
-  const share: ShareResult = latest.ok
+  const share: ShareReport = latest.ok
     ? await sharePublished(latest.testimonial, null)
-    : { discord: "failed", instagram: "failed", linkedin: "failed" };
+    : {
+        result: { discord: "failed", instagram: "failed", linkedin: "failed" },
+        bufferPostIds: { instagram: null, linkedin: null },
+      };
 
   await recordShare(id, share);
   revalidateTestimonials(id);
-  redirectShared(id, share);
+  redirectShared(id, share.result);
 }
 
 /** Reintenta las redes que faltan con la card guardada al publicar. Solo sube una si no quedó ninguna. */
@@ -116,7 +128,7 @@ export async function retryShare(id: string, formData: FormData) {
   );
   await recordShare(id, share);
   revalidateTestimonials(id);
-  redirectShared(id, share);
+  redirectShared(id, share.result);
 }
 
 function revalidateTestimonials(id: string) {
@@ -129,11 +141,12 @@ function readString(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-async function recordShare(id: string, share: ShareResult) {
+async function recordShare(id: string, { result, bufferPostIds }: ShareReport) {
+  const { instagram, linkedin } = bufferPostIds;
   await Promise.all([
-    share.discord === "posted" ? markDiscordPosted(id) : null,
-    share.instagram === "posted" ? markBufferPosted(id, "instagram") : null,
-    share.linkedin === "posted" ? markBufferPosted(id, "linkedin") : null,
+    result.discord === "posted" ? markDiscordPosted(id) : null,
+    result.instagram === "posted" && instagram ? markBufferPosted(id, "instagram", instagram) : null,
+    result.linkedin === "posted" && linkedin ? markBufferPosted(id, "linkedin", linkedin) : null,
   ]);
 }
 

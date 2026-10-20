@@ -11,6 +11,8 @@ import {
   formatNetworkList,
   SHARE_NETWORK_LABELS,
   SHARE_NETWORKS,
+  type BufferPostState,
+  type BufferPostStates,
   type ShareChannels,
   type ShareNetwork,
 } from "../types/share";
@@ -18,7 +20,12 @@ import type { AdminTestimonial } from "../types/testimonial";
 import { IgShare } from "./IgShare";
 import { ShareRetry } from "./ShareRetry";
 
-type NetworkState = { label: string; tone: VisualTone; detail: string | null };
+type NetworkState = {
+  label: string;
+  tone: VisualTone;
+  detail: string | null;
+  postUrl?: string | null;
+};
 
 /**
  * Después de publicar: la misma card y el mismo texto salen por Discord (webhook) e
@@ -29,12 +36,15 @@ export function PublishedPanel({
   channels,
   shareStatus,
   shareCardUrl,
+  bufferStates,
 }: {
   testimonial: AdminTestimonial;
   channels: ShareChannels;
   shareStatus: "ok" | "failed" | null;
   /** La card que se subió al publicar. Sin ella se redibuja con el diseño base. */
   shareCardUrl: string | null;
+  /** Estado consultado a Buffer al cargar la ficha. Sin él se usa la hora guardada. */
+  bufferStates: BufferPostStates | null;
 }) {
   if (testimonial.status !== "published") {
     return (
@@ -59,6 +69,11 @@ export function PublishedPanel({
   const card = igCardContent(testimonial, testimonial.quote, "photo");
 
   function stateOf(network: ShareNetwork): NetworkState {
+    const live = network === "discord" ? null : bufferStates?.[network];
+    if (live) {
+      return bufferState(live);
+    }
+
     const at = postedAt[network];
     if (at) {
       const scheduled = network !== "discord" && !bufferPublishesImmediately();
@@ -116,7 +131,19 @@ export function PublishedPanel({
                     <span className="text-admin-caption text-muted-foreground">{state.detail}</span>
                   ) : null}
                 </span>
-                <StatusBadge tone={state.tone}>{state.label}</StatusBadge>
+                <span className="flex shrink-0 items-center gap-2">
+                  {state.postUrl ? (
+                    <a
+                      href={state.postUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ variant: "outline", size: "xs" })}
+                    >
+                      Ver post
+                    </a>
+                  ) : null}
+                  <StatusBadge tone={state.tone}>{state.label}</StatusBadge>
+                </span>
               </li>
             );
           })}
@@ -172,4 +199,31 @@ export function PublishedPanel({
       </section>
     </div>
   );
+}
+
+function bufferState(post: BufferPostState): NetworkState {
+  const buffer = (iso: string | null) => (iso ? `Buffer · ${formatSubmittedAt(iso)}` : "Buffer");
+
+  switch (post.status) {
+    case "scheduled":
+    case "needs_approval":
+      return { label: "Programado", tone: "info", detail: buffer(post.dueAt) };
+    case "sending":
+      return { label: "Enviando", tone: "info", detail: "Buffer" };
+    case "sent":
+      return {
+        label: "Publicado",
+        tone: "success",
+        detail: buffer(post.sentAt),
+        postUrl: post.externalLink,
+      };
+    case "error":
+      return {
+        label: "Falló",
+        tone: "destructive",
+        detail: post.errorMessage ? `Buffer · ${post.errorMessage}` : "Buffer",
+      };
+    case "draft":
+      return { label: "Borrador", tone: "neutral", detail: "Buffer" };
+  }
 }

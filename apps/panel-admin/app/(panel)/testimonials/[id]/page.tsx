@@ -6,6 +6,7 @@ import { PublishedPanel } from "@features/testimonials/components/PublishedPanel
 import { ReviewForm } from "@features/testimonials/components/ReviewForm";
 import { Submission } from "@features/testimonials/components/Submission";
 import {
+  bufferPostStates,
   getTestimonialById,
   storedShareCardUrl,
 } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
@@ -61,8 +62,10 @@ export default async function TestimonialDetailPage({
     );
   }
 
-  const shareCardUrl =
-    testimonial.status === "published" ? await storedShareCardUrl(testimonial.slug) : null;
+  const [shareCardUrl, bufferStates] =
+    testimonial.status === "published"
+      ? await Promise.all([storedShareCardUrl(testimonial.slug), bufferPostStates(testimonial)])
+      : [null, null];
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
@@ -74,6 +77,7 @@ export default async function TestimonialDetailPage({
           channels={channels}
           shareStatus={shareStatus}
           shareCardUrl={shareCardUrl}
+          bufferStates={bufferStates}
         />
       </div>
     </div>
