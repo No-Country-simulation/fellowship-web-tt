@@ -58,7 +58,7 @@ Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fi
 
 ## Composición de la galería
 
-`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el formulario y en el estado de error de la ficha.
+`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` compone su propio encabezado editorial y `<main>` en `app/enviar/page.tsx`, con ancho `max-w-3xl`.
 
 `GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente con ejemplos locales identificados como ilustrativos, pendientes de reemplazo por historias autorizadas antes de producción. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; filtra en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
 

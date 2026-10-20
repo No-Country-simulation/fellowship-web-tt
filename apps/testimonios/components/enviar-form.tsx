@@ -10,7 +10,7 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
+import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react";
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
@@ -59,6 +59,13 @@ const STEP_TITLES = [
   "Captura y links",
   "Consentimiento",
 ] as const;
+
+const STEP_LABELS = ["Tipo", "Datos", "Historia", "Links", "Consentimiento"] as const;
+const TYPE_ICONS = {
+  simulation: Laptop,
+  first_job: BriefcaseBusiness,
+  career_change: TrendingUp,
+} satisfies Record<TestimonialType, typeof Laptop>;
 
 function focusAndReveal(control: HTMLElement | null) {
   if (!control) return;
@@ -282,19 +289,27 @@ export function EnviarForm() {
         aria-invalid={Boolean(fieldErrors.type)}
         className={cn(step === 1 && "flex flex-col gap-sm")}
       >
-        <legend className="sr-only">Qué querés contar</legend>
-        <div className="grid gap-sm sm:grid-cols-3">
+        <legend className="mb-sm text-lg font-semibold text-text-primary">
+          Elegí el tipo de experiencia <span aria-hidden="true" className="text-brand-pink">*</span>
+          <span className="sr-only"> (obligatorio)</span>
+        </legend>
+        <div className="grid gap-sm md:grid-cols-3">
           {TYPE_OPTIONS.map((option) => {
             const checked = type === option.value;
+            const Icon = TYPE_ICONS[option.value];
             return (
               <label
                 key={option.value}
                 className={cn(
-                  "flex cursor-pointer flex-col gap-xs rounded-md border border-border bg-card p-md",
-                  "hover:border-accent-cyan/70",
-                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-mint",
-                  checked && "border-accent-cyan ring-2 ring-accent-cyan/40",
+                  "group relative grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-card border p-sm transition-colors motion-reduce:transition-none md:flex md:flex-col md:items-start md:gap-md md:p-md",
+                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
+                  checked
+                    ? "border-transparent bg-bg-surface-2"
+                    : "border-border bg-card hover:border-accent-cyan/60 hover:bg-bg-surface-3",
                 )}
+                style={checked ? {
+                  background: "linear-gradient(var(--bg-surface-2), var(--bg-surface-2)) padding-box, var(--gradient-brand) border-box",
+                } : undefined}
               >
                 <input
                   type="radio"
@@ -313,12 +328,32 @@ export function EnviarForm() {
                     }
                   }}
                 />
-                <span id={`type-${option.value}-label`} className="text-body font-medium text-text-primary">
-                  {option.label}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-md border md:size-12",
+                    checked
+                      ? "border-accent-cyan/25 bg-accent-cyan/10 text-accent-cyan"
+                      : "border-border bg-bg-surface-3 text-accent-indigo-light group-hover:text-accent-cyan",
+                  )}
+                >
+                  <Icon className="size-5 md:size-6" />
                 </span>
-                <span id={`type-${option.value}-description`} className="text-body-small text-text-secondary">
-                  {option.description}
+                <span className="min-w-0">
+                  <span id={`type-${option.value}-label`} className="block text-body font-semibold text-text-primary md:text-lg">
+                    {option.label}
+                  </span>
+                  <span id={`type-${option.value}-description`} className="mt-1 block text-body-small leading-relaxed text-text-secondary">
+                    {option.description}
+                  </span>
                 </span>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full md:absolute md:top-md md:right-md",
+                    checked ? "bg-brand-gradient" : "border border-border",
+                  )}
+                />
               </label>
             );
           })}
@@ -784,22 +819,25 @@ export function EnviarForm() {
         ) : null}
       </fieldset>
 
-      <div className="flex flex-wrap items-center justify-between gap-sm">
-        <Button
-          type="button"
-          variant="outline"
-          size="lg"
-          disabled={step === 1 || pending}
-          onClick={() => navigateTo(Math.max(1, step - 1))}
-        >
-          Atrás
-        </Button>
+      <div className={cn("flex flex-wrap items-center gap-sm", step === 1 ? "justify-end" : "justify-between")}>
+        {step > 1 ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            disabled={step === 1 || pending}
+            onClick={() => navigateTo(Math.max(1, step - 1))}
+          >
+            Atrás
+          </Button>
+        ) : null}
         {step < STEPS ? (
           <Button
             key="next"
             type="button"
             variant="gradient"
             size="lg"
+            className={step === 1 ? "min-h-11 w-full px-md sm:w-auto" : undefined}
             onClick={goNext}
           >
             Siguiente
@@ -829,15 +867,33 @@ function StepProgress({ step, headingRef }: {
       <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
         Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
       </h2>
-      <div
-        className="mt-xs h-1 overflow-hidden rounded-full bg-bg-surface-4"
-        aria-hidden="true"
-      >
-        <div
-          className="h-full bg-brand-gradient transition-[width] motion-reduce:transition-none"
-          style={{ width: `${(step / STEPS) * 100}%` }}
-        />
-      </div>
+      {/* El h2 enfocado comunica el progreso; los círculos son solo visuales, sin barra duplicada. */}
+      <ol aria-hidden="true" className="mt-md grid grid-cols-5">
+        {STEP_LABELS.map((label, index) => {
+          const current = step === index + 1;
+          const completed = step > index + 1;
+          return (
+            <li key={label} className="relative flex min-w-0 flex-col items-center gap-xs text-center">
+              {index < STEPS - 1 ? (
+                <span className={cn("absolute top-5 left-1/2 h-px w-full", completed ? "bg-accent-cyan/60" : "bg-border")} />
+              ) : null}
+              <span className={cn(
+                "relative flex size-10 items-center justify-center rounded-full text-body-small font-semibold",
+                current
+                  ? "bg-brand-gradient text-white ring-4 ring-brand-pink/10"
+                  : completed
+                    ? "border border-accent-cyan bg-bg-surface-2 text-accent-cyan"
+                    : "border border-border bg-bg-base text-text-secondary",
+              )}>
+                {index + 1}
+              </span>
+              <span className={cn("hidden text-body-small md:block", current ? "font-medium text-text-primary" : "text-text-secondary")}>
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
