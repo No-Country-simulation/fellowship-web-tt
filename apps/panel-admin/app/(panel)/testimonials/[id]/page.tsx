@@ -5,7 +5,10 @@ import { DetailHeader } from "@features/testimonials/components/DetailHeader";
 import { PublishedPanel } from "@features/testimonials/components/PublishedPanel";
 import { ReviewForm } from "@features/testimonials/components/ReviewForm";
 import { Submission } from "@features/testimonials/components/Submission";
-import { getTestimonialById } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
+import {
+  getTestimonialById,
+  storedShareCardUrl,
+} from "@features/testimonials/infrastructure/repositories/testimonialRepository";
 import { PageHeader, PageHeaderDescription, PageHeaderTitle, PageBackLink } from "@shared/ui/patterns/PageHeader";
 
 export const metadata: Metadata = {
@@ -17,12 +20,11 @@ export default async function TestimonialDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ discord?: string | string[]; buffer?: string | string[] }>;
+  searchParams: Promise<{ share?: string | string[] }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const discordParam = firstSearchParam(query.discord);
-  const bufferParam = firstSearchParam(query.buffer);
+  const shareParam = firstSearchParam(query.share);
 
   if (!id) {
     notFound();
@@ -44,29 +46,34 @@ export default async function TestimonialDetailPage({
     );
   }
 
-  const { testimonial, metaLine, canRetryDiscord, canRetryInstagram, canRetryLinkedin } = result;
+  const { testimonial, channels } = result;
   const inReview = testimonial.status === "in_review";
-  const discordStatus =
-    discordParam === "failed" || discordParam === "ok" ? discordParam : null;
-  const bufferStatus = bufferParam === "failed" || bufferParam === "ok" ? bufferParam : null;
+  const shareStatus = shareParam === "failed" || shareParam === "ok" ? shareParam : null;
   const submission = <Submission testimonial={testimonial} />;
 
   if (inReview) {
-    return <ReviewForm testimonial={testimonial} submission={submission} metaLine={metaLine} />;
+    return (
+      <ReviewForm
+        testimonial={testimonial}
+        submission={submission}
+        channels={channels}
+      />
+    );
   }
+
+  const shareCardUrl =
+    testimonial.status === "published" ? await storedShareCardUrl(testimonial.slug) : null;
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-      <DetailHeader testimonial={testimonial} metaLine={metaLine} />
+      <DetailHeader testimonial={testimonial} />
       <div className="mt-6 flex min-w-0 flex-col gap-6">
         {submission}
         <PublishedPanel
           testimonial={testimonial}
-          discordStatus={discordStatus}
-          bufferStatus={bufferStatus}
-          canRetryDiscord={canRetryDiscord}
-          canRetryInstagram={canRetryInstagram}
-          canRetryLinkedin={canRetryLinkedin}
+          channels={channels}
+          shareStatus={shareStatus}
+          shareCardUrl={shareCardUrl}
         />
       </div>
     </div>

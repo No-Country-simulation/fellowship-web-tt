@@ -27,15 +27,18 @@ No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya
 | Ruta | Qué es |
 | --- | --- |
 | `/testimonials` | Inbox: lista de envíos y, al elegir uno, la ficha al lado |
-| `/testimonials/[id]` | Ficha: envío, quote editable, tabs Discord / Instagram / LinkedIn |
+| `/testimonials/[id]` | Ficha: envío y una sola publicación (card + texto) para las tres redes |
 
-Quote y captions llegan armados por la plantilla del formulario y se editan a mano. No hay
-generación con IA. El video es solo un link de YouTube: en Discord y LinkedIn se muestra como embed
-o link `watch?v=`. Instagram no lo postea.
+Hay **una sola publicación** para Discord, Instagram y LinkedIn: la misma card PNG 1080×1350 y el
+mismo texto. El quote (que va dentro de la card) y el texto llegan armados por la plantilla del
+formulario y se editan a mano. No hay generación con IA. El texto se guarda en `ig_caption` y se
+copia a `li_caption`. El video es solo un link de YouTube: Discord y LinkedIn lo suman al post;
+Instagram no admite links.
 
-Publicar escribe la fila con `service_role` (`published` y `published_at`) y después manda el webhook
-de Discord comunidad y el post a Buffer (Instagram con la card PNG, LinkedIn con el caption y la
-captura si hay). Si una red falla, el testimonio queda publicado y se reintenta desde la ficha.
+Publicar escribe la fila con `service_role` (`published` y `published_at`), sube la card al bucket
+`share-cards` y manda el mismo post al webhook de Discord comunidad y a Buffer (Instagram y
+LinkedIn). La ficha muestra el estado por red. Si alguna falla, el testimonio queda publicado y
+un solo botón reintenta las que falten.
 
 | Variable | Para qué |
 | --- | --- |

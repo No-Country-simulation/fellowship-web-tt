@@ -48,16 +48,14 @@ export function hasLinkedInChannel() {
   return Boolean(apiKey() && linkedInChannelId());
 }
 
-export type CreatePostInput =
-  | { network: "instagram"; text: string; imageUrl: string }
-  | {
-      network: "linkedin";
-      text: string;
-      /** Captura opcional del proyecto (no la card de Instagram). */
-      imageUrl?: string | null;
-      /** YouTube: se agrega al texto, igual que el campo Video de Discord. */
-      videoUrl?: string | null;
-    };
+export type CreatePostInput = {
+  network: BufferNetwork;
+  text: string;
+  /** Card PNG del testimonio. Es la misma en todas las redes. */
+  imageUrl: string;
+  /** YouTube: LinkedIn lo suma al texto. Instagram no admite links en el caption. */
+  videoUrl?: string | null;
+};
 
 export async function createPost(
   input: CreatePostInput,
@@ -77,29 +75,19 @@ export async function createPost(
     ...bufferShareTiming(),
   };
 
-  if (input.network === "instagram") {
-    const imageUrl = parseHttpsUrl(input.imageUrl);
-    if (!imageUrl) {
-      console.error("Buffer createPost failed: image URL must be https");
-      return { status: "failed" };
-    }
+  const imageUrl = parseHttpsUrl(input.imageUrl);
+  if (!imageUrl) {
+    console.error("Buffer createPost failed: image URL must be https");
+    return { status: "failed" };
+  }
+  payload.assets = [{ image: { url: imageUrl } }];
 
-    payload.assets = [{ image: { url: imageUrl } }];
+  if (input.network === "instagram") {
     payload.metadata = {
       instagram: { type: "post", shouldShareToFeed: true },
     };
   } else {
     payload.text = linkedInText(input.text, input.videoUrl);
-
-    const captureUrl = input.imageUrl?.trim();
-    if (captureUrl) {
-      const imageUrl = parseHttpsUrl(captureUrl);
-      if (!imageUrl) {
-        console.error("Buffer createPost failed: image URL must be https");
-        return { status: "failed" };
-      }
-      payload.assets = [{ image: { url: imageUrl } }];
-    }
   }
 
   try {

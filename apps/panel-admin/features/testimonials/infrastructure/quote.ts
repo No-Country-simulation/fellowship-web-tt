@@ -1,6 +1,6 @@
-export const QUOTE_MIN_CHARS = 200;
-export const QUOTE_MAX_CHARS = 240;
-export const QUOTE_EDIT_MAX_CHARS = 400;
+export const QUOTE_MIN_CHARS = 80;
+export const QUOTE_MAX_CHARS = 200;
+export const QUOTE_EDIT_MAX_CHARS = 200;
 export const CAPTION_EDIT_MAX_CHARS = 2000;
 
 export const IG_HASHTAGS = [
@@ -11,9 +11,6 @@ export const IG_HASHTAGS = [
 
 export const DEFAULT_POST_INTRO =
   "Desde No Country compartimos esta historia de nuestro talento";
-export const DEFAULT_IG_INTRO = DEFAULT_POST_INTRO;
-export const DEFAULT_DISCORD_INTRO = DEFAULT_POST_INTRO;
-export const DEFAULT_LI_INTRO = DEFAULT_POST_INTRO;
 
 const LEGACY_DEFAULT_INTROS = new Set([
   "Talento de No Country 👇",
@@ -30,34 +27,32 @@ export function formatQuotedQuote(quote: string): string {
   return text ? `"${text}"` : "";
 }
 
-export function buildDiscordDescription(quote: string): string {
-  const quoted = formatQuotedQuote(quote);
-  return [DEFAULT_POST_INTRO, quoted].filter(Boolean).join("\n\n");
-}
-
+/** Primera o dos primeras frases, sin pasar de QUOTE_MAX_CHARS. */
 export function excerptQuote(story: string): string {
   const text = story.trim().replace(/\s+/g, " ");
   if (!text) {
     return "";
   }
-  if (text.length <= QUOTE_MAX_CHARS) {
-    return text;
-  }
 
   const twoSentences = firstSentences(text, 2);
-  if (twoSentences && twoSentences.length <= QUOTE_MAX_CHARS) {
+  if (twoSentences.length <= QUOTE_MAX_CHARS) {
     return twoSentences;
+  }
+
+  const oneSentence = firstSentences(text, 1);
+  if (oneSentence.length >= QUOTE_MIN_CHARS && oneSentence.length <= QUOTE_MAX_CHARS) {
+    return oneSentence;
   }
 
   return cutAtBoundary(text, QUOTE_MIN_CHARS, QUOTE_MAX_CHARS);
 }
 
-/** intro + quote + nombre + red + hashtags. */
+/** intro + quote + nombre + redes (una por línea) + hashtags. */
 export function buildShareCaption(input: {
   intro: string;
   quote: string;
   fullName: string;
-  handle?: string | null;
+  handles?: (string | null | undefined)[];
 }): string {
   const lines = [
     input.intro.trim(),
@@ -66,39 +61,29 @@ export function buildShareCaption(input: {
     "",
     input.fullName.trim(),
   ];
-  const handle = input.handle?.trim();
-  if (handle) {
-    lines.push(handle);
+  for (const handle of input.handles ?? []) {
+    const value = handle?.trim();
+    if (value) {
+      lines.push(value);
+    }
   }
   lines.push("", IG_HASHTAGS.join(" "));
   return lines.join("\n");
 }
 
-export function buildIgCaption(input: {
+/** Texto único del post: el mismo sale en Discord, Instagram y LinkedIn, con las dos redes de la persona. */
+export function buildPostCaption(input: {
   quote: string;
   fullName: string;
   instagram: string | null;
+  linkedin: string | null;
   intro?: string;
 }): string {
   return buildShareCaption({
     intro: input.intro?.trim() || DEFAULT_POST_INTRO,
     quote: input.quote,
     fullName: input.fullName,
-    handle: input.instagram,
-  });
-}
-
-export function buildLiCaption(input: {
-  quote: string;
-  fullName: string;
-  linkedin?: string | null;
-  intro?: string;
-}): string {
-  return buildShareCaption({
-    intro: input.intro?.trim() || DEFAULT_POST_INTRO,
-    quote: input.quote,
-    fullName: input.fullName,
-    handle: input.linkedin,
+    handles: [input.instagram, input.linkedin],
   });
 }
 
@@ -141,12 +126,10 @@ function cutAtBoundary(text: string, min: number, max: number): string {
     return window.slice(0, punctuation + 1).trim();
   }
 
-  const space = window.lastIndexOf(" ");
-  if (space > 0) {
-    return window.slice(0, space).trim();
-  }
-
-  return window.trim();
+  const words = text.slice(0, max - 1);
+  const space = words.lastIndexOf(" ");
+  const cut = (space > 0 ? words.slice(0, space) : words).replace(/[\s,;:]+$/, "");
+  return `${cut}…`;
 }
 
 function lastIndexOfAny(
