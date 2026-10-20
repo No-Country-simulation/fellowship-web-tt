@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { Area } from "react-easy-crop";
 
 import { CaptureCropDialog } from "./capture-crop-dialog";
@@ -30,12 +30,13 @@ type FieldProps = {
   className?: string;
   children: (control: {
     id: string;
+    labelledBy: string;
     describedBy?: string;
     invalid: boolean;
   }) => ReactNode;
 };
 
-/** Label, hint y error. El control lo arma `children` con `{ id, describedBy, invalid }`. */
+/** Label, hint y error; `children` recibe id, labelledBy, describedBy e invalid. */
 export function Field({
   id,
   label,
@@ -49,6 +50,7 @@ export function Field({
 }: FieldProps) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
+  const labelId = `${fieldId}-label`;
   const hintId = hint ? `${fieldId}-hint` : undefined;
   const errorId = error ? `${fieldId}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
@@ -66,11 +68,11 @@ export function Field({
   );
 
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    <div data-field="" className={cn("flex flex-col gap-1", className)}>
       {labelAs === "span" ? (
-        <span className={labelClassName}>{labelContent}</span>
+        <span id={labelId} className={labelClassName}>{labelContent}</span>
       ) : (
-        <label htmlFor={fieldId} className={labelClassName}>
+        <label id={labelId} htmlFor={fieldId} className={labelClassName}>
           {labelContent}
         </label>
       )}
@@ -79,9 +81,9 @@ export function Field({
           {hint}
         </p>
       ) : null}
-      {children({ id: fieldId, describedBy, invalid: Boolean(error) })}
+      {children({ id: fieldId, labelledBy: labelId, describedBy, invalid: Boolean(error) })}
       {error ? (
-        <p id={errorId} className="text-body-small text-destructive" role="alert">
+        <p id={errorId} className="text-body-small text-destructive">
           {error}
         </p>
       ) : null}
@@ -103,7 +105,7 @@ type FileFieldProps = {
   onInvalid?: (message: string | undefined) => void;
 };
 
-/** Upload de imagen con preview local. Al elegir archivo, recorte cuadrado (avatar) o 16:9 (captura). */
+/** Imagen confirmada con preview local; el reemplazo solo se aplica tras recortarlo. */
 export function FileField({
   name,
   label,
@@ -124,34 +126,32 @@ export function FileField({
     url: string;
   } | null>(null);
   const [cropping, setCropping] = useState(false);
+  const objectUrls = useRef(new Set<string>());
+  const operation = useRef(0);
+  const processing = useRef(false);
 
-  function replacePreview(nextUrl: string | null) {
-    setObjectUrl((current) => {
-      if (current) {
-        URL.revokeObjectURL(current);
-      }
-      return nextUrl;
-    });
+  function createObjectUrl(file: File) {
+    const url = URL.createObjectURL(file);
+    objectUrls.current.add(url);
+    return url;
   }
 
   function clearFile() {
-    replacePreview(null);
+    setObjectUrl(null);
     closeCrop();
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     onFileChange(null);
     onInvalid?.(undefined);
+    inputRef.current?.focus({ preventScroll: true });
   }
 
   function closeCrop() {
+    operation.current += 1;
+    processing.current = false;
     setCropping(false);
-    setCropSource((current) => {
-      if (current) {
-        URL.revokeObjectURL(current.url);
-      }
-      return null;
-    });
+    setCropSource(null);
   }
 
   function cancelCrop() {
@@ -159,40 +159,51 @@ export function FileField({
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-    onFileChange(null);
-    onInvalid?.(undefined);
   }
 
   function confirmCrop(area: Area) {
-    if (!cropSource) {
+    if (!cropSource || processing.current) {
       return;
     }
+    const currentOperation = operation.current;
+    processing.current = true;
     setCropping(true);
-    onInvalid?.(undefined);
     const cropFile = preview === "avatar" ? cropAvatarFile : cropCaptureFile;
     void cropFile(cropSource.file, area)
       .then((prepared) => {
-        replacePreview(URL.createObjectURL(prepared));
+        if (currentOperation !== operation.current) return;
+        setObjectUrl(createObjectUrl(prepared));
         onFileChange(prepared);
         closeCrop();
       })
       .catch(() => {
+        if (currentOperation !== operation.current) return;
         onInvalid?.("No pudimos recortar la foto.");
         closeCrop();
         if (inputRef.current) {
           inputRef.current.value = "";
         }
-        onFileChange(null);
       });
   }
 
+  // Liberar solo URLs que el DOM ya dejó de usar; nunca desde un updater.
   useEffect(() => {
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+    for (const url of objectUrls.current) {
+      if (url !== objectUrl && url !== cropSource?.url) {
+        URL.revokeObjectURL(url);
+        objectUrls.current.delete(url);
       }
+    }
+  }, [objectUrl, cropSource]);
+
+  useLayoutEffect(() => {
+    const urls = objectUrls.current;
+    return () => {
+      operation.current += 1;
+      for (const url of urls) URL.revokeObjectURL(url);
+      urls.clear();
     };
-  }, [objectUrl]);
+  }, []);
 
   return (
     <Field
@@ -207,13 +218,14 @@ export function FileField({
         className,
       )}
     >
-      {({ id, describedBy, invalid }) => (
+      {({ id, labelledBy, describedBy, invalid }) => (
         <div className="relative">
         <label
           htmlFor={id}
           className={cn(
             "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base",
             "hover:border-accent-cyan/70 hover:bg-bg-white-a5",
+            "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
             preview === "avatar"
               ? "relative aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-2xl p-md text-center"
               : preview === "capture"
@@ -252,25 +264,17 @@ export function FileField({
             name={name}
             type="file"
             accept={accept}
+            aria-labelledby={labelledBy}
             aria-invalid={invalid}
             aria-describedby={describedBy}
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0] ?? null;
-              if (!file) {
-                clearFile();
-                return;
-              }
-              replacePreview(null);
-              onFileChange(null);
-              onInvalid?.(undefined);
-              setCropping(false);
-              setCropSource((current) => {
-                if (current) {
-                  URL.revokeObjectURL(current.url);
-                }
-                return { file, url: URL.createObjectURL(file) };
-              });
+              // Permitir elegir el mismo original otra vez, incluso tras cancelar.
+              event.target.value = "";
+              if (!file) return;
+              closeCrop();
+              setCropSource({ file, url: createObjectUrl(file) });
             }}
           />
         </label>
@@ -278,7 +282,7 @@ export function FileField({
           <button
             type="button"
             aria-label={preview === "avatar" ? "Quitar foto" : "Quitar captura"}
-            className="absolute top-sm right-sm grid size-8 place-items-center rounded-full bg-bg-base text-body text-text-primary shadow-sm"
+            className="absolute top-sm right-sm grid size-11 place-items-center rounded-full bg-bg-base text-body text-text-primary shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
             onClick={clearFile}
           >
             <span aria-hidden="true">×</span>
@@ -286,9 +290,11 @@ export function FileField({
         ) : null}
         {cropSource ? (
           <CaptureCropDialog
+            key={cropSource.url}
             imageUrl={cropSource.url}
             kind={preview}
             confirming={cropping}
+            returnFocusRef={inputRef}
             onCancel={cancelCrop}
             onConfirm={confirmCrop}
           />

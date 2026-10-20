@@ -4,28 +4,36 @@ import {
   startTransition,
   useActionState,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
+import { COUNTRY_OPTIONS, OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countries";
 import {
-  AVATAR_MAX_BYTES,
-  CAPTURE_MAX_BYTES,
+  FIELD_STEP,
   STORY_MAX_CHARS,
-  STORY_MIN_CHARS,
-  isValidEmail,
-  normalizeInstagram,
-  normalizeLinkedIn,
-  normalizeYouTubeUrl,
-  validateImageFile,
+  firstErrorStep,
   type FieldErrors,
   type FormField,
 } from "@/lib/testimonials/parse";
+import {
+  FORM_FIELDS,
+  PROFESSIONAL_FIELDS,
+  resolveFormErrors,
+  updateFormErrors,
+  validateField,
+  validateFormStep,
+  type FormValidation,
+  type FormValues,
+} from "@/lib/testimonials/form-validation";
 import {
   TYPE_OPTIONS,
   isTestimonialType,
@@ -52,6 +60,19 @@ const STEP_TITLES = [
   "Consentimiento",
 ] as const;
 
+function focusAndReveal(control: HTMLElement | null) {
+  if (!control) return;
+  control.focus({ preventScroll: true });
+  const main = control.closest("main");
+  if (!main) return;
+  const anchor = control.closest<HTMLElement>("[data-field], label") ?? control;
+  main.scrollTo({
+    top: main.scrollTop + anchor.getBoundingClientRect().top -
+      main.getBoundingClientRect().top - 16,
+    behavior: "instant",
+  });
+}
+
 export function EnviarForm() {
   const [state, formAction, pending] = useActionState(
     submitTestimonial,
@@ -60,7 +81,8 @@ export function EnviarForm() {
   const [step, setStep] = useState(1);
   const [type, setType] = useState<TestimonialType | "">("");
   const [fullName, setFullName] = useState("");
-  const [country, setCountry] = useState("");
+  const [countrySelection, setCountrySelection] = useState("");
+  const [customCountry, setCustomCountry] = useState("");
   const [email, setEmail] = useState("");
   const [story, setStory] = useState("");
   const [company, setCompany] = useState("");
@@ -74,111 +96,126 @@ export function EnviarForm() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [captureFile, setCaptureFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [inviteUrl, setInviteUrl] = useState(() => `${getSiteUrl()}/enviar`);
+  const [validation, setValidation] = useState<FormValidation>({
+    response: initialSubmitState,
+    overrides: {},
+  });
+  const formRef = useRef<HTMLFormElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const focusRequest = useRef<{ errors?: FieldErrors } | null>(null);
+
+  function focusFirstError(errors: FieldErrors) {
+    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      "input[name], textarea[name], select[name]",
+    );
+    const first = Array.from(controls ?? []).find((control) =>
+      errors[control.name as FormField] && !control.disabled &&
+      !control.closest("fieldset")?.hidden,
+    );
+    focusAndReveal(first ?? null);
+  }
+
+  // El DOM ya muestra el paso y sus mensajes; no hay foco automático al cargar.
+  useLayoutEffect(() => {
+    const request = focusRequest.current;
+    if (!request) return;
+    focusRequest.current = null;
+    if (request.errors) focusFirstError(request.errors);
+    else focusAndReveal(headingRef.current);
+  }, [step, validation]);
 
   if (state.status === "success") {
-    return <SuccessCard />;
+    return <SuccessCard inviteUrl={inviteUrl} />;
   }
 
   const selected = type ? typeOption(type) : null;
+  const isOtherCountry = countrySelection === OTHER_COUNTRY_VALUE;
+  const country = isOtherCountry ? customCountry : countrySelection;
+  const values: FormValues = {
+    type,
+    full_name: fullName,
+    country,
+    email,
+    story,
+    company,
+    primary_role: primaryRole,
+    role_achieved: roleAchieved,
+    previous_profession: previousProfession,
+    new_role: newRole,
+    video_url: videoUrl,
+    instagram,
+    linkedin,
+    avatar: avatarFile,
+    capture: captureFile,
+    consent,
+  };
+  const { fieldErrors, serverErrors, unknownErrors, message: serverMessage } =
+    resolveFormErrors(state, validation, type, pending);
+  const correctionStep = Object.keys(serverErrors).length
+    ? firstErrorStep(serverErrors)
+    : undefined;
+
+  function updateErrors(updates: FieldErrors) {
+    setValidation((current) => updateFormErrors(current, state, updates));
+  }
 
   function setError(field: FormField, message: string | undefined) {
-    setFieldErrors((current) => {
-      const next = { ...current };
-      if (message) {
-        next[field] = message;
-      } else {
-        delete next[field];
+    updateErrors({ [field]: message });
+  }
+
+  function revalidateField<K extends FormField>(field: K, value: FormValues[K]) {
+    if (fieldErrors[field]) {
+      setError(field, validateField(field, { ...values, [field]: value }));
+    }
+  }
+
+  function changeType(nextType: TestimonialType) {
+    setType(nextType);
+    const updates: FieldErrors = { type: undefined };
+    const previousOverrides =
+      validation.response === state ? validation.overrides : {};
+    const categoryServerErrors =
+      resolveFormErrors(state, validation, nextType, pending).serverErrors;
+    for (const field of FORM_FIELDS) {
+      // Al volver a una categoría ya validada, revisar sus valores conservados.
+      const wasValidated =
+        Object.prototype.hasOwnProperty.call(previousOverrides, field) ||
+        categoryServerErrors[field];
+      if (PROFESSIONAL_FIELDS[field] === nextType && wasValidated) {
+        updates[field] = categoryServerErrors[field] ??
+          validateField(field, { ...values, type: nextType });
       }
-      return next;
-    });
+    }
+    updateErrors(updates);
   }
 
   function validateStep(current: number): boolean {
-    const nextErrors: FieldErrors = {};
-
-    if (current === 1 && !type) {
-      nextErrors.type = "Elegí qué querés contar.";
-    }
-
-    if (current === 2) {
-      if (!fullName.trim()) {
-        nextErrors.full_name = "El nombre es obligatorio.";
-      }
-      if (!country.trim()) {
-        nextErrors.country = "El país es obligatorio.";
-      }
-      if (!email.trim()) {
-        nextErrors.email = "El email es obligatorio. No se muestra en público.";
-      } else if (!isValidEmail(email)) {
-        nextErrors.email = "Ingresá un email válido.";
-      }
-      const avatarError = validateImageFile(avatarFile, {
-        required: true,
-        maxBytes: AVATAR_MAX_BYTES,
-        label: "La foto de perfil",
-      });
-      if (avatarError) {
-        nextErrors.avatar = avatarError;
+    const nextErrors = validateFormStep(current, values);
+    // Revalidar el paso no equivale a editar los campos rechazados por el servidor.
+    for (const field of FORM_FIELDS) {
+      if (FIELD_STEP[field] === current && serverErrors[field]) {
+        nextErrors[field] = serverErrors[field];
       }
     }
+    updateErrors(nextErrors);
+    const valid = !Object.values(nextErrors).some(Boolean);
+    if (!valid) focusRequest.current = { errors: nextErrors };
+    return valid;
+  }
 
-    if (current === 3) {
-      if (type === "simulation" && primaryRole.trim().length > 120) {
-        nextErrors.primary_role = "Máximo 120 caracteres.";
-      }
-      if (type === "first_job") {
-        if (!company.trim()) {
-          nextErrors.company = "La empresa es obligatoria.";
-        }
-        if (!roleAchieved.trim()) {
-          nextErrors.role_achieved = "El puesto es obligatorio.";
-        }
-      }
-      if (type === "career_change") {
-        if (!previousProfession.trim()) {
-          nextErrors.previous_profession = "El oficio anterior es obligatorio.";
-        }
-        if (!newRole.trim()) {
-          nextErrors.new_role = "El rol nuevo es obligatorio.";
-        }
-      }
-      if (story.trim().length < STORY_MIN_CHARS) {
-        nextErrors.story = `Escribí al menos ${STORY_MIN_CHARS} caracteres.`;
-      }
+  function navigateTo(nextStep: number, errors?: FieldErrors) {
+    if (nextStep === step) {
+      if (errors) focusFirstError(errors);
+      return;
     }
-
-    if (current === 4) {
-      const captureError = validateImageFile(captureFile, {
-        required: false,
-        maxBytes: CAPTURE_MAX_BYTES,
-        label: "La captura del proyecto",
-      });
-      if (captureError) {
-        nextErrors.capture = captureError;
-      }
-      if (videoUrl.trim() && !normalizeYouTubeUrl(videoUrl)) {
-        nextErrors.video_url = "Pegá un link de YouTube (youtube.com o youtu.be).";
-      }
-      if (instagram.trim() && !normalizeInstagram(instagram)) {
-        nextErrors.instagram = "Usá tu usuario (@nombre) o el link de Instagram.";
-      }
-      if (linkedin.trim() && !normalizeLinkedIn(linkedin)) {
-        nextErrors.linkedin = "Pegá tu perfil (linkedin.com/in/…) o tu usuario.";
-      }
-    }
-
-    if (current === 5 && !consent) {
-      nextErrors.consent = "Tenés que aceptar para enviar.";
-    }
-
-    setFieldErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+    focusRequest.current = { errors };
+    setStep(nextStep);
   }
 
   function goNext() {
     if (validateStep(step) && step < STEPS) {
-      setStep(step + 1);
+      navigateTo(step + 1);
     }
   }
 
@@ -201,11 +238,15 @@ export function EnviarForm() {
     formData.set("country", country);
     formData.set("email", email);
     formData.set("story", story);
-    formData.set("company", company);
-    formData.set("primary_role", primaryRole);
-    formData.set("role_achieved", roleAchieved);
-    formData.set("previous_profession", previousProfession);
-    formData.set("new_role", newRole);
+    if (type === "simulation") {
+      formData.set("primary_role", primaryRole);
+    } else if (type === "first_job") {
+      formData.set("company", company);
+      formData.set("role_achieved", roleAchieved);
+    } else if (type === "career_change") {
+      formData.set("previous_profession", previousProfession);
+      formData.set("new_role", newRole);
+    }
     formData.set("video_url", videoUrl);
     formData.set("instagram", instagram);
     formData.set("linkedin", linkedin);
@@ -218,6 +259,9 @@ export function EnviarForm() {
     if (captureFile) {
       formData.set("capture", captureFile);
     }
+    setInviteUrl(`${window.location.origin}/enviar`);
+    // Retirar la respuesta anterior antes de iniciar el siguiente envío.
+    setValidation({ response: state, overrides: {}, retired: true });
     startTransition(() => {
       formAction(formData);
     });
@@ -225,15 +269,17 @@ export function EnviarForm() {
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       onSubmit={onSubmit}
       className="mt-lg flex flex-col gap-lg"
       noValidate
     >
-      <StepProgress step={step} />
+      <StepProgress step={step} headingRef={headingRef} />
 
       <fieldset
         hidden={step !== 1}
+        aria-invalid={Boolean(fieldErrors.type)}
         className={cn(step === 1 && "flex flex-col gap-sm")}
       >
         <legend className="sr-only">Qué querés contar</legend>
@@ -246,6 +292,7 @@ export function EnviarForm() {
                 className={cn(
                   "flex cursor-pointer flex-col gap-xs rounded-md border border-border bg-card p-md",
                   "hover:border-accent-cyan/70",
+                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-mint",
                   checked && "border-accent-cyan ring-2 ring-accent-cyan/40",
                 )}
               >
@@ -254,18 +301,22 @@ export function EnviarForm() {
                   name="type"
                   value={option.value}
                   checked={checked}
+                  aria-labelledby={`type-${option.value}-label`}
+                  aria-describedby={[
+                    `type-${option.value}-description`,
+                    fieldErrors.type ? "type-error" : undefined,
+                  ].filter(Boolean).join(" ")}
                   className="sr-only"
                   onChange={() => {
                     if (isTestimonialType(option.value)) {
-                      setType(option.value);
-                      setError("type", undefined);
+                      changeType(option.value);
                     }
                   }}
                 />
-                <span className="text-body font-medium text-text-primary">
+                <span id={`type-${option.value}-label`} className="text-body font-medium text-text-primary">
                   {option.label}
                 </span>
-                <span className="text-body-small text-text-secondary">
+                <span id={`type-${option.value}-description`} className="text-body-small text-text-secondary">
                   {option.description}
                 </span>
               </label>
@@ -273,7 +324,7 @@ export function EnviarForm() {
           })}
         </div>
         {fieldErrors.type ? (
-          <p className="text-body-small text-destructive" role="alert">
+          <p id="type-error" className="text-body-small text-destructive">
             {fieldErrors.type}
           </p>
         ) : null}
@@ -293,8 +344,13 @@ export function EnviarForm() {
             error={fieldErrors.avatar}
             accept={IMAGE_ACCEPT}
             preview="avatar"
-            onFileChange={setAvatarFile}
-            onInvalid={(message) => setError("avatar", message)}
+            onFileChange={(file) => {
+              setAvatarFile(file);
+              revalidateField("avatar", file);
+            }}
+            onInvalid={(message) => {
+              if (message) setError("avatar", message);
+            }}
           />
           <div className="flex flex-col gap-md">
             <Field label="Nombre completo" error={fieldErrors.full_name}>
@@ -309,26 +365,63 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setFullName(event.target.value)}
+                  onChange={(event) => {
+                    setFullName(event.target.value);
+                    revalidateField("full_name", event.target.value);
+                  }}
                 />
               )}
             </Field>
-            <Field label="País" error={fieldErrors.country}>
+            <Field label="País" error={isOtherCountry ? undefined : fieldErrors.country}>
               {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="country"
-                  type="text"
-                  autoComplete="country-name"
-                  placeholder="Argentina"
-                  value={country}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => setCountry(event.target.value)}
-                />
+                <div className="relative">
+                  <select
+                    id={id}
+                    name={isOtherCountry ? "country_selection" : "country"}
+                    autoComplete="country-name"
+                    value={countrySelection}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                    className={cn(fieldClassName, "appearance-none pr-12")}
+                    onChange={(event) => {
+                      const selection = event.target.value;
+                      setCountrySelection(selection);
+                      revalidateField("country", selection === OTHER_COUNTRY_VALUE ? customCountry : selection);
+                    }}
+                  >
+                    <option value="">Seleccioná un país</option>
+                    {COUNTRY_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                    <option value={OTHER_COUNTRY_VALUE}>Otro país</option>
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-sm top-1/2 size-4 -translate-y-1/2 text-text-primary"
+                  />
+                </div>
               )}
             </Field>
+            {isOtherCountry ? (
+              <Field label="Especificá tu país" error={fieldErrors.country}>
+                {({ id, describedBy, invalid }) => (
+                  <input
+                    id={id}
+                    name="country"
+                    type="text"
+                    autoComplete="country-name"
+                    value={customCountry}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                    className={fieldClassName}
+                    onChange={(event) => {
+                      setCustomCountry(event.target.value);
+                      revalidateField("country", event.target.value);
+                    }}
+                  />
+                )}
+              </Field>
+            ) : null}
             <Field label="Email" error={fieldErrors.email}>
               {({ id, describedBy, invalid }) => (
                 <input
@@ -341,7 +434,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    revalidateField("email", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -369,7 +465,10 @@ export function EnviarForm() {
                 aria-invalid={invalid}
                 aria-describedby={describedBy}
                 className={fieldClassName}
-                onChange={(event) => setPrimaryRole(event.target.value)}
+                onChange={(event) => {
+                  setPrimaryRole(event.target.value);
+                  revalidateField("primary_role", event.target.value);
+                }}
               />
             )}
           </Field>
@@ -386,7 +485,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setCompany(event.target.value)}
+                  onChange={(event) => {
+                    setCompany(event.target.value);
+                    revalidateField("company", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -400,7 +502,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setRoleAchieved(event.target.value)}
+                  onChange={(event) => {
+                    setRoleAchieved(event.target.value);
+                    revalidateField("role_achieved", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -421,7 +526,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setPreviousProfession(event.target.value)}
+                  onChange={(event) => {
+                    setPreviousProfession(event.target.value);
+                    revalidateField("previous_profession", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -435,7 +543,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setNewRole(event.target.value)}
+                  onChange={(event) => {
+                    setNewRole(event.target.value);
+                    revalidateField("new_role", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -456,7 +567,10 @@ export function EnviarForm() {
                 aria-invalid={invalid}
                 aria-describedby={describedBy}
                 className={textareaClassName}
-                onChange={(event) => setStory(event.target.value)}
+                onChange={(event) => {
+                  setStory(event.target.value);
+                  revalidateField("story", event.target.value);
+                }}
               />
               <p className="mt-xs text-body-small text-text-muted">
                 {story.trim().length}/{STORY_MAX_CHARS}
@@ -483,8 +597,13 @@ export function EnviarForm() {
             optional
             accept={IMAGE_ACCEPT}
             preview="capture"
-            onFileChange={setCaptureFile}
-            onInvalid={(message) => setError("capture", message)}
+            onFileChange={(file) => {
+              setCaptureFile(file);
+              revalidateField("capture", file);
+            }}
+            onInvalid={(message) => {
+              if (message) setError("capture", message);
+            }}
           />
           <div className="flex flex-col gap-md">
             <Field
@@ -504,7 +623,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setVideoUrl(event.target.value)}
+                  onChange={(event) => {
+                    setVideoUrl(event.target.value);
+                    revalidateField("video_url", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -525,7 +647,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setInstagram(event.target.value)}
+                  onChange={(event) => {
+                    setInstagram(event.target.value);
+                    revalidateField("instagram", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -546,7 +671,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setLinkedin(event.target.value)}
+                  onChange={(event) => {
+                    setLinkedin(event.target.value);
+                    revalidateField("linkedin", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -606,8 +734,13 @@ export function EnviarForm() {
             name="consent"
             value="1"
             checked={consent}
-            className="mt-1 size-4 rounded-sm border-border accent-accent-cyan"
-            onChange={(event) => setConsent(event.target.checked)}
+            aria-invalid={Boolean(fieldErrors.consent)}
+            aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
+            className="mt-1 size-4 rounded-sm border-border accent-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+            onChange={(event) => {
+              setConsent(event.target.checked);
+              revalidateField("consent", event.target.checked);
+            }}
           />
           <span>
             Acepto que No Country publique mi testimonio (nombre, foto y texto)
@@ -616,26 +749,33 @@ export function EnviarForm() {
           </span>
         </label>
         {fieldErrors.consent ? (
-          <p className="text-body-small text-destructive" role="alert">
+          <p id="consent-error" className="text-body-small text-destructive">
             {fieldErrors.consent}
           </p>
         ) : null}
-        {state.status === "error" ? (
+        {serverMessage || correctionStep || unknownErrors.length > 0 ? (
           <div className="flex flex-col gap-xs" role="alert">
-            <p className="text-body-small text-destructive">{state.message}</p>
-            {state.fieldErrors
-              ? Object.values(state.fieldErrors).map((message) => (
-                  <p key={message} className="text-body-small text-destructive">
-                    {message}
-                  </p>
-                ))
-              : null}
-            {state.step ? (
+            {serverMessage ? (
+              <p className="text-body-small text-destructive">{serverMessage}</p>
+            ) : null}
+            {Object.entries(serverErrors)
+              .filter(([field]) => FIELD_STEP[field as FormField] !== STEPS)
+              .map(([field, message]) => (
+                <p key={field} className="text-body-small text-destructive">
+                  {message}
+                </p>
+              ))}
+            {unknownErrors.map(([field, message]) => (
+              <p key={field} className="text-body-small text-destructive">
+                {message}
+              </p>
+            ))}
+            {correctionStep ? (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setStep(state.step ?? 1)}
+                onClick={() => navigateTo(correctionStep, serverErrors)}
               >
                 Ir a corregir
               </Button>
@@ -650,7 +790,7 @@ export function EnviarForm() {
           variant="outline"
           size="lg"
           disabled={step === 1 || pending}
-          onClick={() => setStep((current) => Math.max(1, current - 1))}
+          onClick={() => navigateTo(Math.max(1, step - 1))}
         >
           Atrás
         </Button>
@@ -680,18 +820,21 @@ export function EnviarForm() {
   );
 }
 
-function StepProgress({ step }: { step: number }) {
+function StepProgress({ step, headingRef }: {
+  step: number;
+  headingRef: React.RefObject<HTMLHeadingElement | null>;
+}) {
   return (
     <div>
-      <p className="text-overline text-text-secondary">
+      <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
         Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
-      </p>
+      </h2>
       <div
         className="mt-xs h-1 overflow-hidden rounded-full bg-bg-surface-4"
         aria-hidden="true"
       >
         <div
-          className="h-full bg-brand-gradient transition-[width]"
+          className="h-full bg-brand-gradient transition-[width] motion-reduce:transition-none"
           style={{ width: `${(step / STEPS) * 100}%` }}
         />
       </div>
@@ -699,12 +842,12 @@ function StepProgress({ step }: { step: number }) {
   );
 }
 
-function SuccessCard() {
-  const [inviteUrl, setInviteUrl] = useState(`${getSiteUrl()}/enviar`);
+function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
   const [copied, setCopied] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    setInviteUrl(`${window.location.origin}/enviar`);
+    focusAndReveal(headingRef.current);
   }, []);
 
   async function copyInviteLink() {
@@ -720,7 +863,7 @@ function SuccessCard() {
   return (
     <div className="mt-lg rounded-md border border-border bg-card p-md">
       <p className="text-overline text-accent-mint">Listo</p>
-      <h2 className="mt-xs text-heading-3 text-text-primary">
+      <h2 ref={headingRef} tabIndex={-1} className="mt-xs text-heading-3 text-text-primary">
         Gracias por tu testimonio
       </h2>
       <p className="mt-sm text-body text-text-secondary">
