@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useState, type ReactNode } from "react";
+import { startTransition, useActionState, useRef, useState, type ReactNode } from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
@@ -14,7 +14,12 @@ import {
   QUOTE_EDIT_MAX_CHARS,
 } from "../infrastructure/quote";
 import { initialReviewState } from "../types/reviewState";
-import { formatNetworkList, SHARE_NETWORKS, type ShareChannels } from "../types/share";
+import {
+  formatNetworkList,
+  SHARE_CARD_MAX_BYTES,
+  SHARE_NETWORKS,
+  type ShareChannels,
+} from "../types/share";
 import type { AdminTestimonial, CardDesign } from "../types/testimonial";
 import { CaptionField } from "./CaptionField";
 import { CardDesignField } from "./CardDesignField";
@@ -44,6 +49,11 @@ export function ReviewForm({
   const [caption, setCaption] = useState(testimonial.caption);
   const [cardDesign, setCardDesign] = useState<CardDesign>("photo");
   const [intent, setIntent] = useState<Intent | null>(null);
+  const [cardFailed, setCardFailed] = useState(false);
+  const [cardAttempt, setCardAttempt] = useState<"publish" | "retry" | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const preparingCardRef = useRef(false);
+  const preparingCard = cardAttempt !== null;
   const quoteEmpty = quote.trim().length === 0;
   const quoteTooLong = quote.length > QUOTE_EDIT_MAX_CHARS;
   const quoteInvalid = quoteEmpty || quoteTooLong;
@@ -54,6 +64,37 @@ export function ReviewForm({
     linkedin: testimonial.linkedin,
   });
   const targets = SHARE_NETWORKS.filter((network) => channels[network]);
+
+  async function publishWithCard(attempt: "publish" | "retry") {
+    const form = formRef.current;
+    if (!form || preparingCardRef.current) {
+      return;
+    }
+    preparingCardRef.current = true;
+    const formData = new FormData(form);
+    formData.set("intent", "publish");
+    formData.set("quote", quote);
+    formData.set("caption", caption);
+    setIntent("publish");
+    setCardAttempt(attempt);
+    let blob: Blob | null = null;
+    try {
+      blob = await igCardPngBlob(igCardContent(testimonial, quote, cardDesign));
+    } catch {
+      blob = null;
+    }
+    preparingCardRef.current = false;
+    setCardAttempt(null);
+    if (!blob || blob.size === 0 || blob.size > SHARE_CARD_MAX_BYTES) {
+      setCardFailed(true);
+      return;
+    }
+    formData.set("share_card", new File([blob], "instagram.png", { type: "image/png" }));
+    setCardFailed(false);
+    startTransition(() => {
+      formAction(formData);
+    });
+  }
 
   function onQuoteChange(value: string) {
     setQuote(value);
@@ -73,6 +114,7 @@ export function ReviewForm({
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       onSubmit={(event) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
@@ -81,30 +123,18 @@ export function ReviewForm({
           return;
         }
         event.preventDefault();
-        const form = event.currentTarget;
-        const formData = new FormData(form);
-        formData.set("intent", value);
-        formData.set("quote", quote);
-        formData.set("caption", caption);
         if (value !== "publish") {
+          const formData = new FormData(event.currentTarget);
+          formData.set("intent", value);
+          formData.set("quote", quote);
+          formData.set("caption", caption);
           setIntent("save");
           startTransition(() => {
             formAction(formData);
           });
           return;
         }
-        void (async () => {
-          setIntent("publish");
-          try {
-            const blob = await igCardPngBlob(igCardContent(testimonial, quote, cardDesign));
-            formData.set("share_card", new File([blob], "instagram.png", { type: "image/png" }));
-          } catch {
-            // Publica igual; las redes fallan sin card y se reintentan desde la ficha.
-          }
-          startTransition(() => {
-            formAction(formData);
-          });
-        })();
+        void publishWithCard("publish");
       }}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
@@ -212,7 +242,7 @@ export function ReviewForm({
             type="submit"
             name="intent"
             value="reject"
-            disabled={pending}
+            disabled={pending || preparingCard}
             className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
             onClick={(event) => {
               if (
@@ -240,11 +270,28 @@ export function ReviewForm({
                 {state.message}
               </p>
             ) : null}
+            {cardFailed ? (
+              <p className="text-admin-caption text-destructive" role="alert">
+                No se pudo generar la imagen y el testimonio no se publicó.
+              </p>
+            ) : null}
+            {cardFailed ? (
+              <button
+                type="button"
+                disabled={pending || preparingCard || quoteInvalid}
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+                onClick={() => {
+                  void publishWithCard("retry");
+                }}
+              >
+                {cardAttempt === "retry" ? "Reintentando…" : "Reintentar imagen"}
+              </button>
+            ) : null}
             <button
               type="submit"
               name="intent"
               value="save"
-              disabled={pending || quoteInvalid}
+              disabled={pending || preparingCard || quoteInvalid}
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               onClick={() => setIntent("save")}
             >
@@ -254,7 +301,7 @@ export function ReviewForm({
               type="submit"
               name="intent"
               value="publish"
-              disabled={pending || quoteInvalid}
+              disabled={pending || preparingCard || quoteInvalid}
               className={cn(buttonVariants({ variant: "default", size: "lg" }))}
               onClick={(event) => {
                 const where = targets.length
@@ -267,7 +314,9 @@ export function ReviewForm({
                 setIntent("publish");
               }}
             >
-              {pending && intent === "publish" ? "Publicando…" : "Publicar"}
+              {(pending && intent === "publish") || cardAttempt === "publish"
+                ? "Publicando…"
+                : "Publicar"}
             </button>
           </div>
         </div>

@@ -55,6 +55,8 @@ export const TestimonialMapper = {
       discordPostedAt: dto.discord_posted_at ?? null,
       bufferInstagramPostedAt: dto.buffer_instagram_posted_at ?? null,
       bufferLinkedinPostedAt: dto.buffer_linkedin_posted_at ?? null,
+      bufferInstagramPostId: dto.buffer_instagram_post_id ?? null,
+      bufferLinkedinPostId: dto.buffer_linkedin_post_id ?? null,
     };
   },
 

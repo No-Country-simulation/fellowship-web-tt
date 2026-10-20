@@ -37,6 +37,8 @@ export type Database = {
           discord_posted_at: string | null;
           buffer_instagram_posted_at: string | null;
           buffer_linkedin_posted_at: string | null;
+          buffer_instagram_post_id: string | null;
+          buffer_linkedin_post_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -64,6 +66,8 @@ export type Database = {
           discord_posted_at?: string | null;
           buffer_instagram_posted_at?: string | null;
           buffer_linkedin_posted_at?: string | null;
+          buffer_instagram_post_id?: string | null;
+          buffer_linkedin_post_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -91,6 +95,8 @@ export type Database = {
           discord_posted_at?: string | null;
           buffer_instagram_posted_at?: string | null;
           buffer_linkedin_posted_at?: string | null;
+          buffer_instagram_post_id?: string | null;
+          buffer_linkedin_post_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };

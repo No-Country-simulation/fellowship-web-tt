@@ -1,10 +1,10 @@
-import type { ShareChannels } from "../../types/share";
+import type { BufferPostStates, ShareChannels } from "../../types/share";
 import type {
   AdminInboxData,
   AdminTestimonial,
   TestimonialStatus,
 } from "../../types/testimonial";
-import { hasInstagramChannel, hasLinkedInChannel } from "../buffer";
+import { getPost, hasInstagramChannel, hasLinkedInChannel } from "../buffer";
 import type { TestimonialDto } from "../dtos/testimonialDto";
 import { hasCommunityWebhook } from "../discord";
 import { TestimonialMapper } from "../mappers/testimonialMapper";
@@ -131,6 +131,7 @@ export async function markDiscordPosted(
 export async function markBufferPosted(
   id: string,
   network: "instagram" | "linkedin",
+  postId: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
@@ -140,8 +141,8 @@ export async function markBufferPosted(
   const postedAt = new Date().toISOString();
   const values =
     network === "instagram"
-      ? { buffer_instagram_posted_at: postedAt }
-      : { buffer_linkedin_posted_at: postedAt };
+      ? { buffer_instagram_posted_at: postedAt, buffer_instagram_post_id: postId }
+      : { buffer_linkedin_posted_at: postedAt, buffer_linkedin_post_id: postId };
   const { data, error } = await supabase
     .from("testimonials")
     .update(values)
@@ -178,6 +179,16 @@ export async function rejectTestimonial(
 export async function storedShareCardUrl(slug: string): Promise<string | null> {
   const path = `${slug}/${SHARE_CARD_NAME}`;
   return (await shareCardExists(path)) ? publicStorageUrl(SHARE_CARDS_BUCKET, path) : null;
+}
+
+/** Estado de los posts de Buffer con id guardado. Sin id (envíos viejos) la red queda en `null`. */
+export async function bufferPostStates(testimonial: AdminTestimonial): Promise<BufferPostStates> {
+  const { bufferInstagramPostId, bufferLinkedinPostId } = testimonial;
+  const [instagram, linkedin] = await Promise.all([
+    bufferInstagramPostId ? getPost(bufferInstagramPostId) : null,
+    bufferLinkedinPostId ? getPost(bufferLinkedinPostId) : null,
+  ]);
+  return { instagram, linkedin };
 }
 
 /** Sube la card del post (la misma para las tres redes) o confirma que ya está. Devuelve la URL pública. */

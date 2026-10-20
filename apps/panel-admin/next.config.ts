@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@repo/ui"],
   experimental: {
     serverActions: {
-      bodySizeLimit: "8mb",
+      bodySizeLimit: "12mb",
     },
   },
   images: {

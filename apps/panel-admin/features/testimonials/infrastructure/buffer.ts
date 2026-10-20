@@ -1,3 +1,4 @@
+import type { BufferPostState, BufferPostStatus } from "../types/share";
 import { youtubeWatchUrl } from "./youtube";
 
 const BUFFER_API_URL = "https://api.buffer.com";
@@ -21,6 +22,30 @@ mutation CreateScheduledPost($input: CreatePostInput!) {
   }
 }
 `;
+
+const POST_QUERY = `
+query GetPost($input: PostInput!) {
+  post(input: $input) {
+    id
+    status
+    dueAt
+    sentAt
+    externalLink
+    error {
+      message
+    }
+  }
+}
+`;
+
+const BUFFER_POST_STATUSES: readonly BufferPostStatus[] = [
+  "draft",
+  "error",
+  "needs_approval",
+  "scheduled",
+  "sending",
+  "sent",
+];
 
 export function bufferPublishesImmediately() {
   return trimEnv(process.env.BUFFER_ENV)?.toLowerCase() === "production";
@@ -113,6 +138,30 @@ export async function createPost(
   }
 }
 
+/** Estado actual de un post creado con `createPost`. `null` si falta la key o Buffer no responde. */
+export async function getPost(id: string): Promise<BufferPostState | null> {
+  const key = apiKey();
+  if (!key) {
+    return null;
+  }
+
+  try {
+    const response = await bufferGraphql(key, POST_QUERY, { input: { id } });
+    if (!response) {
+      return null;
+    }
+
+    const post = parsePost(response.post);
+    if (!post) {
+      console.error("Buffer getPost failed: unexpected payload");
+    }
+    return post;
+  } catch {
+    console.error("Buffer getPost failed");
+    return null;
+  }
+}
+
 function apiKey() {
   return trimEnv(process.env.BUFFER_API_KEY);
 }
@@ -167,6 +216,7 @@ function parseHttpsUrl(value: string) {
 type GraphqlBody = {
   data?: {
     createPost?: unknown;
+    post?: unknown;
   };
   errors?: { message?: string }[];
 };
@@ -221,6 +271,26 @@ function parseCreatePostPayload(payload: unknown): BufferPost | null {
     status: typeof post.status === "string" ? post.status : "",
     sentAt: typeof post.sentAt === "string" ? post.sentAt : null,
   };
+}
+
+function parsePost(post: unknown): BufferPostState | null {
+  if (!isRecord(post) || !isBufferPostStatus(post.status)) {
+    return null;
+  }
+
+  const error = isRecord(post.error) && typeof post.error.message === "string" ? post.error.message : null;
+
+  return {
+    status: post.status,
+    dueAt: typeof post.dueAt === "string" ? post.dueAt : null,
+    sentAt: typeof post.sentAt === "string" ? post.sentAt : null,
+    externalLink: typeof post.externalLink === "string" ? parseHttpsUrl(post.externalLink) : null,
+    errorMessage: error?.trim() || null,
+  };
+}
+
+function isBufferPostStatus(value: unknown): value is BufferPostStatus {
+  return typeof value === "string" && (BUFFER_POST_STATUSES as readonly string[]).includes(value);
 }
 
 function mutationErrorMessage(payload: unknown) {

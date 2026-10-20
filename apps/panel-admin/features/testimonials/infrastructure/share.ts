@@ -1,11 +1,14 @@
-import type { ShareOutcome, ShareResult } from "../types/share";
+import {
+  SHARE_CARD_MAX_BYTES,
+  type BufferPostIds,
+  type ShareOutcome,
+  type ShareReport,
+} from "../types/share";
 import type { AdminTestimonial } from "../types/testimonial";
 import { createPost, hasInstagramChannel, hasLinkedInChannel } from "./buffer";
 import type { BufferCreatePostResult } from "./buffer";
 import { hasCommunityWebhook, postCommunityTestimonial } from "./discord";
 import { prepareShareCard } from "./repositories/testimonialRepository";
-
-const SHARE_CARD_MAX_BYTES = 5 * 1024 * 1024;
 
 type ShareSource = Pick<
   AdminTestimonial,
@@ -18,6 +21,8 @@ type ShareSource = Pick<
   | "bufferInstagramPostedAt"
   | "bufferLinkedinPostedAt"
 >;
+
+const NO_BUFFER_POSTS: BufferPostIds = { instagram: null, linkedin: null };
 
 export function readShareCard(formData: FormData): File | null {
   const value = formData.get("share_card");
@@ -38,7 +43,7 @@ export function readShareCard(formData: FormData): File | null {
 export async function sharePublished(
   testimonial: ShareSource,
   card: File | null,
-): Promise<ShareResult> {
+): Promise<ShareReport> {
   const pending = {
     discord: hasCommunityWebhook() && !testimonial.discordPostedAt,
     instagram: hasInstagramChannel() && !testimonial.bufferInstagramPostedAt,
@@ -46,15 +51,21 @@ export async function sharePublished(
   };
 
   if (!pending.discord && !pending.instagram && !pending.linkedin) {
-    return { discord: "skipped", instagram: "skipped", linkedin: "skipped" };
+    return {
+      result: { discord: "skipped", instagram: "skipped", linkedin: "skipped" },
+      bufferPostIds: NO_BUFFER_POSTS,
+    };
   }
 
   const imageUrl = await prepareShareCard(testimonial.slug, card);
   if (!imageUrl) {
     return {
-      discord: pending.discord ? "failed" : "skipped",
-      instagram: pending.instagram ? "failed" : "skipped",
-      linkedin: pending.linkedin ? "failed" : "skipped",
+      result: {
+        discord: pending.discord ? "failed" : "skipped",
+        instagram: pending.instagram ? "failed" : "skipped",
+        linkedin: pending.linkedin ? "failed" : "skipped",
+      },
+      bufferPostIds: NO_BUFFER_POSTS,
     };
   }
 
@@ -69,24 +80,34 @@ export async function sharePublished(
         })
       : ("skipped" as const),
     pending.instagram
-      ? createPost({ network: "instagram", text: testimonial.caption, imageUrl }).then(toOutcome)
-      : ("skipped" as const),
+      ? createPost({ network: "instagram", text: testimonial.caption, imageUrl })
+      : null,
     pending.linkedin
       ? createPost({
           network: "linkedin",
           text: testimonial.caption,
           imageUrl,
           videoUrl: testimonial.videoUrl,
-        }).then(toOutcome)
-      : ("skipped" as const),
+        })
+      : null,
   ]);
 
-  return { discord, instagram, linkedin };
+  return {
+    result: { discord, instagram: toOutcome(instagram), linkedin: toOutcome(linkedin) },
+    bufferPostIds: { instagram: postId(instagram), linkedin: postId(linkedin) },
+  };
 }
 
-function toOutcome(result: BufferCreatePostResult): ShareOutcome {
+function toOutcome(result: BufferCreatePostResult | null): ShareOutcome {
+  if (!result) {
+    return "skipped";
+  }
   if (result.status === "created") {
     return "posted";
   }
   return result.status;
+}
+
+function postId(result: BufferCreatePostResult | null): string | null {
+  return result?.status === "created" ? result.post.id : null;
 }
