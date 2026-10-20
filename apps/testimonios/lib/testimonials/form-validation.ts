@@ -10,6 +10,7 @@ import {
   normalizeInstagram,
   normalizeLinkedIn,
   normalizeYouTubeUrl,
+  validateCountry,
   validateImageFile,
   type FieldErrors,
   type FormField,
@@ -71,11 +72,7 @@ export function validateField(
         "El nombre es obligatorio.",
       );
     case "country":
-      return validateText(
-        values.country,
-        FIELD_MAX_CHARS,
-        "El país es obligatorio.",
-      );
+      return validateCountry(values.country);
     case "email":
       if (!values.email.trim()) {
         return "El email es obligatorio. No se muestra en público.";

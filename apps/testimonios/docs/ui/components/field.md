@@ -19,7 +19,7 @@ import {
 
 ## Cuándo usarlo
 
-- Cualquier input, textarea o grupo de radios de esta app
+- Cualquier input, select, textarea o grupo de radios de esta app
 - Upload de avatar o captura (`FileField`)
 - Textareas sueltos que deban verse igual (`textareaClassName` en quote o captions)
 
@@ -61,6 +61,20 @@ validación, el formulario enfoca el primer control inválido en orden de DOM y 
 `aria-describedby` incluye el error, evitando anunciar a la vez todos los campos.
 Los errores generales del servidor mantienen su región de alerta separada.
 
+En el paso 2 de `/enviar`, País usa un `select` nativo con `fieldClassName`.
+Las opciones de `lib/testimonials/countries.ts` son provisionales, pendientes de
+la lista oficial de No Country. “Otro país” muestra el input “Especificá tu país”
+para admitir participantes de países no incluidos. Su texto se conserva al
+cambiar de opción, categoría o paso; el valor final se deriva de la selección
+activa y se envía una sola vez como `country`, sin el marcador interno.
+
+Solo el control activo recibe el error de `country`: el selector si falta elegir
+una opción o el input si está seleccionado “Otro país”. Ese control conserva
+`name="country"` para que la navegación al primer error lo enfoque. La validación
+compartida entre cliente y servidor exige contenido, hasta `FIELD_MAX_CHARS`
+(120), letras Unicode y ausencia de números; admite espacios y puntuación
+habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provisional.
+
 ## Props — `FileField`
 
 | Prop | Tipo | Default | Descripción |
@@ -81,7 +95,7 @@ Los errores generales del servidor mantienen su región de alerta separada.
 
 | Export | Uso |
 | --- | --- |
-| `fieldClassName` | `<input>` de una línea (alto 44px) |
+| `fieldClassName` | `<input>` de una línea o `<select>` nativo (alto 44px) |
 | `textareaClassName` | `<textarea>` (min-height 144px, resize vertical) |
 
 Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.

@@ -10,11 +10,13 @@ import {
   type FormEvent,
 } from "react";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
+import { COUNTRY_OPTIONS, OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countries";
 import {
   FIELD_STEP,
   STORY_MAX_CHARS,
@@ -79,7 +81,8 @@ export function EnviarForm() {
   const [step, setStep] = useState(1);
   const [type, setType] = useState<TestimonialType | "">("");
   const [fullName, setFullName] = useState("");
-  const [country, setCountry] = useState("");
+  const [countrySelection, setCountrySelection] = useState("");
+  const [customCountry, setCustomCountry] = useState("");
   const [email, setEmail] = useState("");
   const [story, setStory] = useState("");
   const [company, setCompany] = useState("");
@@ -103,8 +106,8 @@ export function EnviarForm() {
   const focusRequest = useRef<{ errors?: FieldErrors } | null>(null);
 
   function focusFirstError(errors: FieldErrors) {
-    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-      "input[name], textarea[name]",
+    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      "input[name], textarea[name], select[name]",
     );
     const first = Array.from(controls ?? []).find((control) =>
       errors[control.name as FormField] && !control.disabled &&
@@ -127,6 +130,8 @@ export function EnviarForm() {
   }
 
   const selected = type ? typeOption(type) : null;
+  const isOtherCountry = countrySelection === OTHER_COUNTRY_VALUE;
+  const country = isOtherCountry ? customCountry : countrySelection;
   const values: FormValues = {
     type,
     full_name: fullName,
@@ -367,25 +372,56 @@ export function EnviarForm() {
                 />
               )}
             </Field>
-            <Field label="País" error={fieldErrors.country}>
+            <Field label="País" error={isOtherCountry ? undefined : fieldErrors.country}>
               {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="country"
-                  type="text"
-                  autoComplete="country-name"
-                  placeholder="Argentina"
-                  value={country}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setCountry(event.target.value);
-                    revalidateField("country", event.target.value);
-                  }}
-                />
+                <div className="relative">
+                  <select
+                    id={id}
+                    name={isOtherCountry ? "country_selection" : "country"}
+                    autoComplete="country-name"
+                    value={countrySelection}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                    className={cn(fieldClassName, "appearance-none pr-12")}
+                    onChange={(event) => {
+                      const selection = event.target.value;
+                      setCountrySelection(selection);
+                      revalidateField("country", selection === OTHER_COUNTRY_VALUE ? customCountry : selection);
+                    }}
+                  >
+                    <option value="">Seleccioná un país</option>
+                    {COUNTRY_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                    <option value={OTHER_COUNTRY_VALUE}>Otro país</option>
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-sm top-1/2 size-4 -translate-y-1/2 text-text-primary"
+                  />
+                </div>
               )}
             </Field>
+            {isOtherCountry ? (
+              <Field label="Especificá tu país" error={fieldErrors.country}>
+                {({ id, describedBy, invalid }) => (
+                  <input
+                    id={id}
+                    name="country"
+                    type="text"
+                    autoComplete="country-name"
+                    value={customCountry}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                    className={fieldClassName}
+                    onChange={(event) => {
+                      setCustomCountry(event.target.value);
+                      revalidateField("country", event.target.value);
+                    }}
+                  />
+                )}
+              </Field>
+            ) : null}
             <Field label="Email" error={fieldErrors.email}>
               {({ id, describedBy, invalid }) => (
                 <input
