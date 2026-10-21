@@ -123,7 +123,7 @@ export function validateField(
       return validateImageFile(values.capture, {
         required: false,
         maxBytes: CAPTURE_MAX_BYTES,
-        label: "La captura del proyecto",
+        label: "La foto testimonial",
       });
     case "video_url":
       if (values.video_url.trim() && !normalizeYouTubeUrl(values.video_url)) {

@@ -47,21 +47,21 @@ export const TYPE_OPTIONS: TypeOption[] = [
     label: "Simulación",
     description: "Tu experiencia en una simulación laboral.",
     storyLabel: "Contanos tu experiencia en la simulación",
-    storyHint: "En tus palabras. No hace falta que quede perfecto.",
+    storyHint: "¿Qué aprendiste? ¿Cómo fue trabajar en equipo y qué experiencia te llevaste?",
   },
   {
     value: "first_job",
     label: "Primer empleo",
     description: "Cómo la simulación te ayudó a entrar a IT.",
     storyLabel: "Cómo te ayudó la simulación",
-    storyHint: "Contá el puente entre la simulación y este trabajo.",
+    storyHint: "¿Cómo fue pasar a tu primer empleo? ¿Qué te aportó la experiencia previa?",
   },
   {
     value: "career_change",
     label: "Reconversión",
     description: "Por qué cambiaste de oficio y cómo te está ayudando No Country.",
     storyLabel: "Por qué cambiaste y cómo te está ayudando No Country",
-    storyHint: "El oficio de antes, el rol de ahora y qué cambió.",
+    storyHint: "¿De dónde venís? ¿Qué motivó el cambio y cómo estás transitando este nuevo camino?",
   },
 ];
 

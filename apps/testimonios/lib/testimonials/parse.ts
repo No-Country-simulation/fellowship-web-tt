@@ -374,7 +374,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const captureError = validateImageFile(capture, {
     required: false,
     maxBytes: CAPTURE_MAX_BYTES,
-    label: "La captura del proyecto",
+    label: "La foto testimonial",
   });
   if (captureError) {
     fieldErrors.capture = captureError;
