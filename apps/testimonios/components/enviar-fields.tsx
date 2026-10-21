@@ -121,6 +121,7 @@ type FileFieldProps = {
   name: string;
   label: string;
   hint?: string;
+  requirements?: string;
   error?: string;
   optional?: boolean;
   required?: boolean;
@@ -132,11 +133,12 @@ type FileFieldProps = {
   onInvalid?: (message: string | undefined) => void;
 };
 
-/** Imagen confirmada con preview local; el reemplazo solo se aplica tras recortarlo. */
+/** Imagen con preview y requisitos asociados; el reemplazo solo se aplica tras recortarlo. */
 export function FileField({
   name,
   label,
   hint,
+  requirements,
   error,
   optional,
   required,
@@ -284,7 +286,7 @@ export function FileField({
               {cropSource
                 ? "Recortando…"
                 : preview === "avatar"
-                  ? "Foto"
+                  ? "Agregar foto de perfil"
                   : "Agregar fotografía"}
             </span>
           )}
@@ -296,7 +298,7 @@ export function FileField({
             accept={accept}
             aria-labelledby={labelledBy}
             aria-invalid={invalid}
-            aria-describedby={describedBy}
+            aria-describedby={[describedBy, requirements ? `${id}-requirements` : undefined].filter(Boolean).join(" ") || undefined}
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0] ?? null;
@@ -330,6 +332,11 @@ export function FileField({
             onCancel={cancelCrop}
             onConfirm={confirmCrop}
           />
+        ) : null}
+        {requirements ? (
+          <p id={`${id}-requirements`} className="mt-1 text-xs leading-relaxed text-text-secondary">
+            {requirements}
+          </p>
         ) : null}
         </div>
       )}

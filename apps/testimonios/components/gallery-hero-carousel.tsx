@@ -1,23 +1,40 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, UserRound } from "lucide-react";
 
-import { HERO_STORIES } from "@/components/gallery-hero-data";
+import type { HeroStory } from "@/components/gallery-hero-data";
 import { cn } from "@/lib/utils";
 
 import styles from "./gallery-hero-carousel.module.css";
 
 const CONTROL_CLASSES =
-  "inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-bg-surface-2 text-text-primary transition-[color,border-color,background-color] duration-200 hover:border-accent-cyan hover:bg-bg-surface-3 hover:text-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan motion-reduce:transition-none";
+  "inline-flex size-[44px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-bg-surface-2 text-text-primary transition-[color,border-color,background-color] duration-200 hover:border-accent-cyan hover:bg-bg-surface-3 hover:text-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan motion-reduce:transition-none";
 
 type CarouselMotion = {
   from: number;
   direction: "next" | "previous";
 };
 
-/** Tres tarjetas reales con transiciones secuenciales y controles de foco estable. */
-export function GalleryHeroCarousel() {
+type GalleryHeroCarouselProps = {
+  stories: readonly HeroStory[];
+};
+
+/** Publicados seleccionados en servidor; reinicia la navegación si cambian sus identidades u orden. */
+export function GalleryHeroCarousel({ stories }: GalleryHeroCarouselProps) {
+  if (stories.length === 0) return null;
+
+  return (
+    <HeroStoryStack
+      key={JSON.stringify(stories.map((story) => story.id))}
+      stories={stories}
+    />
+  );
+}
+
+function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
   const [{ activeIndex, hasNavigated, motion }, setNavigation] = useState<{
     activeIndex: number;
     hasNavigated: boolean;
@@ -29,7 +46,8 @@ export function GalleryHeroCarousel() {
   });
   const stackRef = useRef<HTMLDivElement>(null);
   const id = useId();
-  const total = HERO_STORIES.length;
+  const total = stories.length;
+  const hasNavigation = total > 1;
 
   useEffect(() => {
     if (!motion) return;
@@ -53,6 +71,8 @@ export function GalleryHeroCarousel() {
   }, [motion]);
 
   function navigate(direction: -1 | 1) {
+    if (!hasNavigation) return;
+
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -76,30 +96,32 @@ export function GalleryHeroCarousel() {
 
   return (
     <section
-      aria-label="Historias ilustrativas de la comunidad"
-      aria-roledescription="carrusel"
-      aria-describedby={`${id}-notice`}
+      aria-label={hasNavigation
+        ? "Testimonios publicados de la comunidad"
+        : "Testimonio publicado de la comunidad"}
+      aria-roledescription={hasNavigation ? "carrusel" : undefined}
       className="w-full min-w-0 max-w-[28rem] justify-self-center lg:justify-self-end"
     >
-      <div className="sm:pr-10">
+      <div className={total === 3 ? "sm:pr-10" : hasNavigation ? "sm:pr-6" : undefined}>
         <div className="relative isolate">
-          {/* Todas las tarjetas participan en la altura de la misma celda. */}
+          {/* La celda comparte altura y crece solo si el contenido obligatorio lo necesita. */}
           <div
             ref={stackRef}
             id={`${id}-stories`}
+            data-count={total}
             data-direction={motion?.direction}
             className={cn(styles.stack, "grid")}
           >
-            {HERO_STORIES.map((story, index) => {
+            {stories.map((story, index) => {
               const position = (index + total - activeIndex) % total;
               const active = position === 0;
 
               return (
                 <figure
                   key={story.id}
-                  role="group"
-                  aria-roledescription="diapositiva"
-                  aria-label={`${index + 1} de ${total}`}
+                  role={hasNavigation ? "group" : undefined}
+                  aria-roledescription={hasNavigation ? "diapositiva" : undefined}
+                  aria-label={hasNavigation ? `${index + 1} de ${total}` : undefined}
                   aria-hidden={!active}
                   inert={!active}
                   data-position={position}
@@ -114,32 +136,53 @@ export function GalleryHeroCarousel() {
                   }
                   className={cn(
                     styles.card,
-                    "flex min-h-72 min-w-0 flex-col rounded-card border border-transparent p-5 sm:p-md",
+                    "flex min-w-0 flex-col rounded-card border border-transparent p-5 sm:p-md",
                   )}
                 >
                   <span
                     aria-hidden="true"
-                    className="text-brand-gradient block h-9 w-fit text-6xl font-bold leading-none"
+                    className="text-brand-gradient block h-9 w-fit shrink-0 text-6xl font-bold leading-none"
                   >
                     “
                   </span>
-                  <blockquote className="mt-xs flex-1 text-xl font-medium leading-snug tracking-tight text-text-primary wrap-anywhere sm:text-[1.375rem]">
-                    <p>{story.quote}</p>
+                  <blockquote className={cn(styles.quoteSpace, "mt-xs flex-1 text-xl font-medium leading-snug tracking-tight text-text-primary wrap-anywhere sm:text-[1.375rem]")}>
+                    <p className={cn(styles.quote, "line-clamp-1")}>{story.quote}</p>
                   </blockquote>
-                  <figcaption className="mt-md flex min-w-0 items-center gap-xs pb-14 sm:pr-28 sm:pb-0">
+                  <figcaption
+                    className={cn(
+                      "mt-md flex min-w-0 shrink-0 flex-wrap items-center gap-xs",
+                      hasNavigation && "pb-14 sm:pr-28 sm:pb-0",
+                    )}
+                  >
                     <span
                       aria-hidden="true"
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full border border-accent-indigo-light/30 bg-accent-indigo/20 text-accent-indigo-light"
+                      className="relative flex size-10 shrink-0 self-start items-center justify-center overflow-hidden rounded-full border border-accent-indigo-light/30 bg-accent-indigo/20 text-accent-indigo-light"
                     >
-                      <UserRound className="size-5" strokeWidth={1.5} />
+                      {story.avatarUrl ? (
+                        <Image
+                          src={story.avatarUrl}
+                          alt=""
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <UserRound className="size-5" strokeWidth={1.5} />
+                      )}
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-[1_1_6rem]">
                       <p className="text-sm font-medium leading-snug text-text-primary wrap-anywhere">
-                        {story.displayName}
+                        {story.fullName}
                       </p>
                       <p className="mt-1 text-[0.625rem] leading-relaxed tracking-[0.12em] text-text-secondary uppercase wrap-anywhere">
-                        {story.category}
+                        {story.typeLabel}
                       </p>
+                      <Link
+                        href={`/t/${story.slug}`}
+                        className="mt-1 inline-flex min-h-11 max-w-full items-center rounded-button text-xs font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+                      >
+                        Ver historia
+                      </Link>
                     </div>
                   </figcaption>
                 </figure>
@@ -147,34 +190,35 @@ export function GalleryHeroCarousel() {
             })}
           </div>
           {/* Fuera de las tarjetas: no se remontan ni se desplazan al navegar. */}
-          <div className="absolute right-5 bottom-5 z-10 flex gap-xs sm:right-md sm:bottom-md">
-            <button
-              type="button"
-              aria-label="Testimonio anterior"
-              aria-controls={`${id}-stories`}
-              onClick={() => navigate(-1)}
-              className={CONTROL_CLASSES}
-            >
-              <ChevronLeft aria-hidden="true" className="size-5" />
-            </button>
-            <button
-              type="button"
-              aria-label="Siguiente testimonio"
-              aria-controls={`${id}-stories`}
-              onClick={() => navigate(1)}
-              className={CONTROL_CLASSES}
-            >
-              <ChevronRight aria-hidden="true" className="size-5" />
-            </button>
-          </div>
+          {hasNavigation ? (
+            <div className="absolute right-5 bottom-5 z-10 flex gap-xs sm:right-md sm:bottom-md">
+              <button
+                type="button"
+                aria-label="Testimonio anterior"
+                aria-controls={`${id}-stories`}
+                onClick={() => navigate(-1)}
+                className={CONTROL_CLASSES}
+              >
+                <ChevronLeft aria-hidden="true" className="size-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Siguiente testimonio"
+                aria-controls={`${id}-stories`}
+                onClick={() => navigate(1)}
+                className={CONTROL_CLASSES}
+              >
+                <ChevronRight aria-hidden="true" className="size-5" />
+              </button>
+            </div>
+          ) : null}
         </div>
-        <p id={`${id}-notice`} className="sr-only">
-          Ejemplos ilustrativos para desarrollo y revisión.
-        </p>
       </div>
-      <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-        {hasNavigated ? `Testimonio ${activeIndex + 1} de ${total}` : ""}
-      </p>
+      {hasNavigation ? (
+        <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {hasNavigated ? `Testimonio ${activeIndex + 1} de ${total}` : ""}
+        </p>
+      ) : null}
     </section>
   );
 }

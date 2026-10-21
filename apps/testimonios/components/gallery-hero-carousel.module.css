@@ -1,9 +1,19 @@
 .stack {
+  min-height: 368px;
+  grid-template-rows: minmax(0, 1fr);
   --motion-duration: 420ms;
   --motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
+  --return-x: 36px;
+  --return-scale: 0.94;
+}
+
+.stack[data-count="2"] {
+  --return-x: 18px;
+  --return-scale: 0.97;
 }
 
 .card {
+  min-height: 0;
   grid-area: 1 / 1;
   position: relative;
   transform-origin: right center;
@@ -17,6 +27,28 @@
       color-mix(in srgb, var(--brand-cyan) 60%, var(--border))
     ) border-box;
   box-shadow: 0 16px 40px color-mix(in srgb, var(--bg-base) 35%, transparent);
+}
+
+.quoteSpace {
+  container-type: size;
+  min-height: 1lh;
+}
+
+/* El clamp se adapta a líneas completas, reservando siempre el pie de la tarjeta. */
+@container (min-height: 2lh) {
+  .quote { -webkit-line-clamp: 2; }
+}
+
+@container (min-height: 3lh) {
+  .quote { -webkit-line-clamp: 3; }
+}
+
+@container (min-height: 4lh) {
+  .quote { -webkit-line-clamp: 4; }
+}
+
+@container (min-height: 5lh) {
+  .quote { -webkit-line-clamp: 5; }
 }
 
 /* La superficie sigue opaca: esta capa atenúa las tarjetas posteriores. */
@@ -79,6 +111,14 @@
 
 /* Se reserva el desplazamiento lateral en el wrapper desde sm. */
 @media (min-width: 40rem) {
+  .stack {
+    min-height: 384px;
+  }
+
+  @container (min-height: 6lh) {
+    .quote { -webkit-line-clamp: 6; }
+  }
+
   .card {
     transition: transform 380ms var(--motion-easing);
   }
@@ -127,8 +167,8 @@
 @keyframes leave {
   0% { transform: translateX(0) scale(1); opacity: 1; z-index: 4; }
   40% { transform: translateX(-40px) scale(0.98); opacity: 0; z-index: 4; }
-  41% { transform: translateX(-10px) scale(0.94); opacity: 0; z-index: 1; }
-  100% { transform: translateX(36px) scale(0.94); opacity: 1; z-index: 1; }
+  41% { transform: translateX(-10px) scale(var(--return-scale)); opacity: 0; z-index: 1; }
+  100% { transform: translateX(var(--return-x)) scale(var(--return-scale)); opacity: 1; z-index: 1; }
 }
 
 @keyframes enter {

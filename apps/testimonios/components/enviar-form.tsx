@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
 import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react";
@@ -20,6 +21,7 @@ import { COUNTRY_OPTIONS, OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countri
 import {
   FIELD_STEP,
   STORY_MAX_CHARS,
+  STORY_MIN_CHARS,
   firstErrorStep,
   type FieldErrors,
   type FormField,
@@ -56,7 +58,7 @@ const STEP_TITLES = [
   "Qué querés contar",
   "Nombre, país, email y foto",
   "Tu historia",
-  "Captura y links",
+  "Foto testimonial y enlaces",
   "Consentimiento",
 ] as const;
 
@@ -80,7 +82,8 @@ function focusAndReveal(control: HTMLElement | null) {
   });
 }
 
-export function EnviarForm() {
+/** Recibe el encabezado de servidor como children y lo retira al mostrar el éxito. */
+export function EnviarForm({ children }: { children: ReactNode }) {
   const [state, formAction, pending] = useActionState(
     submitTestimonial,
     initialSubmitState,
@@ -92,6 +95,7 @@ export function EnviarForm() {
   const [customCountry, setCustomCountry] = useState("");
   const [email, setEmail] = useState("");
   const [story, setStory] = useState("");
+  const [storyNeedsReview, setStoryNeedsReview] = useState(false);
   const [company, setCompany] = useState("");
   const [primaryRole, setPrimaryRole] = useState("");
   const [roleAchieved, setRoleAchieved] = useState("");
@@ -162,6 +166,13 @@ export function EnviarForm() {
   const correctionStep = Object.keys(serverErrors).length
     ? firstErrorStep(serverErrors)
     : undefined;
+  const professionalSummary = type === "simulation"
+    ? (primaryRole.trim() ? [["Puesto principal", primaryRole.trim()]] : [])
+    : type === "first_job"
+      ? [["Empresa", company.trim() || "Falta completar"], ["Puesto", roleAchieved.trim() || "Falta completar"]]
+      : type === "career_change"
+        ? [["Oficio anterior", previousProfession.trim() || "Falta completar"], ["Rol nuevo", newRole.trim() || "Falta completar"]]
+        : [];
 
   function updateErrors(updates: FieldErrors) {
     setValidation((current) => updateFormErrors(current, state, updates));
@@ -178,6 +189,9 @@ export function EnviarForm() {
   }
 
   function changeType(nextType: TestimonialType) {
+    if (type && nextType !== type && story.trim()) {
+      setStoryNeedsReview(true);
+    }
     setType(nextType);
     const updates: FieldErrors = { type: undefined };
     const previousOverrides =
@@ -274,7 +288,7 @@ export function EnviarForm() {
     });
   }
 
-  return (
+  const form = (
     <form
       ref={formRef}
       action={formAction}
@@ -376,6 +390,7 @@ export function EnviarForm() {
           <FileField
             name="avatar"
             label="Foto de perfil"
+            requirements="JPG, PNG o WebP · Máximo 5 MB."
             required
             className="max-w-36 md:max-w-48"
             error={fieldErrors.avatar}
@@ -590,42 +605,50 @@ export function EnviarForm() {
             </Field>
           </div>
         ) : null}
-        <Field
-          label={selected?.storyLabel ?? "Tu historia"}
-          required
-          reserveErrorSpace
-          className="gap-xs"
-          hint={selected?.storyHint}
-          error={fieldErrors.story}
-          trailingInfo={(
-            <span className="text-xs text-text-secondary tabular-nums">
-              {story.trim().length}/{STORY_MAX_CHARS}
-            </span>
-          )}
-        >
-          {({ id, describedBy, invalid }) => (
-            <textarea
-              id={id}
-              name="story"
-              value={story}
-              maxLength={STORY_MAX_CHARS}
-              aria-invalid={invalid}
-              aria-describedby={describedBy}
-              className={textareaClassName}
-              onChange={(event) => {
-                setStory(event.target.value);
-                revalidateField("story", event.target.value);
-              }}
-            />
-          )}
-        </Field>
+        <div className="flex min-w-0 flex-col gap-xs">
+          {storyNeedsReview ? (
+            <p id="story-review-notice" className="text-body-small leading-relaxed text-accent-cyan">
+              Cambiaste el tipo de experiencia. Revisá que tu historia responda a la nueva pregunta.
+            </p>
+          ) : null}
+          <Field
+            label={selected?.storyLabel ?? "Tu historia"}
+            required
+            reserveErrorSpace
+            className="gap-xs"
+            hint={`${selected?.storyHint ?? "En tus palabras."} Entre ${STORY_MIN_CHARS} y ${STORY_MAX_CHARS} caracteres.`}
+            error={fieldErrors.story}
+            trailingInfo={(
+              <span className="text-xs text-text-secondary tabular-nums">
+                {story.trim().length}/{STORY_MAX_CHARS}
+              </span>
+            )}
+          >
+            {({ id, describedBy, invalid }) => (
+              <textarea
+                id={id}
+                name="story"
+                value={story}
+                maxLength={STORY_MAX_CHARS}
+                aria-invalid={invalid}
+                aria-describedby={[describedBy, storyNeedsReview ? "story-review-notice" : undefined].filter(Boolean).join(" ")}
+                className={cn(textareaClassName, "min-h-40 sm:min-h-44")}
+                onChange={(event) => {
+                  setStory(event.target.value);
+                  setStoryNeedsReview(false);
+                  revalidateField("story", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+        </div>
       </fieldset>
 
       <fieldset
         hidden={step !== 4}
         className={cn(step === 4 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Captura y links</legend>
+        <legend className="sr-only">Foto testimonial y enlaces</legend>
         <p className="text-body-small text-text-secondary">
           Todo este paso es opcional.
         </p>
@@ -634,6 +657,7 @@ export function EnviarForm() {
             name="capture"
             label="Foto testimonial"
             hint="Una foto real de tu experiencia: trabajando, con tu equipo o en una reunión."
+            requirements="JPG, PNG o WebP · Máximo 8 MB."
             error={fieldErrors.capture}
             accept={IMAGE_ACCEPT}
             preview="capture"
@@ -732,21 +756,56 @@ export function EnviarForm() {
         </div>
         <section aria-labelledby="testimonial-summary-title" className="rounded-card border border-border bg-card p-sm sm:p-md">
           <h4 id="testimonial-summary-title" className="text-body font-semibold text-text-primary">Resumen</h4>
-          <dl className="mt-sm grid gap-x-md sm:grid-cols-2">
-            {[
-              ["Tipo", selected?.label ?? "—"],
-              ["Nombre", fullName.trim() || "—"],
-              ["País", country.trim() || "—"],
-              ["Foto de perfil", avatarFile ? "Lista" : "Falta"],
-              ["Foto testimonial", captureFile ? "Adjunta" : "Sin captura"],
-              ["YouTube", videoUrl.trim() ? "Link cargado" : "Sin video"],
-            ].map(([label, value]) => (
-              <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
-                <dt className="text-body-small text-text-secondary">{label}</dt>
-                <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="mt-sm flex flex-col gap-md">
+            <section aria-labelledby="summary-testimonial-title">
+              <h5 id="summary-testimonial-title" className="text-body-small font-semibold text-text-primary">Datos de tu testimonio</h5>
+              <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
+                {[
+                  ["Tipo de experiencia", selected?.label ?? "Sin seleccionar"],
+                  ["Nombre", fullName.trim() || "Falta completar"],
+                  ["País", country.trim() || "Falta completar"],
+                  ...professionalSummary,
+                ].map(([label, value]) => (
+                  <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                    <dt className="text-body-small text-text-secondary">{label}</dt>
+                    <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
+                  </div>
+                ))}
+                <div className="min-w-0 border-t border-border-subtle py-xs sm:col-span-2 sm:py-sm">
+                  <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? "Tu historia"}</dt>
+                  <dd className="mt-1 text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : "Falta completar"}</dd>
+                </div>
+              </dl>
+            </section>
+            <section aria-labelledby="summary-contact-title">
+              <h5 id="summary-contact-title" className="text-body-small font-semibold text-text-primary">Datos de contacto</h5>
+              <dl className="mt-xs">
+                <div className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                  <dt className="text-body-small text-text-secondary">Email</dt>
+                  <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{email.trim() || "Falta completar"}</dd>
+                </div>
+              </dl>
+              <p className="text-body-small leading-relaxed text-text-secondary">El email es privado: se usa como dato de contacto y no se publica.</p>
+            </section>
+            <section aria-labelledby="summary-media-title">
+              <h5 id="summary-media-title" className="text-body-small font-semibold text-text-primary">Fotografías y enlaces</h5>
+              <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
+                {[
+                  ["Foto de perfil", avatarFile ? "Lista" : "Falta (obligatoria)"],
+                  ["Foto testimonial", captureFile ? "Adjunta" : "No agregada (opcional)"],
+                  ...(videoUrl.trim() ? [["YouTube", videoUrl.trim()]] : []),
+                  ...(instagram.trim() ? [["Instagram", instagram.trim()]] : []),
+                  ...(linkedin.trim() ? [["LinkedIn", linkedin.trim()]] : []),
+                ].map(([label, value]) => (
+                  <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                    <dt className="text-body-small text-text-secondary">{label}</dt>
+                    <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </div>
+          <p className="mt-sm text-body-small leading-relaxed text-text-secondary">El equipo de No Country revisará tu testimonio antes de publicarlo.</p>
         </section>
         <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
           <h4 id="testimonial-consent-title" className="mb-sm text-body font-semibold text-text-primary">
@@ -852,6 +911,8 @@ export function EnviarForm() {
       </div>
     </form>
   );
+
+  return <>{children}{form}</>;
 }
 
 function StepProgress({ step, headingRef }: {
@@ -915,20 +976,18 @@ function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
   return (
     <div className="mt-lg rounded-card border border-border bg-card p-md sm:p-lg">
       <p className="text-overline text-accent-cyan">Listo</p>
-      <h2 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+      <h1 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
         Gracias por tu testimonio
-      </h2>
+      </h1>
       <p className="mt-sm text-body text-text-secondary">
-        Ya lo tenemos. Gracias por tomarte el tiempo de contarlo.
+        Recibimos tu testimonio. El equipo de No Country lo revisará antes de publicarlo.
       </p>
       <div className="mt-md border-t border-border pt-md">
         <p className="text-body text-text-primary">
           Ahora ayudá a que otra persona se anime
         </p>
         <p className="mt-xs text-body text-text-secondary">
-          Si alguien de tu equipo o de tu simulación todavía no contó su
-          historia, pasale este enlace. Tu invitación puede ser el empujón
-          que necesita para dejarla.
+          Si conocés a alguien con una experiencia para compartir, pasale este enlace. Su historia también puede ayudar a otras personas.
         </p>
         <p className="mt-sm break-all text-body">
           <a

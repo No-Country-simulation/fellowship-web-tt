@@ -9,19 +9,20 @@ Presentación de servidor de la galería pública, con un carrusel cliente indep
 ```tsx
 import { GalleryHero } from "@/components/gallery-hero";
 
-<GalleryHero />
+<GalleryHero stories={heroStories} />
 ```
 
 ## API y composición
 
-No recibe props. El copy provisional se agrupa en `HERO_COPY`, sin modificar las historias publicadas.
+Recibe `stories: readonly HeroStory[] | null`, preparado por `app/page.tsx` a partir de su única consulta pública. Un array vacío significa que todavía no hay publicados; `null` indica que falló la carga. El copy de presentación se agrupa en `HERO_COPY`, sin modificar las historias publicadas.
 
-- Un único `<h1>` con “Historias de” en blanco y “talento real.” con el degradado de marca.
+- Un único `<h1>` con “Historias de” en blanco y “talento real.” con el degradado de marca. Un espacio explícito separa ambos fragmentos; el destacado usa `inline-block`, sin salto forzado. El título permanece en una línea cuando cabe y se ajusta naturalmente al ancho de su columna, conservando la tipografía y los tamaños responsive.
 - Eyebrow con una línea degradada decorativa de 28×2px.
 - Descripción existente, seguida del CTA con 24px de separación (`mt-md`).
 - Un `Link` a `/enviar`, con `buttonVariants` de `@repo/ui`, únicamente el texto “Enviar testimonio” y foco visible.
-- El CTA reutiliza la variante `gradient`: relleno rosa → cyan del token `--gradient-brand`, texto blanco de 16px (`text-base`), `font-medium`, radio `rounded-button` y borde transparente. Conserva 48px de altura mínima; el hover reduce la opacidad al 90% y el foco muestra el halo de la variante compartida (indigo claro). Las transiciones respetan movimiento reducido.
-- Un [GalleryHeroCarousel](./gallery-hero-carousel.md) con tres historias ilustrativas locales y navegación manual. Reemplaza la tarjeta informativa anterior.
+- El CTA reutiliza la variante `gradient`: relleno rosa → cyan del token `--gradient-brand`, texto blanco de 16px (`text-base`), `font-medium`, radio `rounded-button` y borde transparente. Conserva 48px de altura mínima a fuente base de 16px; limita su ancho a la columna y permite varias líneas y altura automática al ampliar el texto, con padding vertical `py-xs`. Su padding horizontal usa `--spacing-md` con un máximo de 24px para reservar espacio al texto ampliado. El hover reduce la opacidad al 90% y el foco muestra el halo de la variante compartida (indigo claro). Las transiciones respetan movimiento reducido.
+- Un [GalleryHeroCarousel](./gallery-hero-carousel.md) con hasta tres testimonios publicados y navegación manual cuando hay más de uno. Usa citas, nombres, categorías y avatares públicos reales, con enlace a su ficha.
+- Sin publicados, un texto discreto: «Pronto vas a encontrar historias de nuestra comunidad.», sin tarjetas ni controles. Ante error (`stories === null`), se omite esa zona: el único aviso de error queda en la sección inferior existente.
 
 ## Layout y accesibilidad
 
@@ -33,8 +34,8 @@ Dos grupos de puntos a la derecha conservan el paso de 28px y la máscara de opa
 
 La decoración vive en una capa absoluta con `aria-hidden` y `pointer-events: none`, aislada detrás del contenido mediante `isolation` y `z-index: -1`. Solo esa capa recorta sus formas con `overflow: clip`: el hero conserva el espacio para las tarjetas y los indicadores de foco.
 
-Se conserva la composición del hero, el diseño del CTA y el comportamiento del carrusel. El contenido se centra a un máximo de `70rem` (1120px). Desde `lg`, la segunda columna ocupa `26rem`, con una separación de 32px; desde `xl`, ocupa `28rem`, con 64px de separación. Así el título conserva espacio a 1024px. En pantallas menores el carrusel aparece debajo del texto y el CTA, centrado y limitado a `28rem`.
+Se conserva la composición del hero, el diseño del CTA y el comportamiento del carrusel. El contenido se centra a un máximo de `70rem` (1120px). Desde `lg`, la segunda columna ocupa `26rem`, con una separación de 32px; desde `xl`, ocupa `28rem`, con 64px de separación. Las dos columnas requieren además al menos `56rem` de ancho disponible en el contenedor del hero: si la fuente ampliada hace que no alcancen, se apilan sin reducir la tipografía ni modificar el carrusel. A fuente base de 16px se conserva la composición anterior. En pantallas menores el carrusel aparece debajo del texto y el CTA, centrado y limitado a `28rem`. La columna de texto permite cortar palabras solo cuando exceden su ancho (`wrap-anywhere`), sin recortar contenido ni foco.
 
-La sección se identifica mediante el H1; el carrusel tiene su propio nombre accesible. La línea de marca es decorativa. `GalleryHero` sigue siendo un componente de servidor, sin estado ni consultas; solo el carrusel gestiona interacción en el cliente. No recibe datos de Supabase ni modifica la grilla inferior.
+La sección se identifica mediante el H1; el carrusel tiene su propio nombre accesible. La línea de marca es decorativa. `GalleryHero` sigue siendo un componente de servidor, sin estado ni consultas; solo el carrusel gestiona interacción en el cliente. Recibe exclusivamente las historias seleccionadas con el contrato público mínimo y no modifica la grilla inferior.
 
-El carrusel conserva una aclaración de contenido ilustrativo para lectores de pantalla, sin pie visual. Los ejemplos locales son exclusivamente para desarrollo y revisión; deben reemplazarse por historias reales autorizadas antes de producción.
+La selección ocurre una vez por renderizado de servidor en `selectHeroStories`, de `gallery-hero-data.ts`, protegido con `server-only`. Conserva hasta tres registros cuando hay pocos; con más de tres aplica Fisher–Yates parcial sobre una copia, sin reemplazo ni cambios en el orden de la galería. La selección viaja serializada al cliente y permanece estable al navegar; una nueva carga de página puede elegir otras historias. No se vuelve a consultar Supabase ni se usan ejemplos ficticios como fallback.

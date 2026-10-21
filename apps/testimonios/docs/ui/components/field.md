@@ -104,6 +104,7 @@ habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provision
 | `name` | `string` | — | `name` del `<input type="file">` |
 | `label` | `string` | — | Texto del label |
 | `hint` | `string` | — | Ayuda opcional sobre qué foto pedir |
+| `requirements` | `string` | — | Restricciones de archivo bajo el selector, asociadas mediante `aria-describedby` |
 | `accept` | `string` | — | p. ej. `"image/jpeg,image/png,image/webp"` |
 | `preview` | `"avatar" \| "capture"` | — | Avatar cuadrado; captura 16:9 |
 | `onFileChange` | `(file: File \| null) => void` | — | Archivo recortado confirmado o `null` al quitarlo explícitamente |
@@ -163,6 +164,7 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 <FileField
   name="avatar"
   label="Foto de perfil"
+  requirements="JPG, PNG o WebP · Máximo 5 MB."
   required
   accept="image/jpeg,image/png,image/webp"
   preview="avatar"
@@ -174,6 +176,7 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
   name="capture"
   label="Foto testimonial"
   hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión."
+  requirements="JPG, PNG o WebP · Máximo 8 MB."
   accept="image/jpeg,image/png,image/webp"
   preview="capture"
   onFileChange={setCapture}
@@ -189,8 +192,12 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
   al elegir el archivo (cuadrado o 16:9).
 - El input file es `sr-only`; el hit area es el label dashed. Avatar es cuadrado;
   la foto testimonial conserva 16:9 y muestra “Agregar fotografía” cuando está
-  vacía. Un ícono decorativo acompaña la selección. El avatar no necesita repetir
+  vacía; el avatar muestra “Agregar foto de perfil”. Un ícono decorativo acompaña la selección. El avatar no necesita repetir
   instrucciones de recorte: las presenta el diálogo al elegir el archivo.
+- `requirements` presenta formato y tamaño sin reemplazar el hint que explica
+  el propósito de la foto ni cambiar la reserva de errores. `/enviar` muestra
+  JPG, PNG o WebP y el máximo de 5 MB para el avatar u 8 MB para la foto
+  testimonial. Este texto es informativo; no cambia las reglas de archivos.
 - Hint y error se anidan en `aria-describedby` en ese orden.
 - El input de archivo conserva el nombre del label visible al cargar o reemplazar
   una imagen. El recuadro muestra un contorno cyan cuando el input recibe foco con

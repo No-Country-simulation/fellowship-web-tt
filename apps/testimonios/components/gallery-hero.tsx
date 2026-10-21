@@ -2,6 +2,7 @@ import Link from "next/link";
 import { buttonVariants } from "@repo/ui/button";
 
 import { GalleryHeroCarousel } from "@/components/gallery-hero-carousel";
+import type { HeroStory } from "@/components/gallery-hero-data";
 import { cn } from "@/lib/utils";
 
 import styles from "./gallery-hero.module.css";
@@ -16,14 +17,18 @@ const HERO_COPY = {
   action: "Enviar testimonio",
 } as const;
 
-/** Hero de servidor con presentación, CTA y un carrusel cliente independiente. */
-export function GalleryHero() {
+type GalleryHeroProps = {
+  stories: readonly HeroStory[] | null;
+};
+
+/** Hero de servidor: publicados seleccionados, vacío honesto o null si falló la carga. */
+export function GalleryHero({ stories }: GalleryHeroProps) {
   return (
     <section
       aria-labelledby="gallery-title"
       className={cn(
         styles.hero,
-        "border-b border-border-subtle px-md py-xl md:px-lg md:py-3xl",
+        "@container border-b border-border-subtle px-md py-xl md:px-lg md:py-3xl",
       )}
     >
       <div aria-hidden="true" className={styles.backdrop}>
@@ -130,8 +135,8 @@ export function GalleryHero() {
         <span className={cn(styles.points, styles.pointsTop)} />
         <span className={cn(styles.points, styles.pointsBottom)} />
       </div>
-      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-2xl">
-        <div className="min-w-0">
+      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:@min-[56rem]:grid-cols-[minmax(0,1fr)_26rem] lg:@min-[56rem]:items-center xl:gap-2xl xl:@min-[56rem]:grid-cols-[minmax(0,1fr)_28rem]">
+        <div className="min-w-0 wrap-anywhere">
           <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
             <span
               aria-hidden="true"
@@ -143,8 +148,8 @@ export function GalleryHero() {
             id="gallery-title"
             className="mt-md text-[2.125rem] font-bold leading-[1.1] tracking-tight text-text-primary sm:text-5xl"
           >
-            {HERO_COPY.title}
-            <span className="text-brand-gradient block w-fit">
+            {HERO_COPY.title}{" "}
+            <span className="text-brand-gradient inline-block">
               {HERO_COPY.highlight}
             </span>
           </h1>
@@ -155,13 +160,19 @@ export function GalleryHero() {
             href="/enviar"
             className={cn(
               buttonVariants({ variant: "gradient", size: "lg" }),
-              "mt-md min-h-12 px-md text-base focus-visible:border-transparent motion-reduce:transition-none",
+              "mt-md h-auto min-h-12 max-w-full px-[min(var(--spacing-md),24px)] py-xs text-base whitespace-normal focus-visible:border-transparent motion-reduce:transition-none",
             )}
           >
             {HERO_COPY.action}
           </Link>
         </div>
-        <GalleryHeroCarousel />
+        {stories === null ? null : stories.length > 0 ? (
+          <GalleryHeroCarousel stories={stories} />
+        ) : (
+          <p className="w-full max-w-[28rem] justify-self-center text-base leading-relaxed text-text-secondary lg:justify-self-end">
+            Pronto vas a encontrar historias de nuestra comunidad.
+          </p>
+        )}
       </div>
     </section>
   );

@@ -1,28 +1,30 @@
-type HeroStory = {
-  id: string;
-  quote: string;
-  displayName: string;
-  category: string;
-};
+import "server-only";
 
-// TODO: reemplazar estos ejemplos por historias reales autorizadas antes de producción.
-export const HERO_STORIES = [
-  {
-    id: "example-simulation",
-    quote: "Trabajar en equipo me ayudó a llevar lo aprendido a un proyecto compartido.",
-    displayName: "Participante 01",
-    category: "Simulación",
-  },
-  {
-    id: "example-first-job",
-    quote: "Practicar con otros me dio más confianza para buscar mi primer empleo en tecnología.",
-    displayName: "Participante 02",
-    category: "Primer empleo",
-  },
-  {
-    id: "example-career-change",
-    quote: "Cambiar de rumbo fue más fácil al compartir el camino con una comunidad.",
-    displayName: "Participante 03",
-    category: "Reconversión",
-  },
-] as const satisfies readonly HeroStory[];
+import type { PublicTestimonial } from "@/lib/testimonials/public";
+
+export type HeroStory = Pick<
+  PublicTestimonial,
+  "id" | "slug" | "quote" | "fullName" | "typeLabel" | "avatarUrl"
+>;
+
+/** Elige hasta tres publicados sin reemplazo en servidor, sin alterar el orden de la galería. */
+export function selectHeroStories(testimonials: readonly PublicTestimonial[]): HeroStory[] {
+  const candidates = [...testimonials];
+
+  if (candidates.length > 3) {
+    // Fisher–Yates parcial: solo necesitamos las tres primeras posiciones.
+    for (let index = 0; index < 3; index++) {
+      const selected = index + Math.floor(Math.random() * (candidates.length - index));
+      [candidates[index], candidates[selected]] = [candidates[selected], candidates[index]];
+    }
+  }
+
+  return candidates.slice(0, 3).map(({ id, slug, quote, fullName, typeLabel, avatarUrl }) => ({
+    id,
+    slug,
+    quote,
+    fullName,
+    typeLabel,
+    avatarUrl,
+  }));
+}

@@ -35,7 +35,7 @@ const chipClassName =
 const targetChipClassName =
   "border-accent-cyan/40 bg-accent-cyan/10 text-text-primary";
 
-/** Ficha editorial de servidor con un único main; solo la ampliación de la captura es cliente. */
+/** Ficha editorial de servidor con un único main; solo la foto testimonial es cliente. */
 export function TestimonialDetail({ testimonial }: TestimonialDetailProps) {
   return (
     <main
@@ -108,9 +108,9 @@ export function TestimonialDetail({ testimonial }: TestimonialDetailProps) {
           </section>
 
           {testimonial.captureUrl ? (
-            <section aria-labelledby="testimonial-project-title">
-              <DetailHeading id="testimonial-project-title">El proyecto</DetailHeading>
-              <div className="mt-md">
+            <section aria-labelledby="testimonial-photo-title">
+              <DetailHeading id="testimonial-photo-title">Foto testimonial</DetailHeading>
+              <div className="mt-md w-full max-w-3xl">
                 <TestimonialCapture
                   src={testimonial.captureUrl}
                   participantName={testimonial.fullName}
@@ -122,7 +122,7 @@ export function TestimonialDetail({ testimonial }: TestimonialDetailProps) {
           {testimonial.youtubeEmbedUrl ? (
             <section aria-labelledby="testimonial-video-title">
               <DetailHeading id="testimonial-video-title">En video</DetailHeading>
-              <div className="mt-md">
+              <div className="mt-md w-full max-w-3xl">
                 <YoutubeEmbed
                   src={testimonial.youtubeEmbedUrl}
                   title={`Video de ${testimonial.fullName}`}

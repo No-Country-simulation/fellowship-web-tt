@@ -1,4 +1,5 @@
 import { GalleryHero } from "@/components/gallery-hero";
+import { selectHeroStories } from "@/components/gallery-hero-data";
 import { TestimonialsGallery } from "@/components/testimonials-gallery";
 import { listPublishedTestimonials } from "@/lib/testimonials/public";
 
@@ -7,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 // Copy provisional de la sección de exploración.
 const GALLERY_COPY = {
+  eyebrow: "VOCES DE LA COMUNIDAD",
   heading: "Explorá las historias",
-  description: "Elegí el tipo de experiencia que te interesa conocer.",
 } as const;
 
 export default async function HomePage() {
@@ -27,25 +28,27 @@ export default async function HomePage() {
       )
     : [];
   const loadError = listed.ok ? null : listed.message;
+  const heroStories = listed.ok ? selectHeroStories(listed.testimonials) : null;
 
   return (
     <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-bg-base">
-      <GalleryHero />
+      <GalleryHero stories={heroStories} />
       <section
         aria-labelledby="gallery-stories-title"
         className="px-md py-lg md:px-lg md:py-xl"
       >
-        <div className="mx-auto w-full max-w-[70rem]">
-          <div className="mb-md flex flex-col gap-xs md:flex-row md:items-end md:justify-between md:gap-md">
+        <div className="mx-auto w-full max-w-[70rem] wrap-anywhere">
+          <div className="mb-md flex flex-col gap-md">
+            <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
+              <span aria-hidden="true" className="h-0.5 w-7 shrink-0 rounded-full bg-brand-gradient" />
+              {GALLERY_COPY.eyebrow}
+            </p>
             <h2
               id="gallery-stories-title"
               className="text-2xl font-bold tracking-tight text-text-primary"
             >
               {GALLERY_COPY.heading}
             </h2>
-            <p className="text-sm leading-relaxed text-text-secondary">
-              {GALLERY_COPY.description}
-            </p>
           </div>
           {loadError ? (
             <p
