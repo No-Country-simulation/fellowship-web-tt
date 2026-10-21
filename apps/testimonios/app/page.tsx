@@ -1,4 +1,5 @@
 import { GalleryHero } from "@/components/gallery-hero";
+import { selectHeroStories } from "@/components/gallery-hero-data";
 import { TestimonialsGallery } from "@/components/testimonials-gallery";
 import { listPublishedTestimonials } from "@/lib/testimonials/public";
 
@@ -27,10 +28,11 @@ export default async function HomePage() {
       )
     : [];
   const loadError = listed.ok ? null : listed.message;
+  const heroStories = listed.ok ? selectHeroStories(listed.testimonials) : null;
 
   return (
     <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-bg-base">
-      <GalleryHero />
+      <GalleryHero stories={heroStories} />
       <section
         aria-labelledby="gallery-stories-title"
         className="px-md py-lg md:px-lg md:py-xl"

@@ -1,6 +1,6 @@
 # GalleryHeroCarousel
 
-Carrusel específico del hero. Sustituye la tarjeta informativa con tres tarjetas reales apiladas y navegación manual, sin autoplay ni consultas.
+Carrusel del hero con hasta tres testimonios publicados reales, navegación manual y sin autoplay ni consultas propias.
 
 **Archivos:** `components/gallery-hero-carousel.tsx`, `components/gallery-hero-carousel.module.css` y `components/gallery-hero-data.ts`.
 
@@ -9,41 +9,63 @@ Carrusel específico del hero. Sustituye la tarjeta informativa con tres tarjeta
 ```tsx
 import { GalleryHeroCarousel } from "@/components/gallery-hero-carousel";
 
-<GalleryHeroCarousel />
+<GalleryHeroCarousel stories={heroStories} />
 ```
 
-No recibe props. Es un Client Component pequeño integrado por `GalleryHero`, que permanece en el servidor.
+Es un Client Component integrado por `GalleryHero`, que permanece en el servidor.
 
-## Datos y presentación
+## Contrato y selección
 
-`HERO_STORIES` contiene tres entradas locales tipadas con `id`, `quote`, `displayName` y `category`, una por categoría. Los participantes tienen identificaciones genéricas y una representación neutra con `UserRound`; no se usan fotografías ni enlaces a fichas.
+Recibe `stories: readonly HeroStory[]`, ya seleccionado y serializado por el servidor. `HeroStory` es un `Pick<PublicTestimonial>` limitado a `id`, `slug`, `quote`, `fullName`, `typeLabel` y `avatarUrl`. No recibe la historia completa, campos profesionales ni datos de contacto. El import desde `public.ts` es solo de tipo.
 
-La aclaración **«Ejemplos ilustrativos para desarrollo y revisión»** permanece solo para lectores de pantalla (`sr-only`), referenciada por `aria-describedby`. No hay pie ni índice visual debajo de las tarjetas. Estos datos locales son exclusivamente para desarrollo y revisión: el `TODO` junto al array exige reemplazarlos por historias reales autorizadas antes de producción. No deben presentarse como testimonios auténticos en un despliegue público.
+`app/page.tsx` reutiliza su única llamada a `listPublishedTestimonials()`, que consulta `testimonials_public`. `selectHeroStories`, en el módulo `gallery-hero-data.ts` protegido con `server-only`, conserva los registros disponibles si hay hasta tres. Con más de tres, aplica tres pasos de Fisher–Yates sobre una copia y toma las primeras tres posiciones: selección aleatoria sin reemplazo, sin duplicar posiciones ni alterar el array de la galería. Los IDs de los registros publicados son las claves de las tarjetas.
 
-Cada tarjeta incluye comillas tipográficas decorativas con `text-brand-gradient`, cita, autor y categoría. Las superficies, borde degradado tenue, radio y sombra utilizan los tokens locales. No modifica `TestimonialCard`.
+La selección ocurre una vez por renderizado de servidor; no hay aleatoriedad durante el render cliente, inicializadores o efectos. El array no se reordena al navegar y la hidratación usa la misma selección. Una nueva carga de página puede mostrar otros testimonios. La galería conserva `force-dynamic`, la búsqueda y su orden de publicación.
 
-## Pila y navegación
+## Cantidades y error de carga
 
-Las tres tarjetas permanecen montadas, con claves estables, en `grid-area: 1 / 1`. Todas participan en el cálculo de la altura; el contenido más alto reserva el espacio y evita saltos al navegar, sin recortar las citas.
+| Datos | Presentación |
+| --- | --- |
+| Cero publicados | `GalleryHero` muestra «Pronto vas a encontrar historias de nuestra comunidad.». No monta el carrusel, tarjetas ficticias, controles ni región de estado. El componente también admite `[]` y devuelve `null`. |
+| Uno | Una única tarjeta, sin pila, controles, semántica de carrusel o anuncios de navegación. |
+| Dos | Dos tarjetas con navegación circular, una sola tarjeta posterior y reserva lateral de 24px desde `sm`. |
+| Tres o más | El servidor selecciona hasta tres y conserva la pila original; reserva lateral de 40px desde `sm`. |
+| Error | `GalleryHero` recibe `null` y omite la zona de historias. El aviso existente con `role="alert"` permanece solo en la sección inferior; no se interpreta el error como ausencia de publicaciones. |
 
-La posición se calcula con `(index + total - activeIndex) % total`. La frontal tiene escala 1; las posteriores se desplazan 18px y 36px, con escalas 0.97 y 0.94. Sus superficies permanecen opacas: una capa `::after` las oscurece al 35 % y 60 %, sin transparentar las citas. El contenido de las tarjetas posteriores se oculta visualmente.
+Cuando cambian los IDs recibidos o su orden, una clave derivada de esa secuencia reinicia el stack y su índice en cero. Evita conservar índices o animaciones de una selección anterior, sin efectos de sincronización. Si solo cambian los datos de las mismas identidades, las tarjetas actualizan su contenido y se conserva la navegación. La identidad del stack no cambia al navegar.
 
-Desde `sm`, los cambios de posición transicionan en 380ms. En «Siguiente», la frontal sale 40px hacia la izquierda, se desvanece y regresa al fondo; en «Anterior», la nueva frontal entra desde 48px a la izquierda. Estas animaciones duran 420ms con `cubic-bezier(0.22, 1, 0.36, 1)`. El texto saliente termina de desaparecer al 30 % y el entrante comienza a aparecer al 45 %: no hay dos citas visibles mezcladas durante el movimiento.
+## Tarjetas y enlaces
 
-En mobile, la salida y la entrada se suceden sin desplazamiento lateral: la tarjeta saliente se desvanece durante el primer 45 % y la entrante aparece desde el 50 %, en un ciclo total de 420ms. Las tres tarjetas siguen montadas y contribuyendo a la altura.
+Cada tarjeta muestra el `quote` público ya preparado por el servidor, `fullName` y `typeLabel`, sin generar ni sustituir contenido. Conserva comillas decorativas, superficies, borde degradado, radio y sombra de los tokens locales. No modifica `TestimonialCard`.
 
-Los botones anterior/siguiente recorren el array de forma circular. Permanecen fuera de las tarjetas, superpuestos abajo a la derecha, y conservan su identidad y foco. Durante una animación se ignoran nuevas pulsaciones, sin encolarlas ni aplicar `disabled`; una vez finalizada se puede navegar nuevamente.
+El avatar utiliza `next/image` con `fill`, `sizes="40px"`, `object-cover` y contenedor relativo circular de 40px. Sigue el patrón público de `TestimonialCard`; la configuración existente permite las rutas públicas de Storage en `*.supabase.co`. Usa `alt=""` y contenedor decorativo porque el nombre está al lado. Si no hay URL, conserva `UserRound` como fallback neutro. No agrega fotografías de respaldo inventadas.
 
-`motion` guarda la dirección y la tarjeta saliente. Un efecto obtiene las animaciones CSS reales del stack y sus descendientes mediante `getAnimations({ subtree: true })`; `Promise.allSettled` espera sus promesas `finished`, tanto si terminan como si se cancelan. También resuelve si no hay animaciones. Así un cambio de breakpoint o de preferencia de movimiento no deja el carrusel bloqueado. La limpieza comprueba la identidad de `motion` y descarta efectos anteriores para no borrar una navegación nueva. No depende de `onAnimationEnd` ni utiliza temporizadores.
+El enlace discreto «Ver historia» apunta a `/t/${slug}` y tiene altura mínima de 44px y foco visible. Las tarjetas inactivas son `inert` y no permiten enfocar sus enlaces. Los botones de navegación permanecen fuera de las tarjetas, en la ubicación aprobada, sin interferencia con el enlace.
 
-Con movimiento reducido, `navigate` actualiza el índice sin crear `motion` ni esperar animaciones, incluso ante pulsaciones rápidas. No hay cambios de foco programáticos.
+## Pila y animaciones
+
+Todas las tarjetas suministradas permanecen montadas en `grid-area: 1 / 1`. El stack tiene una altura fija de 368px en mobile y 384px desde `sm`, con una fila `minmax(0, 1fr)`; las tarjetas ocupan el 100 % de esa altura con `min-height: 0`. La longitud de las citas no modifica esa altura, tampoco al navegar. Las tarjetas posteriores mantienen su escala visual; su altura de layout coincide con la frontal.
+
+La cita conserva su tipografía y `wrap-anywhere`. Su área flexible usa `min-height: 0` y contención de tamaño; el párrafo interior tiene `line-clamp` visual con puntos suspensivos. Las consultas de contenedor seleccionan únicamente el número de líneas completas que cabe en el espacio restante, hasta cinco en mobile y seis desde `sm`. Nombres o categorías más extensos pueden reducir ese número para mantener visibles avatar, autor, categoría, enlace y controles. Las comillas decorativas y el pie no se comprimen. El recorte se aplica únicamente al párrafo, sin scroll interno ni `overflow-hidden` sobre la tarjeta, por lo que los indicadores de foco permanecen visibles.
+
+El texto original recibido se conserva íntegro en los datos y en el DOM; no se recortan caracteres con JavaScript ni se agregan tooltips o anuncios que dupliquen la cita. «Ver historia» continúa llevando a la ficha completa mediante el slug real.
+
+La posición se calcula con `(index + total - activeIndex) % total`, únicamente con un total positivo. La frontal tiene escala 1; las posteriores ocupan solo las posiciones existentes, a 18px/0.97 y 36px/0.94. Una capa opaca `::after` atenúa el fondo al 35 % y 60 %, con el contenido posterior oculto visualmente.
+
+Desde `sm`, las posiciones transicionan en 380ms. En «Siguiente», la frontal sale 40px hacia la izquierda y regresa al fondo; en «Anterior», la nueva frontal entra desde 48px a la izquierda. La animación dura 420ms con `cubic-bezier(0.22, 1, 0.36, 1)`. El punto final de retorno se adapta mediante variables CSS: con dos tarjetas, 18px/0.97; con tres, 36px/0.94. Así no se anima hacia una tercera posición inexistente. El texto saliente desaparece al 30 % y el entrante comienza al 45 %.
+
+En mobile, salida y entrada se suceden sin desplazamiento lateral: salida durante el primer 45 % y entrada desde el 50 %, en un ciclo de 420ms.
+
+Durante una animación se ignoran nuevas pulsaciones sin encolarlas ni usar `disabled`; los controles conservan identidad y foco. El efecto existente usa `getAnimations({ subtree: true })` y `Promise.allSettled` sobre `finished`. Resuelve finalización, cancelación y ausencia de animaciones, también al cambiar de breakpoint o preferencia de movimiento. La limpieza y la comparación por identidad de `motion` evitan que un efecto anterior borre una navegación nueva. No usa temporizadores.
+
+Con movimiento reducido, la navegación actualiza el índice sin crear `motion` ni esperar animaciones, incluso ante pulsaciones rápidas. No hay cambios de foco programáticos ni autoplay.
 
 ## Responsive y accesibilidad
 
-- Ancho máximo de `28rem`. Desde `sm` se reservan 40px para las tarjetas posteriores; por debajo, las inactivas se ocultan visualmente y no se desplazan lateralmente.
-- En mobile, los controles tienen su propio espacio debajo del autor. Desde `sm`, comparten visualmente la fila inferior, con espacio reservado para evitar solapamientos.
-- Citas y nombres pueden envolver; todas las tarjetas contribuyen a una altura común.
-- Región identificada como carrusel; solo la diapositiva activa se expone a tecnologías asistivas. Las posteriores usan `aria-hidden` e `inert` booleano de React 19 y no reciben interacción.
-- Botones de 44×44px, etiquetas «Testimonio anterior» / «Siguiente testimonio», `aria-controls`, hover cyan y foco visible inmediato.
-- Estado `aria-live="polite"` inicialmente vacío. Tras una acción anuncia únicamente «Testimonio N de 3»; no repite las tres citas. La posición no agrega una línea visual debajo del carrusel.
-- `prefers-reduced-motion` desactiva transiciones y animaciones de tarjetas, contenido y controles; la navegación sigue funcionando.
+- Ancho máximo de 28rem, con la reserva lateral correspondiente únicamente si hay pila. En mobile, las inactivas se ocultan sin desplazamiento horizontal.
+- Con navegación, los controles mantienen su espacio debajo del autor en mobile y a su derecha desde `sm`. Citas y nombres pueden envolver sin desbordar.
+- Con varias historias, región «Testimonios publicados de la comunidad» identificada como carrusel, y diapositivas «N de total». Con una, región «Testimonio publicado de la comunidad» y figura nativa sin semántica interactiva de carrusel.
+- Solo la activa se expone a tecnologías asistivas; las inactivas mantienen `aria-hidden` e `inert` booleano de React 19, incluso durante animaciones.
+- Controles de 44×44px con etiquetas «Testimonio anterior» / «Siguiente testimonio», `aria-controls`, hover cyan y foco visible inmediato.
+- Una única región `aria-live="polite"` del carrusel, solo con varias historias e inicialmente vacía. Tras navegar anuncia «Testimonio N de total», sin repetir citas. La galería conserva su región independiente de conteo.
+- `prefers-reduced-motion` desactiva transiciones y animaciones de tarjetas, contenido y controles.
