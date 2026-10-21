@@ -21,7 +21,7 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Hasta tres testimonios publicados, apilados y con navegación manual |
 | [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla de historias |
 | [TestimonialDetail](./components/testimonial-detail.md) | Ficha editorial de servidor, contexto profesional y medios opcionales |
-| [TestimonialCapture](./components/testimonial-capture.md) | Captura a tamaño natural y ampliación en diálogo accesible |
+| [TestimonialCapture](./components/testimonial-capture.md) | Foto testimonial a tamaño natural, sin pie visible y con ampliación accesible |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
 | [TestimonialCard](./components/testimonial-card.md) | Card de resumen para galería y otros usos; no compone la ficha |
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
@@ -70,4 +70,4 @@ La sección «Explorá las historias» conserva su `h2` y asociación accesible,
 
 `app/t/[slug]/page.tsx` conserva la consulta, `generateMetadata`, `notFound()` y el estado de error. El resultado exitoso se presenta con `TestimonialDetail`, sin `PageShell` ni `TestimonialCard`. Su único `<main>` mantiene `flex-1 min-h-0 min-w-0 overflow-y-auto`, y todas las secciones comparten el contenedor `max-w-[70rem]` y el padding exterior de la galería.
 
-La historia completa siempre se muestra, incluso cuando coincide con `quote`, con saltos de línea intactos y ancho de lectura de 44rem alineado a la izquierda. Los medios son condicionales. Solo `TestimonialCapture` agrega una interacción cliente para ampliar la captura; utiliza un diálogo nativo sin dependencias adicionales. Ver las fichas de ambos componentes para responsive, accesibilidad y limitaciones.
+La historia completa siempre se muestra, incluso cuando coincide con `quote`, con saltos de línea intactos y ancho de lectura de 44rem alineado a la izquierda. Los medios son condicionales y se limitan a 768px en la ficha. Solo `TestimonialCapture` agrega una interacción cliente para ampliar la foto testimonial; utiliza un diálogo nativo sin dependencias adicionales y sin ese límite de ancho. Ver las fichas de ambos componentes para responsive, accesibilidad y limitaciones.

@@ -10,13 +10,13 @@ type TestimonialCaptureProps = {
   participantName: string;
 };
 
-/** Captura con carga y error accesibles, aparición suave y ampliación en diálogo nativo. */
+/** Foto testimonial con carga y error accesibles, aparición suave y diálogo nativo. */
 export function TestimonialCapture(props: TestimonialCaptureProps) {
   // Cada URL tiene su propio estado y nodo: una decodificación anterior no puede revelarla.
   return <CaptureWithLoading key={props.src} {...props} />;
 }
 
-/** Conserva el tamaño natural y habilita la ampliación cuando la captura está decodificada. */
+/** Conserva el tamaño natural y habilita la ampliación cuando la foto está decodificada. */
 function CaptureWithLoading({
   src,
   participantName,
@@ -32,7 +32,7 @@ function CaptureWithLoading({
     height: number;
   } | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const caption = `Captura del proyecto de ${participantName}`;
+  const imageLabel = `Foto testimonial de ${participantName}`;
 
   const readDimensions = useCallback((image: HTMLImageElement) => {
     if (imageRef.current !== image || !image.naturalWidth || !image.naturalHeight) {
@@ -87,8 +87,8 @@ function CaptureWithLoading({
         type="button"
         aria-label={
           status === "ready"
-            ? `Ampliar captura del proyecto de ${participantName}`
-            : caption
+            ? `Ampliar foto testimonial de ${participantName}`
+            : imageLabel
         }
         aria-haspopup="dialog"
         aria-controls={dialogId}
@@ -119,7 +119,7 @@ function CaptureWithLoading({
           <img
             ref={attachImage}
             src={src}
-            alt={caption}
+            alt={imageLabel}
             loading="lazy"
             decoding="async"
             onLoad={(event) => void revealImage(event.currentTarget)}
@@ -138,7 +138,7 @@ function CaptureWithLoading({
               aria-hidden="true"
               className="absolute inset-0 flex items-center justify-center p-sm text-center text-sm leading-relaxed text-text-secondary"
             >
-              No pudimos cargar la captura.
+              No pudimos cargar la foto testimonial.
             </span>
           ) : null}
         </span>
@@ -153,7 +153,7 @@ function CaptureWithLoading({
             )}
           >
             <Expand className="size-4 shrink-0 text-accent-cyan" />
-            Ampliar captura
+            Ampliar foto
           </span>
           <span
             className={cn(
@@ -161,25 +161,24 @@ function CaptureWithLoading({
               status === "ready" && "invisible",
             )}
           >
-            {status === "error" ? "Captura no disponible" : "Cargando captura…"}
+            {status === "error"
+              ? "Foto testimonial no disponible"
+              : "Cargando foto testimonial…"}
           </span>
         </span>
       </button>
       <span role="status" className="sr-only">
         {status === "loading"
-          ? "Cargando captura…"
+          ? "Cargando foto testimonial…"
           : status === "error"
-            ? "No pudimos cargar la captura."
+            ? "No pudimos cargar la foto testimonial."
             : ""}
       </span>
-      <figcaption className="mt-sm text-sm leading-relaxed text-text-secondary">
-        {caption}
-      </figcaption>
 
       <dialog
         ref={dialogRef}
         id={dialogId}
-        aria-label={`${caption}, vista ampliada`}
+        aria-label={`${imageLabel}, vista ampliada`}
         className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none flex-col items-center justify-center border-0 bg-bg-base/95 px-sm pt-20 pb-md text-text-primary backdrop:bg-black/90 open:flex md:px-lg"
         onClose={() => triggerRef.current?.focus({ preventScroll: true })}
       >
@@ -195,7 +194,7 @@ function CaptureWithLoading({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
-          alt={caption}
+          alt={imageLabel}
           loading="lazy"
           decoding="async"
           className="block h-auto w-auto max-w-full min-h-0 max-h-full rounded-md object-contain"

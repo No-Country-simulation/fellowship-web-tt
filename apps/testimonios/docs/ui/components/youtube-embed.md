@@ -52,6 +52,7 @@ if (src) {
 ## Notas
 
 - Contenedor `aspect-video`, `rounded-md`, borde. El iframe es `size-full`.
+- En `TestimonialDetail`, un contenedor externo `mt-md w-full max-w-3xl` limita la vista a 768px, alineada a la izquierda y al ancho disponible en mobile. El componente conserva su proporción 16:9 y no impone ese máximo a otros usos.
 - `allowFullScreen` y permisos estándar de YouTube (autoplay, picture-in-picture, etc.).
 - Si no hay video, no renderices el componente: no hay empty state.
 - Es Server Component (sin `"use client"`).
