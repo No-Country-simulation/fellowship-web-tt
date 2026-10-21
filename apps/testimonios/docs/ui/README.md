@@ -66,6 +66,8 @@ La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap d
 
 La sección «Explorá las historias» conserva su `h2` y asociación accesible, con el eyebrow «VOCES DE LA COMUNIDAD» y una línea de degradado de marca encima, separados del título por 24px como en el hero. El contador aparece sobre una única barra de búsqueda y filtros. Hasta `lg`, la búsqueda ocupa la primera fila y los filtros quedan debajo: en una grilla 2 × 2 antes de `sm`, y con ancho natural y wrapping desde `sm`. Desde `lg`, los filtros quedan a la izquierda y el buscador a la derecha, con 288px de ancho y 320px desde `xl`, sin ocupar todo el espacio sobrante.
 
+Al ampliar la fuente, el CTA puede ocupar varias líneas, el hero apila sus columnas si no dispone de `56rem` y la barra permite filas adicionales; sus filtros pasan a una columna si el ancho interior es menor que `14rem`. La sección de exploración permite cortar palabras que excedan su ancho, evitando desbordamientos sin ocultar contenido. La composición anterior se conserva con fuente base de 16px. Los detalles están documentados en cada componente.
+
 ## Composición de la ficha
 
 `app/t/[slug]/page.tsx` conserva la consulta, `generateMetadata`, `notFound()` y el estado de error. El resultado exitoso se presenta con `TestimonialDetail`, sin `PageShell` ni `TestimonialCard`. Su único `<main>` mantiene `flex-1 min-h-0 min-w-0 overflow-y-auto`, y todas las secciones comparten el contenedor `max-w-[70rem]` y el padding exterior de la galería.

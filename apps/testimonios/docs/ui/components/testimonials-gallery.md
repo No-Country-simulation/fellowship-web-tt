@@ -58,12 +58,22 @@ comprimirse y el buscador a la derecha, con un ancho de 288px; desde `xl`, de 32
 sin crecer para llenar el espacio sobrante. El contador queda fuera de la barra, encima,
 separado por 8px y sin otra superficie; conserva la única región de estado.
 
+Con texto ampliado, la barra permite que sus grupos pasen a otra fila también
+desde `lg`; filtros y buscador se limitan al ancho disponible. Los filtros pueden
+envolver sus etiquetas y, antes de `sm`, pasan de dos columnas a una cuando el
+ancho interior de la barra es menor que `14rem`. A fuente base de 16px se conserva
+la grilla 2 × 2 en 320/375px y la disposición horizontal desktop aprobada.
+
 El buscador usa superficie oscura, borde de los controles existentes y foco cyan.
 El input nativo `type="search"` tiene label
 accesible oculto asociado mediante un `useId` estable y `aria-controls` hacia
 los resultados. El ícono Search es decorativo; el botón de limpieza tiene nombre
 “Limpiar búsqueda” e ícono X decorativo. Se oculta la limpieza nativa de WebKit
-para evitar dos indicadores superpuestos. Input y botón tienen 44px de altura.
+para evitar dos indicadores superpuestos. El input tiene una altura de `2.75rem`
+(44px a fuente base de 16px); el botón de limpieza conserva un área de 44×44px,
+centrada verticalmente. Los íconos de 16px y las reservas laterales de 40/48px
+no crecen con la fuente, dejando espacio para escribir incluso en 320px con
+fuente base de 32px. El texto del input sí respeta la ampliación del navegador.
 
 Escribir y seleccionar categorías conserva el foco en el control utilizado.
 Tab y Shift+Tab permiten recorrer el input, su limpieza cuando existe, los

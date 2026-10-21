@@ -1,5 +1,5 @@
 .stack {
-  height: 368px;
+  min-height: 368px;
   grid-template-rows: minmax(0, 1fr);
   --motion-duration: 420ms;
   --motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
@@ -13,7 +13,6 @@
 }
 
 .card {
-  height: 100%;
   min-height: 0;
   grid-area: 1 / 1;
   position: relative;
@@ -32,6 +31,7 @@
 
 .quoteSpace {
   container-type: size;
+  min-height: 1lh;
 }
 
 /* El clamp se adapta a líneas completas, reservando siempre el pie de la tarjeta. */
@@ -112,7 +112,7 @@
 /* Se reserva el desplazamiento lateral en el wrapper desde sm. */
 @media (min-width: 40rem) {
   .stack {
-    height: 384px;
+    min-height: 384px;
   }
 
   @container (min-height: 6lh) {

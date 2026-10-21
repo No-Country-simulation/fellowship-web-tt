@@ -28,7 +28,7 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
       aria-labelledby="gallery-title"
       className={cn(
         styles.hero,
-        "border-b border-border-subtle px-md py-xl md:px-lg md:py-3xl",
+        "@container border-b border-border-subtle px-md py-xl md:px-lg md:py-3xl",
       )}
     >
       <div aria-hidden="true" className={styles.backdrop}>
@@ -135,8 +135,8 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
         <span className={cn(styles.points, styles.pointsTop)} />
         <span className={cn(styles.points, styles.pointsBottom)} />
       </div>
-      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-2xl">
-        <div className="min-w-0">
+      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:@min-[56rem]:grid-cols-[minmax(0,1fr)_26rem] lg:@min-[56rem]:items-center xl:gap-2xl xl:@min-[56rem]:grid-cols-[minmax(0,1fr)_28rem]">
+        <div className="min-w-0 wrap-anywhere">
           <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
             <span
               aria-hidden="true"
@@ -160,7 +160,7 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
             href="/enviar"
             className={cn(
               buttonVariants({ variant: "gradient", size: "lg" }),
-              "mt-md min-h-12 px-md text-base focus-visible:border-transparent motion-reduce:transition-none",
+              "mt-md h-auto min-h-12 max-w-full px-[min(var(--spacing-md),24px)] py-xs text-base whitespace-normal focus-visible:border-transparent motion-reduce:transition-none",
             )}
           >
             {HERO_COPY.action}

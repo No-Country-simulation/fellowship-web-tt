@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import styles from "./gallery-hero-carousel.module.css";
 
 const CONTROL_CLASSES =
-  "inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-bg-surface-2 text-text-primary transition-[color,border-color,background-color] duration-200 hover:border-accent-cyan hover:bg-bg-surface-3 hover:text-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan motion-reduce:transition-none";
+  "inline-flex size-[44px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-bg-surface-2 text-text-primary transition-[color,border-color,background-color] duration-200 hover:border-accent-cyan hover:bg-bg-surface-3 hover:text-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan motion-reduce:transition-none";
 
 type CarouselMotion = {
   from: number;
@@ -104,7 +104,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
     >
       <div className={total === 3 ? "sm:pr-10" : hasNavigation ? "sm:pr-6" : undefined}>
         <div className="relative isolate">
-          {/* Todas las tarjetas ocupan la misma celda de altura fija. */}
+          {/* La celda comparte altura y crece solo si el contenido obligatorio lo necesita. */}
           <div
             ref={stackRef}
             id={`${id}-stories`}
@@ -145,12 +145,12 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
                   >
                     “
                   </span>
-                  <blockquote className={cn(styles.quoteSpace, "mt-xs min-h-0 flex-1 text-xl font-medium leading-snug tracking-tight text-text-primary wrap-anywhere sm:text-[1.375rem]")}>
+                  <blockquote className={cn(styles.quoteSpace, "mt-xs flex-1 text-xl font-medium leading-snug tracking-tight text-text-primary wrap-anywhere sm:text-[1.375rem]")}>
                     <p className={cn(styles.quote, "line-clamp-1")}>{story.quote}</p>
                   </blockquote>
                   <figcaption
                     className={cn(
-                      "mt-md flex min-w-0 shrink-0 items-center gap-xs",
+                      "mt-md flex min-w-0 shrink-0 flex-wrap items-center gap-xs",
                       hasNavigation && "pb-14 sm:pr-28 sm:pb-0",
                     )}
                   >
@@ -170,7 +170,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
                         <UserRound className="size-5" strokeWidth={1.5} />
                       )}
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-[1_1_6rem]">
                       <p className="text-sm font-medium leading-snug text-text-primary wrap-anywhere">
                         {story.fullName}
                       </p>
@@ -179,7 +179,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
                       </p>
                       <Link
                         href={`/t/${story.slug}`}
-                        className="mt-1 inline-flex min-h-11 items-center rounded-button text-xs font-medium text-accent-cyan hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+                        className="mt-1 inline-flex min-h-11 max-w-full items-center rounded-button text-xs font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
                       >
                         Ver historia
                       </Link>

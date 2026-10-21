@@ -106,11 +106,11 @@ export function TestimonialsGallery({ testimonials }: TestimonialsGalleryProps) 
         <strong className="font-semibold text-text-primary">{visible.length}</strong>{" "}
         {visible.length === 1 ? GALLERY_COPY.story : GALLERY_COPY.stories}
       </p>
-      <div className="flex flex-col gap-md rounded-card border border-border bg-bg-surface-2/70 px-sm py-sm md:px-md lg:flex-row lg:items-center lg:py-xs">
+      <div className="@container flex flex-col gap-md rounded-card border border-border bg-bg-surface-2/70 px-sm py-sm md:px-md lg:flex-row lg:flex-wrap lg:items-center lg:py-xs">
         {testimonials.length > 0 ? (
-          <div className="relative w-full min-w-0 lg:order-2 lg:ml-auto lg:w-72 lg:flex-none xl:w-80">
+          <div className="relative w-full min-w-0 max-w-full lg:order-2 lg:ml-auto lg:w-72 lg:flex-none xl:w-80">
             <label htmlFor={searchId} className="sr-only">{GALLERY_COPY.searchLabel}</label>
-            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-secondary" />
+            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-[12px] size-[16px] -translate-y-1/2 text-text-secondary" />
             <input
               ref={searchRef}
               id={searchId}
@@ -120,7 +120,7 @@ export function TestimonialsGallery({ testimonials }: TestimonialsGalleryProps) 
               placeholder={GALLERY_COPY.searchPlaceholder}
               autoComplete="off"
               aria-controls="gallery-results"
-              className="block h-11 min-w-0 w-full rounded-md border border-border bg-bg-surface-2/70 pr-12 pl-10 text-sm text-text-primary outline-none placeholder:text-text-muted focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+              className="block h-11 min-w-0 w-full rounded-md border border-border bg-bg-surface-2/70 pr-[48px] pl-[40px] text-sm text-text-primary outline-none placeholder:text-text-muted focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             />
             {query ? (
               <button
@@ -128,11 +128,11 @@ export function TestimonialsGallery({ testimonials }: TestimonialsGalleryProps) 
                 aria-label={GALLERY_COPY.clearSearch}
                 onClick={clearSearch}
                 className={cn(
-                  "absolute top-0 right-0 grid size-11 cursor-pointer place-items-center rounded-md text-text-secondary transition-colors hover:text-accent-cyan motion-reduce:transition-none",
+                  "absolute top-1/2 right-0 grid size-[44px] -translate-y-1/2 cursor-pointer place-items-center rounded-md text-text-secondary transition-colors hover:text-accent-cyan motion-reduce:transition-none",
                   FOCUS_CLASSES,
                 )}
               >
-                <X aria-hidden="true" className="size-4" />
+                <X aria-hidden="true" className="size-[16px]" />
               </button>
             ) : null}
           </div>
@@ -140,7 +140,7 @@ export function TestimonialsGallery({ testimonials }: TestimonialsGalleryProps) 
         <div
           role="group"
           aria-label={GALLERY_COPY.filterLabel}
-          className="grid grid-cols-2 gap-xs sm:flex sm:flex-wrap lg:order-1 lg:shrink-0 lg:flex-nowrap"
+          className="grid min-w-0 max-w-full grid-cols-2 gap-xs @max-[14rem]:grid-cols-1 sm:flex sm:flex-wrap lg:order-1 lg:shrink-0"
         >
           {FILTERS.map(({ value, label }) => {
             const active = filter === value;
@@ -154,7 +154,7 @@ export function TestimonialsGallery({ testimonials }: TestimonialsGalleryProps) 
                 aria-controls="gallery-results"
                 onClick={() => setFilter(value)}
                 className={cn(
-                  "relative isolate min-h-11 w-full cursor-pointer rounded-full border-2 border-border bg-bg-surface-2 px-2 py-xs text-[0.8125rem] font-medium transition-[color,border-color] duration-200 ease-out hover:border-accent-cyan/50 motion-reduce:transition-none sm:w-auto sm:px-2.5",
+                  "relative isolate min-h-11 w-full min-w-0 max-w-full cursor-pointer rounded-full border-2 border-border bg-bg-surface-2 px-2 py-xs text-[0.8125rem] font-medium wrap-anywhere transition-[color,border-color] duration-200 ease-out hover:border-accent-cyan/50 motion-reduce:transition-none sm:w-auto sm:px-2.5",
                   FOCUS_CLASSES,
                   active
                     ? "text-text-primary"

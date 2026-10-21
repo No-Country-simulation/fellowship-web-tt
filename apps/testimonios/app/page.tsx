@@ -37,7 +37,7 @@ export default async function HomePage() {
         aria-labelledby="gallery-stories-title"
         className="px-md py-lg md:px-lg md:py-xl"
       >
-        <div className="mx-auto w-full max-w-[70rem]">
+        <div className="mx-auto w-full max-w-[70rem] wrap-anywhere">
           <div className="mb-md flex flex-col gap-md">
             <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
               <span aria-hidden="true" className="h-0.5 w-7 shrink-0 rounded-full bg-brand-gradient" />
