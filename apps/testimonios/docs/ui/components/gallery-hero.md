@@ -16,7 +16,7 @@ import { GalleryHero } from "@/components/gallery-hero";
 
 No recibe props. El copy provisional se agrupa en `HERO_COPY`, sin modificar las historias publicadas.
 
-- Un único `<h1>` con “Historias de” en blanco y “talento real.” con el degradado de marca.
+- Un único `<h1>` con “Historias de” en blanco y “talento real.” con el degradado de marca. Un espacio explícito separa ambos fragmentos; el destacado usa `inline-block`, sin salto forzado. El título permanece en una línea cuando cabe y se ajusta naturalmente al ancho de su columna, conservando la tipografía y los tamaños responsive.
 - Eyebrow con una línea degradada decorativa de 28×2px.
 - Descripción existente, seguida del CTA con 24px de separación (`mt-md`).
 - Un `Link` a `/enviar`, con `buttonVariants` de `@repo/ui`, únicamente el texto “Enviar testimonio” y foco visible.

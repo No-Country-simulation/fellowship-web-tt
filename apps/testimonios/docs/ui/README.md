@@ -19,7 +19,7 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [SiteHeader](./components/site-header.md) | Chrome del layout (logo y nav) |
 | [GalleryHero](./components/gallery-hero.md) | Presentación de servidor, CTA y composición del hero |
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Carrusel cliente de tres historias ilustrativas apiladas |
-| [TestimonialsGallery](./components/testimonials-gallery.md) | Filtros, contador y grilla de historias |
+| [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla de historias |
 | [TestimonialDetail](./components/testimonial-detail.md) | Ficha editorial de servidor, contexto profesional y medios opcionales |
 | [TestimonialCapture](./components/testimonial-capture.md) | Captura a tamaño natural y ampliación en diálogo accesible |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
@@ -60,9 +60,11 @@ Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fi
 
 `app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` compone su propio encabezado editorial y `<main>` en `app/enviar/page.tsx`, con ancho `max-w-3xl`. El encabezado se pasa como `children` de servidor a `EnviarForm`: aparece durante los pasos y se retira al mostrar el éxito. En ese estado, `SuccessCard` proporciona el único `h1` y recibe el foco existente.
 
-`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente con ejemplos locales identificados como ilustrativos, pendientes de reemplazo por historias autorizadas antes de producción. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; filtra en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
+`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente con ejemplos locales identificados como ilustrativos, pendientes de reemplazo por historias autorizadas antes de producción. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; busca por nombre o extracto y filtra por categoría en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
 
 La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Los textos provisionales están agrupados en constantes locales en la página y sus componentes. Las historias y avatares de la grilla provienen de los datos publicados.
+
+La sección «Explorá las historias» conserva su `h2` y asociación accesible, con el eyebrow «VOCES DE LA COMUNIDAD» y una línea de degradado de marca encima, separados del título por 24px como en el hero. El contador aparece sobre una única barra de búsqueda y filtros. Hasta `lg`, la búsqueda ocupa la primera fila y los filtros quedan debajo: en una grilla 2 × 2 antes de `sm`, y con ancho natural y wrapping desde `sm`. Desde `lg`, los filtros quedan a la izquierda y el buscador a la derecha, con 288px de ancho y 320px desde `xl`, sin ocupar todo el espacio sobrante.
 
 ## Composición de la ficha
 

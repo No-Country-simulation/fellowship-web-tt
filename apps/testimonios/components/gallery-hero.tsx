@@ -143,8 +143,8 @@ export function GalleryHero() {
             id="gallery-title"
             className="mt-md text-[2.125rem] font-bold leading-[1.1] tracking-tight text-text-primary sm:text-5xl"
           >
-            {HERO_COPY.title}
-            <span className="text-brand-gradient block w-fit">
+            {HERO_COPY.title}{" "}
+            <span className="text-brand-gradient inline-block">
               {HERO_COPY.highlight}
             </span>
           </h1>
