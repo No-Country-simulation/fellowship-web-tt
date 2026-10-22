@@ -3,26 +3,35 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
 import { buildPostCaption, CAPTION_EDIT_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
 import {
   getTestimonialById,
-  markBufferPosted,
-  markDiscordPosted,
+  isTestimonialId,
   prepareShareCard,
   publishTestimonial,
   rejectTestimonial,
+  revertPublishedTestimonial,
   saveReviewEdits,
   storedShareCardUrl,
 } from "../infrastructure/repositories/testimonialRepository";
-import { readShareCard, sharePublished } from "../infrastructure/share";
+import { prepareErroredBufferRetries, readShareCard, sharePublished } from "../infrastructure/share";
 import type { ReviewState } from "../types/reviewState";
-import type { ShareReport, ShareResult } from "../types/share";
+import {
+  SHARE_CARD_TOO_LARGE_MESSAGE,
+  SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
+  type ShareResult,
+} from "../types/share";
 
 export async function reviewTestimonial(
   id: string,
   _prev: ReviewState,
   formData: FormData,
 ): Promise<ReviewState> {
+  if (!isTestimonialId(id)) {
+    return { status: "error", message: "No encontramos ese testimonio." };
+  }
+
   const intent = formData.get("intent");
   if (intent !== "save" && intent !== "publish" && intent !== "reject") {
     return { status: "error", message: "Acción no válida." };
@@ -39,7 +48,12 @@ export async function reviewTestimonial(
       return { status: "error", message: rejected.message };
     }
     revalidateTestimonials(id);
-    redirect("/testimonials");
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  if (intent === "publish" && current.testimonial.status === "published") {
+    revalidateTestimonials(id);
+    redirectWithFilters(`/testimonials/${id}`, formData);
   }
 
   const quote = readString(formData, "quote");
@@ -83,52 +97,79 @@ export async function reviewTestimonial(
   }
 
   const card = readShareCard(formData);
-  if (!card) {
-    return { status: "error", message: "No llegó la imagen. El testimonio no se publicó." };
+  if (card.status === "too_large") {
+    return { status: "error", message: SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE };
   }
-
-  const cardUrl = await prepareShareCard(current.testimonial.slug, card);
-  if (!cardUrl) {
-    return { status: "error", message: "No pudimos guardar la imagen. El testimonio no se publicó." };
+  if (card.status !== "ok") {
+    return { status: "error", message: "No llegó la imagen. El testimonio no se publicó." };
   }
 
   const published = await publishTestimonial(id, { quote, caption });
   if (!published.ok) {
+    if ("lost" in published) {
+      revalidateTestimonials(id);
+      redirectWithFilters(`/testimonials/${id}`, formData);
+    }
     return { status: "error", message: published.message };
   }
 
+  const cardUrl = await prepareShareCard(published.slug, card.file);
+  if (!cardUrl) {
+    const reverted = await revertPublishedTestimonial(id);
+    revalidateTestimonials(id);
+    return {
+      status: "error",
+      message: reverted.ok
+        ? "No pudimos guardar la imagen. El testimonio no se publicó."
+        : reverted.message,
+    };
+  }
+
   const latest = await getTestimonialById(id);
-  const share: ShareReport = latest.ok
+  const share = latest.ok
     ? await sharePublished(latest.testimonial, null)
     : {
-        result: { discord: "failed", instagram: "failed", linkedin: "failed" },
-        bufferPostIds: { instagram: null, linkedin: null },
+        discord: "failed" as const,
+        instagram: "failed" as const,
+        linkedin: "failed" as const,
       };
 
-  await recordShare(id, share);
   revalidateTestimonials(id);
-  redirectShared(id, share.result);
+  redirectShared(id, share, formData);
 }
 
-/** Reintenta las redes que faltan con la card guardada al publicar. Solo sube una si no quedó ninguna. */
+/**
+ * Reintenta las redes sin fecha y las de Buffer que siguen en error.
+ * El estado se consulta acá con el id guardado: un flag del cliente no decide.
+ */
 export async function retryShare(id: string, formData: FormData) {
+  if (!isTestimonialId(id)) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
   const current = await getTestimonialById(id);
   if (!current.ok) {
-    redirect("/testimonials");
+    redirectWithFilters("/testimonials", formData);
   }
 
   if (current.testimonial.status !== "published") {
-    redirect(`/testimonials/${id}`);
+    redirectWithFilters(`/testimonials/${id}`, formData);
   }
 
   const stored = await storedShareCardUrl(current.testimonial.slug);
-  const share = await sharePublished(
-    current.testimonial,
-    stored ? null : readShareCard(formData),
-  );
-  await recordShare(id, share);
+  let card: File | null = null;
+  if (!stored) {
+    const read = readShareCard(formData);
+    if (read.status === "too_large") {
+      return { status: "error", message: SHARE_CARD_TOO_LARGE_MESSAGE };
+    }
+    card = read.status === "ok" ? read.file : null;
+  }
+
+  const source = await prepareErroredBufferRetries(current.testimonial);
+  const share = await sharePublished(source, card);
   revalidateTestimonials(id);
-  redirectShared(id, share.result);
+  redirectShared(id, share, formData);
 }
 
 function revalidateTestimonials(id: string) {
@@ -141,22 +182,21 @@ function readString(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-async function recordShare(id: string, { result, bufferPostIds }: ShareReport) {
-  const { instagram, linkedin } = bufferPostIds;
-  await Promise.all([
-    result.discord === "posted" ? markDiscordPosted(id) : null,
-    result.instagram === "posted" && instagram ? markBufferPosted(id, "instagram", instagram) : null,
-    result.linkedin === "posted" && linkedin ? markBufferPosted(id, "linkedin", linkedin) : null,
-  ]);
+function redirectWithFilters(
+  path: string,
+  formData: FormData,
+  extra?: Record<string, string>,
+): never {
+  redirect(inboxHref(path, inboxQueryFromField(formData.get("filters")), extra));
 }
 
-function redirectShared(id: string, share: ShareResult): never {
+function redirectShared(id: string, share: ShareResult, formData: FormData): never {
   const outcomes = Object.values(share);
   if (outcomes.includes("failed")) {
-    redirect(`/testimonials/${id}?share=failed`);
+    redirectWithFilters(`/testimonials/${id}`, formData, { share: "failed" });
   }
   if (outcomes.includes("posted")) {
-    redirect(`/testimonials/${id}?share=ok`);
+    redirectWithFilters(`/testimonials/${id}`, formData, { share: "ok" });
   }
-  redirect(`/testimonials/${id}`);
+  redirectWithFilters(`/testimonials/${id}`, formData);
 }

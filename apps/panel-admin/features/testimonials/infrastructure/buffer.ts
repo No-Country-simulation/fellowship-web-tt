@@ -186,7 +186,7 @@ function bufferShareTiming() {
 
   return {
     mode: "customScheduled" as const,
-    dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   };
 }
 

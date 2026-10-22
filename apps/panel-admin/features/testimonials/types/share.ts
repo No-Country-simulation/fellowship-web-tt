@@ -15,14 +15,6 @@ export type ShareOutcome = "posted" | "skipped" | "failed";
 
 export type ShareResult = Record<ShareNetwork, ShareOutcome>;
 
-/** Id del post en Buffer por red. `null` si no se creó. */
-export type BufferPostIds = Record<"instagram" | "linkedin", string | null>;
-
-export type ShareReport = {
-  result: ShareResult;
-  bufferPostIds: BufferPostIds;
-};
-
 export type BufferPostStatus =
   | "draft"
   | "error"
@@ -43,8 +35,14 @@ export type BufferPostState = {
 /** `null` por red si no hay id guardado o Buffer no respondió. */
 export type BufferPostStates = Record<"instagram" | "linkedin", BufferPostState | null>;
 
-/** Tope del PNG de la card, en el cliente y en el server action. */
-export const SHARE_CARD_MAX_BYTES = 8 * 1024 * 1024;
+/** Tope del PNG de la card. El bucket `share-cards` corta en este tamaño. */
+export const SHARE_CARD_MAX_BYTES = 5 * 1024 * 1024;
+
+/** Cuando el PNG supera `SHARE_CARD_MAX_BYTES`. */
+export const SHARE_CARD_TOO_LARGE_MESSAGE = "La imagen pasa el tope de 5 MB.";
+
+/** Mismo tope, en publicar: el envío sigue en revisión. */
+export const SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE = `${SHARE_CARD_TOO_LARGE_MESSAGE} El testimonio no se publicó.`;
 
 /** "Discord, Instagram y LinkedIn". */
 export function formatNetworkList(networks: readonly ShareNetwork[]): string {

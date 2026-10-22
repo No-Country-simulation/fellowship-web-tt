@@ -3,10 +3,8 @@ import { cn } from "@repo/ui/utils";
 import { StatusBadge } from "@shared/ui/patterns/StatusBadge";
 import type { VisualTone } from "@shared/ui/patterns/visualTone";
 
-import { bufferPublishesImmediately } from "../infrastructure/buffer";
 import { formatSubmittedAt } from "../infrastructure/mappers/testimonialMapper";
 import { igCardContent } from "../infrastructure/ig-card";
-import { galleryTestimonialHref } from "../infrastructure/site";
 import {
   formatNetworkList,
   SHARE_NETWORK_LABELS,
@@ -28,8 +26,9 @@ type NetworkState = {
 };
 
 /**
- * Después de publicar: la misma card y el mismo texto salen por Discord (webhook) e
- * Instagram y LinkedIn (Buffer). Un solo reintento cubre las redes que falten.
+ * Después de publicar: la misma card sale por Discord, Instagram y LinkedIn.
+ * Instagram y LinkedIn comparten el texto. Discord lleva intro + frase.
+ * Un solo reintento cubre las redes sin fecha y las de Buffer cuyo estado es error.
  */
 export function PublishedPanel({
   testimonial,
@@ -37,6 +36,8 @@ export function PublishedPanel({
   shareStatus,
   shareCardUrl,
   bufferStates,
+  publicHref,
+  scheduled,
 }: {
   testimonial: AdminTestimonial;
   channels: ShareChannels;
@@ -45,6 +46,10 @@ export function PublishedPanel({
   shareCardUrl: string | null;
   /** Estado consultado a Buffer al cargar la ficha. Sin él se usa la hora guardada. */
   bufferStates: BufferPostStates | null;
+  /** Ficha en la galería. Null si no hay `GALLERY_URL`. */
+  publicHref: string | null;
+  /** Buffer programa el post en vez de publicarlo ya. */
+  scheduled: boolean;
 }) {
   if (testimonial.status !== "published") {
     return (
@@ -65,7 +70,15 @@ export function PublishedPanel({
     instagram: testimonial.bufferInstagramPostedAt,
     linkedin: testimonial.bufferLinkedinPostedAt,
   };
-  const missing = SHARE_NETWORKS.filter((network) => channels[network] && !postedAt[network]);
+  const missing = SHARE_NETWORKS.filter((network) => {
+    if (!channels[network]) {
+      return false;
+    }
+    if (!postedAt[network]) {
+      return true;
+    }
+    return network !== "discord" && bufferStates?.[network]?.status === "error";
+  });
   const card = igCardContent(testimonial, testimonial.quote, "photo");
 
   function stateOf(network: ShareNetwork): NetworkState {
@@ -76,10 +89,10 @@ export function PublishedPanel({
 
     const at = postedAt[network];
     if (at) {
-      const scheduled = network !== "discord" && !bufferPublishesImmediately();
+      const waiting = network !== "discord" && scheduled;
       return {
-        label: scheduled ? "Programado" : "Publicado",
-        tone: scheduled ? "info" : "success",
+        label: waiting ? "Programado" : "Publicado",
+        tone: waiting ? "info" : "success",
         detail: network === "discord" ? formatSubmittedAt(at) : `Buffer · ${formatSubmittedAt(at)}`,
       };
     }
@@ -107,16 +120,28 @@ export function PublishedPanel({
               {testimonial.publishedAt ? ` · ${formatSubmittedAt(testimonial.publishedAt)}` : null}
             </h2>
             <p className="text-admin-caption text-muted-foreground">
-              Ya está en la galería. La misma imagen y el mismo texto salen en todas las redes.
+              Ya está en la galería. La misma imagen sale en todas las redes. Instagram y
+              LinkedIn comparten el texto; Discord lleva la intro y la frase.
             </p>
           </div>
-          <a
-            href={galleryTestimonialHref(testimonial.slug)}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Ver ficha pública
-          </a>
+          {publicHref ? (
+            <a
+              href={publicHref}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              Ver ficha pública
+            </a>
+          ) : null}
         </header>
+
+        {shareStatus === "ok" ? (
+          <p
+            className="rounded-lg border border-tone-success/40 bg-tone-success/10 px-3 py-2 text-admin-caption text-tone-success"
+            role="status"
+          >
+            Salió en las redes.
+          </p>
+        ) : null}
 
         <ul aria-label="Estado por red" className="divide-y divide-border rounded-lg border border-border">
           {SHARE_NETWORKS.map((network) => {
@@ -159,7 +184,10 @@ export function PublishedPanel({
             )}
           >
             <p
-              className={`text-admin-caption ${shareStatus === "failed" ? "text-destructive" : "text-muted-foreground"}`}
+              className={cn(
+                "text-admin-caption",
+                shareStatus === "failed" ? "text-destructive" : "text-muted-foreground",
+              )}
               role={shareStatus === "failed" ? "alert" : undefined}
             >
               {shareStatus === "failed"

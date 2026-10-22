@@ -1,12 +1,22 @@
 "use client";
 
-import { startTransition, useActionState, useRef, useState, type ReactNode } from "react";
+import {
+  startTransition,
+  useActionState,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
 import { reviewTestimonial } from "../actions/testimonialActions";
+import { INBOX_FILTERS_FIELD } from "../infrastructure/inboxQuery";
+import { useInboxFilters } from "./InboxFilters";
 import { igCardContent } from "../infrastructure/ig-card";
-import { igCardPngBlob } from "../infrastructure/ig-card-canvas";
+import { igCardPngBlob, igCardQuoteClipped } from "../infrastructure/ig-card-canvas";
 import {
   buildPostCaption,
   extractCaptionIntro,
@@ -17,6 +27,7 @@ import { initialReviewState } from "../types/reviewState";
 import {
   formatNetworkList,
   SHARE_CARD_MAX_BYTES,
+  SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
   SHARE_NETWORKS,
   type ShareChannels,
 } from "../types/share";
@@ -31,7 +42,8 @@ import { textareaClassName } from "./fields";
 type Intent = "save" | "publish" | "reject";
 
 /**
- * Revisión: envío plegado y una sola publicación (card + texto) para Discord, Instagram y LinkedIn.
+ * Revisión: envío plegado. La misma card en las tres redes. Instagram y LinkedIn
+ * comparten el texto; Discord lleva intro + frase.
  * El quote y el texto se editan a mano.
  */
 export function ReviewForm({
@@ -49,14 +61,27 @@ export function ReviewForm({
   const [caption, setCaption] = useState(testimonial.caption);
   const [cardDesign, setCardDesign] = useState<CardDesign>("photo");
   const [intent, setIntent] = useState<Intent | null>(null);
-  const [cardFailed, setCardFailed] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
   const [cardAttempt, setCardAttempt] = useState<"publish" | "retry" | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const { filtersField } = useInboxFilters();
   const preparingCardRef = useRef(false);
   const preparingCard = cardAttempt !== null;
   const quoteEmpty = quote.trim().length === 0;
   const quoteTooLong = quote.length > QUOTE_EDIT_MAX_CHARS;
   const quoteInvalid = quoteEmpty || quoteTooLong;
+  const canMeasureCard = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const quoteClipped = useMemo(() => {
+    if (!canMeasureCard || quoteEmpty) return false;
+    return igCardQuoteClipped(
+      igCardContent(testimonial, quote, cardDesign),
+      getComputedStyle(document.body).fontFamily || "sans-serif",
+    );
+  }, [canMeasureCard, cardDesign, quote, quoteEmpty, testimonial]);
   const templateCaption = buildPostCaption({
     quote,
     fullName: testimonial.fullName,
@@ -85,12 +110,16 @@ export function ReviewForm({
     }
     preparingCardRef.current = false;
     setCardAttempt(null);
-    if (!blob || blob.size === 0 || blob.size > SHARE_CARD_MAX_BYTES) {
-      setCardFailed(true);
+    if (!blob || blob.size === 0) {
+      setCardError("No se pudo generar la imagen y el testimonio no se publicó.");
+      return;
+    }
+    if (blob.size > SHARE_CARD_MAX_BYTES) {
+      setCardError(SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE);
       return;
     }
     formData.set("share_card", new File([blob], "instagram.png", { type: "image/png" }));
-    setCardFailed(false);
+    setCardError(null);
     startTransition(() => {
       formAction(formData);
     });
@@ -138,6 +167,7 @@ export function ReviewForm({
       }}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
     >
+      <input type="hidden" name={INBOX_FILTERS_FIELD} value={filtersField} readOnly />
       <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="quote" value={quote} />
       <textarea hidden readOnly tabIndex={-1} aria-hidden="true" name="caption" value={caption} />
 
@@ -156,8 +186,9 @@ export function ReviewForm({
                 Publicación
               </h2>
               <p className="text-admin-caption text-muted-foreground">
-                Una sola publicación para todas las redes: la misma imagen y el mismo texto. La
-                imagen se actualiza mientras escribís y al cambiar el diseño.
+                La misma imagen en todas las redes. Instagram y LinkedIn comparten el texto;
+                Discord lleva la intro y la frase. La imagen se actualiza mientras escribís y al
+                cambiar el diseño.
               </p>
               <ShareTargets channels={channels} />
             </header>
@@ -187,7 +218,10 @@ export function ReviewForm({
                       Frase de la imagen
                     </label>
                     <p
-                      className={`text-admin-caption ${quoteInvalid ? "text-destructive" : "text-muted-foreground"}`}
+                      className={cn(
+                        "text-admin-caption",
+                        quoteInvalid ? "text-destructive" : "text-muted-foreground",
+                      )}
                     >
                       {quoteEmpty
                         ? "No puede estar vacía"
@@ -198,11 +232,16 @@ export function ReviewForm({
                     Una o dos frases, cortas y con impacto. Si el texto sigue la plantilla, se ajusta
                     solo.
                   </p>
+                  {quoteClipped ? (
+                    <p id="admin-quote-clip" className="text-admin-caption text-tone-warning" role="status">
+                      En este diseño la card no muestra toda la frase: la corta con “…”.
+                    </p>
+                  ) : null}
                   <textarea
                     id="admin-quote"
                     value={quote}
                     maxLength={QUOTE_EDIT_MAX_CHARS}
-                    aria-describedby="admin-quote-hint"
+                    aria-describedby={quoteClipped ? "admin-quote-hint admin-quote-clip" : "admin-quote-hint"}
                     aria-invalid={quoteInvalid || undefined}
                     className={cn(textareaClassName, "min-h-28")}
                     onChange={(event) => onQuoteChange(event.target.value)}
@@ -214,8 +253,8 @@ export function ReviewForm({
                     label="Texto del post"
                     hint={
                       testimonial.videoUrl
-                        ? "Mismo texto en todas las redes. En Discord y LinkedIn se suma el link del video."
-                        : "Mismo texto en todas las redes."
+                        ? "Este texto va a Instagram y LinkedIn. Discord lleva la intro y la frase. En Discord y LinkedIn se suma el link del video."
+                        : "Este texto va a Instagram y LinkedIn. Discord lleva la intro y la frase."
                     }
                     value={caption}
                     onChange={setCaption}
@@ -270,12 +309,12 @@ export function ReviewForm({
                 {state.message}
               </p>
             ) : null}
-            {cardFailed ? (
+            {cardError ? (
               <p className="text-admin-caption text-destructive" role="alert">
-                No se pudo generar la imagen y el testimonio no se publicó.
+                {cardError}
               </p>
             ) : null}
-            {cardFailed ? (
+            {cardError ? (
               <button
                 type="button"
                 disabled={pending || preparingCard || quoteInvalid}
@@ -307,7 +346,12 @@ export function ReviewForm({
                 const where = targets.length
                   ? ` y se publica en ${formatNetworkList(targets)} con la misma imagen y texto`
                   : "";
-                if (!window.confirm(`¿Publicar este testimonio? Sale en la galería${where}.`)) {
+                const clipNote = quoteClipped
+                  ? " En este diseño la card corta la frase con “…”."
+                  : "";
+                if (
+                  !window.confirm(`¿Publicar este testimonio? Sale en la galería${where}.${clipNote}`)
+                ) {
                   event.preventDefault();
                   return;
                 }
