@@ -34,6 +34,15 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - No enviar datos de prueba, ejecutar migraciones ni modificar servicios compartidos sin autorización.
 - No mostrar ni copiar credenciales, tokens o contenido de archivos `.env*`.
 
+### Protección de credenciales y secretos
+- No abrir ni leer archivos `.env`, `.env.local`, `.env.production` u otros archivos de credenciales, ni imprimir, copiar o inspeccionar sus valores, sin autorización explícita del desarrollador.
+- La restricción incluye claves públicas y privadas, tokens, contraseñas y cadenas de conexión. No leer una clave innecesariamente aunque sea pública por diseño.
+- Para comprender la configuración, priorizar `.env.example`, la documentación y los nombres de variables presentes en el código, sin acceder a sus valores reales.
+- No incluir secretos ni valores de credenciales en respuestas, logs, scripts de prueba, capturas, documentación o archivos generados.
+- Si una tarea requiere consultar credenciales, explicar qué información hace falta y solicitar autorización antes de acceder a ella.
+- Si aparece accidentalmente un secreto en una salida, no reproducirlo ni continuar exponiéndolo; informar del incidente sin mostrar el valor.
+- Se permite ejecutar herramientas normales del proyecto, como build, lint y pruebas, aunque carguen variables de entorno automáticamente. La restricción se refiere a inspeccionar o exponer sus valores.
+
 ### Flujo de trabajo
 - Respetar la arquitectura y los patrones existentes.
 - No ejecutar `git add`, `commit`, `push`, `merge`, `rebase` ni `reset` sin autorización explícita.
