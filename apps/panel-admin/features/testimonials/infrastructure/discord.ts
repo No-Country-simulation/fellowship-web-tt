@@ -1,3 +1,4 @@
+import { buildDiscordDescription } from "./quote";
 import { getGalleryUrl, SITE_BRAND } from "./site";
 import { youtubeWatchUrl } from "./youtube";
 
@@ -11,13 +12,13 @@ export function hasCommunityWebhook() {
 }
 
 /**
- * Post al canal de comunidad: mismo texto y misma card que Instagram y LinkedIn.
- * El aviso de inbox se queda en la app pública.
+ * Post al canal de comunidad: la misma card que Instagram y LinkedIn.
+ * El texto es intro + frase, como en la app pública. El aviso de inbox se queda ahí.
  */
 export async function postCommunityTestimonial(post: {
   fullName: string;
   avatarUrl: string;
-  caption: string;
+  quote: string;
   imageUrl: string;
   videoUrl: string | null;
 }): Promise<DiscordPostStatus> {
@@ -28,7 +29,7 @@ export async function postCommunityTestimonial(post: {
 
   const embed: DiscordEmbed = {
     author: { name: post.fullName, icon_url: post.avatarUrl },
-    description: post.caption,
+    description: buildDiscordDescription(post.quote),
     color: BRAND_COLOR,
     image: { url: post.imageUrl },
   };

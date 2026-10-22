@@ -1,6 +1,4 @@
-export const QUOTE_MIN_CHARS = 80;
-export const QUOTE_MAX_CHARS = 200;
-export const QUOTE_EDIT_MAX_CHARS = 200;
+export const QUOTE_EDIT_MAX_CHARS = 400;
 export const CAPTION_EDIT_MAX_CHARS = 2000;
 
 export const IG_HASHTAGS = [
@@ -27,26 +25,6 @@ export function formatQuotedQuote(quote: string): string {
   return text ? `"${text}"` : "";
 }
 
-/** Primera o dos primeras frases, sin pasar de QUOTE_MAX_CHARS. */
-export function excerptQuote(story: string): string {
-  const text = story.trim().replace(/\s+/g, " ");
-  if (!text) {
-    return "";
-  }
-
-  const twoSentences = firstSentences(text, 2);
-  if (twoSentences.length <= QUOTE_MAX_CHARS) {
-    return twoSentences;
-  }
-
-  const oneSentence = firstSentences(text, 1);
-  if (oneSentence.length >= QUOTE_MIN_CHARS && oneSentence.length <= QUOTE_MAX_CHARS) {
-    return oneSentence;
-  }
-
-  return cutAtBoundary(text, QUOTE_MIN_CHARS, QUOTE_MAX_CHARS);
-}
-
 /** intro + quote + nombre + redes (una por línea) + hashtags. */
 export function buildShareCaption(input: {
   intro: string;
@@ -71,7 +49,13 @@ export function buildShareCaption(input: {
   return lines.join("\n");
 }
 
-/** Texto único del post: el mismo sale en Discord, Instagram y LinkedIn, con las dos redes de la persona. */
+/** Intro + frase. Igual que la app pública: Discord no lleva nombre, red ni hashtags. */
+export function buildDiscordDescription(quote: string): string {
+  const quoted = formatQuotedQuote(quote);
+  return [DEFAULT_POST_INTRO, quoted].filter(Boolean).join("\n\n");
+}
+
+/** Texto de Instagram y LinkedIn. Si hay las dos, van las dos: es una sola publicación. */
 export function buildPostCaption(input: {
   quote: string;
   fullName: string;
@@ -102,47 +86,4 @@ export function extractCaptionIntro(caption: string): string | null {
 /** True si el caption sigue intro + quote entre comillas. Los libres no. */
 export function followsShareCaptionTemplate(caption: string): boolean {
   return SHARE_CAPTION_QUOTE.test(caption);
-}
-
-function firstSentences(text: string, count: number): string {
-  const sentences = text.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g) ?? [text];
-  return sentences
-    .slice(0, count)
-    .map((sentence) => sentence.trim())
-    .filter(Boolean)
-    .join(" ");
-}
-
-function cutAtBoundary(text: string, min: number, max: number): string {
-  const window = text.slice(0, max);
-  const sentenceEnd = lastIndexOfAny(window, [". ", "! ", "? "], min - 1);
-
-  if (sentenceEnd >= min - 1) {
-    return window.slice(0, sentenceEnd + 1).trim();
-  }
-
-  const punctuation = lastIndexOfAny(window, [".", "!", "?"], min - 1);
-  if (punctuation >= min - 1) {
-    return window.slice(0, punctuation + 1).trim();
-  }
-
-  const words = text.slice(0, max - 1);
-  const space = words.lastIndexOf(" ");
-  const cut = (space > 0 ? words.slice(0, space) : words).replace(/[\s,;:]+$/, "");
-  return `${cut}…`;
-}
-
-function lastIndexOfAny(
-  value: string,
-  needles: string[],
-  afterInclusive: number,
-): number {
-  let best = -1;
-  for (const needle of needles) {
-    const index = value.lastIndexOf(needle);
-    if (index >= afterInclusive && index > best) {
-      best = index;
-    }
-  }
-  return best;
 }

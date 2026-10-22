@@ -217,7 +217,7 @@ export type AdminTestimonial = {
   linkedin: string | null;
   story: string;
   quote: string;
-  /** Texto del post, igual en las tres redes. */
+  /** Texto de Instagram y LinkedIn. Discord lleva intro + frase. */
   caption: string;
   avatarUrl: string;
   captureUrl: string | null;

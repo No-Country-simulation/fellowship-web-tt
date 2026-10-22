@@ -2,15 +2,15 @@
 
 V1 no procesa video. Si hay video, es un **link de YouTube** (`testimonials.video_url`). Sin FFmpeg, sin worker, sin mp4 propio.
 
-Hay **una sola publicación** para Discord, Instagram y LinkedIn: la misma card PNG 1080×1350 y el mismo texto. El texto usa este intro:
+Hay **una sola card** PNG 1080×1350 para Discord, Instagram y LinkedIn. Instagram y LinkedIn comparten el texto: el intro, el quote entre comillas, el nombre, el Instagram y el LinkedIn de la persona (los que haya) y `#NoCountry #DemoDay #TalentoIT`. Discord no usa ese texto: lleva el intro y la frase entre comillas. El intro es:
 
 `Desde No Country compartimos esta historia de nuestro talento`
 
-Más el quote entre comillas, el nombre, el Instagram y el LinkedIn de la persona (los que haya) y `#NoCountry #DemoDay #TalentoIT`. Se edita en el panel.
+Se edita en el panel.
 
 | Pieza | Discord | Instagram | LinkedIn |
 | --- | --- | --- | --- |
-| Texto del post | Descripción del embed | Caption | Texto del post |
+| Texto del post | Intro y frase | Caption | El mismo texto que Instagram |
 | Card 1080×1350 | Imagen grande del embed | Imagen del post | Imagen del post |
 | Quote | En la card y en el texto | En la card y en el texto | En la card y en el texto |
 | Avatar | En la card + icono del autor | En la card | En la card |

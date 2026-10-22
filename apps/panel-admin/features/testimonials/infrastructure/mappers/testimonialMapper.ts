@@ -1,11 +1,5 @@
 import type { TestimonialDto } from "../dtos/testimonialDto";
-import {
-  buildPostCaption,
-  excerptQuote,
-  extractCaptionIntro,
-  followsShareCaptionTemplate,
-  QUOTE_MAX_CHARS,
-} from "../quote";
+import { buildPostCaption } from "../quote";
 import { youtubeEmbedSrc } from "../youtube";
 import {
   careerChangeFields,
@@ -103,26 +97,21 @@ export function inboxItemMeta(item: Pick<AdminInboxItem, "typeLabel" | "submitte
 }
 
 /**
- * Envíos viejos traen quotes de hasta 240 caracteres. Sin publicar, se recortan al límite
- * actual y el texto del post se ajusta si sigue la plantilla. Los publicados no se tocan.
+ * Muestra el quote y el caption guardados. No los recorta ni los rearma,
+ * ni en revisión ni publicados. Si falta el texto del post, arma la plantilla para revisar.
  */
 function reviewQuoteAndCaption(dto: TestimonialDto) {
-  const tooLong = dto.status !== "published" && dto.quote.length > QUOTE_MAX_CHARS;
-  const quote = tooLong ? excerptQuote(dto.quote) : dto.quote;
-  const template = (intro?: string) =>
-    buildPostCaption({
-      intro,
-      quote,
-      fullName: dto.full_name,
-      instagram: dto.instagram,
-      linkedin: dto.linkedin ?? null,
-    });
-
+  const quote = dto.quote;
   if (!dto.ig_caption.trim()) {
-    return { quote, caption: template() };
-  }
-  if (tooLong && followsShareCaptionTemplate(dto.ig_caption)) {
-    return { quote, caption: template(extractCaptionIntro(dto.ig_caption) ?? undefined) };
+    return {
+      quote,
+      caption: buildPostCaption({
+        quote,
+        fullName: dto.full_name,
+        instagram: dto.instagram,
+        linkedin: dto.linkedin ?? null,
+      }),
+    };
   }
   return { quote, caption: dto.ig_caption };
 }
