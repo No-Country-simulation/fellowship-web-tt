@@ -27,8 +27,8 @@ Este checklist resume el estado de desarrollo de Testimonios. Las secciones sigu
 
 - [ ] Revisar la protección de fotografías pendientes de moderación en Supabase Storage.
 - [ ] Verificar los controles de autenticación y autorización del panel antes de utilizar datos reales.
-- [ ] Revisar la diferencia entre los límites de tamaño de las cards PNG del panel y Storage.
-- [ ] Evaluar la recuperación de publicaciones fallidas después de su envío a Buffer.
+- [x] Límites de la card PNG y Storage: la card y el bucket `share-cards` cortan en 5 MB. El body de la Server Action queda en 8 MB para que entren la card y el texto.
+- [x] Recuperación si Buffer falla después de crear el post: el reintento borra fecha e id solo si siguen siendo los de ese post y vuelve a publicar esa red.
 - [ ] Definir la política de conservación o eliminación de testimonios rechazados y sus archivos.
 
 ### V2 — Fuera del alcance actual
