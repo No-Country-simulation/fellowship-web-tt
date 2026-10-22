@@ -1,5 +1,47 @@
 # Plan: sistema de testimonios
 
+## Estado actual de implementación
+
+**Última revisión:** 22 de octubre de 2026.
+
+Este checklist resume el estado de desarrollo de Testimonios. Las secciones siguientes conservan la planificación y las decisiones originales del proyecto.
+
+### V1 — Interfaz pública de Testimonios
+
+- [x] Formulario `/enviar` de cinco pasos y tres categorías de testimonios.
+- [x] Validaciones, avatar obligatorio y fotografía testimonial opcional.
+- [x] Consentimiento, resumen y confirmación del envío pendiente de moderación.
+- [x] Galería pública con búsqueda, filtros, contador y estados vacíos.
+- [x] Carrusel de hasta tres testimonios publicados.
+- [x] Ficha individual con historia completa, fotografía testimonial y video de YouTube.
+- [x] Mejoras responsive, de accesibilidad y adaptación a texto ampliado.
+- [x] Documentación UI de los componentes implementados y modificados.
+
+### V1 — Funcionalidades del equipo
+
+- [x] Panel administrativo de revisión, edición y moderación de testimonios.
+- [x] Generación de cards para redes sociales.
+- [x] Integraciones con Discord y Buffer, demostradas funcionando por el equipo en dev.
+
+### Pendientes de revisión técnica
+
+- [ ] Revisar la protección de fotografías pendientes de moderación en Supabase Storage.
+- [ ] Verificar los controles de autenticación y autorización del panel antes de utilizar datos reales.
+- [ ] Revisar la diferencia entre los límites de tamaño de las cards PNG del panel y Storage.
+- [ ] Evaluar la recuperación de publicaciones fallidas después de su envío a Buffer.
+- [ ] Definir la política de conservación o eliminación de testimonios rechazados y sus archivos.
+
+### V2 — Fuera del alcance actual
+
+- [ ] Grabación y subida directa de archivos de video.
+- [ ] Procesamiento y generación de videos con identidad de marca.
+- [ ] Generación de Reels verticales.
+- [ ] Evaluación de FFmpeg, OpenCut u otras herramientas de procesamiento.
+
+**Nota:** los puntos de V2 son funcionalidades futuras, no tareas incumplidas de V1. Los pendientes relacionados con el panel, Supabase y las publicaciones requieren evaluación por sus responsables.
+
+---
+
 El inbox ya no vive en esta app. Galería y `/enviar` quedan en `apps/testimonios`. Revisar y publicar está en `apps/panel-admin` (`/testimonials`). Quote y captions salen de la plantilla; no hay generación con IA.
 
 Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Foto testimonial y YouTube opcionales. Se pide en **Demo Day**.
