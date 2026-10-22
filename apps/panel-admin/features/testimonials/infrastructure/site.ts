@@ -14,6 +14,11 @@ export function getGalleryUrl() {
   return "http://localhost:3001";
 }
 
-export function galleryTestimonialHref(slug: string) {
-  return `${getGalleryUrl()}/t/${slug}`;
+/** Null si falta el origen en producción: armar el link no debe tirar en el render. */
+export function galleryTestimonialHref(slug: string): string | null {
+  try {
+    return `${getGalleryUrl()}/t/${slug}`;
+  } catch {
+    return null;
+  }
 }

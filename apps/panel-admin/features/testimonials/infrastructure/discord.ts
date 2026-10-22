@@ -1,6 +1,6 @@
-import type { AdminTestimonial } from "../types/testimonial";
-import { buildCommunityEmbed } from "./community-embed";
+import { buildDiscordDescription } from "./quote";
 import { getGalleryUrl, SITE_BRAND } from "./site";
+import { youtubeWatchUrl } from "./youtube";
 
 const BRAND_COLOR = 0xfe0096;
 const WEBHOOK_TIMEOUT_MS = 8000;
@@ -11,44 +11,31 @@ export function hasCommunityWebhook() {
   return Boolean(communityWebhookUrl());
 }
 
-/** Post al canal de comunidad. El aviso de inbox se queda en la app pública. */
-export async function postCommunityTestimonial(
-  testimonial: Pick<
-    AdminTestimonial,
-    | "fullName"
-    | "avatarUrl"
-    | "typeLabel"
-    | "quote"
-    | "country"
-    | "simulation"
-    | "firstJob"
-    | "careerChange"
-    | "captureUrl"
-    | "videoUrl"
-  >,
-): Promise<DiscordPostStatus> {
+/**
+ * Post al canal de comunidad: la misma card que Instagram y LinkedIn.
+ * El texto es intro + frase, como en la app pública. El aviso de inbox se queda ahí.
+ */
+export async function postCommunityTestimonial(post: {
+  fullName: string;
+  avatarUrl: string;
+  quote: string;
+  imageUrl: string;
+  videoUrl: string | null;
+}): Promise<DiscordPostStatus> {
   const webhookUrl = communityWebhookUrl();
   if (!webhookUrl) {
     return "skipped";
   }
 
-  const community = buildCommunityEmbed(testimonial);
   const embed: DiscordEmbed = {
-    author: {
-      name: community.authorName,
-      icon_url: community.authorIconUrl,
-    },
-    title: community.title,
-    description: community.description,
+    author: { name: post.fullName, icon_url: post.avatarUrl },
+    description: buildDiscordDescription(post.quote),
     color: BRAND_COLOR,
-    footer: { text: community.footer },
+    image: { url: post.imageUrl },
   };
 
-  if (community.imageUrl) {
-    embed.image = { url: community.imageUrl };
-  }
-  if (community.fields.length > 0) {
-    embed.fields = community.fields;
+  if (post.videoUrl) {
+    embed.fields = [{ name: "Video", value: youtubeWatchUrl(post.videoUrl), inline: false }];
   }
 
   return postWebhook(webhookUrl, {

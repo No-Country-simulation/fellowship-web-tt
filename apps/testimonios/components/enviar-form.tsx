@@ -4,28 +4,38 @@ import {
   startTransition,
   useActionState,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
+import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react";
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
+import { COUNTRY_OPTIONS, OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countries";
 import {
-  AVATAR_MAX_BYTES,
-  CAPTURE_MAX_BYTES,
+  FIELD_STEP,
   STORY_MAX_CHARS,
   STORY_MIN_CHARS,
-  isValidEmail,
-  normalizeInstagram,
-  normalizeLinkedIn,
-  normalizeYouTubeUrl,
-  validateImageFile,
+  firstErrorStep,
   type FieldErrors,
   type FormField,
 } from "@/lib/testimonials/parse";
+import {
+  FORM_FIELDS,
+  PROFESSIONAL_FIELDS,
+  resolveFormErrors,
+  updateFormErrors,
+  validateField,
+  validateFormStep,
+  type FormValidation,
+  type FormValues,
+} from "@/lib/testimonials/form-validation";
 import {
   TYPE_OPTIONS,
   isTestimonialType,
@@ -48,11 +58,32 @@ const STEP_TITLES = [
   "Qué querés contar",
   "Nombre, país, email y foto",
   "Tu historia",
-  "Captura y links",
+  "Foto testimonial y enlaces",
   "Consentimiento",
 ] as const;
 
-export function EnviarForm() {
+const STEP_LABELS = ["Tipo", "Datos", "Historia", "Links", "Consentimiento"] as const;
+const TYPE_ICONS = {
+  simulation: Laptop,
+  first_job: BriefcaseBusiness,
+  career_change: TrendingUp,
+} satisfies Record<TestimonialType, typeof Laptop>;
+
+function focusAndReveal(control: HTMLElement | null) {
+  if (!control) return;
+  control.focus({ preventScroll: true });
+  const main = control.closest("main");
+  if (!main) return;
+  const anchor = control.closest<HTMLElement>("[data-field], label") ?? control;
+  main.scrollTo({
+    top: main.scrollTop + anchor.getBoundingClientRect().top -
+      main.getBoundingClientRect().top - 16,
+    behavior: "instant",
+  });
+}
+
+/** Recibe el encabezado de servidor como children y lo retira al mostrar el éxito. */
+export function EnviarForm({ children }: { children: ReactNode }) {
   const [state, formAction, pending] = useActionState(
     submitTestimonial,
     initialSubmitState,
@@ -60,9 +91,11 @@ export function EnviarForm() {
   const [step, setStep] = useState(1);
   const [type, setType] = useState<TestimonialType | "">("");
   const [fullName, setFullName] = useState("");
-  const [country, setCountry] = useState("");
+  const [countrySelection, setCountrySelection] = useState("");
+  const [customCountry, setCustomCountry] = useState("");
   const [email, setEmail] = useState("");
   const [story, setStory] = useState("");
+  const [storyNeedsReview, setStoryNeedsReview] = useState(false);
   const [company, setCompany] = useState("");
   const [primaryRole, setPrimaryRole] = useState("");
   const [roleAchieved, setRoleAchieved] = useState("");
@@ -74,111 +107,136 @@ export function EnviarForm() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [captureFile, setCaptureFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [inviteUrl, setInviteUrl] = useState(() => `${getSiteUrl()}/enviar`);
+  const [validation, setValidation] = useState<FormValidation>({
+    response: initialSubmitState,
+    overrides: {},
+  });
+  const formRef = useRef<HTMLFormElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const focusRequest = useRef<{ errors?: FieldErrors } | null>(null);
+
+  function focusFirstError(errors: FieldErrors) {
+    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+      "input[name], textarea[name], select[name]",
+    );
+    const first = Array.from(controls ?? []).find((control) =>
+      errors[control.name as FormField] && !control.disabled &&
+      !control.closest("fieldset")?.hidden,
+    );
+    focusAndReveal(first ?? null);
+  }
+
+  // El DOM ya muestra el paso y sus mensajes; no hay foco automático al cargar.
+  useLayoutEffect(() => {
+    const request = focusRequest.current;
+    if (!request) return;
+    focusRequest.current = null;
+    if (request.errors) focusFirstError(request.errors);
+    else focusAndReveal(headingRef.current);
+  }, [step, validation]);
 
   if (state.status === "success") {
-    return <SuccessCard />;
+    return <SuccessCard inviteUrl={inviteUrl} />;
   }
 
   const selected = type ? typeOption(type) : null;
+  const isOtherCountry = countrySelection === OTHER_COUNTRY_VALUE;
+  const country = isOtherCountry ? customCountry : countrySelection;
+  const values: FormValues = {
+    type,
+    full_name: fullName,
+    country,
+    email,
+    story,
+    company,
+    primary_role: primaryRole,
+    role_achieved: roleAchieved,
+    previous_profession: previousProfession,
+    new_role: newRole,
+    video_url: videoUrl,
+    instagram,
+    linkedin,
+    avatar: avatarFile,
+    capture: captureFile,
+    consent,
+  };
+  const { fieldErrors, serverErrors, unknownErrors, message: serverMessage } =
+    resolveFormErrors(state, validation, type, pending);
+  const correctionStep = Object.keys(serverErrors).length
+    ? firstErrorStep(serverErrors)
+    : undefined;
+  const professionalSummary = type === "simulation"
+    ? (primaryRole.trim() ? [["Puesto principal", primaryRole.trim()]] : [])
+    : type === "first_job"
+      ? [["Empresa", company.trim() || "Falta completar"], ["Puesto", roleAchieved.trim() || "Falta completar"]]
+      : type === "career_change"
+        ? [["Oficio anterior", previousProfession.trim() || "Falta completar"], ["Rol nuevo", newRole.trim() || "Falta completar"]]
+        : [];
+
+  function updateErrors(updates: FieldErrors) {
+    setValidation((current) => updateFormErrors(current, state, updates));
+  }
 
   function setError(field: FormField, message: string | undefined) {
-    setFieldErrors((current) => {
-      const next = { ...current };
-      if (message) {
-        next[field] = message;
-      } else {
-        delete next[field];
+    updateErrors({ [field]: message });
+  }
+
+  function revalidateField<K extends FormField>(field: K, value: FormValues[K]) {
+    if (fieldErrors[field]) {
+      setError(field, validateField(field, { ...values, [field]: value }));
+    }
+  }
+
+  function changeType(nextType: TestimonialType) {
+    if (type && nextType !== type && story.trim()) {
+      setStoryNeedsReview(true);
+    }
+    setType(nextType);
+    const updates: FieldErrors = { type: undefined };
+    const previousOverrides =
+      validation.response === state ? validation.overrides : {};
+    const categoryServerErrors =
+      resolveFormErrors(state, validation, nextType, pending).serverErrors;
+    for (const field of FORM_FIELDS) {
+      // Al volver a una categoría ya validada, revisar sus valores conservados.
+      const wasValidated =
+        Object.prototype.hasOwnProperty.call(previousOverrides, field) ||
+        categoryServerErrors[field];
+      if (PROFESSIONAL_FIELDS[field] === nextType && wasValidated) {
+        updates[field] = categoryServerErrors[field] ??
+          validateField(field, { ...values, type: nextType });
       }
-      return next;
-    });
+    }
+    updateErrors(updates);
   }
 
   function validateStep(current: number): boolean {
-    const nextErrors: FieldErrors = {};
-
-    if (current === 1 && !type) {
-      nextErrors.type = "Elegí qué querés contar.";
-    }
-
-    if (current === 2) {
-      if (!fullName.trim()) {
-        nextErrors.full_name = "El nombre es obligatorio.";
-      }
-      if (!country.trim()) {
-        nextErrors.country = "El país es obligatorio.";
-      }
-      if (!email.trim()) {
-        nextErrors.email = "El email es obligatorio. No se muestra en público.";
-      } else if (!isValidEmail(email)) {
-        nextErrors.email = "Ingresá un email válido.";
-      }
-      const avatarError = validateImageFile(avatarFile, {
-        required: true,
-        maxBytes: AVATAR_MAX_BYTES,
-        label: "La foto de perfil",
-      });
-      if (avatarError) {
-        nextErrors.avatar = avatarError;
+    const nextErrors = validateFormStep(current, values);
+    // Revalidar el paso no equivale a editar los campos rechazados por el servidor.
+    for (const field of FORM_FIELDS) {
+      if (FIELD_STEP[field] === current && serverErrors[field]) {
+        nextErrors[field] = serverErrors[field];
       }
     }
+    updateErrors(nextErrors);
+    const valid = !Object.values(nextErrors).some(Boolean);
+    if (!valid) focusRequest.current = { errors: nextErrors };
+    return valid;
+  }
 
-    if (current === 3) {
-      if (type === "simulation" && primaryRole.trim().length > 120) {
-        nextErrors.primary_role = "Máximo 120 caracteres.";
-      }
-      if (type === "first_job") {
-        if (!company.trim()) {
-          nextErrors.company = "La empresa es obligatoria.";
-        }
-        if (!roleAchieved.trim()) {
-          nextErrors.role_achieved = "El puesto es obligatorio.";
-        }
-      }
-      if (type === "career_change") {
-        if (!previousProfession.trim()) {
-          nextErrors.previous_profession = "El oficio anterior es obligatorio.";
-        }
-        if (!newRole.trim()) {
-          nextErrors.new_role = "El rol nuevo es obligatorio.";
-        }
-      }
-      if (story.trim().length < STORY_MIN_CHARS) {
-        nextErrors.story = `Escribí al menos ${STORY_MIN_CHARS} caracteres.`;
-      }
+  function navigateTo(nextStep: number, errors?: FieldErrors) {
+    if (nextStep === step) {
+      if (errors) focusFirstError(errors);
+      return;
     }
-
-    if (current === 4) {
-      const captureError = validateImageFile(captureFile, {
-        required: false,
-        maxBytes: CAPTURE_MAX_BYTES,
-        label: "La captura del proyecto",
-      });
-      if (captureError) {
-        nextErrors.capture = captureError;
-      }
-      if (videoUrl.trim() && !normalizeYouTubeUrl(videoUrl)) {
-        nextErrors.video_url = "Pegá un link de YouTube (youtube.com o youtu.be).";
-      }
-      if (instagram.trim() && !normalizeInstagram(instagram)) {
-        nextErrors.instagram = "Usá tu usuario (@nombre) o el link de Instagram.";
-      }
-      if (linkedin.trim() && !normalizeLinkedIn(linkedin)) {
-        nextErrors.linkedin = "Pegá tu perfil (linkedin.com/in/…) o tu usuario.";
-      }
-    }
-
-    if (current === 5 && !consent) {
-      nextErrors.consent = "Tenés que aceptar para enviar.";
-    }
-
-    setFieldErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+    focusRequest.current = { errors };
+    setStep(nextStep);
   }
 
   function goNext() {
     if (validateStep(step) && step < STEPS) {
-      setStep(step + 1);
+      navigateTo(step + 1);
     }
   }
 
@@ -201,11 +259,15 @@ export function EnviarForm() {
     formData.set("country", country);
     formData.set("email", email);
     formData.set("story", story);
-    formData.set("company", company);
-    formData.set("primary_role", primaryRole);
-    formData.set("role_achieved", roleAchieved);
-    formData.set("previous_profession", previousProfession);
-    formData.set("new_role", newRole);
+    if (type === "simulation") {
+      formData.set("primary_role", primaryRole);
+    } else if (type === "first_job") {
+      formData.set("company", company);
+      formData.set("role_achieved", roleAchieved);
+    } else if (type === "career_change") {
+      formData.set("previous_profession", previousProfession);
+      formData.set("new_role", newRole);
+    }
     formData.set("video_url", videoUrl);
     formData.set("instagram", instagram);
     formData.set("linkedin", linkedin);
@@ -218,65 +280,105 @@ export function EnviarForm() {
     if (captureFile) {
       formData.set("capture", captureFile);
     }
+    setInviteUrl(`${window.location.origin}/enviar`);
+    // Retirar la respuesta anterior antes de iniciar el siguiente envío.
+    setValidation({ response: state, overrides: {}, retired: true });
     startTransition(() => {
       formAction(formData);
     });
   }
 
-  return (
+  const form = (
     <form
+      ref={formRef}
       action={formAction}
       onSubmit={onSubmit}
       className="mt-lg flex flex-col gap-lg"
       noValidate
     >
-      <StepProgress step={step} />
+      <StepProgress step={step} headingRef={headingRef} />
 
       <fieldset
         hidden={step !== 1}
-        className={cn(step === 1 && "flex flex-col gap-sm")}
+        aria-invalid={Boolean(fieldErrors.type)}
+        className={cn(step === 1 && "flex flex-col")}
       >
-        <legend className="sr-only">Qué querés contar</legend>
-        <div className="grid gap-sm sm:grid-cols-3">
+        <legend className="mb-sm text-lg font-semibold text-text-primary">
+          Elegí el tipo de experiencia <span aria-hidden="true" className="text-brand-pink">*</span>
+          <span className="sr-only"> (obligatorio)</span>
+        </legend>
+        <div className="grid gap-sm md:grid-cols-3">
           {TYPE_OPTIONS.map((option) => {
             const checked = type === option.value;
+            const Icon = TYPE_ICONS[option.value];
             return (
               <label
                 key={option.value}
                 className={cn(
-                  "flex cursor-pointer flex-col gap-xs rounded-md border border-border bg-card p-md",
-                  "hover:border-accent-cyan/70",
-                  checked && "border-accent-cyan ring-2 ring-accent-cyan/40",
+                  "group relative grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-card border p-sm transition-colors motion-reduce:transition-none md:flex md:flex-col md:items-start md:gap-md md:p-md",
+                  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
+                  checked
+                    ? "border-transparent bg-bg-surface-2"
+                    : "border-border bg-card hover:border-accent-cyan/60 hover:bg-bg-surface-3",
                 )}
+                style={checked ? {
+                  background: "linear-gradient(var(--bg-surface-2), var(--bg-surface-2)) padding-box, var(--gradient-brand) border-box",
+                } : undefined}
               >
                 <input
                   type="radio"
                   name="type"
                   value={option.value}
                   checked={checked}
+                  aria-labelledby={`type-${option.value}-label`}
+                  aria-describedby={[
+                    `type-${option.value}-description`,
+                    fieldErrors.type ? "type-error" : undefined,
+                  ].filter(Boolean).join(" ")}
                   className="sr-only"
                   onChange={() => {
                     if (isTestimonialType(option.value)) {
-                      setType(option.value);
-                      setError("type", undefined);
+                      changeType(option.value);
                     }
                   }}
                 />
-                <span className="text-body font-medium text-text-primary">
-                  {option.label}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-md border md:size-12",
+                    checked
+                      ? "border-accent-cyan/25 bg-accent-cyan/10 text-accent-cyan"
+                      : "border-border bg-bg-surface-3 text-accent-indigo-light group-hover:text-accent-cyan",
+                  )}
+                >
+                  <Icon className="size-5 md:size-6" />
                 </span>
-                <span className="text-body-small text-text-secondary">
-                  {option.description}
+                <span className="min-w-0">
+                  <span id={`type-${option.value}-label`} className="block text-body font-semibold text-text-primary md:text-lg">
+                    {option.label}
+                  </span>
+                  <span id={`type-${option.value}-description`} className="mt-1 block text-body-small leading-relaxed text-text-secondary">
+                    {option.description}
+                  </span>
                 </span>
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full md:absolute md:top-md md:right-md",
+                    checked ? "bg-brand-gradient" : "border border-border",
+                  )}
+                />
               </label>
             );
           })}
         </div>
-        {fieldErrors.type ? (
-          <p className="text-body-small text-destructive" role="alert">
-            {fieldErrors.type}
-          </p>
-        ) : null}
+        <div className="mt-1 min-h-6">
+          {fieldErrors.type ? (
+            <p id="type-error" className="text-body-small leading-relaxed text-destructive">
+              {fieldErrors.type}
+            </p>
+          ) : null}
+        </div>
       </fieldset>
 
       <fieldset
@@ -284,20 +386,26 @@ export function EnviarForm() {
         className={cn(step === 2 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">Nombre, país, email y foto</legend>
-        <div className="grid items-start gap-md sm:grid-cols-[12rem_minmax(0,1fr)]">
+        <div className="grid items-start gap-md md:grid-cols-[12rem_minmax(0,1fr)] md:gap-lg">
           <FileField
             name="avatar"
             label="Foto de perfil"
-            hint="Al subirla vas a recortar en cuadrado."
-            className="max-w-48"
+            requirements="JPG, PNG o WebP · Máximo 5 MB."
+            required
+            className="max-w-36 md:max-w-48"
             error={fieldErrors.avatar}
             accept={IMAGE_ACCEPT}
             preview="avatar"
-            onFileChange={setAvatarFile}
-            onInvalid={(message) => setError("avatar", message)}
+            onFileChange={(file) => {
+              setAvatarFile(file);
+              revalidateField("avatar", file);
+            }}
+            onInvalid={(message) => {
+              if (message) setError("avatar", message);
+            }}
           />
-          <div className="flex flex-col gap-md">
-            <Field label="Nombre completo" error={fieldErrors.full_name}>
+          <div className="flex min-w-0 flex-col gap-xs">
+            <Field label="Nombre completo" required error={fieldErrors.full_name}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -309,27 +417,64 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setFullName(event.target.value)}
+                  onChange={(event) => {
+                    setFullName(event.target.value);
+                    revalidateField("full_name", event.target.value);
+                  }}
                 />
               )}
             </Field>
-            <Field label="País" error={fieldErrors.country}>
+            <Field label="País" required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldErrors.country}>
               {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="country"
-                  type="text"
-                  autoComplete="country-name"
-                  placeholder="Argentina"
-                  value={country}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => setCountry(event.target.value)}
-                />
+                <div className="relative">
+                  <select
+                    id={id}
+                    name={isOtherCountry ? "country_selection" : "country"}
+                    autoComplete="country-name"
+                    value={countrySelection}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                    className={cn(fieldClassName, "appearance-none pr-12")}
+                    onChange={(event) => {
+                      const selection = event.target.value;
+                      setCountrySelection(selection);
+                      revalidateField("country", selection === OTHER_COUNTRY_VALUE ? customCountry : selection);
+                    }}
+                  >
+                    <option value="">Seleccioná un país</option>
+                    {COUNTRY_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                    <option value={OTHER_COUNTRY_VALUE}>Otro país</option>
+                  </select>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-sm top-1/2 size-4 -translate-y-1/2 text-text-primary"
+                  />
+                </div>
               )}
             </Field>
-            <Field label="Email" error={fieldErrors.email}>
+            {isOtherCountry ? (
+              <Field label="Especificá tu país" required error={fieldErrors.country}>
+                {({ id, describedBy, invalid }) => (
+                  <input
+                    id={id}
+                    name="country"
+                    type="text"
+                    autoComplete="country-name"
+                    value={customCountry}
+                    aria-invalid={invalid}
+                    aria-describedby={describedBy}
+                    className={fieldClassName}
+                    onChange={(event) => {
+                      setCustomCountry(event.target.value);
+                      revalidateField("country", event.target.value);
+                    }}
+                  />
+                )}
+              </Field>
+            ) : null}
+            <Field label="Email" required error={fieldErrors.email}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -341,7 +486,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    revalidateField("email", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -357,7 +505,7 @@ export function EnviarForm() {
         {type === "simulation" ? (
           <Field
             label="Puesto principal"
-            hint="Opcional. El rol que tuviste en la simulación."
+            hint="El rol que tuviste en la simulación."
             error={fieldErrors.primary_role}
           >
             {({ id, describedBy, invalid }) => (
@@ -369,14 +517,17 @@ export function EnviarForm() {
                 aria-invalid={invalid}
                 aria-describedby={describedBy}
                 className={fieldClassName}
-                onChange={(event) => setPrimaryRole(event.target.value)}
+                onChange={(event) => {
+                  setPrimaryRole(event.target.value);
+                  revalidateField("primary_role", event.target.value);
+                }}
               />
             )}
           </Field>
         ) : null}
         {type === "first_job" ? (
-          <div className="grid grid-cols-2 gap-md">
-            <Field label="Empresa" error={fieldErrors.company}>
+          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
+            <Field label="Empresa" required error={fieldErrors.company}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -386,11 +537,14 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setCompany(event.target.value)}
+                  onChange={(event) => {
+                    setCompany(event.target.value);
+                    revalidateField("company", event.target.value);
+                  }}
                 />
               )}
             </Field>
-            <Field label="Puesto" error={fieldErrors.role_achieved}>
+            <Field label="Puesto" required error={fieldErrors.role_achieved}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -400,16 +554,20 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setRoleAchieved(event.target.value)}
+                  onChange={(event) => {
+                    setRoleAchieved(event.target.value);
+                    revalidateField("role_achieved", event.target.value);
+                  }}
                 />
               )}
             </Field>
           </div>
         ) : null}
         {type === "career_change" ? (
-          <div className="grid grid-cols-2 gap-md">
+          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
             <Field
               label="Oficio anterior"
+              required
               error={fieldErrors.previous_profession}
             >
               {({ id, describedBy, invalid }) => (
@@ -421,11 +579,14 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setPreviousProfession(event.target.value)}
+                  onChange={(event) => {
+                    setPreviousProfession(event.target.value);
+                    revalidateField("previous_profession", event.target.value);
+                  }}
                 />
               )}
             </Field>
-            <Field label="Rol nuevo" error={fieldErrors.new_role}>
+            <Field label="Rol nuevo" required error={fieldErrors.new_role}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -435,63 +596,84 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setNewRole(event.target.value)}
+                  onChange={(event) => {
+                    setNewRole(event.target.value);
+                    revalidateField("new_role", event.target.value);
+                  }}
                 />
               )}
             </Field>
           </div>
         ) : null}
-        <Field
-          label={selected?.storyLabel ?? "Tu historia"}
-          hint={selected?.storyHint}
-          error={fieldErrors.story}
-        >
-          {({ id, describedBy, invalid }) => (
-            <>
+        <div className="flex min-w-0 flex-col gap-xs">
+          {storyNeedsReview ? (
+            <p id="story-review-notice" className="text-body-small leading-relaxed text-accent-cyan">
+              Cambiaste el tipo de experiencia. Revisá que tu historia responda a la nueva pregunta.
+            </p>
+          ) : null}
+          <Field
+            label={selected?.storyLabel ?? "Tu historia"}
+            required
+            reserveErrorSpace
+            className="gap-xs"
+            hint={`${selected?.storyHint ?? "En tus palabras."} Entre ${STORY_MIN_CHARS} y ${STORY_MAX_CHARS} caracteres.`}
+            error={fieldErrors.story}
+            trailingInfo={(
+              <span className="text-xs text-text-secondary tabular-nums">
+                {story.trim().length}/{STORY_MAX_CHARS}
+              </span>
+            )}
+          >
+            {({ id, describedBy, invalid }) => (
               <textarea
                 id={id}
                 name="story"
                 value={story}
                 maxLength={STORY_MAX_CHARS}
                 aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={textareaClassName}
-                onChange={(event) => setStory(event.target.value)}
+                aria-describedby={[describedBy, storyNeedsReview ? "story-review-notice" : undefined].filter(Boolean).join(" ")}
+                className={cn(textareaClassName, "min-h-40 sm:min-h-44")}
+                onChange={(event) => {
+                  setStory(event.target.value);
+                  setStoryNeedsReview(false);
+                  revalidateField("story", event.target.value);
+                }}
               />
-              <p className="mt-xs text-body-small text-text-muted">
-                {story.trim().length}/{STORY_MAX_CHARS}
-              </p>
-            </>
-          )}
-        </Field>
+            )}
+          </Field>
+        </div>
       </fieldset>
 
       <fieldset
         hidden={step !== 4}
         className={cn(step === 4 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Captura y links</legend>
+        <legend className="sr-only">Foto testimonial y enlaces</legend>
         <p className="text-body-small text-text-secondary">
           Todo este paso es opcional.
         </p>
-        <div className="grid items-start gap-md sm:grid-cols-2">
+        <div className="grid items-start gap-md md:grid-cols-2 md:gap-lg">
           <FileField
             name="capture"
             label="Foto testimonial"
-            hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión. Ayuda a mostrar cómo se vivió, más allá del proyecto."
+            hint="Una foto real de tu experiencia: trabajando, con tu equipo o en una reunión."
+            requirements="JPG, PNG o WebP · Máximo 8 MB."
             error={fieldErrors.capture}
-            optional
             accept={IMAGE_ACCEPT}
             preview="capture"
-            onFileChange={setCaptureFile}
-            onInvalid={(message) => setError("capture", message)}
+            onFileChange={(file) => {
+              setCaptureFile(file);
+              revalidateField("capture", file);
+            }}
+            onInvalid={(message) => {
+              if (message) setError("capture", message);
+            }}
           />
-          <div className="flex flex-col gap-md">
+          <div className="flex min-w-0 flex-col gap-md">
             <Field
               label="Video de YouTube"
               hint="Solo un link de YouTube. No se sube un archivo."
               error={fieldErrors.video_url}
-              optional
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -504,7 +686,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setVideoUrl(event.target.value)}
+                  onChange={(event) => {
+                    setVideoUrl(event.target.value);
+                    revalidateField("video_url", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -512,7 +697,6 @@ export function EnviarForm() {
               label="Instagram"
               hint="Para mencionarte en el caption si publicamos."
               error={fieldErrors.instagram}
-              optional
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -525,7 +709,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setInstagram(event.target.value)}
+                  onChange={(event) => {
+                    setInstagram(event.target.value);
+                    revalidateField("instagram", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -533,7 +720,6 @@ export function EnviarForm() {
               label="LinkedIn"
               hint="Para mencionarte en el post de LinkedIn si publicamos."
               error={fieldErrors.linkedin}
-              optional
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -546,7 +732,10 @@ export function EnviarForm() {
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
                   className={fieldClassName}
-                  onChange={(event) => setLinkedin(event.target.value)}
+                  onChange={(event) => {
+                    setLinkedin(event.target.value);
+                    revalidateField("linkedin", event.target.value);
+                  }}
                 />
               )}
             </Field>
@@ -559,83 +748,122 @@ export function EnviarForm() {
         className={cn(step === 5 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">Consentimiento</legend>
-        <div className="rounded-md border border-border bg-card p-md">
-          <p className="text-overline text-text-secondary">Resumen</p>
-          <ul className="mt-xs space-y-1 text-body-small text-text-secondary">
-            <li>
-              Tipo:{" "}
-              <span className="text-text-primary">
-                {selected?.label ?? "—"}
-              </span>
-            </li>
-            <li>
-              Nombre:{" "}
-              <span className="text-text-primary">
-                {fullName.trim() || "—"}
-              </span>
-            </li>
-            <li>
-              País:{" "}
-              <span className="text-text-primary">
-                {country.trim() || "—"}
-              </span>
-            </li>
-            <li>
-              Foto de perfil:{" "}
-              <span className="text-text-primary">
-                {avatarFile ? "Lista" : "Falta"}
-              </span>
-            </li>
-            <li>
-              Foto testimonial:{" "}
-              <span className="text-text-primary">
-                {captureFile ? "Adjunta" : "Sin captura"}
-              </span>
-            </li>
-            <li>
-              YouTube:{" "}
-              <span className="text-text-primary">
-                {videoUrl.trim() ? "Link cargado" : "Sin video"}
-              </span>
-            </li>
-          </ul>
-        </div>
-        <label className="flex items-start gap-sm text-body-small text-text-secondary">
-          <input
-            type="checkbox"
-            name="consent"
-            value="1"
-            checked={consent}
-            className="mt-1 size-4 rounded-sm border-border accent-accent-cyan"
-            onChange={(event) => setConsent(event.target.checked)}
-          />
-          <span>
-            Acepto que No Country publique mi testimonio (nombre, foto y texto)
-            en la galería y en Discord. El email no se muestra en público. El
-            equipo lo revisa antes de publicarlo.
-          </span>
-        </label>
-        {fieldErrors.consent ? (
-          <p className="text-body-small text-destructive" role="alert">
-            {fieldErrors.consent}
+        <div>
+          <h3 className="text-heading-3 text-text-primary">Revisá tu testimonio</h3>
+          <p className="mt-xs text-body-small leading-relaxed text-text-secondary">
+            Comprobá que los datos estén correctos antes de enviarlo.
           </p>
-        ) : null}
-        {state.status === "error" ? (
-          <div className="flex flex-col gap-xs" role="alert">
-            <p className="text-body-small text-destructive">{state.message}</p>
-            {state.fieldErrors
-              ? Object.values(state.fieldErrors).map((message) => (
-                  <p key={message} className="text-body-small text-destructive">
-                    {message}
-                  </p>
-                ))
-              : null}
-            {state.step ? (
+        </div>
+        <section aria-labelledby="testimonial-summary-title" className="rounded-card border border-border bg-card p-sm sm:p-md">
+          <h4 id="testimonial-summary-title" className="text-body font-semibold text-text-primary">Resumen</h4>
+          <div className="mt-sm flex flex-col gap-md">
+            <section aria-labelledby="summary-testimonial-title">
+              <h5 id="summary-testimonial-title" className="text-body-small font-semibold text-text-primary">Datos de tu testimonio</h5>
+              <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
+                {[
+                  ["Tipo de experiencia", selected?.label ?? "Sin seleccionar"],
+                  ["Nombre", fullName.trim() || "Falta completar"],
+                  ["País", country.trim() || "Falta completar"],
+                  ...professionalSummary,
+                ].map(([label, value]) => (
+                  <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                    <dt className="text-body-small text-text-secondary">{label}</dt>
+                    <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
+                  </div>
+                ))}
+                <div className="min-w-0 border-t border-border-subtle py-xs sm:col-span-2 sm:py-sm">
+                  <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? "Tu historia"}</dt>
+                  <dd className="mt-1 text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : "Falta completar"}</dd>
+                </div>
+              </dl>
+            </section>
+            <section aria-labelledby="summary-contact-title">
+              <h5 id="summary-contact-title" className="text-body-small font-semibold text-text-primary">Datos de contacto</h5>
+              <dl className="mt-xs">
+                <div className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                  <dt className="text-body-small text-text-secondary">Email</dt>
+                  <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{email.trim() || "Falta completar"}</dd>
+                </div>
+              </dl>
+              <p className="text-body-small leading-relaxed text-text-secondary">El email es privado: se usa como dato de contacto y no se publica.</p>
+            </section>
+            <section aria-labelledby="summary-media-title">
+              <h5 id="summary-media-title" className="text-body-small font-semibold text-text-primary">Fotografías y enlaces</h5>
+              <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
+                {[
+                  ["Foto de perfil", avatarFile ? "Lista" : "Falta (obligatoria)"],
+                  ["Foto testimonial", captureFile ? "Adjunta" : "No agregada (opcional)"],
+                  ...(videoUrl.trim() ? [["YouTube", videoUrl.trim()]] : []),
+                  ...(instagram.trim() ? [["Instagram", instagram.trim()]] : []),
+                  ...(linkedin.trim() ? [["LinkedIn", linkedin.trim()]] : []),
+                ].map(([label, value]) => (
+                  <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
+                    <dt className="text-body-small text-text-secondary">{label}</dt>
+                    <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </div>
+          <p className="mt-sm text-body-small leading-relaxed text-text-secondary">El equipo de No Country revisará tu testimonio antes de publicarlo.</p>
+        </section>
+        <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
+          <h4 id="testimonial-consent-title" className="mb-sm text-body font-semibold text-text-primary">
+            Consentimiento<span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
+          </h4>
+          <label className="relative flex min-h-11 cursor-pointer items-start gap-sm text-body-small leading-relaxed text-text-secondary">
+            <input
+              type="checkbox"
+              name="consent"
+              value="1"
+              checked={consent}
+              aria-invalid={Boolean(fieldErrors.consent)}
+              aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
+              className="mt-1 size-5 shrink-0 rounded-sm border-border accent-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+              onChange={(event) => {
+                setConsent(event.target.checked);
+                revalidateField("consent", event.target.checked);
+              }}
+            />
+            <span>
+              Acepto que No Country publique mi testimonio (nombre, foto y texto)
+              en la galería y en Discord. El email no se muestra en público. El
+              equipo lo revisa antes de publicarlo.
+              <span className="sr-only"> (obligatorio)</span>
+            </span>
+          </label>
+          <div className="mt-1 min-h-6">
+            {fieldErrors.consent ? (
+              <p id="consent-error" className="text-body-small leading-relaxed text-destructive">
+                {fieldErrors.consent}
+              </p>
+            ) : null}
+          </div>
+        </section>
+        {serverMessage || correctionStep || unknownErrors.length > 0 ? (
+          <div className="flex flex-col gap-xs rounded-card border border-destructive/30 bg-destructive/5 p-sm" role="alert">
+            {serverMessage ? (
+              <p className="text-body-small text-destructive">{serverMessage}</p>
+            ) : null}
+            {Object.entries(serverErrors)
+              .filter(([field]) => FIELD_STEP[field as FormField] !== STEPS)
+              .map(([field, message]) => (
+                <p key={field} className="text-body-small text-destructive">
+                  {message}
+                </p>
+              ))}
+            {unknownErrors.map(([field, message]) => (
+              <p key={field} className="text-body-small text-destructive">
+                {message}
+              </p>
+            ))}
+            {correctionStep ? (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setStep(state.step ?? 1)}
+                className="min-h-11 self-start px-sm"
+                onClick={() => navigateTo(correctionStep, serverErrors)}
               >
                 Ir a corregir
               </Button>
@@ -644,22 +872,26 @@ export function EnviarForm() {
         ) : null}
       </fieldset>
 
-      <div className="flex flex-wrap items-center justify-between gap-sm">
-        <Button
-          type="button"
-          variant="outline"
-          size="lg"
-          disabled={step === 1 || pending}
-          onClick={() => setStep((current) => Math.max(1, current - 1))}
-        >
-          Atrás
-        </Button>
+      <div className={cn("flex flex-wrap items-center gap-sm", step === 1 ? "justify-end" : "justify-between border-t border-border pt-md")}>
+        {step > 1 ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="min-h-11 px-sm"
+            disabled={step === 1 || pending}
+            onClick={() => navigateTo(Math.max(1, step - 1))}
+          >
+            Atrás
+          </Button>
+        ) : null}
         {step < STEPS ? (
           <Button
             key="next"
             type="button"
             variant="gradient"
             size="lg"
+            className={step === 1 ? "min-h-11 w-full px-md sm:w-auto" : "min-h-11 px-md"}
             onClick={goNext}
           >
             Siguiente
@@ -670,6 +902,7 @@ export function EnviarForm() {
             type="submit"
             variant="gradient"
             size="lg"
+            className="min-h-11 px-sm sm:px-md"
             disabled={pending}
           >
             {pending ? "Enviando…" : "Enviar testimonio"}
@@ -678,33 +911,56 @@ export function EnviarForm() {
       </div>
     </form>
   );
+
+  return <>{children}{form}</>;
 }
 
-function StepProgress({ step }: { step: number }) {
+function StepProgress({ step, headingRef }: {
+  step: number;
+  headingRef: React.RefObject<HTMLHeadingElement | null>;
+}) {
   return (
     <div>
-      <p className="text-overline text-text-secondary">
+      <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
         Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
-      </p>
-      <div
-        className="mt-xs h-1 overflow-hidden rounded-full bg-bg-surface-4"
-        aria-hidden="true"
-      >
-        <div
-          className="h-full bg-brand-gradient transition-[width]"
-          style={{ width: `${(step / STEPS) * 100}%` }}
-        />
-      </div>
+      </h2>
+      {/* El h2 enfocado comunica el progreso; los círculos son solo visuales, sin barra duplicada. */}
+      <ol aria-hidden="true" className="mt-md grid grid-cols-5">
+        {STEP_LABELS.map((label, index) => {
+          const current = step === index + 1;
+          const completed = step > index + 1;
+          return (
+            <li key={label} className="relative flex min-w-0 flex-col items-center gap-xs text-center">
+              {index < STEPS - 1 ? (
+                <span className={cn("absolute top-5 left-1/2 h-px w-full", completed ? "bg-accent-cyan/60" : "bg-border")} />
+              ) : null}
+              <span className={cn(
+                "relative flex size-10 items-center justify-center rounded-full text-body-small font-semibold",
+                current
+                  ? "bg-brand-gradient text-white ring-4 ring-brand-pink/10"
+                  : completed
+                    ? "border border-accent-cyan bg-bg-surface-2 text-accent-cyan"
+                    : "border border-border bg-bg-base text-text-secondary",
+              )}>
+                {index + 1}
+              </span>
+              <span className={cn("hidden text-body-small md:block", current ? "font-medium text-text-primary" : "text-text-secondary")}>
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
 
-function SuccessCard() {
-  const [inviteUrl, setInviteUrl] = useState(`${getSiteUrl()}/enviar`);
+function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
   const [copied, setCopied] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    setInviteUrl(`${window.location.origin}/enviar`);
+    focusAndReveal(headingRef.current);
   }, []);
 
   async function copyInviteLink() {
@@ -718,22 +974,20 @@ function SuccessCard() {
   }
 
   return (
-    <div className="mt-lg rounded-md border border-border bg-card p-md">
-      <p className="text-overline text-accent-mint">Listo</p>
-      <h2 className="mt-xs text-heading-3 text-text-primary">
+    <div className="mt-lg rounded-card border border-border bg-card p-md sm:p-lg">
+      <p className="text-overline text-accent-cyan">Listo</p>
+      <h1 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
         Gracias por tu testimonio
-      </h2>
+      </h1>
       <p className="mt-sm text-body text-text-secondary">
-        Ya lo tenemos. Gracias por tomarte el tiempo de contarlo.
+        Recibimos tu testimonio. El equipo de No Country lo revisará antes de publicarlo.
       </p>
       <div className="mt-md border-t border-border pt-md">
         <p className="text-body text-text-primary">
           Ahora ayudá a que otra persona se anime
         </p>
         <p className="mt-xs text-body text-text-secondary">
-          Si alguien de tu equipo o de tu simulación todavía no contó su
-          historia, pasale este enlace. Tu invitación puede ser el empujón
-          que necesita para dejarla.
+          Si conocés a alguien con una experiencia para compartir, pasale este enlace. Su historia también puede ayudar a otras personas.
         </p>
         <p className="mt-sm break-all text-body">
           <a
@@ -743,11 +997,11 @@ function SuccessCard() {
             {inviteUrl}
           </a>
         </p>
-        <div className="mt-sm flex flex-wrap gap-sm">
-          <Button type="button" variant="outline" onClick={copyInviteLink}>
+        <div className="mt-md flex flex-col gap-sm sm:flex-row sm:flex-wrap">
+          <Button type="button" variant="gradient" className="min-h-11 px-sm" onClick={copyInviteLink}>
             {copied ? "Enlace copiado" : "Copiar enlace"}
           </Button>
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>
             Volver al inicio
           </Link>
         </div>

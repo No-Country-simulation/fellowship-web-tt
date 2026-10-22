@@ -59,14 +59,16 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `discord_posted_at` | `timestamptz` | sí | | Cuando el webhook de comunidad posteó con éxito. Null = pendiente, falló, o no hay webhook |
 | `buffer_instagram_posted_at` | `timestamptz` | sí | | Cuando Buffer encoló Instagram. Null = pendiente, falló, o no hay canal |
 | `buffer_linkedin_posted_at` | `timestamptz` | sí | | Cuando Buffer encoló LinkedIn. Null = pendiente, falló, o no hay canal |
+| `buffer_instagram_post_id` | `text` | sí | | Id del post de Instagram en Buffer. Null = pendiente, falló, o publicado antes de guardar el id |
+| `buffer_linkedin_post_id` | `text` | sí | | Id del post de LinkedIn en Buffer. Null = pendiente, falló, o publicado antes de guardar el id |
 | `created_at` | `timestamptz` | no | `now()` | |
 | `updated_at` | `timestamptz` | no | `now()` | Trigger `on update` |
 
 Índices: `unique (slug)`, `(status, submitted_at desc)`, `(type)`.
 
-`video_url` vacío o YouTube (`youtube.com` / `youtu.be`). Validar forma de `payload` en la app y, si se quiere, con un check JSON.
+`video_url` vacío o YouTube (`youtube.com` / `youtu.be`). `payload_is_object` (`jsonb_typeof(payload) = 'object'`) y `payload_matches_type` ya están en la base (formas abajo). Los crea [`20260906000000_init.sql`](../supabase/migrations/20260906000000_init.sql); [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql) reemplaza `payload_matches_type`.
 
-`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `li_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
+`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `buffer_*_post_id` de [`20261020180000_buffer_post_ids.sql`](../supabase/migrations/20261020180000_buffer_post_ids.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `li_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
 
 ---
 

@@ -62,6 +62,7 @@
   --radius-button: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 2rem;
+  --radius-card: 1.25rem;
 
   --text-heading-1: 4.75rem;
   --text-heading-2: 3rem;
@@ -72,6 +73,7 @@
   --text-overline: 0.8125rem;
 
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card-hover: 0 2px 6px 0 rgb(0 0 0 / 0.12);
   --max-width-content: 96rem;
 }
 
@@ -87,12 +89,12 @@
   --bg-surface-3: #12132a;
   --bg-surface-4: #181932;
   --bg-white-a5: #ffffff0d;
-  --border-default: #2a2c4a;
-  --border-subtle: #1d283a;
+  --border-default: #2d2b40;
+  --border-subtle: #1c1b29;
   --text-muted: #666666;
   --text-primary: #ffffff;
   --text-secondary: #999999;
-  --brand-gradient-start: #fe0096;
+  --brand-gradient-start: #ff0094;
   --brand-gradient-end: #02beef;
   --brand-pink: var(--brand-gradient-start);
   --brand-cyan: var(--brand-gradient-end);
@@ -245,6 +247,27 @@
     line-height: 1.4;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .type-section {
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .type-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  @media (min-width: 768px) {
+    .type-section {
+      font-size: 2.625rem;
+    }
   }
 
   .container-content {

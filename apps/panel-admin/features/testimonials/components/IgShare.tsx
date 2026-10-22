@@ -17,14 +17,25 @@ type IgShareProps = IgCardContent & {
   caption: string;
   /** `preview` muestra solo el canvas. `share` suma descarga y copia del caption. */
   mode?: "preview" | "share";
+  /** PNG ya publicado. Si está, se muestra y se descarga ese en vez de dibujar la card. */
+  imageUrl?: string | null;
 };
 
-/** Preview, descarga PNG 1080×1350 y copia el caption de Instagram. */
+async function fetchPng(url: string) {
+  const response = await fetch(url, { mode: "cors" });
+  if (!response.ok) {
+    throw new Error("No pudimos bajar la imagen.");
+  }
+  return response.blob();
+}
+
+/** Preview, descarga PNG 1080×1350 y copia el texto del post (iguales en todas las redes). */
 export function IgShare({
   slug,
   quote,
   caption,
   type,
+  design,
   fullName,
   country,
   avatarUrl,
@@ -33,6 +44,7 @@ export function IgShare({
   role,
   previousRole,
   mode = "share",
+  imageUrl = null,
 }: IgShareProps) {
   const previewOnly = mode === "preview";
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,6 +83,7 @@ export function IgShare({
     setPreviewFailed(false);
     void drawIgCard(canvas, {
       type,
+      design,
       quote: previewQuote,
       fullName,
       country,
@@ -98,6 +111,7 @@ export function IgShare({
   }, [
     previewQuote,
     type,
+    design,
     fullName,
     country,
     avatarUrl,
@@ -111,19 +125,7 @@ export function IgShare({
     setDownloadError(null);
     setDownloading(true);
     try {
-      const canvas = document.createElement("canvas");
-      await drawIgCard(canvas, {
-        type,
-        quote: quote || previewQuote,
-        fullName,
-        country,
-        avatarUrl,
-        captureUrl,
-        company,
-        role,
-        previousRole,
-      });
-      const blob = await canvasToPng(canvas);
+      const blob = imageUrl ? await fetchPng(imageUrl) : await drawCardPng();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -137,6 +139,23 @@ export function IgShare({
     }
   }
 
+  async function drawCardPng() {
+    const canvas = document.createElement("canvas");
+    await drawIgCard(canvas, {
+      type,
+      design,
+      quote: quote || previewQuote,
+      fullName,
+      country,
+      avatarUrl,
+      captureUrl,
+      company,
+      role,
+      previousRole,
+    });
+    return canvasToPng(canvas);
+  }
+
   async function copyCaption() {
     try {
       await navigator.clipboard.writeText(caption);
@@ -146,7 +165,18 @@ export function IgShare({
     }
   }
 
-  const canvas = (
+  const canvas = imageUrl ? (
+    <div className="w-full max-w-md">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imageUrl}
+        width={IG_CARD_WIDTH}
+        height={IG_CARD_HEIGHT}
+        alt={`Imagen del post de ${fullName}`}
+        className="aspect-4/5 h-auto w-full rounded-lg border border-border bg-muted"
+      />
+    </div>
+  ) : (
     <div className="w-full max-w-md">
       {previewFailed ? (
         <div className="grid aspect-4/5 w-full place-items-center rounded-lg border border-border bg-muted p-4 text-center">
@@ -159,7 +189,7 @@ export function IgShare({
         ref={canvasRef}
         width={IG_CARD_WIDTH}
         height={IG_CARD_HEIGHT}
-        aria-label={`Card de Instagram de ${fullName}`}
+        aria-label={`Imagen del post de ${fullName}`}
         className={cn(
           "aspect-4/5 w-full rounded-lg border border-border bg-muted",
           previewFailed && "hidden",
@@ -191,7 +221,7 @@ export function IgShare({
             disabled={!caption}
             className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full")}
           >
-            {copied ? "Caption copiado" : "Copiar caption"}
+            {copied ? "Texto copiado" : "Copiar texto"}
           </button>
         </div>
         {downloadError ? (
@@ -204,7 +234,7 @@ export function IgShare({
             {previewCaption}
           </p>
         ) : (
-          <p className="text-admin-caption text-muted-foreground">Sin caption.</p>
+          <p className="text-admin-caption text-muted-foreground">Sin texto.</p>
         )}
       </div>
     </div>

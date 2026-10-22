@@ -1,12 +1,25 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { DetailHeader } from "@features/testimonials/components/DetailHeader";
+import { InboxBackLink } from "@features/testimonials/components/InboxFilters";
 import { PublishedPanel } from "@features/testimonials/components/PublishedPanel";
 import { ReviewForm } from "@features/testimonials/components/ReviewForm";
 import { Submission } from "@features/testimonials/components/Submission";
-import { getTestimonialById } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
-import { PageHeader, PageHeaderDescription, PageHeaderTitle, PageBackLink } from "@shared/ui/patterns/PageHeader";
+import { bufferPublishesImmediately } from "@features/testimonials/infrastructure/buffer";
+import {
+  canonicalInboxHref,
+  inboxParamsFromRecord,
+  inboxSearchNeedsCleanup,
+} from "@features/testimonials/infrastructure/inboxQuery";
+import {
+  bufferPostStates,
+  getTestimonialById,
+  isTestimonialId,
+  storedShareCardUrl,
+} from "@features/testimonials/infrastructure/repositories/testimonialRepository";
+import { galleryTestimonialHref } from "@features/testimonials/infrastructure/site";
+import { PageHeader, PageHeaderDescription, PageHeaderTitle } from "@shared/ui/patterns/PageHeader";
 
 export const metadata: Metadata = {
   title: "Revisar testimonio",
@@ -17,16 +30,21 @@ export default async function TestimonialDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ discord?: string | string[]; buffer?: string | string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const discordParam = firstSearchParam(query.discord);
-  const bufferParam = firstSearchParam(query.buffer);
 
-  if (!id) {
+  if (!isTestimonialId(id)) {
     notFound();
   }
+
+  const inboxParams = inboxParamsFromRecord(query);
+  if (inboxSearchNeedsCleanup(inboxParams)) {
+    redirect(canonicalInboxHref(`/testimonials/${id}`, inboxParams));
+  }
+
+  const shareParam = firstSearchParam(query.share);
 
   const result = await getTestimonialById(id);
   if (!result.ok && result.notFound) {
@@ -36,7 +54,7 @@ export default async function TestimonialDetailPage({
     return (
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
         <PageHeader>
-          <PageBackLink href="/testimonials">Testimonios</PageBackLink>
+          <InboxBackLink>Testimonios</InboxBackLink>
           <PageHeaderTitle>No se pudo cargar</PageHeaderTitle>
           <PageHeaderDescription>{result.message}</PageHeaderDescription>
         </PageHeader>
@@ -44,29 +62,39 @@ export default async function TestimonialDetailPage({
     );
   }
 
-  const { testimonial, metaLine, canRetryDiscord, canRetryInstagram, canRetryLinkedin } = result;
+  const { testimonial, channels } = result;
   const inReview = testimonial.status === "in_review";
-  const discordStatus =
-    discordParam === "failed" || discordParam === "ok" ? discordParam : null;
-  const bufferStatus = bufferParam === "failed" || bufferParam === "ok" ? bufferParam : null;
+  const shareStatus = shareParam === "failed" || shareParam === "ok" ? shareParam : null;
   const submission = <Submission testimonial={testimonial} />;
 
   if (inReview) {
-    return <ReviewForm testimonial={testimonial} submission={submission} metaLine={metaLine} />;
+    return (
+      <ReviewForm
+        testimonial={testimonial}
+        submission={submission}
+        channels={channels}
+      />
+    );
   }
+
+  const [shareCardUrl, bufferStates] =
+    testimonial.status === "published"
+      ? await Promise.all([storedShareCardUrl(testimonial.slug), bufferPostStates(testimonial)])
+      : [null, null];
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-      <DetailHeader testimonial={testimonial} metaLine={metaLine} />
+      <DetailHeader testimonial={testimonial} />
       <div className="mt-6 flex min-w-0 flex-col gap-6">
         {submission}
         <PublishedPanel
           testimonial={testimonial}
-          discordStatus={discordStatus}
-          bufferStatus={bufferStatus}
-          canRetryDiscord={canRetryDiscord}
-          canRetryInstagram={canRetryInstagram}
-          canRetryLinkedin={canRetryLinkedin}
+          channels={channels}
+          shareStatus={shareStatus}
+          shareCardUrl={shareCardUrl}
+          bufferStates={bufferStates}
+          publicHref={galleryTestimonialHref(testimonial.slug)}
+          scheduled={!bufferPublishesImmediately()}
         />
       </div>
     </div>

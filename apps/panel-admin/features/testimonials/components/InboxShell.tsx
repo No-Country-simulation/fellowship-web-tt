@@ -6,6 +6,7 @@ import { cn } from "@repo/ui/utils";
 
 import type { AdminInboxData } from "../types/testimonial";
 import { DetailLoading } from "./DetailLoading";
+import { InboxFiltersProvider } from "./InboxFilters";
 import { InboxList } from "./InboxList";
 
 function selectedIdFromPath(pathname: string) {
@@ -15,6 +16,20 @@ function selectedIdFromPath(pathname: string) {
 
 /** Lista a la izquierda y ficha a la derecha, dentro del padding del shell. */
 export function InboxShell({
+  inbox,
+  children,
+}: {
+  inbox: AdminInboxData;
+  children: ReactNode;
+}) {
+  return (
+    <InboxFiltersProvider>
+      <InboxFrame inbox={inbox}>{children}</InboxFrame>
+    </InboxFiltersProvider>
+  );
+}
+
+function InboxFrame({
   inbox,
   children,
 }: {

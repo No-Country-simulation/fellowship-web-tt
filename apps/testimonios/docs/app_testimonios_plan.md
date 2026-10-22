@@ -1,5 +1,47 @@
 # Plan: sistema de testimonios
 
+## Estado actual de implementación
+
+**Última revisión:** 22 de octubre de 2026.
+
+Este checklist resume el estado de desarrollo de Testimonios. Las secciones siguientes conservan la planificación y las decisiones originales del proyecto.
+
+### V1 — Interfaz pública de Testimonios
+
+- [x] Formulario `/enviar` de cinco pasos y tres categorías de testimonios.
+- [x] Validaciones, avatar obligatorio y fotografía testimonial opcional.
+- [x] Consentimiento, resumen y confirmación del envío pendiente de moderación.
+- [x] Galería pública con búsqueda, filtros, contador y estados vacíos.
+- [x] Carrusel de hasta tres testimonios publicados.
+- [x] Ficha individual con historia completa, fotografía testimonial y video de YouTube.
+- [x] Mejoras responsive, de accesibilidad y adaptación a texto ampliado.
+- [x] Documentación UI de los componentes implementados y modificados.
+
+### V1 — Funcionalidades del equipo
+
+- [x] Panel administrativo de revisión, edición y moderación de testimonios.
+- [x] Generación de cards para redes sociales.
+- [x] Integraciones con Discord y Buffer, demostradas funcionando por el equipo en dev.
+
+### Pendientes de revisión técnica
+
+- [ ] Revisar la protección de fotografías pendientes de moderación en Supabase Storage.
+- [ ] Verificar los controles de autenticación y autorización del panel antes de utilizar datos reales.
+- [x] Límites de la card PNG y Storage: la card y el bucket `share-cards` cortan en 5 MB. El body de la Server Action queda en 8 MB para que entren la card y el texto.
+- [x] Recuperación si Buffer falla después de crear el post: el reintento borra fecha e id solo si siguen siendo los de ese post y vuelve a publicar esa red.
+- [ ] Definir la política de conservación o eliminación de testimonios rechazados y sus archivos.
+
+### V2 — Fuera del alcance actual
+
+- [ ] Grabación y subida directa de archivos de video.
+- [ ] Procesamiento y generación de videos con identidad de marca.
+- [ ] Generación de Reels verticales.
+- [ ] Evaluación de FFmpeg, OpenCut u otras herramientas de procesamiento.
+
+**Nota:** los puntos de V2 son funcionalidades futuras, no tareas incumplidas de V1. Los pendientes relacionados con el panel, Supabase y las publicaciones requieren evaluación por sus responsables.
+
+---
+
 El inbox ya no vive en esta app. Galería y `/enviar` quedan en `apps/testimonios`. Revisar y publicar está en `apps/panel-admin` (`/testimonials`). Quote y captions salen de la plantilla; no hay generación con IA.
 
 Brief: capturar → almacenar → validar → compartir (Discord, Instagram y LinkedIn). Tally/Excel son referencia de campos. Formato base: **texto**. **Avatar obligatorio**. Foto testimonial y YouTube opcionales. Se pide en **Demo Day**.
@@ -48,10 +90,10 @@ Wizard corto, sin login.
 
 - Qué querés contar — obligatorio
 - Nombre completo — obligatorio
-- País — obligatorio en el form. En DB puede ser null (envíos anteriores). Se muestra junto al nombre en `/t/[slug]`, Discord e Instagram
+- País — obligatorio en el form. En DB puede ser null (envíos anteriores). Se muestra junto al nombre en `/t/[slug]` y en la card de las redes
 - Email — obligatorio (no sale en público)
-- **Avatar** — **obligatorio**. Foto de la **persona** (cara / perfil). Va redondo en la card IG y en Discord junto al nombre. Sin avatar no se puede enviar.
-- **Foto testimonial** — opcional. **No es el avatar.** Foto del **entorno de trabajo** (equipo, oficina, reunión), no una captura del proyecto. En Instagram es la foto de arriba de la card; si no hay, se usa `public/brand/ig-fallback.jpg`
+- **Avatar** — **obligatorio**. Foto de la **persona** (cara / perfil). Va redondo en la card y en Discord junto al nombre. Sin avatar no se puede enviar.
+- **Foto testimonial** — opcional. **No es el avatar.** Foto del **entorno de trabajo** (equipo, oficina, reunión), no una captura del proyecto. Es la foto de arriba de la card (diseño Foto arriba); si no hay, se usa `public/brand/ig-fallback.jpg`
 - Video — opcional: **solo URL de YouTube**
 - Instagram — opcional, para mención en el caption de IG
 - LinkedIn — opcional, perfil (`linkedin.com/in/…`) o handle, para el caption de LI
@@ -67,8 +109,8 @@ Totales: simulación 7 obligatorios (incluye país y avatar); empleo y reconvers
 
 Al enviar, el sistema arma los textos **sin IA**: recorta lo que escribió la persona.
 
-- **Quote** (card IG y Discord): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
-- **Captions** de Instagram y LinkedIn (misma plantilla, distinta red):
+- **Quote** (la frase de la card): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
+- **Captions** de Instagram y LinkedIn (misma plantilla, distinta red). El formulario guarda los dos. El panel publica un solo texto para Instagram y LinkedIn; Discord lleva la intro y la frase (ver abajo):
 
 ```
 Desde No Country compartimos esta historia de nuestro talento
@@ -81,7 +123,7 @@ Desde No Country compartimos esta historia de nuestro talento
 #NoCountry #DemoDay #TalentoIT
 ```
 
-El equipo edita quote y captions a mano en el panel (`/testimonials/[id]`) antes de guardar o publicar. Si el caption sigue la plantilla y cambia el quote, se rearma con el mismo intro. Quote, nombre, red y hashtags los arma el código. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
+En el panel (`/testimonials/[id]`) hay un solo **Texto del post** para Instagram y LinkedIn. Parte de `ig_caption`; si sigue la plantilla, lleva el Instagram y el LinkedIn de la persona (los que haya). Al guardar o publicar se escribe en `ig_caption` y se copia a `li_caption`. Discord no usa ese texto: lleva la intro y la frase. Si el texto sigue la plantilla y cambia el quote, se rearma con el mismo intro. Quote, nombre, redes y hashtags los arma el código. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
 
 ## Guardar
 
@@ -93,9 +135,11 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 Revisar y publicar está en `apps/panel-admin`, en `/testimonials` y `/testimonials/[id]`, dentro del mismo shell que el resto del panel. No hay login propio ni generación con IA: el quote y los captions salen de la plantilla y se editan a mano.
 
-Inbox master-detail (`InboxShell`): lista a la izquierda, ficha a la derecha. Los estados (en revisión / publicado / rechazado) filtran la lista en el cliente; no hay `?status=` en la URL. Al elegir un envío, el detalle muestra un esqueleto (`DetailLoading` / `[id]/loading.tsx`) hasta que carga `/testimonials/[id]`.
+Inbox master-detail (`InboxShell`): lista a la izquierda, ficha a la derecha. Los filtros viven en la URL: `?status=` (`in_review`, `published`, `rejected`), `?type=` (`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres de control). Un valor inválido redirige a la query válida. La lista aplica esos filtros en memoria. Al elegir un envío, el detalle muestra un esqueleto (`DetailLoading` / `[id]/loading.tsx`) hasta que carga `/testimonials/[id]`.
 
-En la ficha: envío original arriba (desplegable), quote editable, y preview por tabs (`ShareTabs`: Discord por defecto / Instagram / LinkedIn). Los tres tabs usan el mismo marco full width. La card de Instagram no supera `max-w-md` adentro del tab; el caption de IG va al lado y se edita a mano. LinkedIn edita el caption adentro del preview. Publicar, guardar borrador o rechazar. Después de publicar: Discord / Buffer se envían solos; si fallan, reintentar. Las tabs siguen para revisar o copiar.
+En la ficha (`ReviewForm`): envío original arriba (desplegable) y una sola **Publicación** para las tres redes. A la izquierda, el diseño de la card y la preview 1080×1350; a la derecha, la **Frase de la imagen** (quote) y el **Texto del post**, los dos editables. Arriba se ve a qué redes sale (`ShareTargets`). Publicar, guardar borrador o rechazar.
+
+Después de publicar, la ficha (`PublishedPanel`) muestra el estado por red, la card que salió y los botones para descargarla y copiar el texto. Si alguna red falla, un solo botón reintenta las que falten.
 
 ## Publicar en Discord de comunidad (post validación)
 
@@ -129,50 +173,49 @@ El aviso del Demo Day en el canal **general** es a mano (link `/enviar`). Los we
 
 **Al enviar** (aún `in_review`): `POST` JSON al webhook interno. Aviso corto: nombre, tipo, “nuevo testimonio”, link a `{ADMIN_PANEL_URL}/testimonials/{id}`. Username del webhook: algo tipo “Testimonios inbox”. La comunidad no ve nada.
 
-**Al publicar:** el server action pasa a `published`, escribe `published_at`, y **después** postea Discord (webhook) e Instagram/LinkedIn (Buffer). El testimonio no espera a las redes para quedar publicado.
+**Al publicar:** el server action pasa la fila de `in_review` a `published` y escribe `published_at`. Solo sigue el request que cambia la fila. Ese sube el PNG a `share-cards`. Si el PNG no se genera, pasa de 5 MB o no llega, no se publica. Si Storage falla, la fila vuelve a `in_review` con `published_at` en null. Con la card guardada reserva cada red (la fecha solo si sigue en null) y **después** postea Discord (webhook) e Instagram/LinkedIn (Buffer). Si la llamada falla, borra esa fecha. El testimonio no espera a las redes para quedar publicado.
 
 Cuerpo del `POST` (comunidad): solo `embeds[0]` (sin `content`). Username del webhook: No Country. `avatar_url` de la raíz: logo de No Country.
 
-Cuerpo del post (embed):
+Cuerpo del post (embed), en `postCommunityTestimonial`:
 
-- Autor: `full_name` + avatar. El archivo **no se sube a Discord**. Se manda `embeds[0].author.icon_url` con la URL pública de Storage (`publicStorageUrl("avatars", avatar_path)`), la misma que ya usa el admin. Discord la descarga.
-- Título: tipo (Simulación / Primer empleo / Reconversión)
-- Descripción: intro fijo de No Country + quote entre comillas (`buildDiscordDescription`)
-- Imagen grande: **captura** del proyecto, si hay
-- Campos: país si hay; puesto principal en simulación si lo cargaron; empresa/puesto o reconversión si vienen en `payload`. Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube)
-- Color/footer: No Country
+- Autor: `full_name` + avatar. El archivo **no se sube a Discord**. Se manda `embeds[0].author.icon_url` con la URL pública de Storage del avatar. Discord la descarga.
+- Descripción: la intro y la frase entre comillas. No es el texto de Instagram y LinkedIn.
+- Imagen grande: la **card** de `share-cards` (la misma que Instagram y LinkedIn).
+- Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube).
+- Color: magenta de No Country. Sin título ni footer.
 
-Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `discord_posted_at` queda null. El admin ve el error y un botón **Reintentar Discord**. Si el POST sale bien, se escribe `discord_posted_at`.
+Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `discord_posted_at` queda null. La ficha muestra Falló y un solo botón reintenta las redes que falten. Si el POST sale bien, se escribe `discord_posted_at`. El webhook no devuelve la URL del mensaje: Discord no tiene **Ver post**.
 
 ### Cómo se usa cada media (sin galería)
 
-Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Cada canal usa distinto el mismo envío.
+Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Las tres redes reciben **la misma card**. Instagram y LinkedIn comparten el texto; Discord lleva la intro y la frase. Solo cambia cómo va el video.
 
-- **Avatar** (cara / perfil, siempre hay): en Discord es el icono junto al nombre. En Instagram va en la **card generada**, no se postea solo. En LinkedIn no se muestra (post de texto).
-- **Foto testimonial** (entorno de trabajo, opcional): en Discord es la imagen grande del embed. En Instagram es la foto de arriba de la card (si no hay, fallback de marca). En LinkedIn Buffer la adjunta si hay.
-- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord y LinkedIn el link `watch?v=` va en un campo **Video**. En Instagram no se puede postear como Reel (pide archivo, no link). En v1 el URL **no** entra al caption ni a la card IG. El Reel queda para v2.
+- **Avatar** (cara / perfil, siempre hay): va en la **card generada**. En Discord, además, es el icono junto al nombre.
+- **Foto testimonial** (entorno de trabajo, opcional): es la foto de arriba de la card (si no hay, fallback de marca). No se postea cruda en ninguna red.
+- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord va en un campo **Video** del embed; en LinkedIn se suma al final del texto (`Video: watch?v=…`). En Instagram no entra (no admite links en el caption y un Reel pide archivo). El Reel queda para v2.
 
 **Discord, en la práctica**
 
-1. Siempre: nombre + avatar chico + intro fijo + quote entre comillas. País y puesto de simulación van en campos si hay.
-2. Si hay captura: va de imagen grande. Si no hay, el post es solo texto + cara.
-3. Si hay YouTube: el link `watch?v=` va en un campo del embed. Un embed **no** reproduce YouTube; el link queda clickeable. No se manda `content` aparte.
-4. El intro de Discord no se edita. No se sube el video como archivo. No hace falta.
+1. Siempre: nombre + avatar chico + intro y frase + la card de imagen grande.
+2. Si hay YouTube: el link `watch?v=` va en un campo del embed. Un embed **no** reproduce YouTube; el link queda clickeable. No se manda `content` aparte.
+3. No se sube el video como archivo. No hace falta.
 
-**Instagram, en la práctica (v1)**
+**La card (las tres redes)**
 
-Instagram no acepta un post de solo texto. El post es **una imagen 4:5 (1080×1350) + un caption**. La imagen **se genera** en el panel: no se postea la captura ni el avatar crudos.
+Instagram no acepta un post de solo texto, así que el post es **una imagen 4:5 (1080×1350) + un texto**, y esa misma imagen sale en Discord y LinkedIn. La imagen **se genera** en el panel: no se postea la captura ni el avatar crudos.
 
-La card (PNG 1080×1350, 4:5) se dibuja en el panel, en el browser (`drawIgCard` sobre un `<canvas>` en `apps/panel-admin`). El diseño cambia según el tipo: simulación (aprendizaje), primer empleo y reconversión. La foto de arriba es la captura que subió la persona; si no hay, `public/brand/ig-fallback.jpg` del panel. No existe la ruta `/admin/[id]/ig-card`.
+La card se dibuja en el browser (`drawIgCard` sobre un `<canvas>` en `apps/panel-admin`) y se exporta a PNG con `igCardPngBlob`. La foto de arriba es la captura que subió la persona; si no hay, `public/brand/ig-fallback.jpg` del panel. Tope del PNG: 5 MB (`SHARE_CARD_MAX_BYTES`), el mismo corte del bucket `share-cards`.
 
-**Logo:** el chrome y la card de Instagram usan el mismo PNG (`public/brand/logo-no-country.png`). El header usa [`BrandLogo`](../../../packages/ui/docs/brand-logo.md) (`@repo/ui`); el PNG es el default del componente. No hay SVG en esta app.
+**Logo:** el chrome y la card usan el mismo PNG (`public/brand/logo-no-country.png`). El header usa [`BrandLogo`](../../../packages/ui/docs/brand-logo.md) (`@repo/ui`); el PNG es el default del componente. No hay SVG en esta app.
 
-- Simulación: degradado magenta → índigo, “Lo que aprendí”, bloque del autor semitransparente
-- Primer empleo: fondo claro y “Contratado por” + empresa
-- Reconversión: fondo oscuro y pastillas Antes → Ahora
-- Foto de arriba (captura o fallback), avatar, quote, nombre · país, puesto/rol si hay
+El admin elige el diseño en la ficha (**Diseño de la imagen**). **Foto arriba** es el base de todos los tipos; los otros dos son propios de cada tipo:
 
-YouTube no entra como video. El handle de Instagram va en el caption, no en la card.
+- Simulación: Foto arriba, Cita (sin foto, la frase grande) y Retrato (la persona al centro)
+- Primer empleo: Foto arriba, Empresa (la empresa que lo contrató en grande) y Recorrido (de la simulación al puesto)
+- Reconversión: Foto arriba, Antes y ahora (oficio anterior → rol nuevo) y Perfil (tarjeta con la foto de portada)
+
+El diseño elegido no se guarda: la card publicada queda en `share-cards/{slug}/instagram.png` y es la que se descarga después. Los handles van en el texto, no en la card.
 
 ```mermaid
 flowchart LR
@@ -181,22 +224,25 @@ flowchart LR
   avatar[Avatar] --> card
   logo[Logo] --> card
   card --> storage[share-cards]
-  caption[ig_caption] --> buffer[Buffer Instagram]
-  storage --> buffer
+  storage --> discord[Discord]
+  storage --> buffer[Buffer Instagram y LinkedIn]
+  intro[Intro y frase] --> discord
+  caption[Texto de Instagram y LinkedIn] --> buffer
 ```
 
 **LinkedIn, en la práctica (v1)**
 
-LinkedIn acepta un post de **texto**. No hay card PNG ni chrome de perfil. El preview (`LinkedInPublishPreview`) muestra el caption, un campo **Video** (YouTube, como Discord) y la captura si hay.
+Buffer publica la card. Instagram y LinkedIn usan **el mismo texto**: si la persona tiene las dos redes, van las dos. Si hay YouTube, el link se suma al final en LinkedIn. En la base, `li_caption` guarda una copia de `ig_caption`.
 
-El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn en vez del handle de Instagram. En `/testimonials/[id]` se edita a mano adentro del preview.
+La app pública arma un texto por red (`buildIgCaption` y `buildLiCaption`), cada uno con su handle. En el panel se deja un solo texto a propósito: es la misma publicación y el admin lo edita una vez.
 
 **Cómo se publica**
 
-1. En revisión (`/testimonials/[id]`): tabs Discord / Instagram / LinkedIn. Los captions se editan a mano. Publicar.
-2. Al publicar: Discord (webhook), Instagram (Buffer: sube el PNG a `share-cards` + `ig_caption`) y LinkedIn (Buffer: `li_caption` + captura si hay + YouTube). `BUFFER_ENV=production` publica ya (`shareNow`); `development` o si falta programa a 24h.
-3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. El admin reintenta desde la ficha. Las tabs sirven para copiar a mano si hace falta.
-4. Sin `BUFFER_API_KEY` o sin channel ID, esa red se saltea.
+1. En revisión (`/testimonials/[id]`): elegir el diseño, retocar la frase y el texto. Publicar.
+2. Al publicar: el update a `published` gana solo si la fila sigue `in_review`. El que gana sube el PNG a `share-cards`. Si el PNG no se genera, pasa de 5 MB o no llega, no se publica y el panel muestra **Reintentar imagen**. Si Storage falla, la fila vuelve a `in_review`. Después reserva cada red y postea: Discord (webhook, intro y frase), Instagram (Buffer: card + texto) y LinkedIn (Buffer: card + texto + YouTube). `BUFFER_ENV=production` publica ya (`shareNow`); `development` o si falta programa a 1 semana.
+3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. La ficha reintenta las redes sin fecha, y las de Buffer cuyo estado es `error`, con un solo botón. Si Buffer creó el post y después informa error, ese reintento borra fecha e id solo si siguen siendo los de ese post. También se puede descargar la card y copiar el texto para subirlo a mano.
+4. Se guarda el id de cada post de Buffer (`buffer_*_post_id`). Al abrir la ficha publicada, el panel consulta el estado real en Buffer y, si ya salió, muestra **Ver post** con el link.
+5. Sin `BUFFER_API_KEY` o sin channel ID, esa red se saltea.
 
 **Lo que no se puede en v1**
 
@@ -220,7 +266,7 @@ El caption (`li_caption`) usa la misma plantilla que IG, con el perfil LinkedIn 
 3. Formulario + quote/captions auto (IG + LI) + aviso inbox
 4. Admin validar / publicar
 5. Galería + embed YouTube
-6. Discord webhooks + Buffer (IG/LI) + card IG + preview LinkedIn
+6. Discord webhooks + Buffer (IG/LI) + card única para las tres redes
 
 ---
 

@@ -1,0 +1,195 @@
+.stack {
+  min-height: 368px;
+  grid-template-rows: minmax(0, 1fr);
+  --motion-duration: 420ms;
+  --motion-easing: cubic-bezier(0.22, 1, 0.36, 1);
+  --return-x: 36px;
+  --return-scale: 0.94;
+}
+
+.stack[data-count="2"] {
+  --return-x: 18px;
+  --return-scale: 0.97;
+}
+
+.card {
+  min-height: 0;
+  grid-area: 1 / 1;
+  position: relative;
+  transform-origin: right center;
+  background:
+    linear-gradient(145deg, var(--bg-surface-3), var(--bg-surface-2) 60%, var(--bg-surface-1)) padding-box,
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--accent-indigo-light) 60%, var(--border)),
+      var(--border) 45%,
+      color-mix(in srgb, var(--brand-pink) 35%, var(--border)) 75%,
+      color-mix(in srgb, var(--brand-cyan) 60%, var(--border))
+    ) border-box;
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--bg-base) 35%, transparent);
+}
+
+.quoteSpace {
+  container-type: size;
+  min-height: 1lh;
+}
+
+/* El clamp se adapta a líneas completas, reservando siempre el pie de la tarjeta. */
+@container (min-height: 2lh) {
+  .quote { -webkit-line-clamp: 2; }
+}
+
+@container (min-height: 3lh) {
+  .quote { -webkit-line-clamp: 3; }
+}
+
+@container (min-height: 4lh) {
+  .quote { -webkit-line-clamp: 4; }
+}
+
+@container (min-height: 5lh) {
+  .quote { -webkit-line-clamp: 5; }
+}
+
+/* La superficie sigue opaca: esta capa atenúa las tarjetas posteriores. */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--bg-base);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms ease-out;
+}
+
+.card[data-position="0"] {
+  z-index: 3;
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.card[data-position="1"] {
+  z-index: 2;
+}
+
+.card[data-position="2"] {
+  z-index: 1;
+}
+
+.card[aria-hidden="true"] {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.card[data-motion] {
+  visibility: visible;
+  animation-duration: var(--motion-duration);
+  animation-timing-function: var(--motion-easing);
+  animation-fill-mode: both;
+}
+
+.card[data-motion="leave"] {
+  animation-name: mobile-leave;
+}
+
+.card[data-motion="enter"] {
+  animation-name: mobile-enter;
+}
+
+/* Las citas nunca se funden entre sí: primero sale una y luego entra la otra. */
+@keyframes mobile-leave {
+  0% { opacity: 1; z-index: 4; }
+  45%, 100% { opacity: 0; z-index: 4; }
+}
+
+@keyframes mobile-enter {
+  0%, 50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Se reserva el desplazamiento lateral en el wrapper desde sm. */
+@media (min-width: 40rem) {
+  .stack {
+    min-height: 384px;
+  }
+
+  @container (min-height: 6lh) {
+    .quote { -webkit-line-clamp: 6; }
+  }
+
+  .card {
+    transition: transform 380ms var(--motion-easing);
+  }
+
+  .card[aria-hidden="true"] {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .card[aria-hidden="true"] > * {
+    opacity: 0;
+  }
+
+  .card[data-position="1"] {
+    transform: translateX(18px) scale(0.97);
+  }
+
+  .card[data-position="2"] {
+    transform: translateX(36px) scale(0.94);
+  }
+
+  .card[data-position="1"]::after { opacity: 0.35; }
+  .card[data-position="2"]::after { opacity: 0.6; }
+
+  .card[data-motion] {
+    animation-name: none;
+  }
+
+  .stack[data-direction="next"] .card[data-motion="leave"] {
+    animation-name: leave;
+  }
+
+  .stack[data-direction="previous"] .card[data-motion="enter"] {
+    animation-name: enter;
+  }
+
+  .card[data-motion="leave"] > * {
+    animation: content-leave var(--motion-duration) ease-out both;
+  }
+
+  .card[data-motion="enter"] > * {
+    animation: content-enter var(--motion-duration) ease-out both;
+  }
+}
+
+@keyframes leave {
+  0% { transform: translateX(0) scale(1); opacity: 1; z-index: 4; }
+  40% { transform: translateX(-40px) scale(0.98); opacity: 0; z-index: 4; }
+  41% { transform: translateX(-10px) scale(var(--return-scale)); opacity: 0; z-index: 1; }
+  100% { transform: translateX(var(--return-x)) scale(var(--return-scale)); opacity: 1; z-index: 1; }
+}
+
+@keyframes enter {
+  0% { transform: translateX(-48px) scale(0.98); opacity: 0; z-index: 4; }
+  40% { opacity: 1; }
+  100% { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
+}
+
+@keyframes content-leave {
+  0% { opacity: 1; }
+  30%, 100% { opacity: 0; }
+}
+
+@keyframes content-enter {
+  0%, 45% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .card::after, .card > * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

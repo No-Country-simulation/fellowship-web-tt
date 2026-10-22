@@ -94,6 +94,18 @@ export function isValidEmail(value: string): boolean {
   return EMAIL_PATTERN.test(value.trim());
 }
 
+/** Valida nombres internacionales sin restringirlos al listado del selector. */
+export function validateCountry(raw: string): string | undefined {
+  const country = raw.trim();
+  if (!country) return "El país es obligatorio.";
+  if (country.length > FIELD_MAX_CHARS) {
+    return `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+  }
+  if (!/\p{L}/u.test(country) || !/^[\p{L}\p{M}\p{Zs}\p{Pd}'’‘.,()]+$/u.test(country)) {
+    return "Ingresá un nombre de país válido, sin números.";
+  }
+}
+
 export function youtubeVideoId(raw: string): string | null {
   const trimmed = raw.trim();
   if (!trimmed) {
@@ -229,13 +241,19 @@ export function normalizeLinkedIn(raw: string): string | null {
     : null;
 }
 
+/** Valida presencia, formato y tamaño; permite personalizar el mensaje de obligatoriedad. */
 export function validateImageFile(
   file: File | null,
-  options: { required: boolean; maxBytes: number; label: string },
+  options: {
+    required: boolean;
+    requiredMessage?: string;
+    maxBytes: number;
+    label: string;
+  },
 ): string | undefined {
   if (!file) {
     return options.required
-      ? `${options.label} es obligatorio.`
+      ? (options.requiredMessage ?? `${options.label} es obligatorio.`)
       : undefined;
   }
 
@@ -280,11 +298,8 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     fieldErrors.full_name = `Máximo ${NAME_MAX_CHARS} caracteres.`;
   }
 
-  if (!country) {
-    fieldErrors.country = "El país es obligatorio.";
-  } else if (country.length > FIELD_MAX_CHARS) {
-    fieldErrors.country = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
-  }
+  const countryError = validateCountry(country);
+  if (countryError) fieldErrors.country = countryError;
 
   if (!email) {
     fieldErrors.email = "El email es obligatorio. No se muestra en público.";
@@ -348,6 +363,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   const avatarError = validateImageFile(avatar, {
     required: true,
+    requiredMessage: "Seleccioná una foto de perfil.",
     maxBytes: AVATAR_MAX_BYTES,
     label: "La foto de perfil",
   });
@@ -358,7 +374,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const captureError = validateImageFile(capture, {
     required: false,
     maxBytes: CAPTURE_MAX_BYTES,
-    label: "La captura del proyecto",
+    label: "La foto testimonial",
   });
   if (captureError) {
     fieldErrors.capture = captureError;

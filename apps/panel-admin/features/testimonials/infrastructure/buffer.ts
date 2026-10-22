@@ -1,3 +1,4 @@
+import type { BufferPostState, BufferPostStatus } from "../types/share";
 import { youtubeWatchUrl } from "./youtube";
 
 const BUFFER_API_URL = "https://api.buffer.com";
@@ -21,6 +22,30 @@ mutation CreateScheduledPost($input: CreatePostInput!) {
   }
 }
 `;
+
+const POST_QUERY = `
+query GetPost($input: PostInput!) {
+  post(input: $input) {
+    id
+    status
+    dueAt
+    sentAt
+    externalLink
+    error {
+      message
+    }
+  }
+}
+`;
+
+const BUFFER_POST_STATUSES: readonly BufferPostStatus[] = [
+  "draft",
+  "error",
+  "needs_approval",
+  "scheduled",
+  "sending",
+  "sent",
+];
 
 export function bufferPublishesImmediately() {
   return trimEnv(process.env.BUFFER_ENV)?.toLowerCase() === "production";
@@ -48,16 +73,14 @@ export function hasLinkedInChannel() {
   return Boolean(apiKey() && linkedInChannelId());
 }
 
-export type CreatePostInput =
-  | { network: "instagram"; text: string; imageUrl: string }
-  | {
-      network: "linkedin";
-      text: string;
-      /** Captura opcional del proyecto (no la card de Instagram). */
-      imageUrl?: string | null;
-      /** YouTube: se agrega al texto, igual que el campo Video de Discord. */
-      videoUrl?: string | null;
-    };
+export type CreatePostInput = {
+  network: BufferNetwork;
+  text: string;
+  /** Card PNG del testimonio. Es la misma en todas las redes. */
+  imageUrl: string;
+  /** YouTube: LinkedIn lo suma al texto. Instagram no admite links en el caption. */
+  videoUrl?: string | null;
+};
 
 export async function createPost(
   input: CreatePostInput,
@@ -77,29 +100,19 @@ export async function createPost(
     ...bufferShareTiming(),
   };
 
-  if (input.network === "instagram") {
-    const imageUrl = parseHttpsUrl(input.imageUrl);
-    if (!imageUrl) {
-      console.error("Buffer createPost failed: image URL must be https");
-      return { status: "failed" };
-    }
+  const imageUrl = parseHttpsUrl(input.imageUrl);
+  if (!imageUrl) {
+    console.error("Buffer createPost failed: image URL must be https");
+    return { status: "failed" };
+  }
+  payload.assets = [{ image: { url: imageUrl } }];
 
-    payload.assets = [{ image: { url: imageUrl } }];
+  if (input.network === "instagram") {
     payload.metadata = {
       instagram: { type: "post", shouldShareToFeed: true },
     };
   } else {
     payload.text = linkedInText(input.text, input.videoUrl);
-
-    const captureUrl = input.imageUrl?.trim();
-    if (captureUrl) {
-      const imageUrl = parseHttpsUrl(captureUrl);
-      if (!imageUrl) {
-        console.error("Buffer createPost failed: image URL must be https");
-        return { status: "failed" };
-      }
-      payload.assets = [{ image: { url: imageUrl } }];
-    }
   }
 
   try {
@@ -122,6 +135,30 @@ export async function createPost(
   } catch {
     console.error("Buffer createPost failed");
     return { status: "failed" };
+  }
+}
+
+/** Estado actual de un post creado con `createPost`. `null` si falta la key o Buffer no responde. */
+export async function getPost(id: string): Promise<BufferPostState | null> {
+  const key = apiKey();
+  if (!key) {
+    return null;
+  }
+
+  try {
+    const response = await bufferGraphql(key, POST_QUERY, { input: { id } });
+    if (!response) {
+      return null;
+    }
+
+    const post = parsePost(response.post);
+    if (!post) {
+      console.error("Buffer getPost failed: unexpected payload");
+    }
+    return post;
+  } catch {
+    console.error("Buffer getPost failed");
+    return null;
   }
 }
 
@@ -149,7 +186,7 @@ function bufferShareTiming() {
 
   return {
     mode: "customScheduled" as const,
-    dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   };
 }
 
@@ -179,6 +216,7 @@ function parseHttpsUrl(value: string) {
 type GraphqlBody = {
   data?: {
     createPost?: unknown;
+    post?: unknown;
   };
   errors?: { message?: string }[];
 };
@@ -233,6 +271,26 @@ function parseCreatePostPayload(payload: unknown): BufferPost | null {
     status: typeof post.status === "string" ? post.status : "",
     sentAt: typeof post.sentAt === "string" ? post.sentAt : null,
   };
+}
+
+function parsePost(post: unknown): BufferPostState | null {
+  if (!isRecord(post) || !isBufferPostStatus(post.status)) {
+    return null;
+  }
+
+  const error = isRecord(post.error) && typeof post.error.message === "string" ? post.error.message : null;
+
+  return {
+    status: post.status,
+    dueAt: typeof post.dueAt === "string" ? post.dueAt : null,
+    sentAt: typeof post.sentAt === "string" ? post.sentAt : null,
+    externalLink: typeof post.externalLink === "string" ? parseHttpsUrl(post.externalLink) : null,
+    errorMessage: error?.trim() || null,
+  };
+}
+
+function isBufferPostStatus(value: unknown): value is BufferPostStatus {
+  return typeof value === "string" && (BUFFER_POST_STATUSES as readonly string[]).includes(value);
 }
 
 function mutationErrorMessage(payload: unknown) {

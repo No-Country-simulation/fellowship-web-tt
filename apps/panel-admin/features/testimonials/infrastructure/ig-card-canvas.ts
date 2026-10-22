@@ -5,12 +5,15 @@ import {
   type IgCardContent,
 } from "./ig-card";
 import { stripWrappingQuotes } from "./quote";
-import type { TestimonialType } from "../types/testimonial";
+import type { CardDesign, TestimonialType } from "../types/testimonial";
 
 const LOGO_SRC = "/brand/logo-no-country.png";
 const FALLBACK_PHOTO_SRC = "/brand/ig-fallback.jpg";
 const PAD = 52;
+/** Las fotos testimoniales se recortan en 16:9 al subirlas. */
+const PHOTO_ASPECT = 16 / 9;
 const AUTHOR_H = 168;
+const INLINE_AUTHOR_H = 132;
 
 const PINK = "#ff3d9a";
 const INK = "#16132b";
@@ -46,15 +49,48 @@ export async function drawIgCard(
     input.captureUrl ? loadImage(input.captureUrl) : Promise.resolve(null),
     loadImage(FALLBACK_PHOTO_SRC),
   ]);
-  const photo = capture ?? fallbackPhoto;
-
   const fontFamily =
     getComputedStyle(document.body).fontFamily || "sans-serif";
   const variant = variantOf(input.type);
-  const copy = COPY[variant];
-
-  const hasPhoto = Boolean(photo);
   ctx.imageSmoothingQuality = "high";
+
+  const scene: Scene = {
+    ctx,
+    input,
+    variant,
+    copy: COPY[variant],
+    logo,
+    avatar,
+    photo: capture ?? fallbackPhoto,
+    fontFamily,
+  };
+  DESIGNS[input.design](scene);
+}
+
+const DESIGNS: Record<CardDesign, (scene: Scene) => void> = {
+  photo: drawPhotoDesign,
+  quote: drawQuoteDesign,
+  portrait: drawPortraitDesign,
+  offer: drawOfferDesign,
+  journey: drawJourneyDesign,
+  shift: drawShiftDesign,
+  profile: drawProfileDesign,
+};
+
+type Scene = {
+  ctx: CanvasRenderingContext2D;
+  input: IgCardContent;
+  variant: Variant;
+  copy: { badge: string; kicker: string };
+  logo: ImageBitmap | null;
+  avatar: ImageBitmap | null;
+  photo: ImageBitmap | null;
+  fontFamily: string;
+};
+
+/** Foto en la franja de arriba, frase y autor en caja abajo. */
+function drawPhotoDesign({ ctx, input, variant, copy, logo, avatar, photo, fontFamily }: Scene) {
+  const hasPhoto = Boolean(photo);
   if (photo) {
     drawPhoto(ctx, photo, variant);
     drawTopScrim(ctx);
@@ -72,54 +108,41 @@ export async function drawIgCard(
     drawBody(ctx, variant, IG_PHOTO_HEIGHT);
   }
 
-  const authorTop = IG_CARD_HEIGHT - PAD - AUTHOR_H;
-  const kickerSize = 26;
-  const headerBottom = 156;
-  let contentTop = headerBottom;
-  if (hasPhoto) {
-    contentTop = IG_PHOTO_HEIGHT + (variant === "job" ? 72 : 44);
-    if (variant === "job") {
-      drawHiredPill(ctx, input.company, fontFamily, IG_PHOTO_HEIGHT - 38);
-    }
-  } else if (variant === "job" && input.company?.trim()) {
-    drawHiredPill(ctx, input.company, fontFamily, headerBottom);
-    contentTop = headerBottom + 76 + 40;
+  const placed = photoQuotePlacement(input, variant, hasPhoto);
+  if (hasPhoto && variant === "job") {
+    drawHiredPill(ctx, input.company, fontFamily, IG_PHOTO_HEIGHT - 38);
+  } else if (!hasPhoto && variant === "job" && input.company?.trim()) {
+    drawHiredPill(ctx, input.company, fontFamily, 156);
   }
 
-  const showPills = variant === "change" && Boolean(input.previousRole && input.role);
-  const pillsBlock = showPills ? 28 + 56 : 0;
-  const quoteMaxWidth = IG_CARD_WIDTH - PAD * 2;
-  const quoteMaxHeight = Math.max(
-    80,
-    authorTop - 36 - contentTop - kickerSize - 28 - pillsBlock,
-  );
-  const quoteLayout = layoutQuote(
-    ctx,
-    `“${stripWrappingQuotes(input.quote)}”`,
-    quoteMaxWidth,
-    quoteMaxHeight,
-    fontFamily,
-    hasPhoto ? 48 : 56,
-  );
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
   const block =
-    kickerSize + 28 + quoteLayout.height + pillsBlock;
-  const room = authorTop - 36 - contentTop;
+    placed.kickerSize + 28 + quoteLayout.height + placed.pillsBlock;
+  const room = placed.authorTop - 36 - placed.contentTop;
   const kickerY = hasPhoto
-    ? contentTop
-    : contentTop + Math.max(0, (room - block) / 2);
+    ? placed.contentTop
+    : placed.contentTop + Math.max(0, (room - block) / 2);
   drawKicker(ctx, copy.kicker, variant, PAD, kickerY, fontFamily);
 
-  const quoteTop = kickerY + kickerSize + 28;
-  paintQuote(ctx, quoteLayout, PAD, quoteTop, quoteMaxWidth, variant, fontFamily);
+  const quoteTop = kickerY + placed.kickerSize + 28;
+  paintQuote(
+    ctx,
+    quoteLayout,
+    PAD,
+    quoteTop,
+    placed.frame.maxWidth,
+    variant === "job" ? INK : "#ffffff",
+    fontFamily,
+  );
 
-  if (showPills && input.previousRole && input.role) {
+  if (placed.showPills && input.previousRole && input.role) {
     drawTransition(
       ctx,
       input.previousRole,
       input.role,
       PAD,
       quoteTop + quoteLayout.height + 28,
-      quoteMaxWidth,
+      placed.frame.maxWidth,
       fontFamily,
     );
   }
@@ -131,8 +154,641 @@ export async function drawIgCard(
     role: input.role,
     avatar,
     fontFamily,
-    y: authorTop,
+    y: placed.authorTop,
   });
+}
+
+/** Sin foto: la frase grande con comilla decorativa y el autor abajo. */
+function drawQuoteDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }: Scene) {
+  const light = variant === "job";
+  drawBody(ctx, variant, 0);
+  drawHexDecoration(ctx, variant);
+  drawLogo(ctx, logo, fontFamily, light ? INK : "#ffffff");
+  drawBadge(ctx, copy.badge, variant, fontFamily);
+
+  const placed = quoteDesignPlacement(input, variant);
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
+  const block = placed.kickerBlock + quoteLayout.height + placed.extras;
+  const kickerY =
+    placed.contentTop +
+    Math.max(0, (placed.contentBottom - placed.contentTop - block) / 2);
+
+  ctx.font = `800 300px ${fontFamily}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = variant === "learning" ? "rgba(255,255,255,0.32)" : PINK;
+  ctx.fillText("“", PAD - 10, kickerY + 96);
+
+  drawKicker(ctx, copy.kicker, variant, PAD, kickerY, fontFamily);
+  const quoteTop = kickerY + placed.kickerBlock;
+  paintQuote(
+    ctx,
+    quoteLayout,
+    PAD,
+    quoteTop,
+    placed.frame.maxWidth,
+    light ? INK : "#ffffff",
+    fontFamily,
+  );
+
+  const extrasTop = quoteTop + quoteLayout.height;
+  if (placed.company) {
+    drawHiredPill(ctx, placed.company, fontFamily, extrasTop + 44, PAD);
+  } else if (placed.showPills && input.previousRole && input.role) {
+    drawTransition(
+      ctx,
+      input.previousRole,
+      input.role,
+      PAD,
+      extrasTop + 32,
+      placed.frame.maxWidth,
+      fontFamily,
+    );
+  }
+
+  ctx.fillStyle = light ? "#e2dcea" : "rgba(255,255,255,0.18)";
+  ctx.fillRect(PAD, placed.authorTop - 36, IG_CARD_WIDTH - PAD * 2, 2);
+  drawAuthorInline(ctx, {
+    fullName: input.fullName,
+    country: input.country,
+    role: input.role,
+    avatar,
+    fontFamily,
+    y: placed.authorTop,
+    light,
+  });
+}
+
+/** Reconversión: tarjeta de perfil con la foto como portada 16:9, avatar, rol nuevo y la frase. */
+function drawProfileDesign({ ctx, input, variant, copy, logo, avatar, photo, fontFamily }: Scene) {
+  const bg = ctx.createLinearGradient(0, 0, 0, IG_CARD_HEIGHT);
+  bg.addColorStop(0, "#150a33");
+  bg.addColorStop(1, "#1b0d3f");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, IG_CARD_WIDTH, IG_CARD_HEIGHT);
+  drawGlow(ctx, 0, 760, 520, "255, 61, 154", 0.3);
+  drawGlow(ctx, IG_CARD_WIDTH, 620, 520, "139, 92, 246", 0.26);
+  drawLogo(ctx, logo, fontFamily, "#ffffff");
+  drawBadge(ctx, copy.badge, variant, fontFamily);
+
+  const cardX = PAD;
+  const cardY = 150;
+  const cardW = IG_CARD_WIDTH - PAD * 2;
+  const cardH = IG_CARD_HEIGHT - PAD - cardY;
+  ctx.beginPath();
+  roundRect(ctx, cardX, cardY, cardW, cardH, 36);
+  ctx.fillStyle = "rgba(255,255,255,0.04)";
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.stroke();
+
+  const inset = 20;
+  const bannerX = cardX + inset;
+  const bannerY = cardY + inset;
+  const bannerW = cardW - inset * 2;
+  const bannerH = Math.round(bannerW / PHOTO_ASPECT);
+  ctx.save();
+  ctx.beginPath();
+  roundRect(ctx, bannerX, bannerY, bannerW, bannerH, 24);
+  ctx.clip();
+  ctx.fillStyle = "#0d0722";
+  ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
+  if (photo) {
+    drawContain(ctx, photo, bannerX, bannerY, bannerW, bannerH);
+  }
+  ctx.restore();
+  const bannerBottom = bannerY + bannerH;
+
+  const r = 112;
+  const hexHalfW = r * (Math.sqrt(3) / 2);
+  const avatarX = bannerX + 36 + hexHalfW;
+  const avatarY = bannerBottom;
+  const ring = ctx.createLinearGradient(avatarX - r, avatarY - r, avatarX + r, avatarY + r);
+  ring.addColorStop(0, PINK);
+  ring.addColorStop(0.5, "#8b5cf6");
+  ring.addColorStop(1, "#38bdf8");
+  hexPath(ctx, avatarX, avatarY, r + 12);
+  ctx.fillStyle = ring;
+  ctx.fill();
+  hexPath(ctx, avatarX, avatarY, r + 5);
+  ctx.fillStyle = "#150a33";
+  ctx.fill();
+  drawHexAvatar(ctx, avatar, input.fullName, avatarX, avatarY, r, fontFamily);
+
+  const sideX = avatarX + hexHalfW + 40;
+  const sideW = cardX + cardW - 40 - sideX;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const nameSize = fitFont(ctx, input.fullName, sideW, 52, 34, 800, fontFamily);
+  ctx.font = `800 ${nameSize}px ${fontFamily}`;
+  ctx.fillStyle = "#ffffff";
+  const nameY = bannerBottom + 22;
+  ctx.fillText(truncateToWidth(ctx, input.fullName, sideW), sideX, nameY);
+  drawPreviousLine(ctx, {
+    previous: input.previousRole?.trim() || null,
+    country: input.country?.trim() || null,
+    x: sideX,
+    y: nameY + nameSize + 14,
+    maxWidth: sideW,
+    fontFamily,
+  });
+
+  const placed = profileQuotePlacement(ctx, input, fontFamily);
+  ctx.font = `800 ${placed.roleFit.size}px ${fontFamily}`;
+  const roleFill = ctx.createLinearGradient(placed.innerX, 0, placed.innerX + placed.innerW, 0);
+  roleFill.addColorStop(0, "#ff5fae");
+  roleFill.addColorStop(0.55, "#8b5cf6");
+  roleFill.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = roleFill;
+  placed.roleFit.lines.forEach((line, i) =>
+    ctx.fillText(line, placed.innerX, placed.roleTop + i * placed.roleLineH),
+  );
+
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.fillRect(placed.innerX, placed.dividerY, placed.innerW, 2);
+
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
+  paintQuote(
+    ctx,
+    quoteLayout,
+    placed.innerX,
+    placed.quoteTop + Math.max(0, (placed.quoteRoom - quoteLayout.height) / 2),
+    placed.innerW,
+    "#ffffff",
+    fontFamily,
+  );
+}
+
+/** "Antes: rol tachado · país", recortado al ancho. */
+function drawPreviousLine(
+  ctx: CanvasRenderingContext2D,
+  {
+    previous,
+    country,
+    x,
+    y,
+    maxWidth,
+    fontFamily,
+  }: {
+    previous: string | null;
+    country: string | null;
+    x: number;
+    y: number;
+    maxWidth: number;
+    fontFamily: string;
+  },
+) {
+  const size = 30;
+  ctx.font = `500 ${size}px ${fontFamily}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  if (!previous) {
+    if (country) {
+      ctx.fillText(truncateToWidth(ctx, country, maxWidth), x, y);
+    }
+    return;
+  }
+
+  const label = "Antes: ";
+  const labelW = ctx.measureText(label).width;
+  const withCountry = country ? ` · ${country}` : "";
+  const fitsAll = labelW + ctx.measureText(`${previous}${withCountry}`).width <= maxWidth;
+  const suffix = fitsAll ? withCountry : "";
+  const shown = truncateToWidth(ctx, previous, maxWidth - labelW);
+  const shownW = ctx.measureText(shown).width;
+  ctx.fillText(label, x, y);
+  ctx.fillText(shown, x + labelW, y);
+  if (suffix) {
+    ctx.fillText(suffix, x + labelW + shownW, y);
+  }
+
+  ctx.fillStyle = PINK;
+  ctx.fillRect(x + labelW - 2, y + size * 0.56, shownW + 4, 3);
+}
+
+/** Simulación: la persona al centro en un hexágono grande y la frase debajo. */
+function drawPortraitDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }: Scene) {
+  drawBody(ctx, variant, 0);
+  drawLogo(ctx, logo, fontFamily, "#ffffff");
+  drawBadge(ctx, copy.badge, variant, fontFamily);
+
+  const cx = IG_CARD_WIDTH / 2;
+  const cy = 420;
+  const r = 170;
+  ctx.save();
+  ctx.lineWidth = 3;
+  for (const [radius, alpha] of [
+    [r + 40, 0.24],
+    [r + 80, 0.12],
+  ] as const) {
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+    hexPath(ctx, cx, cy, radius);
+    ctx.stroke();
+  }
+  ctx.restore();
+  drawHexAvatar(ctx, avatar, input.fullName, cx, cy, r, fontFamily);
+
+  const maxWidth = IG_CARD_WIDTH - PAD * 2;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `700 54px ${fontFamily}`;
+  ctx.fillText(truncateToWidth(ctx, input.fullName, maxWidth), cx, 700);
+  const meta = [input.role?.trim(), input.country?.trim()].filter(Boolean).join(" · ");
+  if (meta) {
+    ctx.font = `600 30px ${fontFamily}`;
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.fillText(truncateToWidth(ctx, meta, maxWidth), cx, 770);
+  }
+  ctx.textAlign = "left";
+
+  const placed = portraitQuotePlacement(input);
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
+  const kickerY =
+    placed.contentTop + Math.max(0, (placed.room - placed.kickerBlock - quoteLayout.height) / 2);
+  drawKicker(ctx, copy.kicker, variant, cx, kickerY, fontFamily, true);
+  paintQuote(
+    ctx,
+    quoteLayout,
+    PAD,
+    kickerY + placed.kickerBlock,
+    placed.maxWidth,
+    "#ffffff",
+    fontFamily,
+    "center",
+  );
+}
+
+/** Primer empleo: la empresa que lo contrató es la protagonista. */
+function drawOfferDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }: Scene) {
+  drawBody(ctx, variant, 0);
+  const edge = ctx.createLinearGradient(0, 0, 0, IG_CARD_HEIGHT);
+  edge.addColorStop(0, PINK);
+  edge.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = edge;
+  ctx.fillRect(0, 0, 14, IG_CARD_HEIGHT);
+  drawLogo(ctx, logo, fontFamily, INK);
+  drawBadge(ctx, copy.badge, variant, fontFamily);
+
+  ctx.font = `700 26px ${fontFamily}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = PINK;
+  fillTracked(ctx, "CONTRATADO POR", PAD, 230, 3.2);
+
+  const placed = offerQuotePlacement(ctx, input, fontFamily);
+  ctx.font = `800 ${placed.size}px ${fontFamily}`;
+  const shown = truncateToWidth(ctx, placed.company, placed.maxWidth);
+  const companyWidth = ctx.measureText(shown).width;
+  const fill = ctx.createLinearGradient(PAD, 0, PAD + companyWidth, 0);
+  fill.addColorStop(0, PINK);
+  fill.addColorStop(0.55, "#6366f1");
+  fill.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = fill;
+  ctx.fillText(shown, PAD, 280);
+
+  const dividerY = placed.quoteTop - 56;
+  if (placed.role) {
+    ctx.font = `600 38px ${fontFamily}`;
+    ctx.fillStyle = "#5c5670";
+    ctx.fillText(
+      truncateToWidth(ctx, `como ${placed.role}`, placed.maxWidth),
+      PAD,
+      dividerY - 48 - 38,
+    );
+  }
+  ctx.fillStyle = "#e2dcea";
+  ctx.fillRect(PAD, dividerY, placed.maxWidth, 2);
+
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
+  paintQuote(ctx, quoteLayout, PAD, placed.quoteTop, placed.maxWidth, INK, fontFamily);
+
+  drawAuthorInline(ctx, {
+    fullName: input.fullName,
+    country: input.country,
+    role: null,
+    avatar,
+    fontFamily,
+    y: placed.authorTop,
+    light: true,
+  });
+}
+
+/** Primer empleo: línea de recorrido desde la simulación hasta el puesto, con la frase abajo. */
+function drawJourneyDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }: Scene) {
+  const bg = ctx.createLinearGradient(0, 0, 0, IG_CARD_HEIGHT);
+  bg.addColorStop(0, "#150a33");
+  bg.addColorStop(1, "#1b0d3f");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, IG_CARD_WIDTH, IG_CARD_HEIGHT);
+  drawGlow(ctx, 0, 560, 520, "255, 61, 154", 0.28);
+  drawGlow(ctx, IG_CARD_WIDTH, 1000, 560, "139, 92, 246", 0.22);
+  drawLogo(ctx, logo, fontFamily, "#ffffff");
+  drawBadge(ctx, copy.badge, variant, fontFamily);
+
+  const r = 160;
+  const cx = 124 + r * (Math.sqrt(3) / 2);
+  const cy = 610;
+  const lineTop = 190;
+  const lineBottom = cy + r + 80;
+  const nodeY = 320;
+
+  const line = ctx.createLinearGradient(0, lineTop, 0, lineBottom);
+  line.addColorStop(0, PINK);
+  line.addColorStop(0.5, "#8b5cf6");
+  line.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = line;
+  ctx.beginPath();
+  roundRect(ctx, cx - 4, lineTop, 8, lineBottom - lineTop, 4);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, nodeY, 18, 0, Math.PI * 2);
+  ctx.fillStyle = "#150a33";
+  ctx.fill();
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = "#c04bd6";
+  ctx.stroke();
+
+  const nodeX = cx + 50;
+  ctx.font = `600 40px ${fontFamily}`;
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const nodeLines = wrapText(ctx, "Simulación en No Country", IG_CARD_WIDTH - PAD - nodeX).slice(0, 2);
+  const nodeLineH = 50;
+  const nodeTop = nodeY - (nodeLines.length * nodeLineH) / 2 + 4;
+  nodeLines.forEach((text, i) => ctx.fillText(text, nodeX, nodeTop + i * nodeLineH));
+
+  const ring = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+  ring.addColorStop(0, "#e04fd0");
+  ring.addColorStop(0.5, "#8b5cf6");
+  ring.addColorStop(1, "#38bdf8");
+  hexPath(ctx, cx, cy, r + 14);
+  ctx.fillStyle = "#150a33";
+  ctx.fill();
+  ctx.save();
+  ctx.shadowColor = "rgba(192, 75, 214, 0.85)";
+  ctx.shadowBlur = 40;
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = ring;
+  ctx.stroke();
+  ctx.restore();
+  drawHexAvatar(ctx, avatar, input.fullName, cx, cy, r - 6, fontFamily);
+
+  const textX = cx + r * (Math.sqrt(3) / 2) + 56;
+  const textW = IG_CARD_WIDTH - PAD - textX;
+  const role = input.role?.trim() || "Primer empleo";
+  const roleFit = fitLines(ctx, role, textW, 80, 40, 800, fontFamily, 3);
+  const roleLineH = roleFit.size * 1.1;
+  const company = input.company?.trim();
+  ctx.font = `700 44px ${fontFamily}`;
+  const companyWrapped = company ? wrapText(ctx, `en ${company}`, textW) : [];
+  const companyLines =
+    companyWrapped.length > 2
+      ? [companyWrapped[0] ?? "", truncateToWidth(ctx, `${companyWrapped.slice(1).join(" ")}…`, textW)]
+      : companyWrapped;
+  const companyLineH = 54;
+  const blockH =
+    roleFit.lines.length * roleLineH + (companyLines.length ? 14 + companyLines.length * companyLineH : 0);
+  let y = cy - blockH / 2;
+
+  ctx.font = `800 ${roleFit.size}px ${fontFamily}`;
+  const roleFill = ctx.createLinearGradient(textX, 0, textX + textW, 0);
+  roleFill.addColorStop(0, "#e04fd0");
+  roleFill.addColorStop(0.55, "#8b5cf6");
+  roleFill.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = roleFill;
+  roleFit.lines.forEach((text, i) => ctx.fillText(text, textX, y + i * roleLineH));
+  y += roleFit.lines.length * roleLineH + 14;
+
+  if (companyLines.length) {
+    ctx.font = `700 44px ${fontFamily}`;
+    ctx.fillStyle = "#ffffff";
+    companyLines.forEach((text, i) => ctx.fillText(text, textX, y + i * companyLineH));
+  }
+
+  const placed = journeyQuotePlacement(input);
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
+  const blockTop = placed.quoteTop + Math.max(0, (placed.room - quoteLayout.height) / 2);
+  const authorY = blockTop + quoteLayout.height + placed.authorGap;
+
+  const bar = ctx.createLinearGradient(0, blockTop, 0, authorY + placed.authorH);
+  bar.addColorStop(0, PINK);
+  bar.addColorStop(1, "#8b5cf6");
+  ctx.fillStyle = bar;
+  ctx.beginPath();
+  roundRect(ctx, PAD, blockTop + 4, 6, authorY + placed.authorH - blockTop - 4, 3);
+  ctx.fill();
+
+  paintQuote(ctx, quoteLayout, placed.quoteX, blockTop, placed.quoteW, "#ffffff", fontFamily);
+
+  const country = input.country?.trim();
+  ctx.font = `600 30px ${fontFamily}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#e04fd0";
+  ctx.fillText(
+    truncateToWidth(ctx, `— ${input.fullName}${country ? ` · ${country}` : ""}`, placed.quoteW),
+    placed.quoteX,
+    authorY,
+  );
+}
+
+/** Reconversión: el oficio de antes en contorno y tachado, una flecha y el rol de ahora en grande. */
+function drawShiftDesign(scene: Scene) {
+  const { ctx, input, variant, copy, logo, avatar, fontFamily } = scene;
+  const previous = input.previousRole?.trim();
+  const role = input.role?.trim();
+  if (!previous || !role) {
+    drawQuoteDesign(scene);
+    return;
+  }
+
+  drawBody(ctx, variant, 0);
+  drawGlow(ctx, 930, 560, 560, "192, 38, 211", 0.34);
+  drawGlow(ctx, 90, 1240, 520, "124, 58, 237", 0.26);
+  drawDotGrid(ctx, 0.05);
+  drawLogo(ctx, logo, fontFamily, "#ffffff");
+  drawBadge(ctx, copy.badge, variant, fontFamily);
+
+  const x = PAD;
+  const width = IG_CARD_WIDTH - PAD * 2;
+
+  const beforeLabelY = 200;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.font = `700 24px ${fontFamily}`;
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  fillTracked(ctx, "ANTES", x, beforeLabelY, 4);
+  const beforeLabelW = measureTracked(ctx, "ANTES", 4);
+  ctx.fillRect(x + beforeLabelW + 18, beforeLabelY + 11, 64, 2);
+
+  const placed = shiftQuotePlacement(ctx, input, fontFamily, previous, role);
+  const before = placed.before;
+  const beforeTop = placed.beforeTop;
+  const beforeLineH = placed.beforeLineH;
+  ctx.font = `800 ${before.size}px ${fontFamily}`;
+  ctx.lineJoin = "round";
+  before.lines.forEach((line, i) => {
+    const lineTop = beforeTop + i * beforeLineH;
+    const lineW = ctx.measureText(line).width;
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.fillText(line, x, lineTop);
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+    ctx.lineWidth = 2.5;
+    ctx.strokeText(line, x, lineTop);
+    ctx.save();
+    ctx.strokeStyle = PINK;
+    ctx.lineWidth = Math.max(5, before.size * 0.07);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x - 6, lineTop + before.size * 0.64);
+    ctx.lineTo(x + lineW + 10, lineTop + before.size * 0.4);
+    ctx.stroke();
+    ctx.restore();
+  });
+  const arrowTop = placed.arrowTop;
+  const arrowX = x + 34;
+  const arrowEndX = x + 150;
+  const arrowEndY = placed.arrowEndY;
+  const arrow = ctx.createLinearGradient(arrowX, arrowTop, arrowEndX, arrowEndY);
+  arrow.addColorStop(0, "rgba(255,61,154,0.35)");
+  arrow.addColorStop(1, PINK);
+  ctx.save();
+  ctx.strokeStyle = arrow;
+  ctx.lineWidth = 8;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(arrowX, arrowTop);
+  ctx.bezierCurveTo(arrowX, arrowTop + 88, arrowX + 30, arrowEndY, arrowEndX, arrowEndY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(arrowEndX - 22, arrowEndY - 20);
+  ctx.lineTo(arrowEndX + 2, arrowEndY);
+  ctx.lineTo(arrowEndX - 22, arrowEndY + 20);
+  ctx.strokeStyle = PINK;
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.font = `800 26px ${fontFamily}`;
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = PINK;
+  fillTracked(ctx, "AHORA", arrowEndX + 28, arrowEndY + 1, 4);
+  ctx.textBaseline = "top";
+
+  const afterTop = placed.afterTop;
+  const after = placed.after;
+  ctx.font = `800 ${after.size}px ${fontFamily}`;
+  const afterFill = ctx.createLinearGradient(x, 0, x + width, 0);
+  afterFill.addColorStop(0, "#ff5fae");
+  afterFill.addColorStop(0.5, "#d946ef");
+  afterFill.addColorStop(1, "#8b5cf6");
+  ctx.fillStyle = afterFill;
+  const afterLineH = placed.afterLineH;
+  after.lines.forEach((line, i) => ctx.fillText(line, x, afterTop + i * afterLineH));
+
+  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
+  const bar = ctx.createLinearGradient(0, placed.quoteTop, 0, placed.quoteTop + quoteLayout.height);
+  bar.addColorStop(0, PINK);
+  bar.addColorStop(1, "#8b5cf6");
+  ctx.fillStyle = bar;
+  ctx.beginPath();
+  roundRect(ctx, x, placed.quoteTop + 4, 6, Math.max(20, quoteLayout.height - 8), 3);
+  ctx.fill();
+  paintQuote(
+    ctx,
+    quoteLayout,
+    x + 34,
+    placed.quoteTop,
+    placed.quoteMax,
+    "rgba(255,255,255,0.94)",
+    fontFamily,
+  );
+
+  ctx.fillStyle = "rgba(255,255,255,0.16)";
+  ctx.fillRect(PAD, placed.authorTop - 36, width, 2);
+  drawAuthorInline(ctx, {
+    fullName: input.fullName,
+    country: input.country,
+    role: null,
+    avatar,
+    fontFamily,
+    y: placed.authorTop,
+    light: false,
+  });
+}
+
+function drawGlow(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  rgb: string,
+  alpha: number,
+) {
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  glow.addColorStop(0, `rgba(${rgb}, ${alpha})`);
+  glow.addColorStop(1, `rgba(${rgb}, 0)`);
+  ctx.fillStyle = glow;
+  ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+}
+
+function drawDotGrid(ctx: CanvasRenderingContext2D, alpha: number) {
+  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+  for (let y = 24; y < IG_CARD_HEIGHT; y += 36) {
+    for (let x = 24; x < IG_CARD_WIDTH; x += 36) {
+      ctx.fillRect(x, y, 3, 3);
+    }
+  }
+}
+
+/** Tamaño más grande en que el texto entra en `maxLines` líneas. */
+function fitLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxSize: number,
+  minSize: number,
+  weight: number,
+  fontFamily: string,
+  maxLines: number,
+) {
+  const words = text.split(/\s+/).filter(Boolean);
+  for (let size = maxSize; size > minSize; size -= 4) {
+    ctx.font = `${weight} ${size}px ${fontFamily}`;
+    const lines = wrapText(ctx, text, maxWidth);
+    const wordsFit = words.every((word) => ctx.measureText(word).width <= maxWidth);
+    if (wordsFit && lines.length <= maxLines) {
+      return { size, lines };
+    }
+  }
+  ctx.font = `${weight} ${minSize}px ${fontFamily}`;
+  const lines = wrapText(ctx, text, maxWidth).slice(0, maxLines);
+  const last = lines.length - 1;
+  lines[last] = truncateToWidth(ctx, lines[last] ?? "", maxWidth);
+  return { size: minSize, lines };
+}
+
+function fitFont(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxSize: number,
+  minSize: number,
+  weight: number,
+  fontFamily: string,
+) {
+  for (let size = maxSize; size > minSize; size -= 4) {
+    ctx.font = `${weight} ${size}px ${fontFamily}`;
+    if (ctx.measureText(text).width <= maxWidth) {
+      return size;
+    }
+  }
+  return minSize;
 }
 
 export function canvasToPng(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -179,6 +835,22 @@ function drawPhoto(
   drawContain(ctx, capture, 0, 0, IG_CARD_WIDTH, IG_PHOTO_HEIGHT);
 }
 
+function drawHexDecoration(ctx: CanvasRenderingContext2D, variant: Variant) {
+  ctx.save();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle =
+    variant === "job"
+      ? "rgba(255, 61, 154, 0.16)"
+      : variant === "change"
+        ? "rgba(255, 61, 154, 0.22)"
+        : "rgba(255, 255, 255, 0.14)";
+  hexPath(ctx, IG_CARD_WIDTH - 90, 430, 250);
+  ctx.stroke();
+  hexPath(ctx, IG_CARD_WIDTH - 90, 430, 170);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawTopScrim(ctx: CanvasRenderingContext2D) {
   const scrim = ctx.createLinearGradient(0, 0, 0, 220);
   scrim.addColorStop(0, "rgba(0,0,0,0.5)");
@@ -191,11 +863,11 @@ function drawLogo(
   ctx: CanvasRenderingContext2D,
   logo: ImageBitmap | null,
   fontFamily: string,
-  fallbackColor: string,
+  color: string,
 ) {
   const y = 44;
   if (!logo) {
-    ctx.fillStyle = fallbackColor;
+    ctx.fillStyle = color;
     ctx.font = `600 36px ${fontFamily}`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
@@ -204,7 +876,7 @@ function drawLogo(
   }
   const width = 300;
   const height = Math.round((width * logo.height) / logo.width);
-  ctx.drawImage(tintLogo(logo, width, height, "#ffffff"), PAD, y);
+  ctx.drawImage(tintLogo(logo, width, height, color), PAD, y);
 }
 
 function tintLogo(
@@ -309,6 +981,7 @@ function drawHiredPill(
   company: string | null,
   fontFamily: string,
   top: number,
+  pillX?: number,
 ) {
   const name = company?.trim();
   if (!name) {
@@ -328,7 +1001,7 @@ function drawHiredPill(
   const maxRight = IG_CARD_WIDTH - PAD * 2 - leftW;
   const usedRight = Math.min(rightW, Math.max(160, maxRight));
   const total = leftW + usedRight;
-  const x = (IG_CARD_WIDTH - total) / 2;
+  const x = pillX ?? (IG_CARD_WIDTH - total) / 2;
 
   ctx.save();
   ctx.beginPath();
@@ -366,41 +1039,316 @@ function drawKicker(
   x: number,
   y: number,
   fontFamily: string,
+  centered = false,
 ) {
   ctx.font = `700 26px ${fontFamily}`;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillStyle = variant === "learning" ? "rgba(255,255,255,0.92)" : PINK;
-  fillTracked(ctx, label, x, y, 3.2);
+  const startX = centered ? x - measureTracked(ctx, label, 3.2) / 2 : x;
+  fillTracked(ctx, label, startX, y, 3.2);
+}
+
+const QUOTE_MIN_FONT = 30;
+
+type QuoteFrame = {
+  text: string;
+  maxWidth: number;
+  maxHeight: number;
+  maxFont: number;
+};
+
+/** True si este diseño no entra la frase ni a 30 px y la card la corta con "…". */
+export function igCardQuoteClipped(input: IgCardContent, fontFamily: string): boolean {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return false;
+  }
+  const hasPhoto = input.design === "photo";
+  return layoutQuote(ctx, quoteFrame(ctx, input, fontFamily, hasPhoto), fontFamily).clipped;
+}
+
+function quoteFrame(
+  ctx: CanvasRenderingContext2D,
+  input: IgCardContent,
+  fontFamily: string,
+  hasPhoto: boolean,
+): QuoteFrame {
+  const variant = variantOf(input.type);
+  switch (input.design) {
+    case "photo":
+      return photoQuotePlacement(input, variant, hasPhoto).frame;
+    case "quote":
+      return quoteDesignPlacement(input, variant).frame;
+    case "portrait":
+      return portraitQuotePlacement(input).frame;
+    case "offer":
+      return offerQuotePlacement(ctx, input, fontFamily).frame;
+    case "journey":
+      return journeyQuotePlacement(input).frame;
+    case "shift": {
+      const previous = input.previousRole?.trim();
+      const role = input.role?.trim();
+      if (!previous || !role) {
+        return quoteDesignPlacement(input, variant).frame;
+      }
+      return shiftQuotePlacement(ctx, input, fontFamily, previous, role).frame;
+    }
+    case "profile":
+      return profileQuotePlacement(ctx, input, fontFamily).frame;
+  }
+}
+
+function photoQuotePlacement(input: IgCardContent, variant: Variant, hasPhoto: boolean) {
+  const authorTop = IG_CARD_HEIGHT - PAD - AUTHOR_H;
+  const kickerSize = 26;
+  const headerBottom = 156;
+  let contentTop = headerBottom;
+  if (hasPhoto) {
+    contentTop = IG_PHOTO_HEIGHT + (variant === "job" ? 72 : 44);
+  } else if (variant === "job" && input.company?.trim()) {
+    contentTop = headerBottom + 76 + 40;
+  }
+  const showPills = variant === "change" && Boolean(input.previousRole && input.role);
+  const pillsBlock = showPills ? 28 + 56 : 0;
+  const maxWidth = IG_CARD_WIDTH - PAD * 2;
+  return {
+    authorTop,
+    kickerSize,
+    contentTop,
+    showPills,
+    pillsBlock,
+    frame: {
+      text: `“${stripWrappingQuotes(input.quote)}”`,
+      maxWidth,
+      maxHeight: Math.max(80, authorTop - 36 - contentTop - kickerSize - 28 - pillsBlock),
+      maxFont: hasPhoto ? 48 : 56,
+    },
+  };
+}
+
+function quoteDesignPlacement(input: IgCardContent, variant: Variant) {
+  const authorTop = IG_CARD_HEIGHT - PAD - INLINE_AUTHOR_H;
+  const contentTop = 340;
+  const contentBottom = authorTop - 72;
+  const kickerBlock = 26 + 28;
+  const company = variant === "job" ? input.company?.trim() || null : null;
+  const showPills = variant === "change" && Boolean(input.previousRole && input.role);
+  const extras = company ? 44 + 76 : showPills ? 32 + 56 : 0;
+  const maxWidth = IG_CARD_WIDTH - PAD * 2;
+  return {
+    authorTop,
+    contentTop,
+    contentBottom,
+    kickerBlock,
+    company,
+    showPills,
+    extras,
+    frame: {
+      text: stripWrappingQuotes(input.quote),
+      maxWidth,
+      maxHeight: Math.max(80, contentBottom - contentTop - kickerBlock - extras),
+      maxFont: 68,
+    },
+  };
+}
+
+function portraitQuotePlacement(input: IgCardContent) {
+  const maxWidth = IG_CARD_WIDTH - PAD * 2;
+  const contentTop = 850;
+  const kickerBlock = 26 + 28;
+  const room = IG_CARD_HEIGHT - PAD - contentTop;
+  return {
+    maxWidth,
+    contentTop,
+    kickerBlock,
+    room,
+    frame: {
+      text: `“${stripWrappingQuotes(input.quote)}”`,
+      maxWidth,
+      maxHeight: room - kickerBlock,
+      maxFont: 52,
+    },
+  };
+}
+
+function offerQuotePlacement(
+  ctx: CanvasRenderingContext2D,
+  input: IgCardContent,
+  fontFamily: string,
+) {
+  const maxWidth = IG_CARD_WIDTH - PAD * 2;
+  const company = input.company?.trim() || input.role?.trim() || input.fullName;
+  const size = fitFont(ctx, company, maxWidth, 128, 56, 800, fontFamily);
+  let quoteTop = 280 + size * 1.15;
+  const role = input.role?.trim() || null;
+  if (role) {
+    quoteTop += 38;
+  }
+  quoteTop += 48 + 56;
+  const authorTop = IG_CARD_HEIGHT - PAD - INLINE_AUTHOR_H;
+  return {
+    maxWidth,
+    company,
+    size,
+    role,
+    quoteTop,
+    authorTop,
+    frame: {
+      text: `“${stripWrappingQuotes(input.quote)}”`,
+      maxWidth,
+      maxHeight: Math.max(80, authorTop - 56 - quoteTop),
+      maxFont: 52,
+    },
+  };
+}
+
+function journeyQuotePlacement(input: IgCardContent) {
+  const r = 160;
+  const cy = 610;
+  const lineBottom = cy + r + 80;
+  const quoteX = PAD + 44;
+  const quoteW = IG_CARD_WIDTH - PAD - quoteX;
+  const authorH = 30;
+  const authorGap = 28;
+  const quoteTop = lineBottom + 70;
+  const room = IG_CARD_HEIGHT - PAD - quoteTop - authorH - authorGap;
+  return {
+    quoteX,
+    quoteW,
+    authorH,
+    authorGap,
+    quoteTop,
+    room,
+    frame: {
+      text: `“${stripWrappingQuotes(input.quote)}”`,
+      maxWidth: quoteW,
+      maxHeight: room,
+      maxFont: 52,
+    },
+  };
+}
+
+function shiftQuotePlacement(
+  ctx: CanvasRenderingContext2D,
+  input: IgCardContent,
+  fontFamily: string,
+  previous: string,
+  role: string,
+) {
+  const width = IG_CARD_WIDTH - PAD * 2;
+  const beforeTop = 244;
+  const before = fitLines(ctx, previous, width, 96, 48, 800, fontFamily, 2);
+  const beforeLineH = before.size * 1.04;
+  const beforeBottom = beforeTop + before.lines.length * beforeLineH;
+  const arrowTop = beforeBottom + 20;
+  const arrowEndY = arrowTop + 118;
+  const afterTop = arrowEndY + 48;
+  const after = fitLines(ctx, role, width, 124, 56, 800, fontFamily, 2);
+  const afterLineH = after.size * 1.04;
+  const afterBottom = afterTop + after.lines.length * afterLineH;
+  const authorTop = IG_CARD_HEIGHT - PAD - INLINE_AUTHOR_H;
+  const quoteTop = afterBottom + 56;
+  const quoteMax = width - 34;
+  return {
+    before,
+    beforeTop,
+    beforeLineH,
+    arrowTop,
+    arrowEndY,
+    after,
+    afterTop,
+    afterLineH,
+    authorTop,
+    quoteTop,
+    quoteMax,
+    frame: {
+      text: stripWrappingQuotes(input.quote),
+      maxWidth: quoteMax,
+      maxHeight: Math.max(80, authorTop - 64 - quoteTop),
+      maxFont: 44,
+    },
+  };
+}
+
+function profileQuotePlacement(
+  ctx: CanvasRenderingContext2D,
+  input: IgCardContent,
+  fontFamily: string,
+) {
+  const cardX = PAD;
+  const cardY = 150;
+  const cardW = IG_CARD_WIDTH - PAD * 2;
+  const cardH = IG_CARD_HEIGHT - PAD - cardY;
+  const bannerW = cardW - 40;
+  const bannerH = Math.round(bannerW / PHOTO_ASPECT);
+  const bannerBottom = cardY + 20 + bannerH;
+  const r = 112;
+  const innerX = cardX + 40;
+  const innerW = cardW - 80;
+  const roleTop = bannerBottom + r + 36;
+  const roleFit = fitLines(
+    ctx,
+    input.role?.trim() || "Nuevo rol",
+    innerW,
+    76,
+    44,
+    800,
+    fontFamily,
+    2,
+  );
+  const roleLineH = roleFit.size * 1.08;
+  const dividerY = roleTop + roleFit.lines.length * roleLineH + 26;
+  const quoteTop = dividerY + 30;
+  const quoteRoom = cardY + cardH - 40 - quoteTop;
+  return {
+    innerX,
+    innerW,
+    roleFit,
+    roleTop,
+    roleLineH,
+    dividerY,
+    quoteTop,
+    quoteRoom,
+    frame: {
+      text: `“${stripWrappingQuotes(input.quote)}”`,
+      maxWidth: innerW,
+      maxHeight: Math.max(60, quoteRoom),
+      maxFont: 44,
+    },
+  };
 }
 
 function layoutQuote(
   ctx: CanvasRenderingContext2D,
-  quote: string,
-  maxWidth: number,
-  maxHeight: number,
+  frame: QuoteFrame,
   fontFamily: string,
-  maxFont: number,
 ) {
-  let fontSize = maxFont;
+  let fontSize = Math.max(frame.maxFont, QUOTE_MIN_FONT);
   let lines: string[] = [];
   let lineHeight = fontSize * 1.28;
 
-  while (fontSize >= 30) {
+  for (;;) {
     ctx.font = `600 ${fontSize}px ${fontFamily}`;
-    lines = wrapText(ctx, quote, maxWidth);
+    lines = wrapText(ctx, frame.text, frame.maxWidth);
     lineHeight = fontSize * 1.28;
-    if (lines.length * lineHeight <= maxHeight) {
+    if (lines.length * lineHeight <= frame.maxHeight || fontSize <= QUOTE_MIN_FONT) {
       break;
     }
-    fontSize -= 2;
+    fontSize = Math.max(QUOTE_MIN_FONT, fontSize - 2);
   }
 
-  const used = Math.min(
-    lines.length,
-    Math.max(1, Math.floor(maxHeight / lineHeight)),
-  );
-  return { fontSize, lines, lineHeight, used, height: used * lineHeight };
+  const capacity = Math.max(1, Math.floor(frame.maxHeight / lineHeight));
+  const used = Math.min(lines.length, capacity);
+  return {
+    fontSize,
+    lines,
+    lineHeight,
+    used,
+    height: used * lineHeight,
+    clipped: lines.length > used,
+  };
 }
 
 function paintQuote(
@@ -409,21 +1357,40 @@ function paintQuote(
   x: number,
   top: number,
   maxWidth: number,
-  variant: Variant,
+  color: string,
   fontFamily: string,
+  align: "left" | "center" = "left",
 ) {
-  ctx.fillStyle = variant === "job" ? INK : "#ffffff";
-  ctx.textAlign = "left";
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
   ctx.textBaseline = "top";
   ctx.font = `600 ${layout.fontSize}px ${fontFamily}`;
+  const lineX = align === "center" ? x + maxWidth / 2 : x;
   for (let i = 0; i < layout.used; i += 1) {
     const line = layout.lines[i] ?? "";
     const shown =
-      i === layout.used - 1 && layout.lines.length > layout.used
-        ? truncateToWidth(ctx, line, maxWidth)
-        : line;
-    ctx.fillText(shown, x, top + i * layout.lineHeight);
+      i === layout.used - 1 && layout.clipped ? ellipsizeLine(ctx, line, maxWidth) : line;
+    ctx.fillText(shown, lineX, top + i * layout.lineHeight);
   }
+  ctx.textAlign = "left";
+}
+
+function ellipsizeLine(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  const ellipsis = "…";
+  let cut = text.replace(/[…\s]+$/u, "");
+  const fits = (value: string) => ctx.measureText(`${value}${ellipsis}`).width <= maxWidth;
+  if (!fits(cut)) {
+    const words = cut.split(" ");
+    while (words.length > 1 && !fits(words.join(" "))) {
+      words.pop();
+    }
+    cut = words.join(" ");
+    while (cut.length > 0 && !fits(cut)) {
+      cut = cut.slice(0, -1);
+    }
+    cut = cut.trimEnd();
+  }
+  return `${cut}${ellipsis}`;
 }
 
 function drawTransition(
@@ -513,19 +1480,84 @@ function drawAuthor(
   drawHexAvatar(ctx, input.avatar, input.fullName, hexCx, hexCy, hexR, input.fontFamily);
 
   const textX = hexCx + hexR + 28;
-  const textMax = x + width - 36 - textX;
+  drawAuthorText(ctx, {
+    fullName: input.fullName,
+    country: input.country,
+    role: input.role,
+    fontFamily: input.fontFamily,
+    light,
+    x: textX,
+    cy: hexCy,
+    maxWidth: x + width - 36 - textX,
+  });
+}
+
+/** Autor sin caja: hexágono grande y texto al lado. */
+function drawAuthorInline(
+  ctx: CanvasRenderingContext2D,
+  input: {
+    fullName: string;
+    country: string | null;
+    role: string | null;
+    avatar: ImageBitmap | null;
+    fontFamily: string;
+    y: number;
+    light: boolean;
+  },
+) {
+  const hexR = 60;
+  const hexCx = PAD + hexR;
+  const hexCy = input.y + INLINE_AUTHOR_H / 2;
+  drawHexAvatar(ctx, input.avatar, input.fullName, hexCx, hexCy, hexR, input.fontFamily);
+
+  const textX = hexCx + hexR + 32;
+  drawAuthorText(ctx, {
+    fullName: input.fullName,
+    country: input.country,
+    role: input.role,
+    fontFamily: input.fontFamily,
+    light: input.light,
+    x: textX,
+    cy: hexCy,
+    maxWidth: IG_CARD_WIDTH - PAD - textX,
+  });
+}
+
+function drawAuthorText(
+  ctx: CanvasRenderingContext2D,
+  input: {
+    fullName: string;
+    country: string | null;
+    role: string | null;
+    fontFamily: string;
+    light: boolean;
+    x: number;
+    cy: number;
+    maxWidth: number;
+  },
+) {
   const role = input.role?.trim() || null;
   const country = input.country?.trim() || null;
+  const { light } = input;
   ctx.textAlign = "left";
   ctx.fillStyle = light ? INK : "#ffffff";
   if (role) {
     const block = 40 + 10 + 28;
-    const textY = hexCy - block / 2;
+    const textY = input.cy - block / 2;
     ctx.textBaseline = "top";
-    drawNameAndCountry(ctx, input.fullName, country, textX, textY, textMax, input.fontFamily, light);
+    drawNameAndCountry(
+      ctx,
+      input.fullName,
+      country,
+      input.x,
+      textY,
+      input.maxWidth,
+      input.fontFamily,
+      light,
+    );
     ctx.font = `600 28px ${input.fontFamily}`;
     ctx.fillStyle = light ? PINK : "#ffffff";
-    ctx.fillText(truncateToWidth(ctx, role, textMax), textX, textY + 50);
+    ctx.fillText(truncateToWidth(ctx, role, input.maxWidth), input.x, textY + 50);
     return;
   }
 
@@ -534,9 +1566,9 @@ function drawAuthor(
     ctx,
     input.fullName,
     country,
-    textX,
-    hexCy - 20,
-    textMax,
+    input.x,
+    input.cy - 20,
+    input.maxWidth,
     input.fontFamily,
     light,
   );
@@ -601,7 +1633,7 @@ function drawHexAvatar(
     ctx.fillStyle = "#24143f";
     ctx.fill();
     ctx.fillStyle = "#ffffff";
-    ctx.font = `700 42px ${fontFamily}`;
+    ctx.font = `700 ${Math.round(r * 0.8)}px ${fontFamily}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(initialOf(fullName), cx, cy);

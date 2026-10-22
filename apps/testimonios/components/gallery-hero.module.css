@@ -1,0 +1,111 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Solo esta capa recorta la decoración, sin cortar tarjetas ni indicadores de foco. */
+.backdrop {
+  --hero-violet: color-mix(in srgb, var(--brand-pink) 45%, var(--accent-indigo));
+  --hero-blue: hsl(from var(--brand-cyan) calc(h + 12) s l);
+  --hero-deep-blue: hsl(from var(--brand-cyan) calc(h + 26) 78% 38%);
+  --hero-corner-blue: hsl(from var(--brand-cyan) calc(h + 26) 84% 44%);
+
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 50% 74% at 71% 54%,
+      color-mix(in srgb, var(--hero-deep-blue) 27%, transparent),
+      transparent 76%
+    ),
+    radial-gradient(
+      ellipse 40% 44% at 42% 85%,
+      color-mix(in srgb, var(--hero-violet) 14%, transparent),
+      transparent 78%
+    ),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--bg-surface-2) 25%, var(--bg-base)),
+      color-mix(in srgb, var(--bg-surface-1) 20%, var(--bg-base)) 43%,
+      color-mix(in srgb, var(--bg-surface-1) 55%, var(--bg-base))
+    );
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+/* Dos grupos acotados al extremo derecho, con caída gradual de opacidad. */
+.points {
+  position: absolute;
+  right: 2%;
+  width: 450px;
+  height: 182px;
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--hero-violet) 60%, transparent) 1.2px, transparent 1.5px),
+    radial-gradient(circle, color-mix(in srgb, var(--brand-cyan) 35%, transparent) 1.15px, transparent 1.6px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+  mask-image: linear-gradient(to right, transparent, var(--text-primary) 42%, var(--text-primary) 85%, transparent);
+  opacity: 0.46;
+}
+
+.pointsTop {
+  top: 0;
+}
+
+.pointsBottom {
+  bottom: -65px;
+  right: 1%;
+  height: 140px;
+  background-position: 10px 0, 24px 14px;
+  opacity: 0.43;
+}
+
+/* Se conservan el encuadre y los cortes de la decoración de la maqueta aprobada. */
+@media (max-width: 930px) {
+  .backdrop {
+    background:
+      radial-gradient(
+        ellipse 60% 45% at 55% 72%,
+        color-mix(in srgb, var(--hero-deep-blue) 19%, transparent),
+        transparent 75%
+      ),
+      var(--bg-base);
+  }
+
+  .art {
+    width: 170%;
+    left: -35%;
+    opacity: 0.8;
+  }
+
+  .pointsTop {
+    right: -180px;
+    opacity: 0.25;
+  }
+
+  .pointsBottom {
+    opacity: 0.1;
+  }
+}
+
+@media (max-width: 600px) {
+  .art {
+    width: 250%;
+    left: -115%;
+    opacity: 0.57;
+  }
+
+  .points {
+    display: none;
+  }
+}

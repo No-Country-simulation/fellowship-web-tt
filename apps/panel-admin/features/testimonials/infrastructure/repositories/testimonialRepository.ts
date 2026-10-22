@@ -1,12 +1,13 @@
-import type { AdminInboxData, AdminTestimonial, TestimonialStatus } from "../../types/testimonial";
-import { hasInstagramChannel, hasLinkedInChannel } from "../buffer";
+import type { BufferPostStates, ShareChannels } from "../../types/share";
+import type {
+  AdminInboxData,
+  AdminTestimonial,
+  TestimonialStatus,
+} from "../../types/testimonial";
+import { getPost, hasInstagramChannel, hasLinkedInChannel } from "../buffer";
 import type { TestimonialDto } from "../dtos/testimonialDto";
 import { hasCommunityWebhook } from "../discord";
-import {
-  adminContextLine,
-  formatSubmittedAt,
-  TestimonialMapper,
-} from "../mappers/testimonialMapper";
+import { TestimonialMapper } from "../mappers/testimonialMapper";
 import { hasSupabaseServiceRoleEnv } from "../supabase/env";
 import { createServiceRoleClient } from "../supabase/service-role";
 import {
@@ -20,6 +21,20 @@ const missingServiceRole =
   "Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY. El inbox no puede leer ni publicar todavía.";
 
 const SHARE_CARD_NAME = "instagram.png";
+
+/** `testimonials.id` es uuid. Otro formato hace fallar PostgREST en lugar de devolver vacío. */
+const TESTIMONIAL_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const testimonialNotFound = {
+  ok: false as const,
+  notFound: true as const,
+  message: "No encontramos ese testimonio.",
+};
+
+export function isTestimonialId(id: string) {
+  return TESTIMONIAL_ID.test(id);
+}
 
 // Back real: tabla `testimonials` con service_role. No hay mock.
 export async function loadAdminInbox(): Promise<AdminInboxData> {
@@ -37,10 +52,7 @@ export async function getTestimonialById(id: string): Promise<
   | {
       ok: true;
       testimonial: AdminTestimonial;
-      metaLine: string;
-      canRetryDiscord: boolean;
-      canRetryInstagram: boolean;
-      canRetryLinkedin: boolean;
+      channels: ShareChannels;
     }
   | { ok: false; message: string; notFound?: boolean }
 > {
@@ -50,57 +62,63 @@ export async function getTestimonialById(id: string): Promise<
   }
 
   const testimonial = mapTestimonial(row.testimonial);
-  const published = testimonial.status === "published";
-  const context = adminContextLine(testimonial);
 
   return {
     ok: true,
     testimonial,
-    metaLine: `Enviado el ${formatSubmittedAt(testimonial.submittedAt)}${context ? ` · ${context}` : ""}`,
-    canRetryDiscord: published && !testimonial.discordPostedAt && hasCommunityWebhook(),
-    canRetryInstagram:
-      published && !testimonial.bufferInstagramPostedAt && hasInstagramChannel(),
-    canRetryLinkedin: published && !testimonial.bufferLinkedinPostedAt && hasLinkedInChannel(),
+    channels: {
+      discord: hasCommunityWebhook(),
+      instagram: hasInstagramChannel(),
+      linkedin: hasLinkedInChannel(),
+    },
   };
 }
 
+/** `li_caption` guarda el mismo texto que `ig_caption`. Discord no usa este caption. */
 export async function saveReviewEdits(
   id: string,
-  edits: { quote: string; igCaption: string; liCaption: string },
+  edits: { quote: string; caption: string },
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   return updateReviewRow(id, {
     quote: edits.quote,
-    ig_caption: edits.igCaption,
-    li_caption: edits.liCaption,
+    ig_caption: edits.caption,
+    li_caption: edits.caption,
   });
 }
 
 export async function publishTestimonial(
   id: string,
-  edits: { quote: string; igCaption: string; liCaption: string },
-): Promise<{ ok: true; slug: string } | { ok: false; message: string }> {
-  const updated = await updateReviewRow(
-    id,
-    {
-      quote: edits.quote,
-      ig_caption: edits.igCaption,
-      li_caption: edits.liCaption,
-      status: "published",
-      published_at: new Date().toISOString(),
-    },
-    "published",
-  );
+  edits: { quote: string; caption: string },
+): Promise<{ ok: true; slug: string } | { ok: false; lost: true } | { ok: false; message: string }> {
+  const updated = await updateReviewRow(id, {
+    quote: edits.quote,
+    ig_caption: edits.caption,
+    li_caption: edits.caption,
+    status: "published",
+    published_at: new Date().toISOString(),
+  });
 
   if (!updated.ok) {
-    return updated;
+    if (updated.lost) {
+      return { ok: false, lost: true };
+    }
+    return { ok: false, message: updated.message };
   }
 
   return { ok: true, slug: updated.slug };
 }
 
-export async function markDiscordPosted(
+/**
+ * La card no se pudo guardar: vuelve a revisión solo si sigue publicado.
+ * Otro request no llega a subir, así que no pisa el PNG.
+ */
+export async function revertPublishedTestimonial(
   id: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!isTestimonialId(id)) {
+    return { ok: false, message: testimonialNotFound.message };
+  }
+
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
   }
@@ -108,43 +126,114 @@ export async function markDiscordPosted(
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase
     .from("testimonials")
-    .update({ discord_posted_at: new Date().toISOString() })
+    .update({ status: "in_review", published_at: null })
     .eq("id", id)
     .eq("status", "published")
     .select("id")
     .maybeSingle();
 
-  if (error) {
+  if (error || !data) {
     return {
       ok: false,
-      message: "No pudimos marcar el post de Discord.",
-    };
-  }
-
-  if (!data) {
-    return {
-      ok: false,
-      message: "Este envío no está publicado.",
+      message: "No pudimos guardar la imagen. El testimonio quedó publicado y no se posteó.",
     };
   }
 
   return { ok: true };
 }
 
-export async function markBufferPosted(
+export type ShareClaim = "claimed" | "taken" | "error";
+
+/** Reserva Discord solo si la fecha sigue vacía y el envío está publicado. */
+export async function claimDiscordPost(id: string): Promise<ShareClaim> {
+  return claimPostedAt(id, "discord_posted_at");
+}
+
+/** Suelta la reserva si el webhook no salió, para que Reintentar pueda. */
+export async function releaseDiscordPost(id: string): Promise<void> {
+  await releasePostedAt(id, "discord_posted_at");
+}
+
+/** Reserva Instagram o LinkedIn solo si esa fecha sigue vacía. No guarda el id del post. */
+export async function claimBufferPost(
   id: string,
   network: "instagram" | "linkedin",
-): Promise<{ ok: true } | { ok: false; message: string }> {
-  if (!hasSupabaseServiceRoleEnv()) {
-    return { ok: false, message: missingServiceRole };
+): Promise<ShareClaim> {
+  return claimPostedAt(
+    id,
+    network === "instagram" ? "buffer_instagram_posted_at" : "buffer_linkedin_posted_at",
+  );
+}
+
+export async function releaseBufferPost(
+  id: string,
+  network: "instagram" | "linkedin",
+): Promise<void> {
+  await releasePostedAt(
+    id,
+    network === "instagram" ? "buffer_instagram_posted_at" : "buffer_linkedin_posted_at",
+  );
+}
+
+/**
+ * Suelta fecha e id de un post que Buffer marcó en error.
+ * El `where` exige el id consultado: si dos reintentos se cruzan, solo uno borra.
+ */
+export async function clearErroredBufferPost(
+  id: string,
+  network: "instagram" | "linkedin",
+  postId: string,
+): Promise<boolean> {
+  if (!isTestimonialId(id) || !postId) {
+    return false;
   }
 
+  if (!hasSupabaseServiceRoleEnv()) {
+    return false;
+  }
+
+  const postIdColumn =
+    network === "instagram" ? "buffer_instagram_post_id" : "buffer_linkedin_post_id";
   const supabase = createServiceRoleClient();
-  const postedAt = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .update(clearedBufferPost(network))
+    .eq("id", id)
+    .eq("status", "published")
+    .eq(postIdColumn, postId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Buffer error retry clear failed");
+    return false;
+  }
+
+  return Boolean(data);
+}
+
+/**
+ * El post de Buffer ya existe. Si esto falla, la fecha de la reserva queda:
+ * la ficha dice que salió y Reintentar no crea otro.
+ */
+export async function saveBufferPostId(
+  id: string,
+  network: "instagram" | "linkedin",
+  postId: string,
+): Promise<boolean> {
+  if (!isTestimonialId(id)) {
+    return false;
+  }
+
+  if (!hasSupabaseServiceRoleEnv()) {
+    return false;
+  }
+
   const values =
     network === "instagram"
-      ? { buffer_instagram_posted_at: postedAt }
-      : { buffer_linkedin_posted_at: postedAt };
+      ? { buffer_instagram_post_id: postId }
+      : { buffer_linkedin_post_id: postId };
+  const supabase = createServiceRoleClient();
   const { data, error } = await supabase
     .from("testimonials")
     .update(values)
@@ -153,21 +242,12 @@ export async function markBufferPosted(
     .select("id")
     .maybeSingle();
 
-  if (error) {
-    return {
-      ok: false,
-      message: "No pudimos marcar el post de Buffer.",
-    };
+  if (error || !data) {
+    console.error("Buffer post id was not saved");
+    return false;
   }
 
-  if (!data) {
-    return {
-      ok: false,
-      message: "Este envío no está publicado.",
-    };
-  }
-
-  return { ok: true };
+  return true;
 }
 
 export async function rejectTestimonial(
@@ -177,7 +257,23 @@ export async function rejectTestimonial(
   return updated.ok ? { ok: true } : updated;
 }
 
-/** Sube la card de Instagram o confirma que ya está. Devuelve la URL pública. */
+/** URL pública de la card que se guardó al publicar, o `null` si no quedó ninguna. */
+export async function storedShareCardUrl(slug: string): Promise<string | null> {
+  const path = `${slug}/${SHARE_CARD_NAME}`;
+  return (await shareCardExists(path)) ? publicStorageUrl(SHARE_CARDS_BUCKET, path) : null;
+}
+
+/** Estado de los posts de Buffer con id guardado. Sin id (envíos viejos) la red queda en `null`. */
+export async function bufferPostStates(testimonial: AdminTestimonial): Promise<BufferPostStates> {
+  const { bufferInstagramPostId, bufferLinkedinPostId } = testimonial;
+  const [instagram, linkedin] = await Promise.all([
+    bufferInstagramPostId ? getPost(bufferInstagramPostId) : null,
+    bufferLinkedinPostId ? getPost(bufferLinkedinPostId) : null,
+  ]);
+  return { instagram, linkedin };
+}
+
+/** Sube la card del post (la misma para las tres redes) o confirma que ya está. Devuelve la URL pública. */
 export async function prepareShareCard(slug: string, file: File | null): Promise<string | null> {
   const path = `${slug}/${SHARE_CARD_NAME}`;
   if (file) {
@@ -186,7 +282,7 @@ export async function prepareShareCard(slug: string, file: File | null): Promise
       return null;
     }
   } else if (!(await shareCardExists(path))) {
-    console.error("Buffer Instagram failed: missing share card");
+    console.error("Share failed: missing share card");
     return null;
   }
 
@@ -221,6 +317,10 @@ async function getTestimonialRow(id: string): Promise<
   | { ok: true; testimonial: TestimonialDto }
   | { ok: false; message: string; notFound?: boolean }
 > {
+  if (!isTestimonialId(id)) {
+    return testimonialNotFound;
+  }
+
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
   }
@@ -236,14 +336,76 @@ async function getTestimonialRow(id: string): Promise<
   }
 
   if (!data) {
-    return {
-      ok: false,
-      notFound: true,
-      message: "No encontramos ese testimonio.",
-    };
+    return testimonialNotFound;
   }
 
   return { ok: true, testimonial: data };
+}
+
+type PostedAtColumn =
+  | "discord_posted_at"
+  | "buffer_instagram_posted_at"
+  | "buffer_linkedin_posted_at";
+
+async function claimPostedAt(id: string, column: PostedAtColumn): Promise<ShareClaim> {
+  if (!isTestimonialId(id)) {
+    return "error";
+  }
+
+  if (!hasSupabaseServiceRoleEnv()) {
+    return "error";
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .update(postedAtValue(column, new Date().toISOString()))
+    .eq("id", id)
+    .eq("status", "published")
+    .is(column, null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Share claim failed");
+    return "error";
+  }
+
+  return data ? "claimed" : "taken";
+}
+
+async function releasePostedAt(id: string, column: PostedAtColumn): Promise<void> {
+  if (!isTestimonialId(id) || !hasSupabaseServiceRoleEnv()) {
+    return;
+  }
+
+  const supabase = createServiceRoleClient();
+  const { error } = await supabase
+    .from("testimonials")
+    .update(postedAtValue(column, null))
+    .eq("id", id)
+    .eq("status", "published");
+
+  if (error) {
+    console.error("Share release failed");
+  }
+}
+
+function postedAtValue(column: PostedAtColumn, value: string | null) {
+  if (column === "discord_posted_at") {
+    return { discord_posted_at: value };
+  }
+  if (column === "buffer_instagram_posted_at") {
+    return { buffer_instagram_posted_at: value };
+  }
+  return { buffer_linkedin_posted_at: value };
+}
+
+function clearedBufferPost(network: "instagram" | "linkedin") {
+  if (network === "instagram") {
+    return { buffer_instagram_posted_at: null, buffer_instagram_post_id: null };
+  }
+  return { buffer_linkedin_posted_at: null, buffer_linkedin_post_id: null };
 }
 
 async function updateReviewRow(
@@ -255,8 +417,7 @@ async function updateReviewRow(
     status?: TestimonialStatus;
     published_at?: string;
   },
-  alreadyDoneStatus?: TestimonialStatus,
-): Promise<{ ok: true; slug: string } | { ok: false; message: string }> {
+): Promise<{ ok: true; slug: string } | { ok: false; message: string; lost?: boolean }> {
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
   }
@@ -267,11 +428,9 @@ async function updateReviewRow(
   }
 
   if (current.testimonial.status !== "in_review") {
-    if (alreadyDoneStatus && current.testimonial.status === alreadyDoneStatus) {
-      return { ok: true, slug: current.testimonial.slug };
-    }
     return {
       ok: false,
+      lost: current.testimonial.status === "published",
       message: "Este envío ya no está en revisión.",
     };
   }
@@ -295,6 +454,7 @@ async function updateReviewRow(
   if (!data) {
     return {
       ok: false,
+      lost: true,
       message: "Este envío ya no está en revisión.",
     };
   }
@@ -325,7 +485,7 @@ async function uploadShareCard(path: string, file: File) {
   });
 
   if (error) {
-    console.error("Buffer share-cards upload failed");
+    console.error("Share card upload failed");
     return false;
   }
 

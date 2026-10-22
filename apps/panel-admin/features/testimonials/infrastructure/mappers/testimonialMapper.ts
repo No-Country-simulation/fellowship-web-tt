@@ -1,11 +1,10 @@
 import type { TestimonialDto } from "../dtos/testimonialDto";
-import { buildIgCaption, buildLiCaption } from "../quote";
+import { buildPostCaption } from "../quote";
 import { youtubeEmbedSrc } from "../youtube";
 import {
   careerChangeFields,
   firstJobFields,
   simulationFields,
-  storyContextLine,
   typeOption,
   type AdminInboxItem,
   type AdminTestimonial,
@@ -22,6 +21,7 @@ export const TestimonialMapper = {
     const simulation = simulationFields(dto.payload);
     const firstJob = firstJobFields(dto.payload);
     const careerChange = careerChangeFields(dto.payload);
+    const { quote, caption } = reviewQuoteAndCaption(dto);
 
     return {
       id: dto.id,
@@ -35,21 +35,8 @@ export const TestimonialMapper = {
       instagram: dto.instagram,
       linkedin: dto.linkedin ?? null,
       story: dto.story,
-      quote: dto.quote,
-      igCaption: dto.ig_caption.trim()
-        ? dto.ig_caption
-        : buildIgCaption({
-            quote: dto.quote,
-            fullName: dto.full_name,
-            instagram: dto.instagram,
-          }),
-      liCaption: dto.li_caption?.trim()
-        ? dto.li_caption
-        : buildLiCaption({
-            quote: dto.quote,
-            fullName: dto.full_name,
-            linkedin: dto.linkedin,
-          }),
+      quote,
+      caption,
       avatarUrl: media.avatarUrl,
       captureUrl: media.captureUrl,
       videoUrl: dto.video_url,
@@ -62,6 +49,8 @@ export const TestimonialMapper = {
       discordPostedAt: dto.discord_posted_at ?? null,
       bufferInstagramPostedAt: dto.buffer_instagram_posted_at ?? null,
       bufferLinkedinPostedAt: dto.buffer_linkedin_posted_at ?? null,
+      bufferInstagramPostId: dto.buffer_instagram_post_id ?? null,
+      bufferLinkedinPostId: dto.buffer_linkedin_post_id ?? null,
     };
   },
 
@@ -69,6 +58,7 @@ export const TestimonialMapper = {
     const view = this.fromDto(dto, media);
     return {
       id: view.id,
+      type: view.type,
       typeLabel: view.typeLabel,
       status: view.status,
       fullName: view.fullName,
@@ -89,16 +79,41 @@ export function formatSubmittedAt(iso: string) {
   );
 }
 
+/** Fecha corta, sin hora: "13 oct 2026". */
+export function formatShortDate(iso: string) {
+  const parts = new Intl.DateTimeFormat("es-AR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).formatToParts(new Date(iso));
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value.replace(/\./g, "") ?? "";
+  return `${part("day")} ${part("month")} ${part("year")}`;
+}
+
 export function inboxItemMeta(item: Pick<AdminInboxItem, "typeLabel" | "submittedAt">) {
   return `${item.typeLabel} · ${formatSubmittedAt(item.submittedAt)}`;
 }
 
-export function adminContextLine(testimonial: AdminTestimonial) {
-  return storyContextLine({
-    simulation: testimonial.simulation,
-    firstJob: testimonial.firstJob,
-    careerChange: testimonial.careerChange,
-  });
+/**
+ * Muestra el quote y el caption guardados. No los recorta ni los rearma,
+ * ni en revisión ni publicados. Si falta el texto del post, arma la plantilla para revisar.
+ */
+function reviewQuoteAndCaption(dto: TestimonialDto) {
+  const quote = dto.quote;
+  if (!dto.ig_caption.trim()) {
+    return {
+      quote,
+      caption: buildPostCaption({
+        quote,
+        fullName: dto.full_name,
+        instagram: dto.instagram,
+        linkedin: dto.linkedin ?? null,
+      }),
+    };
+  }
+  return { quote, caption: dto.ig_caption };
 }
 
 function formatEsAr(value: string) {

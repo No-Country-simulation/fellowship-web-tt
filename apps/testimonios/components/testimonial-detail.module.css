@@ -1,0 +1,30 @@
+.page {
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(
+      ellipse 38% 24rem at 90% 0%,
+      color-mix(in srgb, var(--brand-cyan) 8%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 40% 22rem at 10% 0%,
+      color-mix(in srgb, var(--brand-pink) 6%, transparent),
+      transparent
+    );
+  background-repeat: no-repeat;
+}
+
+/* El scroll pertenece al main, no al body. El diálogo modal lo bloquea. */
+.page:has(dialog[open]) {
+  overflow: hidden;
+}
+
+.closing {
+  background-color: var(--bg-surface-2);
+  background-image: linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--brand-pink) 6%, transparent),
+    transparent 50%,
+    color-mix(in srgb, var(--brand-cyan) 4%, transparent)
+  );
+}
