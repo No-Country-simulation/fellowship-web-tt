@@ -58,8 +58,10 @@ Los enlaces institucionales usan HTML `<a>` y URLs absolutas. Redes sociales y C
 
 Ver [evidencias y propuesta para el sitio oficial](../official-chrome-improvements.md#footer-institucional--etapa-3).
 
-Chrome headless sobre el build de producción: matriz de seis anchos (320, 375, 768, 1024, 1280 y 1440px) y cuatro fuentes raíz simuladas (16, 20, 24 y 32px), teclado, foco, pantalla baja, orientación horizontal y movimiento reducido. Se comprobó la integración con galería, formulario, ficha publicada, fotografía ampliable, recorte y ruta inexistente, sin enviar formularios.
+Chrome headless sobre el build final de producción: matriz de siete anchos (320, 375, 768, 1024, 1280, 1440 y 1920px) y cuatro fuentes raíz simuladas (16, 20, 24 y 32px), teclado, foco, pantalla baja, orientación horizontal y movimiento reducido. Se comprobó la integración con galería, formulario, ficha publicada, fotografía ampliable, recorte y ruta inexistente, sin enviar formularios. Los diez enlaces se recorrieron en ambos sentidos con foco visible, sin recorte bajo el header.
 
 Éxito y error de `PageShell` se verificaron con renderizados aislados de sus componentes reales para comprobar la composición y posición del footer; no se invocó la acción de envío ni se provocó un fallo del backend. Esta comprobación no equivale a ejecutar el flujo de envío completo.
+
+La etapa 4 revalidó contraste sobre fondos PNG con decoraciones: límite inferior de 6,04:1 a 1440px/fuente 16px y 6,15:1 a 320px/fuente 32px para los textos secundarios. El manifiesto del build no incluye `SiteFooter` como límite cliente; los helpers del framework y de `next/image` pueden seguir utilizando JavaScript propio.
 
 Pendientes de revisión humana: fidelidad visual final, zoom real del navegador, preferencias de fuente, lectores de pantalla, Safari/iOS y Firefox. Los cambios mediante `style.fontSize` simulan texto ampliado; no certifican esas modalidades reales.

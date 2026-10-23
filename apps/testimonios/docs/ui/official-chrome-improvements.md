@@ -1,195 +1,208 @@
 # Chrome oficial: propuesta de mejoras desde Testimonios
 
-**Revisión:** 23 de octubre de 2026. **Alcance implementado:** adaptación al scroll del documento, navbar y footer institucional. La etapa 3 no sustituye la revisión humana ni inicia la etapa 4 de QA integral.
+**Última revisión:** 23 de octubre de 2026. **Estado:** implementación y QA automatizado de etapas 1–4 completados; revisión visual humana y pruebas manuales pendientes.
 
-Este documento propone alternativas al equipo de la [web oficial](https://www.nocountry.tech/). Busca conservar su identidad visual y aportar evidencia reproducible. No es una auditoría completa del sitio ni implica que todas las soluciones deban trasladarse automáticamente: la navegación modal, el layout y las necesidades de cada aplicación requieren evaluación propia.
+Este documento propone mejoras al equipo de la [web oficial](https://www.nocountry.tech/). Conserva la identidad aprobada y distingue observaciones comprobadas, decisiones propias de Testimonios y propuestas sin aprobar. No es una certificación de accesibilidad ni presupone que todas las soluciones deban trasladarse automáticamente a otra aplicación.
 
-## Referencia visual preservada
+## Alcance y arquitectura
 
-Se reutiliza el logo existente y DM Sans. La fila mide 64px más 1px de borde, con fondo `rgba(3, 7, 17, 0.8)`, blur de 12px y padding horizontal de 16px. Los enlaces desktop conservan 14px/20px con fuente raíz de 16px, color `#e1e7ef`, hover rosa y desplegables oscuros. Los neutros específicos se aíslan en un CSS Module; no se remapean tokens globales ni se copia CSS compilado del sitio oficial.
+El documento proporciona el scroll. El layout es una columna flexible con altura mínima del viewport, un único main por ruta normal, SiteHeader sticky y SiteFooter después del contenido. SiteNavigation concentra la interacción; el footer permanece en servidor. Los estilos específicos se aíslan en CSS Modules, sin remapear tokens globales ni modificar componentes compartidos.
 
-Referencia, 1440px:
+El catálogo tipado de lib/nav.ts conserva URLs institucionales absolutas, dominios independientes de los portales y rutas locales de Testimonios. WhatsApp social y Contacto son destinos diferentes. No se modifica la arquitectura de caché, publicación, consultas, procesamiento de archivos ni consentimiento.
 
-![Navbar oficial en desktop, fuente raíz de 16px](./assets/official-chrome/reference-desktop.png)
+## QA integral — etapa 4
 
-Testimonios, mismas condiciones:
+Chrome headless 156 en Windows, perfiles limpios y build de producción en localhost:3002. Se eligió ese puerto porque 3001 estaba ocupado; no se detuvo su proceso. Las solicitudes del navegador distintas de GET/HEAD se bloquearon. No se enviaron testimonios, no se cambiaron registros ni se inspeccionaron valores de credenciales.
 
-![Navbar de Testimonios en desktop, fuente raíz de 16px](./assets/official-chrome/testimonios-desktop.png)
+| Verificación final | Resultado y límite |
+| --- | --- |
+| Matriz responsive | 320, 375, 768, 1024, 1280, 1440 y 1920px × fuentes raíz simuladas de 16, 20, 24 y 32px: 28 combinaciones. Sin overflow horizontal de página, footer, paneles ni opciones. En desktop se abrieron los tres dropdowns; en compacto, los tres grupos. |
+| Pantallas bajas y horizontal | Recorrido completo a 320×320px/fuente 32px; horizontal a 768×375px/fuente 32px. Controles alcanzables mediante scroll interno. |
+| Navbar y foco | Tab/Shift+Tab, Enter/Espacio, Escape, clic exterior, salida del foco, exclusividad desktop, contenido inerte al cerrar, IDs únicos y asociaciones ARIA. Cambiar de breakpoint cierra el modal, retira el bloqueo y conserva un foco visible. |
+| Footer y foco | Diez enlaces recorridos en ambos sentidos; outlines visibles y sin recorte bajo el header. Tres nav identificados, iconos decorativos, redes de 44×44px y pendientes sin interacción falsa. |
+| Movimiento reducido | Animaciones detenidas y transiciones eliminadas. Se comprueba transition-property:none, no solo la duración computada: Tailwind puede conservar una duración aunque la transición esté desactivada. |
+| Galería viva | Búsqueda por nombre y extracto, normalización Unicode, cuatro filtros, combinación, contador único, resultado vacío, restablecimiento y foco. Carrusel publicado con siguiente/anterior e inercia de las tarjetas inactivas. |
+| Navegación interna | Link reales galería → ficha → galería → formulario. Un scroll de documento y footer después del contenido. |
+| Formulario | Cinco pasos, errores de categoría/avatar/historia/consentimiento, offset bajo el header, selección, previews, recortes, resumen, conservación al retroceder y cambiar categoría. Consentimiento inválido bloquea el envío; no se envía con consentimiento válido. |
+| Ficha viva | Historia completa, fotografía ampliable, Escape, foco, posición y ancho al bloquear el scroll. Se encontró un iframe de YouTube con nombre, fullscreen y proporción 16:9; no se probó reproducción remota. |
+| Estados aislados | Renderizados de componentes reales para éxito, PageShell de error, galería sin publicados y ficha sin medios. Verifican composición/semántica; no equivalen a enviar al servidor ni a hidratar esas fixtures. Ruta inexistente comprobada también por HTTP. |
+| Errores cliente | Cero errores de JavaScript en las ejecuciones finales del chrome y de regresión; sin avisos de hidratación observados. |
+| Zoom real | Se intentó Ctrl++ mediante CDP: DPR 1, innerWidth 1440 y visualViewport.scale 1 no cambiaron. No se cuenta como zoom real verificado. La matriz usa style.fontSize y no sustituye preferencias del navegador. |
+| Estáticos | TypeScript, ESLint y build correctos. ESLint general conserva el warning previo de landing-contratar. git diff --check sin errores. |
 
-## Problemas reproducidos y alternativas implementadas
+### Rendimiento y alcance de Git
 
-| Condición observada en la referencia | Alternativa en Testimonios | Beneficio y diferencia deliberada |
-| --- | --- | --- |
-| A 1440px, cambiando la fuente raíz a 24px, el documento mide 1583px de ancho frente a 1425px disponibles; el header crece a 97px. | Se mide el ancho real del logo, navegación, acciones y gaps. Desde 1280px se habilita desktop solo si todo cabe; en caso contrario aparece el botón de navegación compacta. | Mantiene el tamaño del texto y evita recortar enlaces. A 1280px y fuente normal puede mostrarse compacto; no se comprime la tipografía para forzar la fila. |
-| A 375×568px, con los tres grupos móviles abiertos, el header inline mide 730px. Su posición sticky deja enlaces fuera del viewport al desplazar la página. | Diálogo nativo limitado a `100dvh`, toolbar estable y navegación vertical con scroll interno. | Todos los destinos siguen disponibles en pantallas bajas. Es una navegación modal sobre el contenido, a diferencia de la expansión inline de la referencia. |
-| El botón móvil del HTML de referencia se identifica como “Toggle menu”, sin `aria-expanded` ni `aria-controls`. | Botón “Abrir navegación” con estado, asociación al diálogo y nombre accesible. Cerrar y Escape devuelven el foco. | Comunica propósito y estado; no cambia el icono visible de la referencia. |
-| Los desplegables de la referencia utilizan roles `menu`/`menuitem`. | Disclosure Navigation: botones con estado y listas de enlaces; Tab/Shift+Tab nativos, Enter/Espacio y Escape. | El contrato de teclado corresponde a navegación web. No se afirma que los roles aislados demuestren por sí mismos un incumplimiento del sitio oficial. |
+- El manifiesto cliente del build contiene SiteNavigation y no contiene SiteFooter como límite cliente. Esto no significa que next/image o el framework no utilicen su propio JavaScript.
+- Abrir/cerrar navegación no remonta el formulario, su input ni el footer: se comprobaron las identidades de sus nodos. No se realizó perfilado de React ni Lighthouse; no se deducen tiempos de render a partir de esa comprobación.
+- El PNG original pesa 21.129 bytes, mide 1229×207 y coincide byte a byte con el PNG público oficial. No se cambió ni convirtió. Las capturas de documentación no se sirven desde public/.
+- El diff acumulado origin/dev...HEAD comprende 37 archivos de apps/testimonios; el commit del pulido 6d1f893 apareció durante el QA. Sus componentes y capturas coinciden por hash con el estado inicial probado. La corrección local de FileField y la documentación de cierre se revisan además como cambios de trabajo. No hay cambios en dependencias, lockfile, consultas, backend, panel, migraciones ni archivos de credenciales. Se usa la referencia local origin/dev, sin fetch ni operaciones Git de escritura por parte del agente.
+- Se conservan las 14 capturas existentes: 771.797 bytes en total, sin duplicados por SHA-256 y todas incluidas en el HEAD actual. Sus referencias relativas Markdown se verificaron. No se ejecutó git add desde este QA.
 
-La primera medición es una **simulación mediante `document.documentElement.style.fontSize`**, no una prueba de las preferencias reales de fuente ni de zoom del navegador. Esas comprobaciones manuales permanecen pendientes.
+El servidor repitió The destination stream closed early al terminar sesiones automatizadas, mensaje ya documentado en etapas anteriores. No apareció como error de JavaScript del navegador y no se atribuye al chrome. Queda observar el uso manual habitual sin interrupciones de sesiones.
 
-Fuente raíz de 24px en la referencia:
+## Navbar — hallazgos y mejoras
 
-![Referencia a 1440px con fuente raíz de 24px: enlaces extendidos más allá del viewport](./assets/official-chrome/reference-text24.png)
+### NC-N01: Navbar con texto ampliado
 
-Testimonios en las mismas condiciones:
+1. **Situación oficial:** a 1440px con fuente raíz de 24px, el header mide 97px y el documento alcanza 1583px frente a 1425px disponibles, antes de abrir sesión.
+2. **Reproducción:** viewport 1440px, zoom 100%, cambiar style.fontSize a 24px y medir scrollWidth/clientWidth. Es simulación de fuente, no zoom real.
+3. **Impacto:** navegación fuera del ancho útil y scroll horizontal.
+4. **Testimonios:** medición de logo, enlaces, acciones y gaps; modo compacto cuando no caben. No se comprime la fuente.
+5. **Diferencia visual:** a 1280px/fuente normal puede aparecer compacto. A 1440px/fuente 24px el header local conserva 65px y el documento mide 1430px dentro de 1430px útiles.
+6. **Evidencia:** capturas reference-text24.png y testimonios-text24.png; matriz integral final.
+7. **Validación:** implementado y probado en Chrome; preferencias reales de fuente y zoom pendientes.
+8. **Recomendación:** evaluar adaptación según espacio real, sin sustituirla por copy más corto o reducción de tipografía.
+9. **Tipo:** problema reproducido en la referencia y alternativa funcional implementada.
 
-![Testimonios a 1440px con fuente raíz de 24px: versión compacta sin recortes](./assets/official-chrome/testimonios-text24.png)
+### NC-N02: Navegación móvil en pantallas bajas
 
-Menú oficial con tres grupos abiertos a 375×568px:
+1. **Situación oficial:** con tres grupos expandidos a 375×568px, el header inline sticky alcanza 730px y deja destinos fuera de la zona visible.
+2. **Reproducción:** abrir hamburguesa y los tres grupos; desplazar la página y medir el header.
+3. **Impacto:** dificultad para alcanzar y cerrar la navegación con poca altura.
+4. **Testimonios:** diálogo nativo limitado a 100dvh, toolbar estable y navegación con scroll interno; Escape y retorno del foco.
+5. **Diferencia visual:** modal superpuesto en lugar de expansión inline. El diseño normal conserva logo, orden, colores y tipografía.
+6. **Evidencia:** reference-mobile-expanded.png y testimonios-mobile-expanded.png; prueba final a 320×320px/fuente 32px y cambios de breakpoint.
+7. **Validación:** implementado, sin bloqueo residual ni foco oculto en las pruebas; revisión táctil Safari/iOS pendiente.
+8. **Recomendación:** valorar panel limitado al viewport y elegir modalidad según las necesidades del sitio, incluyendo su contrato de foco.
+9. **Tipo:** problema de alcance vertical reproducido; solución modal propia de Testimonios.
 
-![Parte visible del menú oficial expandido, más alto que el viewport](./assets/official-chrome/reference-mobile-expanded.png)
+### NC-N03: Semántica y nombres de navegación
 
-Testimonios, mismos grupos y viewport:
+1. **Situación oficial:** el HTML compartido usa menu/menuitem en dropdowns y el botón móvil Toggle menu sin aria-expanded/aria-controls.
+2. **Reproducción:** inspeccionar el HTML de referencia. Los roles aislados no prueban por sí mismos un incumplimiento del sitio oficial.
+3. **Impacto:** el patrón elegido debe corresponder a su teclado y comunicar el estado del contenido.
+4. **Testimonios:** Disclosure Navigation con botones/listas, aria-expanded y aria-controls; diálogo con nombre, contenido cerrado inerte y foco visible.
+5. **Diferencia visual:** controles mínimos de 44px y outlines cyan; el área del botón puede superar la de la referencia.
+6. **Evidencia:** código de SiteNavigation, asociaciones e IDs y recorrido de ambos sentidos verificados en la etapa 4.
+7. **Validación:** teclado y semántica DOM comprobados. No se probó lector de pantalla ni se auditó por completo el patrón ARIA oficial.
+8. **Recomendación:** revisar el contrato completo de teclado; para navegación web simple, considerar Disclosure sin roles de menú de aplicación.
+9. **Tipo:** mejora semántica implementada; no es un dictamen global de conformidad del sitio oficial.
 
-![Diálogo móvil de Testimonios con navegación desplazable y cierre visible](./assets/official-chrome/testimonios-mobile-expanded.png)
+### NC-N04: Dropdown de sesión y scroll horizontal
 
-## Decisiones propias de Testimonios
+1. **Situación oficial:** el panel alineado a la izquierda del disparador rebasa el ancho útil al abrirse.
+2. **Reproducción:** a 1440×900px/fuente 16px, el documento pasa de 1425 a 1430px; clientHeight baja de 900 a 885px. El borde derecho del panel está en 1429,797px. También se reprodujo en etapas previas a 1280 y 1920px.
+3. **Impacto:** aparece una barra horizontal incluso con fuente normal. A fuente 24px el header ya desborda antes de abrir el panel; el dropdown agrega otro incremento.
+4. **Testimonios:** panel alineado a la derecha, con ancho/altura limitados y modo compacto cuando hace falta.
+5. **Diferencia visual:** a 1440px termina en 1414px, dentro de 1430px disponibles. Opciones de 44px de alto frente a 36px oficiales.
+6. **Evidencia:** capturas polish-reference-login-1440.png y polish-testimonios-login-1440.png; medición repetida en etapa 4.
+7. **Validación:** reproducido oficialmente; el caso local y los tres paneles pasan la matriz sin overflow.
+8. **Recomendación:** alinear los paneles cercanos al borde y medir sus límites, incluyendo iconos y texto ampliado.
+9. **Tipo:** defecto visual reproducido; prevención funcional local verificada.
 
-- El header y el layout permanecen en servidor; `SiteNavigation` concentra los eventos y el estado cliente. El catálogo tipado evita duplicar destinos entre desktop y móvil.
-- Los destinos institucionales son absolutos. Los portales mantienen `talent.nocountry.tech` y `companies.nocountry.tech`; no se reescriben sus rutas de inicio. Los CTA y enlaces locales continúan usando `next/link`.
-- Se verificaron los 14 destinos del catálogo mediante HEAD: todos terminan en HTTP 200; los dos portales redirigen a sus entradas actuales. `#live` existe en el HTML oficial. No se incorporan placeholders ni fragmentos sin verificar.
-- Se conserva un solo grupo abierto en desktop. Clic exterior y salida de foco cierran sin robarlo; Escape devuelve el foco al disparador. Los paneles cerrados quedan inertes y fuera del árbol accesible durante su salida.
-- Los controles y enlaces de los desplegables tienen un mínimo de 44px. Esto puede aumentar moderadamente la altura de los popups frente a la referencia. El de sesión se alinea al borde derecho y los paneles limitan su altura disponible.
-- El diálogo móvil reutiliza el bloqueo de scroll y el gutter estable de la etapa anterior. Una guarda local envuelve Tab/Shift+Tab: Chrome permitía alcanzar el documento al completar el recorrido de un diálogo nativo sin esa guarda. Esta es una necesidad de la variante modal de Testimonios, no un defecto atribuido al menú inline oficial.
-- Al cambiar de modo se cierra el contenido incompatible y se conserva el foco en un control visible, sin remontar el formulario. La altura real del header actualiza el offset global; `focusAndReveal()` sigue midiéndola directamente.
-- El indicador de simulación es decorativo y enlaza a `/#live`; no anuncia datos dinámicos ni consulta un servicio. El trazo y las transiciones se detienen con `prefers-reduced-motion`.
+### NC-N05: Fidelidad de dropdowns y estado abierto
 
-## Evidencia de QA y límites
-
-Pruebas en Chrome headless 156 sobre Windows y el build de producción de localhost, con perfil temporal limpio y bloqueo de solicitudes distintas de GET/HEAD. No se enviaron formularios ni se alteraron registros. La ejecución final completó 228 comprobaciones del navbar y 20 de integración sin fallos ni excepciones de JavaScript en el navegador. Una comprobación adicional de las tres rutas registró cero errores de consola y de hidratación.
-
-- Matriz del navbar: 320, 375, 768, 1024, 1280, 1440, 1536 y 1920px con fuentes raíz de 16, 20, 24 y 32px.
-- A 1440px con fuente raíz de 24px, Testimonios conserva 1430px de ancho disponible y de documento, header de 65px y modo compacto. A 375×568px con todos los grupos abiertos, el diálogo mide 568px: su navegación desplaza 812px de contenido dentro de 504px, sin overflow horizontal (355px disponibles y de contenido).
-- Geometría del header sticky, ausencia de overflow horizontal del navbar, cambio automático a compacto, bloqueo/restauración del documento y scroll local del diálogo.
-- Apertura/cierre de los tres grupos desktop, exclusividad, clic exterior, salida de foco, Enter/Espacio, Tab/Shift+Tab, Escape y retorno de foco.
-- Diálogo a 320×320px con fuente raíz de 32px y todos los grupos abiertos; recorrido completo de teclado y cambio a desktop con el modal abierto.
-- IDs ARIA y SVG únicos, controles asociados, paneles inertes, foco visible y movimiento reducido.
-- Regresión de búsqueda, filtros, contador, estados vacíos y navegación del carrusel. En `/enviar`, cinco pasos, errores, altura real del header, datos conservados y recorte. En la ficha, fotografía ampliable, Escape, foco y posición. Los envíos reales quedan excluidos.
-- TypeScript, ESLint, build y `git diff --check` finalizaron correctamente. ESLint general conserva el warning conocido de `landing-contratar`, ajeno a este cambio.
-
-Las capturas muestran solo el navbar para separar la comparación de las diferencias de contenido entre sitios. Las comprobaciones geométricas y de teclado no sustituyen la aprobación visual humana ni certifican accesibilidad completa. Quedan pendientes zoom real, preferencias de fuente del navegador, lectores de pantalla, Safari/iOS y Firefox.
-
-El servidor de Next registró `The destination stream closed early` en el contexto de las sesiones de QA que se cierran e interrumpen peticiones. El mismo mensaje se observó en la etapa de scroll anterior al navbar; no se atribuye a esta implementación. Conviene observar también el uso habitual en localhost sin esos cierres automatizados.
+1. **Situación oficial:** opciones de 14px/peso 500/interlínea 20px, padding 8px/12px; panel con padding 6px, radio 8px, borde #1c1b29 y fondo #000115. Hover directo rosa con fondo #1d283a; disparadores sin ese fondo.
+2. **Reproducción:** comparar estilos computados a 1440×900 y 1920×900px, zoom 100%, DPR 1 y fuente raíz de 16px.
+3. **Impacto:** copiar nombres de utilidades sin considerar sus valores ni las áreas táctiles puede desplazar o alterar el panel.
+4. **Testimonios:** se igualaron hover, sombra de dos capas negras al 40% y fondo de foco. El texto rosa persiste mientras aria-expanded sea verdadero. Portales con icono externo de 12px, gap 8px, nueva pestaña protegida y aviso accesible.
+5. **Diferencia visual:** margen local 4px frente a 16px oficial: el botón local mide 44px, pero ambos textos terminan en y=42px y ambos paneles empiezan en y=58px. Se conserva la separación visual de 16px; no se copia mt-4. Las opciones mantienen 44px para accesibilidad.
+6. **Evidencia:** capturas del pulido y estilos/teclado de etapa 4. En la etapa de pulido se verificó la creación nativa de las dos pestañas con sus documentos pausados; no se intentó autenticación.
+7. **Validación:** fidelidad medida y estados comprobados. Color persistente y SVG a la derecha solo en compacto son mejoras deliberadas, no errores atribuidos a la referencia.
+8. **Recomendación:** conservar jerarquía visual y foco independiente del hover; advertir nueva pestaña y mantener coherentes los dominios.
+9. **Tipo:** diferencias visuales corregidas y mejoras de UX implementadas.
 
 ## Footer institucional — etapa 3
 
-Se conserva la composición de la [referencia oficial](https://www.nocountry.tech/): fondo `#090a15`, contenedor de hasta 1280px a fuente normal, espaciados, columnas, descripción institucional, logo PNG, trazados sociales, luces y geometría decorativa. `SiteFooter` permanece en servidor y reutiliza el catálogo tipado del navbar. No introduce dependencias, estado ni consultas.
+Se conserva la composición institucional, descripción, PNG, luces y geometría. La etapa 4 revalida el footer en el conjunto del layout y amplía su matriz a siete anchos.
 
-### Observaciones verificadas y propuestas
+### NC-F01: Destinos pendientes sin enlaces ficticios
 
-| Evidencia en la referencia | Implementación en Testimonios | Alcance y beneficio |
-| --- | --- | --- |
-| “Simulaciones abiertas” apunta a `/#proxima-simulacion`, pero ese ID no existe en el documento consultado. “Modelo de validación” y los dos legales apuntan a `#`. `#faq` sí existe. | Se conservan los cuatro textos pendientes, sin enlaces, eventos ni foco artificial. Los demás destinos son absolutos y reutilizan el catálogo. | Evita aparentar una navegación disponible. Las URLs pendientes requieren confirmación del equipo, no una sustitución por páginas relacionadas. |
-| Copyright de 12px, color `#71717a` y fondo base `#090a15`: contraste calculado de 4,08:1, inferior a 4,5:1 para texto normal. | Copyright y textos secundarios usan `#a1a1aa`. | Las luces y figuras se mantienen. El peor fondo de las capturas de Testimonios a 375 y 1440px da un límite inferior de 6,04:1 para esos textos. Componer ambas luces al 10% y ambos trazos blancos al 5%, simultáneamente y a opacidad máxima, mantiene al menos 4,85:1. Este último valor es una cota conservadora calculada, no una muestra del copyright oficial. |
-| Los tres enlaces sociales miden 40×40px a fuente raíz de 16px. | Controles de 44×44px, nombres con aviso de nueva pestaña y foco visible. | Aumenta el área táctil solicitada. La medida original de 40px no implica por sí sola un incumplimiento de WCAG. |
-| A 320px y fuente raíz simulada de 32px, la fila legal sin wrapping mide 271,156px dentro de un contenedor de 241px. Sus textos todavía quedan dentro del footer: no se afirma un recorte del texto en ese caso. | Fila legal con wrapping; grilla con tracks que ceden columnas cuando crece el texto. | Mantiene el contenido dentro de su columna sin reducir la fuente ni fijar alturas. La matriz de Testimonios no presentó desbordamientos. |
+1. **Situación oficial:** Simulaciones abiertas apunta a /#proxima-simulacion, ID no encontrado; Modelo de validación y los dos legales usan #. El fragmento #faq sí existe.
+2. **Reproducción:** inspeccionar href y los IDs del documento oficial.
+3. **Impacto:** los placeholders aparentan una navegación disponible y pueden mover el scroll sin ofrecer destino.
+4. **Testimonios:** mantener los cuatro textos sin href, rol de enlace, foco ni hover interactivo; reutilizar el catálogo para los demás destinos.
+5. **Diferencia visual:** textos y orden conservados; pendientes sin interacción.
+6. **Evidencia:** HTML compartido, captura footer-reference-375.png, inspección de IDs y semántica final.
+7. **Validación:** tratamiento implementado. Las cuatro URLs continúan sin aprobar.
+8. **Recomendación:** confirmar destinos con sus responsables; no sustituirlos automáticamente por páginas relacionadas.
+9. **Tipo:** navegación pendiente de producto; presentación segura implementada.
 
-Los fondos se midieron en capturas PNG sin el contenido frontal, conservando las luces y figuras en la sesión de prueba. Se decodificaron los píxeles y se tomó la mayor luminancia del fondo como límite conservador para el contraste de los textos. El fondo de los botones sociales se trata aparte del texto secundario, y sus iconos mantienen contraste suficiente con su superficie.
+### NC-F02: Contraste del copyright
 
-### Diferencias visuales deliberadas
+1. **Situación oficial:** copyright de 12px, color #71717a y fondo base #090a15: contraste calculado de 4,08:1.
+2. **Reproducción:** medir colores computados a fuente normal y calcular luminancia relativa, incluyendo la composición del fondo.
+3. **Impacto:** por debajo del objetivo de 4,5:1 para texto normal.
+4. **Testimonios:** copyright y secundarios #a1a1aa, conservando luces y figuras.
+5. **Diferencia visual:** copyright más claro; geometría y tipografía permanecen.
+6. **Evidencia:** pares de capturas del footer. En etapa 4 se decodificaron fondos PNG sin primer plano, conservando decoraciones: límite inferior de 6,04:1 a 1440px/fuente 16px y 6,15:1 a 320px/fuente 32px.
+7. **Validación:** colores y píxeles comprobados. Componer ambas luces al 10% y ambos trazos blancos al 5% simultáneamente da además una cota conservadora de 4,85:1; no es una muestra del copyright oficial.
+8. **Recomendación:** ajustar el neutro secundario lo mínimo necesario y revisar los fondos finales, no solo el color base.
+9. **Tipo:** contraste insuficiente confirmado sobre el fondo base; mejora local validada.
 
-- Logo de 237,484×40px en ambos sitios a 375 y 1440px. El enlace local tiene un mínimo de 44px de alto; el recurso PNG no se modifica.
-- Footer local 8px más alto a fuente normal: 897,5px frente a 889,5px a 375px, y 406px frente a 398px a 1440px. Corresponde al enlace de marca y a los controles sociales de 44px.
-- Copyright más claro y destinos pendientes sin hover ni interacción. Se conservan sus textos, ubicación y tipografía.
-- A fuente ampliada, la grilla puede tener menos columnas y los legales pueden pasar de fila. A fuente normal se mantiene la distribución oficial.
-- Las capturas tienen 5px de diferencia en el ancho disponible por los scrollbars preexistentes de ambas aplicaciones. No se modifica el scrollbar para esta etapa.
+### NC-F03: Controles sociales y foco
 
-### Capturas comparativas
+1. **Situación oficial:** enlaces sociales de 40×40px a fuente normal.
+2. **Reproducción:** medir los tres enlaces a 375 y 1440px.
+3. **Impacto:** área menor al objetivo táctil de 44×44px acordado para Testimonios; 40px por sí solo no demuestra incumplimiento de WCAG.
+4. **Testimonios:** áreas de 44×44px, nombres con aviso de nueva pestaña, rel protegido y outline cyan. Decoración aria-hidden, sin eventos y recortada en una capa independiente.
+5. **Diferencia visual:** footer 8px más alto: 897,5 frente a 889,5px en 375px; 406 frente a 398px en 1440px. Incluye el enlace de marca de al menos 44px.
+6. **Evidencia:** capturas del footer; Tab/Shift+Tab por los diez enlaces y outlines completos verificados.
+7. **Validación:** implementación y teclado comprobados; lectores de pantalla pendientes.
+8. **Recomendación:** evaluar áreas táctiles y foco con los neutros/hover existentes, sin cambiar los iconos ni la identidad.
+9. **Tipo:** mejora deliberada de interacción y accesibilidad.
 
-Capturadas en Chrome 156, viewport de 900px de alto, DPR 1 y fuente raíz de 16px. Se oculta temporalmente el header solo durante la captura del footer para evitar su superposición sticky; no se cambia su implementación. Los enlaces de los sitios externos no se activaron.
+### NC-F04: Columnas y legales con texto ampliado
 
-| Ancho | Referencia | Testimonios |
-| --- | --- | --- |
-| 375px | [Footer oficial](./assets/official-chrome/footer-reference-375.png) | [Footer de Testimonios](./assets/official-chrome/footer-testimonios-375.png) |
-| 1440px | [Footer oficial](./assets/official-chrome/footer-reference-1440.png) | [Footer de Testimonios](./assets/official-chrome/footer-testimonios-1440.png) |
+1. **Situación oficial:** a 320px/fuente raíz simulada 32px, la fila legal sin wrapping mide 271,156px en un contenedor de 241px; sus textos todavía quedan dentro del footer.
+2. **Reproducción:** ampliar style.fontSize y medir la fila y su contenedor.
+3. **Impacto:** excede su columna; no se afirma un recorte del texto en esa condición.
+4. **Testimonios:** wrapping en legales y filas inferiores, tracks que ceden columnas y altura natural. A fuente normal se mantiene una/dos/cinco columnas con marca de dos tracks.
+5. **Diferencia visual:** puede cambiar la cantidad de filas/columnas al ampliar el texto; no se reduce la tipografía ni se fija la altura.
+6. **Evidencia:** footer-testimonios-320-text32.png y matriz integral final.
+7. **Validación:** 28 combinaciones sin overflow, controles superpuestos ni textos cortados en el footer. Zoom real pendiente.
+8. **Recomendación:** permitir crecimiento y wrapping dentro de los contenedores antes de reducir fuente o recortar.
+9. **Tipo:** adaptación responsive implementada; observación acotada de la referencia.
 
-[Testimonios a 320px y fuente raíz de 32px](./assets/official-chrome/footer-testimonios-320-text32.png).
+## Integración local y corrección durante el QA
 
-### QA realizado y límites de la evidencia
+### QA-L01: Anclaje del placeholder durante el recorte
 
-- Build de producción, Chrome headless y perfil limpio. Las solicitudes del navegador distintas de GET/HEAD se bloquearon; no se enviaron formularios ni se modificaron registros.
-- 24 combinaciones: 320, 375, 768, 1024, 1280 y 1440px × fuentes raíz simuladas de 16, 20, 24 y 32px. Sin desbordamiento horizontal de página, footer ni sus textos.
-- Tab y Shift+Tab por los diez enlaces del footer, foco de 2px visible a 320×320px y fuente de 32px, nombres sociales, destinos HTTPS, nuevas pestañas protegidas y tres grupos de navegación identificados.
-- Movimiento reducido, menú móvil abierto sobre el footer a 375×320px y fuente de 24px, grupos expandibles, bloqueo del documento, Escape, foco y restauración de posición. Orientación horizontal a 768×375px con fuente de 32px.
-- Las tres rutas conservan el footer después de su contenido y el scroll del documento. Se recorrieron los cinco pasos del formulario con archivos locales: error de avatar y foco bajo el header, recortes, resumen y persistencia al retroceder, sin enviar.
-- Ficha publicada: fotografía ampliable, Escape, bloqueo/restauración de scroll y retorno de foco. La ruta inexistente conserva el footer.
-- Éxito del formulario y error de `PageShell`: renderizados aislados de los componentes reales para comprobar posición y crecimiento flexible del layout. No representan un envío real ni un fallo provocado del backend.
-- Cero errores de JavaScript en las ejecuciones finales del footer y de integración. TypeScript, ESLint general y build correctos; solo permanece el warning preexistente de `landing-contratar`.
+1. **Situación:** hallazgo local con scroll del documento; no se atribuye a la web oficial. El placeholder cambia al montar el diálogo y Chrome puede elegirlo como ancla.
+2. **Reproducción:** /enviar, 375×800px, categoría Simulación, avanzar sin datos, completar nombre/país/email y elegir una imagen local para el avatar.
+3. **Impacto:** el fondo pasaba de scrollY 457 a 483 al abrir el recorte y volvía a 457 al cancelar, aunque no cambiaban la altura del documento ni el área de carga.
+4. **Corrección:** una utilidad CSS overflow-anchor:none en el label del área de archivos. No cambia validación, foco, datos, recorte, archivos ni APIs; evita elegir ese subárbol cambiante como ancla.
+5. **Diferencia visual:** ninguna en el diseño; desaparece el desplazamiento del fondo.
+6. **Evidencia:** medición antes/abierto/cerrado 457/483/457; con la corrección 457/457/457. Regresión repetida en el build final con archivo local.
+7. **Validación:** corregido; apertura, Escape, confirmación, previews, datos y foco pasan las regresiones. El placeholder ya existía; no se hizo ejecución completa de dev para atribuirle un origen histórico.
+8. **Recomendación:** mantener excluido del anclaje este elemento de geometría cambiante; no agregar otro bloqueo imperativo del body ni sincronizar estado adicional.
+9. **Tipo:** corrección menor de integración del scroll, aplicada en etapa 4.
 
-El servidor volvió a registrar `The destination stream closed early` durante estas sesiones de QA. Es el mismo mensaje documentado en las etapas anteriores; no apareció como error de JavaScript del navegador ni se atribuye al footer. Queda observar el uso manual habitual sin cierres automatizados de páginas.
+## Propuestas todavía pendientes
 
-La simulación de fuente raíz y las capturas no sustituyen zoom real, preferencias de fuente, lectores de pantalla o pruebas en otros navegadores. La revisión visual humana y esas comprobaciones permanecen pendientes. Esta propuesta registra alternativas para evaluar con el equipo oficial; no presupone que deban trasladarse automáticamente a su aplicación.
+### NC-E01: Nomenclatura compacta
 
-## Pulido visual y UX del navbar
+1. **Situación oficial:** etiquetas Para Empresas, Para instituciones y Para Talento.
+2. **Reproducción:** observar la navegación institucional a cualquier ancho donde se presente.
+3. **Impacto potencial:** repetir Para ocupa espacio; retirarlo podría equilibrar la fila, pero reducir claridad de audiencia.
+4. **Testimonios:** ninguna modificación aplicada; se propone evaluar Empresas, Instituciones y Talento.
+5. **Diferencia visual:** ninguna actualmente.
+6. **Evidencia:** catálogo tipado y capturas vigentes conservan las etiquetas originales.
+7. **Validación:** propuesta editorial sin aprobación; no se presenta como mejora comprobada.
+8. **Recomendación:** revisar capitalización, nomenclatura institucional y títulos de destino. Talento/Empresas también nombran portales en Iniciar sesión: distinguir navegación institucional de acceso a cuentas.
+9. **Tipo:** decisión editorial del equipo; no sustituye la adaptación responsive.
 
-Comparación de los tres dropdowns en Chrome 156 con perfiles limpios, viewports de 1440×900 y 1920×900px, zoom 100%, DPR 1 y fuente raíz de 16px. Se midieron estilos computados y geometría; no se trasladaron utilidades Tailwind suponiendo sus valores. El footer, layout, formulario y catálogo de destinos permanecen intactos en este pulido.
+## Evidencias y capturas
 
-### Diferencias visuales corregidas
+Todas permanecen en docs/ui/assets/official-chrome/, fuera de public/. No se eliminaron ni sobrescribieron capturas anteriores.
 
-| Elemento | Referencia medida | Ajuste local |
-| --- | --- | --- |
-| Hover de enlaces directos | Texto `rgb(236,70,153)` y fondo `rgb(29,40,58)` | El texto ya coincidía. Se reemplaza el fondo blanco al 5% por `#1d283a`, sin aplicarlo a los disparadores. |
-| Sombra de los paneles | Dos capas negras al 40%: `0 10px 15px -3px` y `0 4px 6px -4px` | Se sustituye la capa única sin spread por esas dos capas. |
-| Opciones con foco visible | Texto blanco y fondo blanco al 5% | Se agrega el fondo que faltaba al enfocar, conservando el outline cyan local. Hover mantiene los mismos colores. |
-| Acceso a portales | Icono externo de 12px, gap de 8px y `target="_blank"` protegido | El checkout inicial no tenía iconos y abría en la misma pestaña. Se incorporan el indicador y la apertura equivalente a la referencia, con aviso accesible. |
-
-No se modifican valores que ya coinciden en los elementos visibles:
-
-| Propiedad | Oficial y Testimonios, fuente raíz de 16px |
-| --- | --- |
-| Padding del panel | 6px |
-| Padding de cada opción | 8px vertical / 12px horizontal |
-| Tipografía de las opciones | 14px, peso 500, interlínea 20px |
-| Fondo / borde del panel | `#000115` / 1px `#1c1b29` |
-| Texto de las opciones | `#9ca3af` |
-| Radio del panel / opciones | 8px / 6px |
-
-**Separación del panel:** la referencia tiene un botón de 20px de alto, cuyo texto termina en `y=42px`, y margen de 16px: el panel empieza en `y=58px`. Testimonios conserva el botón accesible de 44px: su caja termina en `y=54px`, pero el texto también termina en `y=42px`. El margen local de 4px coloca el panel en los mismos `y=58px`, con 16px visuales desde el texto. Copiar `mt-4` desplazaría innecesariamente el panel 12px hacia abajo. Se conserva el margen local y se documenta su propósito.
-
-Las opciones locales conservan un mínimo de 44px frente a los 36px medidos en la referencia. Por ello los paneles locales son más altos; es una diferencia deliberada de accesibilidad, no un padding incorrecto. El ancho del panel de sesión pasa de 102,938 a 122,938px al incorporar los iconos, igualando su ancho oficial a fuente normal.
-
-### Mejoras funcionales verificadas
-
-- Disparadores rosas mientras `aria-expanded="true"`, incluso al retirar el puntero. Los cerrados conservan su color normal cuando no hay hover. El foco continúa comunicándose mediante el outline cyan, independientemente de hover y apertura.
-- Los portales conservan `talent.nocountry.tech` y `companies.nocountry.tech`, con `target="_blank"` y `rel="noopener noreferrer"`. El SVG es decorativo y el texto accesible avisa que se abre otra pestaña. Se comprobó la creación nativa de ambas pestañas con su ejecución pausada mediante CDP; no se inició sesión ni se probó un flujo autenticado.
-- El panel de sesión conserva su alineación al borde derecho y los límites de ancho. Los iconos no se comprimen y el texto móvil puede envolver sin desbordar.
-- Solo en compacto, el SVG de “Simulación en curso” se coloca a la derecha mediante `order`. El comienzo del texto coincide con el de los enlaces directos, conservando su nombre accesible, URL, SVG y soporte de movimiento reducido. Desktop no cambia su orden.
-- Disclosure Navigation, exclusividad desktop, clic exterior, Tab/Shift+Tab, Enter/Espacio, Escape y retorno de foco se mantienen.
-
-### Problema reproducido en la web oficial
-
-Abrir “Iniciar sesión” genera una barra horizontal a fuente normal: el panel está alineado a la izquierda del disparador y su borde derecho supera el ancho disponible. La altura útil del viewport pasa de 900 a 885px, confirmando la presencia de la barra, además del incremento de `scrollWidth`.
-
-| Viewport | Ancho disponible | Documento cerrado → abierto | Borde derecho del panel |
+| Comparación | Referencia oficial | Testimonios | Condiciones / estado |
 | --- | --- | --- | --- |
-| 1280px | 1265px | 1265 → 1270px | 1269,797px |
-| 1440px | 1425px | 1425 → 1430px | 1429,797px |
-| 1920px | 1905px | 1905 → 1910px | 1909,797px |
+| Header desktop | [Referencia](./assets/official-chrome/reference-desktop.png) | [Local](./assets/official-chrome/testimonios-desktop.png) | 1440px/fuente 16px; etapa 2, estado cerrado. |
+| Texto ampliado | [Referencia](./assets/official-chrome/reference-text24.png) | [Local](./assets/official-chrome/testimonios-text24.png) | 1440px/fuente raíz simulada 24px. |
+| Menú alto | [Referencia](./assets/official-chrome/reference-mobile-expanded.png) | [Local](./assets/official-chrome/testimonios-mobile-expanded.png) | 375×568px, tres grupos abiertos; captura histórica previa al movimiento del indicador local. |
+| Footer mobile | [Referencia](./assets/official-chrome/footer-reference-375.png) | [Local](./assets/official-chrome/footer-testimonios-375.png) | 375px/fuente 16px; viewport de 900px de alto. |
+| Footer desktop | [Referencia](./assets/official-chrome/footer-reference-1440.png) | [Local](./assets/official-chrome/footer-testimonios-1440.png) | 1440px/fuente 16px; viewport de 900px de alto. |
+| Sesión después del pulido | [Referencia](./assets/official-chrome/polish-reference-login-1440.png) | [Local](./assets/official-chrome/polish-testimonios-login-1440.png) | 1440×900px/fuente 16px; panel abierto, recorte superior de 220px. |
 
-A 1440px y fuente raíz simulada de 24px existe además desbordamiento del header antes de abrir el panel: 1583px de documento frente a 1425px disponibles; abrirlo aumenta el documento a 1613px. Se distingue el problema previo del header del incremento debido al dropdown.
+Evidencia adicional: [footer a 320px/fuente 32px](./assets/official-chrome/footer-testimonios-320-text32.png) y [menú compacto final de 375×568px](./assets/official-chrome/polish-testimonios-mobile-375.png).
 
-Testimonios no reproduce ese desbordamiento: a 1440px y fuente de 16px, documento y ancho disponible miden 1430px; el panel termina en 1414px. A 1920px, el panel termina en 1894px dentro de 1910px disponibles, con fuentes de 16, 20 y 24px. Cuando falta espacio se utiliza el menú compacto ya implementado.
+Las comparaciones usan Chrome, zoom 100% y DPR 1. El contenido detrás del chrome pertenece a páginas distintas. La captura del footer oculta temporalmente el header para evitar superposición sticky; las del pulido local fijan movimiento reducido. El ancho útil difiere 5px por los scrollbars propios de cada aplicación. Las mediciones finales revalidan proporciones: logo móvil 142,484×24px y desktop 189,984×32px; a 1280px la referencia comprime el logo a 181,969×32px, deformación que Testimonios no copia.
 
-### Propuesta editorial pendiente de aprobación
+## Cierre y revisión humana
 
-Evaluar **Empresas**, **Instituciones** y **Talento** en lugar de “Para Empresas”, “Para instituciones” y “Para Talento”. Son etiquetas más breves, equilibran la fila y reducen la repetición de “Para”.
+**Recomendación:** lista para PR con observaciones de QA manual. No se encontraron bloqueos técnicos del chrome después de la corrección QA-L01. La decisión de crear o aprobar el PR corresponde al equipo; no se ejecutaron operaciones Git de escritura.
 
-La decisión requiere revisar la nomenclatura del sitio oficial, capitalización y consistencia con las páginas de destino. “Talento” y “Empresas” también identifican portales dentro de “Iniciar sesión”; conviene conservar clara la diferencia entre navegación institucional y acceso a cuentas. Esta propuesta no sustituye la adaptación responsive ni está aprobada: **no se cambió ninguna de esas tres etiquetas ni sus destinos**.
+Pendientes: aprobación visual final, zoom real y preferencias de fuente, lectores de pantalla, Safari/iOS y Firefox, reproducción remota de YouTube y flujo real de envío. Los cuatro destinos pendientes del footer y la propuesta editorial requieren confirmación. No se certifican autenticación del panel, Storage ni políticas de publicación desde esta tarea.
 
-### Evidencias y alcance del QA
-
-| Evidencia | Captura |
-| --- | --- |
-| Dropdown oficial de sesión, 1440px | [Referencia](./assets/official-chrome/polish-reference-login-1440.png) |
-| Dropdown local de sesión, 1440px | [Testimonios](./assets/official-chrome/polish-testimonios-login-1440.png) |
-| Menú compacto local, 375×568px | [Indicador a la derecha y texto alineado](./assets/official-chrome/polish-testimonios-mobile-375.png) |
-
-Las capturas recortan el área de navegación; la barra horizontal oficial se fundamenta en las mediciones de ancho y alto útil anteriores. El contenido de las páginas detrás del navbar es distinto. Las capturas finales locales usan movimiento reducido para fijar el SVG decorativo.
-
-- Build de producción y Chrome headless: 28 combinaciones de 320, 375, 768, 1024, 1280, 1440 y 1920px × fuentes raíz simuladas de 16, 20, 24 y 32px. Sin overflow de página, paneles ni opciones: se abre el panel de sesión en desktop y los tres grupos en compacto. Los tres dropdowns desktop se comprueban por separado a 1440px y fuente normal.
-- Tres dropdowns desktop: estilos computados, hover, apertura con texto rosa sin hover, foco de opciones, Enter/Espacio, Tab/Shift+Tab, Escape, paneles cerrados inertes, exclusividad y clic exterior.
-- Modal a 320×320px y fuente de 32px: recorrido completo de teclado, retorno en ambos extremos y restauración del foco. Se verifica el orden visual del SVG móvil y desktop y la detención de la animación con movimiento reducido.
-- Ambos enlaces de portal crean pestañas nativas; la ejecución de sus documentos queda pausada y se cierran sin probar autenticación. No se enviaron formularios ni se activaron acciones del backend.
-- Cero errores de JavaScript en la ejecución final. TypeScript, ESLint general, build y `git diff --check` correctos; permanece únicamente el warning preexistente de `landing-contratar`.
-
-Quedan para revisión humana la fidelidad visual final, zoom real, preferencias de fuente y lectores de pantalla. La simulación mediante `style.fontSize` y las pruebas de Chrome no certifican esos escenarios ni otros navegadores.
+La revisión de alcance se basa en la referencia local origin/dev disponible. Si el remoto cambia, corresponde evaluar esa nueva base antes de integrar. Las observaciones sobre la web oficial son propuestas constructivas con condiciones y evidencia concretas, no una exigencia de trasladar toda la arquitectura de Testimonios.

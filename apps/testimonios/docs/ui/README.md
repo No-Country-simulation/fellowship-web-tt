@@ -18,7 +18,7 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
 | [SiteHeader](./components/site-header.md) | Navbar institucional sticky, disclosures y diálogo móvil |
 | [SiteFooter](./components/site-footer.md) | Footer institucional de servidor, navegación, redes y destinos pendientes |
-| [Propuesta para la web oficial](./official-chrome-improvements.md) | Mejoras del chrome, diferencias deliberadas y evidencias de QA |
+| [Propuesta para la web oficial](./official-chrome-improvements.md) | Registro de hallazgos, diferencias deliberadas y QA integral del chrome |
 | [GalleryHero](./components/gallery-hero.md) | Presentación de servidor, CTA y composición del hero |
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Hasta tres testimonios publicados, apilados y con navegación manual |
 | [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla de historias |
@@ -59,6 +59,8 @@ No documentar formularios de una sola ruta ni utilidades no-UI (`lib/`).
 Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fino: thumb `border`, hover cyan).
 
 ## Composición de la galería
+
+El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--etapa-4) documenta la matriz responsive, teclado y regresiones de las tres rutas. Distingue pruebas vivas, estados aislados y pendientes manuales; el cierre no equivale a certificación de accesibilidad ni aprobación visual humana.
 
 `SiteFooter` completa el chrome institucional después del contenido de cada ruta. Es un componente de servidor con enlaces absolutos centralizados, decoración propia y altura natural; los destinos aún sin aprobar se muestran como texto. El footer continúa en el flujo del documento y no modifica el scroll ni el bloqueo de los diálogos.
 

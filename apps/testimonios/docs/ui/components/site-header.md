@@ -80,3 +80,9 @@ Editar `lib/nav.ts`, sin duplicar destinos en los renderizados desktop y móvil:
 - `prefers-reduced-motion` elimina transiciones y detiene el trazo decorativo de “Simulación en curso”. Sus IDs SVG provienen de `useId`; no anuncia un estado dinámico ni consulta servicios.
 
 Ver la [propuesta y evidencia de QA](../official-chrome-improvements.md). Quedan pendientes la revisión visual humana, zoom real y comprobaciones con lectores de pantalla y navegadores distintos de Chrome.
+
+## QA integral — etapa 4
+
+El build final se comprobó en Chrome con siete anchos de 320 a 1920px y fuentes raíz simuladas de 16, 20, 24 y 32px. Los tres dropdowns se probaron en desktop y los tres grupos en compacto, incluyendo pantallas bajas, recorrido completo de teclado, cambios de breakpoint con modal abierto y foco en desktop al pasar a compacto. No se detectaron desbordamientos, bloqueos residuales ni foco oculto.
+
+Se verificó que abrir/cerrar la navegación conserva los nodos del formulario y del footer; esto no sustituye un perfilado de renderizado. El intento de Ctrl++ mediante CDP no modificó DPR, viewport ni escala y no se presenta como zoom real. Resultados, límites y observaciones del servidor en el [informe final](../official-chrome-improvements.md#qa-integral--etapa-4).
