@@ -35,7 +35,7 @@ El control muestra “Ampliar foto” debajo de la imagen para no taparla ni des
 - El callback de la ref también revisa `complete` y `naturalWidth`: si la imagen ya llegó desde caché o terminó antes de la hidratación, inicia su decodificación sin depender de recibir otro evento `load`. El placeholder se retira al estar lista.
 - Cada `src` monta una instancia interna con estado independiente mediante `key`. Al cambiar de testimonio no se reutiliza el estado listo de la imagen anterior. Las promesas de decodificación comprueban que su nodo siga siendo el actual antes de actualizar el estado; resultados tardíos de nodos desmontados se descartan.
 - Si falla la descarga o la decodificación, la imagen se oculta y el placeholder se reemplaza por “No pudimos cargar la foto testimonial.”. Una única región `role="status"` fuera del botón comunica el estado a lectores de pantalla incluso cuando el control está deshabilitado; los textos visibles de estado son decorativos. Se desactiva `aria-busy` y se indica “Foto testimonial no disponible”, sin icono de imagen rota ni carga permanente. No se reintenta automáticamente ni se modifica la URL.
-- El `<figure>` usa `relative` para contener la posición absoluta de esa región `sr-only`. Así el anuncio permanece dentro del área desplazable del `<main>`: sin un ancestro posicionado, su posición estática después de la foto podía ampliar el documento y generar un segundo scroll con espacio vacío. No se cambia el overflow global ni el padding de la ficha.
+- El `<figure>` usa `relative` para contener la posición absoluta de esa región `sr-only`. Así el anuncio permanece dentro de la figura sin ampliar el documento con espacio vacío. No se cambia el padding de la ficha.
 - El disparador permanece deshabilitado durante la carga o el error. Solo ofrece la ampliación cuando la imagen está disponible y decodificada; el diálogo conserva su imagen nativa y utiliza el recurso ya descargado.
 
 ## Reserva de espacio y limitación
@@ -50,7 +50,7 @@ Una vez conocidas, el marco conserva el ancho natural limitado al espacio dispon
 
 Las etiquetas de carga y ampliación comparten una celda de grid; la etiqueta inactiva conserva su espacio con `invisible`. Así el texto y el icono tampoco modifican las dimensiones del botón durante el fade-in, incluso con imágenes pequeñas. Estas etiquetas están dentro del flujo del control y son decorativas para accesibilidad; el anuncio de estado sigue separado del botón.
 
-El `img` queda posicionado dentro del marco con ancho y alto automáticos y `max-w-full`, sin deformaciones ni ampliación sobre su resolución natural. El marco contiene su overflow mientras se descubre el tamaño; cuando la imagen es visible, su proporción coincide con la del marco y se muestra completa. El `<figure relative>` sigue conteniendo el anuncio accesible para evitar un segundo scroll del documento.
+El `img` queda posicionado dentro del marco con ancho y alto automáticos y `max-w-full`, sin deformaciones ni ampliación sobre su resolución natural. El marco contiene su overflow mientras se descubre el tamaño; cuando la imagen es visible, su proporción coincide con la del marco y se muestra completa. El `<figure relative>` sigue conteniendo el anuncio accesible para evitar espacio vacío al final del documento.
 
 La solución mantiene estable la transición **desde que se conocen las dimensiones reales**, pero no garantiza eliminar el layout shift de la primera carga: una foto vertical, cuadrada o pequeña puede requerir corregir la estimación 16:9. Si el navegador no expone dimensiones durante la descarga, ese ajuste ocurre en `onLoad`, antes de revelar la imagen. La caché permite resolverlas de inmediato cuando el recurso ya está disponible. No se agregan props de dimensiones, consultas, transformaciones de URLs ni cambios de esquema.
 
@@ -67,6 +67,6 @@ Una optimización real podría requerir una miniatura independiente para la vist
 - Al abrir se enfoca el botón visible “Cerrar”. Escape utiliza el cierre nativo; el botón también llama a `close()`.
 - `onClose` devuelve el foco al disparador sin cambiar el scroll, tanto al cerrar con Escape como con el botón.
 - Los controles tienen foco visible y al menos 44px de alto. Los iconos son decorativos. Las transiciones respetan `prefers-reduced-motion`.
-- El `<main>` de `TestimonialDetail` bloquea su propio scroll mientras el diálogo está abierto mediante CSS local. No se modifican estilos del body ni se registran listeners globales.
+- `html:has(dialog:modal)` bloquea el scroll del documento desde `app/globals.css`. `scrollbar-gutter: stable` conserva el ancho al abrir y cerrar. No se agregan listeners globales ni cambios imperativos en el body.
 
-No requiere librerías adicionales. Presupone navegadores modernos compatibles con diálogo modal nativo y `:has()`, acordes al stack de la app. Si se reutiliza fuera de la ficha, el contenedor que controla el scroll debe ocuparse de su bloqueo. No usar como herramienta de recorte o editor de imágenes.
+No requiere librerías adicionales. Presupone navegadores modernos compatibles con diálogo modal nativo, `:modal`, `:has()` y `scrollbar-gutter`, acordes al stack de la app. Si se reutiliza fuera de esta app, el documento anfitrión debe ocuparse del bloqueo de scroll. No usar como herramienta de recorte o editor de imágenes.

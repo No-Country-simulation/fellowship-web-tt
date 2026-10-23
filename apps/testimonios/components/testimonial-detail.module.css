@@ -14,11 +14,6 @@
   background-repeat: no-repeat;
 }
 
-/* El scroll pertenece al main, no al body. El diálogo modal lo bloquea. */
-.page:has(dialog[open]) {
-  overflow: hidden;
-}
-
 .closing {
   background-color: var(--bg-surface-2);
   background-image: linear-gradient(

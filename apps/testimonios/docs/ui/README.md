@@ -16,7 +16,9 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | --- | --- |
 | [Button](../../../../packages/ui/docs/button.md) | Variantes, sizes — `@repo/ui` |
 | [BrandLogo](../../../../packages/ui/docs/brand-logo.md) | Wordmark No Country — `@repo/ui` ([uso local](./components/brand-logo.md)) |
-| [SiteHeader](./components/site-header.md) | Chrome del layout (logo y nav) |
+| [SiteHeader](./components/site-header.md) | Navbar institucional sticky, disclosures y diálogo móvil |
+| [SiteFooter](./components/site-footer.md) | Footer institucional de servidor, navegación, redes y destinos pendientes |
+| [Propuesta para la web oficial](./official-chrome-improvements.md) | Mejoras del chrome, diferencias deliberadas y evidencias de QA |
 | [GalleryHero](./components/gallery-hero.md) | Presentación de servidor, CTA y composición del hero |
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Hasta tres testimonios publicados, apilados y con navegación manual |
 | [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla de historias |
@@ -58,7 +60,11 @@ Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fi
 
 ## Composición de la galería
 
-`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio proporciona el scroll vertical y un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` compone su propio encabezado editorial y `<main>` en `app/enviar/page.tsx`, con ancho `max-w-3xl`. El encabezado se pasa como `children` de servidor a `EnviarForm`: aparece durante los pasos y se retira al mostrar el éxito. En ese estado, `SuccessCard` proporciona el único `h1` y recibe el foco existente.
+`SiteFooter` completa el chrome institucional después del contenido de cada ruta. Es un componente de servidor con enlaces absolutos centralizados, decoración propia y altura natural; los destinos aún sin aprobar se muestran como texto. El footer continúa en el flujo del documento y no modifica el scroll ni el bloqueo de los diálogos.
+
+`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio contiene un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` compone su propio encabezado editorial y `<main>` en `app/enviar/page.tsx`, con ancho `max-w-3xl`. El encabezado se pasa como `children` de servidor a `EnviarForm`: aparece durante los pasos y se retira al mostrar el éxito. En ese estado, `SuccessCard` proporciona el único `h1` y recibe el foco existente.
+
+Las tres rutas usan el scroll del documento. El layout es una columna flexible con altura mínima de `100dvh`; cada `<main>` crece con su contenido y no crea un scroll independiente. El header institucional es sticky y publica su altura real para el offset de scroll. El formulario enfoca pasos y errores sin scroll automático y luego desplaza el documento, descontando la altura real del header y 16px de separación. Su contenedor permite cortar palabras demasiado anchas y sus botones de navegación admiten varias líneas para no depender del antiguo scroll horizontal al ampliar la fuente. Los diálogos modales bloquean el scroll raíz mediante `html:has(dialog:modal)`; `scrollbar-gutter: stable` conserva el ancho al abrirlos y cerrarlos. Los paneles de diálogo mantienen su scroll interno cuando hace falta.
 
 `GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente que recibe hasta tres testimonios de la misma consulta pública de `app/page.tsx`. `selectHeroStories` selecciona en servidor sin reemplazo, con aleatoriedad cuando hay más de tres, y transmite solo `id`, `slug`, `quote`, `fullName`, `typeLabel` y `avatarUrl`. No hay ejemplos ficticios ni consultas adicionales. Con cero publicados, el hero muestra un texto discreto; ante un error, conserva el aviso único de la sección inferior. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; busca por nombre o extracto y filtra por categoría en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
 
@@ -70,6 +76,6 @@ Al ampliar la fuente, el CTA puede ocupar varias líneas, el hero apila sus colu
 
 ## Composición de la ficha
 
-`app/t/[slug]/page.tsx` conserva la consulta, `generateMetadata`, `notFound()` y el estado de error. El resultado exitoso se presenta con `TestimonialDetail`, sin `PageShell` ni `TestimonialCard`. Su único `<main>` mantiene `flex-1 min-h-0 min-w-0 overflow-y-auto`, y todas las secciones comparten el contenedor `max-w-[70rem]` y el padding exterior de la galería.
+`app/t/[slug]/page.tsx` conserva la consulta, `generateMetadata`, `notFound()` y el estado de error. El resultado exitoso se presenta con `TestimonialDetail`, sin `PageShell` ni `TestimonialCard`. Su único `<main>` mantiene `flex-1 min-w-0` en el flujo del documento, y todas las secciones comparten el contenedor `max-w-[70rem]` y el padding exterior de la galería.
 
 La historia completa siempre se muestra, incluso cuando coincide con `quote`, con saltos de línea intactos y ancho de lectura de 44rem alineado a la izquierda. Los medios son condicionales y se limitan a 768px en la ficha. Solo `TestimonialCapture` agrega una interacción cliente para ampliar la foto testimonial; utiliza un diálogo nativo sin dependencias adicionales y sin ese límite de ancho. Ver las fichas de ambos componentes para responsive, accesibilidad y limitaciones.

@@ -12,7 +12,7 @@ type PageShellProps = {
   className?: string;
 };
 
-/** `<main>` de página. `featured` destaca el encabezado; `actions` admite CTAs. Un solo por ruta. */
+/** `<main>` en el flujo del documento. `featured` destaca el encabezado; `actions` admite CTAs. */
 export function PageShell({
   eyebrow,
   title,
@@ -25,7 +25,7 @@ export function PageShell({
   const featured = variant === "featured";
 
   return (
-    <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-md py-md">
+    <main className="flex min-w-0 flex-1 flex-col px-md py-md">
       <div className={cn("container-content max-w-3xl", className)}>
         {eyebrow ? (
           <p

@@ -1,0 +1,70 @@
+.footer {
+  position: relative;
+  isolation: isolate;
+  flex-shrink: 0;
+  padding-block: 4rem 3rem;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  background: #090a15;
+  color: #a1a1aa;
+  overflow-wrap: anywhere;
+}
+
+/* Se recorta solo la decoración; los enlaces y su foco quedan fuera de esa capa. */
+.decoration { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.pinkGlow,
+.cyanGlow { position: absolute; width: 24rem; height: 24rem; border-radius: 50%; filter: blur(64px); }
+.pinkGlow { top: -8rem; left: -8rem; background: color-mix(in srgb, var(--brand-pink) 10%, transparent); }
+.cyanGlow { top: 50%; right: -8rem; background: color-mix(in srgb, var(--brand-cyan) 10%, transparent); }
+.leftShape,
+.rightShape { display: none; position: absolute; width: 16rem; height: 16rem; border: 1px solid rgb(255 255 255 / 5%); border-radius: 3rem; transform: rotate(45deg); }
+.leftShape { top: 5rem; left: -5rem; }
+.rightShape { bottom: 5rem; right: -5rem; }
+
+.container { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: 1rem; }
+.columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; padding-bottom: 3rem; }
+.brand { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+.logo { display: flex; max-width: 100%; min-height: 44px; align-items: center; border-radius: 4px; }
+.logoImage { display: block; width: auto; max-width: 100%; height: 40px; aspect-ratio: 1229 / 207; object-fit: contain; transition: transform 300ms; }
+.logo:hover .logoImage { transform: scale(1.05); }
+.description { max-width: 24rem; font-size: 0.875rem; line-height: 1.25rem; }
+.socials { display: flex; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.5rem; }
+.socialLink { display: flex; flex: none; width: 44px; height: 44px; align-items: center; justify-content: center; border: 1px solid rgb(255 255 255 / 10%); border-radius: 0.75rem; background: rgb(255 255 255 / 4%); box-shadow: 0 1px 2px rgb(0 0 0 / 5%); transition: color 300ms, background-color 300ms, border-color 300ms; }
+.socialLink:hover { color: #fff; background: color-mix(in srgb, var(--social-color) 10%, transparent); border-color: color-mix(in srgb, var(--social-color) 40%, transparent); }
+.socialLink[data-social="whatsapp"] { --social-color: #10b981; }
+.socialLink[data-social="linkedin"] { --social-color: #0ea5e9; }
+.socialLink[data-social="instagram"] { --social-color: var(--brand-pink); }
+.group { min-width: 0; }
+.heading { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.dot { flex: none; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--brand-pink); }
+.dot[data-group="companies"] { background: var(--brand-cyan); }
+.dot[data-group="ecosystem"] { background: #a855f7; }
+.links { display: flex; flex-direction: column; gap: 0.625rem; font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; }
+.textLink,
+.pending { display: block; width: fit-content; max-width: 100%; padding-block: 0.125rem; }
+.textLink { border-radius: 2px; transition: color 200ms; }
+.textLink:hover { color: #fff; }
+.footer a:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 4px; }
+.bottom { display: flex; flex-direction: column; align-items: center; gap: 1rem; border-top: 1px solid rgb(255 255 255 / 10%); padding-top: 2rem; font-size: 0.75rem; font-weight: 500; line-height: 1rem; text-align: center; }
+.bottom > p { min-width: 0; }
+.legal { display: flex; min-width: 0; max-width: 100%; flex-wrap: wrap; justify-content: center; gap: 1rem 1.5rem; }
+
+@media (min-width: 768px) {
+  .container { padding-inline: 2rem; }
+  .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bottom { flex-direction: row; flex-wrap: wrap; justify-content: space-between; text-align: left; }
+}
+
+@media (min-width: 1024px) {
+  /* Cinco tracks a fuente normal; ceden columnas naturalmente al ampliar el texto. */
+  .columns { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+  .brand { grid-column: span 2; padding-right: 2rem; }
+  .leftShape,
+  .rightShape { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoImage,
+  .socialLink,
+  .textLink { transition: none; }
+  .logo:hover .logoImage { transform: none; }
+}

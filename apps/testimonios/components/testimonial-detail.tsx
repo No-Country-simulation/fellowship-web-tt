@@ -41,7 +41,7 @@ export function TestimonialDetail({ testimonial }: TestimonialDetailProps) {
     <main
       className={cn(
         styles.page,
-        "min-h-0 min-w-0 flex-1 overflow-y-auto px-md pt-md pb-2xl md:px-lg md:pb-3xl",
+        "min-w-0 flex-1 px-md pt-md pb-2xl md:px-lg md:pb-3xl",
       )}
     >
       <div className="mx-auto w-full max-w-[70rem] wrap-anywhere">
