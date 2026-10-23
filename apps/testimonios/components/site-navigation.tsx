@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, ExternalLink, X } from "lucide-react";
 
 import {
   institutionalDestinations,
@@ -25,6 +25,7 @@ function NavigationDisclosure({ group, expanded, onExpandedChange, mobile = fals
   const itemRef = useRef<HTMLLIElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const definition = navigationGroups[group];
+  const opensNewTab = group === "login";
 
   useEffect(() => {
     if (!expanded || mobile) return;
@@ -61,12 +62,17 @@ function NavigationDisclosure({ group, expanded, onExpandedChange, mobile = fals
           const item = institutionalDestinations[destination];
           return (
             <li key={destination}>
-              <a href={item.href} className={styles.panelLink} onClick={(event) => {
-                if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-                  onExpandedChange(false);
-                  onNavigate?.();
-                }
-              }}>{item.label}</a>
+              <a href={item.href} className={styles.panelLink}
+                target={opensNewTab ? "_blank" : undefined} rel={opensNewTab ? "noopener noreferrer" : undefined}
+                onClick={(event) => {
+                  if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+                    onExpandedChange(false);
+                    onNavigate?.();
+                  }
+                }}>
+                <span>{item.label}{opensNewTab ? <span className="sr-only"> (abre en otra pestaña)</span> : null}</span>
+                {opensNewTab ? <ExternalLink aria-hidden="true" className={styles.externalIcon} /> : null}
+              </a>
             </li>
           );
         })}

@@ -61,11 +61,11 @@
 .liveLink { gap: 8px; }
 .desktop :is(a, button) { white-space: nowrap; }
 .disclosureTrigger:hover,
+.disclosureTrigger[aria-expanded="true"],
 .directLink:hover,
 .liveLink:hover { color: #ec4699; }
 .directLink:hover,
-.liveLink:hover,
-.panelLink:hover { background: rgb(255 255 255 / 5%); }
+.liveLink:hover { background: #1d283a; }
 
 .header :is(a, button):focus-visible,
 .mobileDialog :is(a, button):focus-visible {
@@ -87,12 +87,13 @@
   max-height: calc(100dvh - var(--site-header-height, 65px) - 12px);
   overflow: auto;
   overscroll-behavior: contain;
+  /* 16px desde el texto: compensa el área táctil de 44px frente a la línea de 20px. */
   margin-top: 4px;
   padding: 6px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--bg-base);
-  box-shadow: 0 10px 15px rgb(0 0 0 / 40%);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 40%), 0 4px 6px -4px rgb(0 0 0 / 40%);
   visibility: hidden;
   opacity: 0;
   transform: translateY(-6px) scale(0.97);
@@ -102,9 +103,11 @@
 
 .desktopPanel[data-open="true"] { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
 .actions .desktopPanel { right: 0; left: auto; transform-origin: top right; }
-.panelLink { padding: 8px 12px; color: #9ca3af; }
+.panelLink { gap: 8px; padding: 8px 12px; color: #9ca3af; }
+.panelLink > span { min-width: 0; }
+.externalIcon { width: 12px; height: 12px; flex: none; opacity: 0.5; }
 .panelLink:hover,
-.panelLink:focus-visible { color: var(--text-primary); }
+.panelLink:focus-visible { color: var(--text-primary); background: rgb(255 255 255 / 5%); }
 .liveSignal { flex: none; overflow: hidden; }
 .liveSignal path { animation: live-trace 2s linear infinite; }
 @keyframes live-trace { to { transform: translateX(-36px); } }
@@ -165,6 +168,7 @@
 .mobilePanel { margin-block: 8px; padding-left: 16px; border-left: 1px solid var(--border-subtle); }
 .mobilePanel .panelLink { min-width: 0; padding: 8px 0; }
 .mobileContent :is(.directLink, .liveLink) { padding: 8px 0; }
+.mobileContent .liveSignal { order: 1; }
 .mobileContent :is(a, button) { min-width: 0; max-width: 100%; }
 .mobileContent .liveLink > span,
 .mobileContent .disclosureTrigger > span { min-width: 0; }

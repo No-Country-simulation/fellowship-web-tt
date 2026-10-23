@@ -119,3 +119,77 @@ Capturadas en Chrome 156, viewport de 900px de alto, DPR 1 y fuente raíz de 16p
 El servidor volvió a registrar `The destination stream closed early` durante estas sesiones de QA. Es el mismo mensaje documentado en las etapas anteriores; no apareció como error de JavaScript del navegador ni se atribuye al footer. Queda observar el uso manual habitual sin cierres automatizados de páginas.
 
 La simulación de fuente raíz y las capturas no sustituyen zoom real, preferencias de fuente, lectores de pantalla o pruebas en otros navegadores. La revisión visual humana y esas comprobaciones permanecen pendientes. Esta propuesta registra alternativas para evaluar con el equipo oficial; no presupone que deban trasladarse automáticamente a su aplicación.
+
+## Pulido visual y UX del navbar
+
+Comparación de los tres dropdowns en Chrome 156 con perfiles limpios, viewports de 1440×900 y 1920×900px, zoom 100%, DPR 1 y fuente raíz de 16px. Se midieron estilos computados y geometría; no se trasladaron utilidades Tailwind suponiendo sus valores. El footer, layout, formulario y catálogo de destinos permanecen intactos en este pulido.
+
+### Diferencias visuales corregidas
+
+| Elemento | Referencia medida | Ajuste local |
+| --- | --- | --- |
+| Hover de enlaces directos | Texto `rgb(236,70,153)` y fondo `rgb(29,40,58)` | El texto ya coincidía. Se reemplaza el fondo blanco al 5% por `#1d283a`, sin aplicarlo a los disparadores. |
+| Sombra de los paneles | Dos capas negras al 40%: `0 10px 15px -3px` y `0 4px 6px -4px` | Se sustituye la capa única sin spread por esas dos capas. |
+| Opciones con foco visible | Texto blanco y fondo blanco al 5% | Se agrega el fondo que faltaba al enfocar, conservando el outline cyan local. Hover mantiene los mismos colores. |
+| Acceso a portales | Icono externo de 12px, gap de 8px y `target="_blank"` protegido | El checkout inicial no tenía iconos y abría en la misma pestaña. Se incorporan el indicador y la apertura equivalente a la referencia, con aviso accesible. |
+
+No se modifican valores que ya coinciden en los elementos visibles:
+
+| Propiedad | Oficial y Testimonios, fuente raíz de 16px |
+| --- | --- |
+| Padding del panel | 6px |
+| Padding de cada opción | 8px vertical / 12px horizontal |
+| Tipografía de las opciones | 14px, peso 500, interlínea 20px |
+| Fondo / borde del panel | `#000115` / 1px `#1c1b29` |
+| Texto de las opciones | `#9ca3af` |
+| Radio del panel / opciones | 8px / 6px |
+
+**Separación del panel:** la referencia tiene un botón de 20px de alto, cuyo texto termina en `y=42px`, y margen de 16px: el panel empieza en `y=58px`. Testimonios conserva el botón accesible de 44px: su caja termina en `y=54px`, pero el texto también termina en `y=42px`. El margen local de 4px coloca el panel en los mismos `y=58px`, con 16px visuales desde el texto. Copiar `mt-4` desplazaría innecesariamente el panel 12px hacia abajo. Se conserva el margen local y se documenta su propósito.
+
+Las opciones locales conservan un mínimo de 44px frente a los 36px medidos en la referencia. Por ello los paneles locales son más altos; es una diferencia deliberada de accesibilidad, no un padding incorrecto. El ancho del panel de sesión pasa de 102,938 a 122,938px al incorporar los iconos, igualando su ancho oficial a fuente normal.
+
+### Mejoras funcionales verificadas
+
+- Disparadores rosas mientras `aria-expanded="true"`, incluso al retirar el puntero. Los cerrados conservan su color normal cuando no hay hover. El foco continúa comunicándose mediante el outline cyan, independientemente de hover y apertura.
+- Los portales conservan `talent.nocountry.tech` y `companies.nocountry.tech`, con `target="_blank"` y `rel="noopener noreferrer"`. El SVG es decorativo y el texto accesible avisa que se abre otra pestaña. Se comprobó la creación nativa de ambas pestañas con su ejecución pausada mediante CDP; no se inició sesión ni se probó un flujo autenticado.
+- El panel de sesión conserva su alineación al borde derecho y los límites de ancho. Los iconos no se comprimen y el texto móvil puede envolver sin desbordar.
+- Solo en compacto, el SVG de “Simulación en curso” se coloca a la derecha mediante `order`. El comienzo del texto coincide con el de los enlaces directos, conservando su nombre accesible, URL, SVG y soporte de movimiento reducido. Desktop no cambia su orden.
+- Disclosure Navigation, exclusividad desktop, clic exterior, Tab/Shift+Tab, Enter/Espacio, Escape y retorno de foco se mantienen.
+
+### Problema reproducido en la web oficial
+
+Abrir “Iniciar sesión” genera una barra horizontal a fuente normal: el panel está alineado a la izquierda del disparador y su borde derecho supera el ancho disponible. La altura útil del viewport pasa de 900 a 885px, confirmando la presencia de la barra, además del incremento de `scrollWidth`.
+
+| Viewport | Ancho disponible | Documento cerrado → abierto | Borde derecho del panel |
+| --- | --- | --- | --- |
+| 1280px | 1265px | 1265 → 1270px | 1269,797px |
+| 1440px | 1425px | 1425 → 1430px | 1429,797px |
+| 1920px | 1905px | 1905 → 1910px | 1909,797px |
+
+A 1440px y fuente raíz simulada de 24px existe además desbordamiento del header antes de abrir el panel: 1583px de documento frente a 1425px disponibles; abrirlo aumenta el documento a 1613px. Se distingue el problema previo del header del incremento debido al dropdown.
+
+Testimonios no reproduce ese desbordamiento: a 1440px y fuente de 16px, documento y ancho disponible miden 1430px; el panel termina en 1414px. A 1920px, el panel termina en 1894px dentro de 1910px disponibles, con fuentes de 16, 20 y 24px. Cuando falta espacio se utiliza el menú compacto ya implementado.
+
+### Propuesta editorial pendiente de aprobación
+
+Evaluar **Empresas**, **Instituciones** y **Talento** en lugar de “Para Empresas”, “Para instituciones” y “Para Talento”. Son etiquetas más breves, equilibran la fila y reducen la repetición de “Para”.
+
+La decisión requiere revisar la nomenclatura del sitio oficial, capitalización y consistencia con las páginas de destino. “Talento” y “Empresas” también identifican portales dentro de “Iniciar sesión”; conviene conservar clara la diferencia entre navegación institucional y acceso a cuentas. Esta propuesta no sustituye la adaptación responsive ni está aprobada: **no se cambió ninguna de esas tres etiquetas ni sus destinos**.
+
+### Evidencias y alcance del QA
+
+| Evidencia | Captura |
+| --- | --- |
+| Dropdown oficial de sesión, 1440px | [Referencia](./assets/official-chrome/polish-reference-login-1440.png) |
+| Dropdown local de sesión, 1440px | [Testimonios](./assets/official-chrome/polish-testimonios-login-1440.png) |
+| Menú compacto local, 375×568px | [Indicador a la derecha y texto alineado](./assets/official-chrome/polish-testimonios-mobile-375.png) |
+
+Las capturas recortan el área de navegación; la barra horizontal oficial se fundamenta en las mediciones de ancho y alto útil anteriores. El contenido de las páginas detrás del navbar es distinto. Las capturas finales locales usan movimiento reducido para fijar el SVG decorativo.
+
+- Build de producción y Chrome headless: 28 combinaciones de 320, 375, 768, 1024, 1280, 1440 y 1920px × fuentes raíz simuladas de 16, 20, 24 y 32px. Sin overflow de página, paneles ni opciones: se abre el panel de sesión en desktop y los tres grupos en compacto. Los tres dropdowns desktop se comprueban por separado a 1440px y fuente normal.
+- Tres dropdowns desktop: estilos computados, hover, apertura con texto rosa sin hover, foco de opciones, Enter/Espacio, Tab/Shift+Tab, Escape, paneles cerrados inertes, exclusividad y clic exterior.
+- Modal a 320×320px y fuente de 32px: recorrido completo de teclado, retorno en ambos extremos y restauración del foco. Se verifica el orden visual del SVG móvil y desktop y la detención de la animación con movimiento reducido.
+- Ambos enlaces de portal crean pestañas nativas; la ejecución de sus documentos queda pausada y se cierran sin probar autenticación. No se enviaron formularios ni se activaron acciones del backend.
+- Cero errores de JavaScript en la ejecución final. TypeScript, ESLint general, build y `git diff --check` correctos; permanece únicamente el warning preexistente de `landing-contratar`.
+
+Quedan para revisión humana la fidelidad visual final, zoom real, preferencias de fuente y lectores de pantalla. La simulación mediante `style.fontSize` y las pruebas de Chrome no certifican esos escenarios ni otros navegadores.
