@@ -126,6 +126,7 @@ export function SiteNavigation({ logo }: { logo: ReactNode }) {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const backdropPressRef = useRef<{ x: number; y: number } | null>(null);
 
   useLayoutEffect(() => {
     const row = rowRef.current;
@@ -179,6 +180,12 @@ export function SiteNavigation({ logo }: { logo: ReactNode }) {
   }, []);
 
   function closeMobile() { dialogRef.current?.close(); }
+
+  function isBackdrop(event: { target: EventTarget; currentTarget: HTMLDialogElement; clientX: number; clientY: number }) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return event.target === event.currentTarget &&
+      (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom);
+  }
 
   function containMobileTab(event: KeyboardEvent<HTMLDialogElement>) {
     if (event.key !== "Tab") return;
@@ -234,6 +241,7 @@ export function SiteNavigation({ logo }: { logo: ReactNode }) {
         <button ref={toggleRef} type="button" className={styles.mobileToggle} aria-label="Abrir navegación"
           aria-haspopup="dialog" aria-expanded={mobileOpen} aria-controls={`${id}-mobile`}
           onClick={() => {
+            setMobileGroups([]);
             dialogRef.current?.showModal();
             setMobileOpen(true);
             closeRef.current?.focus({ preventScroll: true });
@@ -245,11 +253,31 @@ export function SiteNavigation({ logo }: { logo: ReactNode }) {
           </svg>
         </button>
       </div>
-      <dialog ref={dialogRef} id={`${id}-mobile`} aria-labelledby={`${id}-title`} className={styles.mobileDialog}
+      <dialog ref={dialogRef} id={`${id}-mobile`} aria-labelledby={`${id}-title`} className={styles.mobileDialog} closedby="any"
         onKeyDown={containMobileTab}
+        onPointerDown={(event) => {
+          // Los navegadores sin closedBy usan el mismo límite visual del panel.
+          if ("closedBy" in HTMLDialogElement.prototype) return;
+          backdropPressRef.current = event.isPrimary && event.button === 0 && isBackdrop(event)
+            ? { x: event.clientX, y: event.clientY } : null;
+        }}
+        onPointerMove={(event) => {
+          const press = backdropPressRef.current;
+          if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 8) backdropPressRef.current = null;
+        }}
+        onPointerCancel={() => { backdropPressRef.current = null; }}
+        onClick={(event) => {
+          const press = backdropPressRef.current;
+          backdropPressRef.current = null;
+          if (press && isBackdrop(event) && Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 8) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeMobile();
+          }
+        }}
         onClose={() => {
           setMobileOpen(false);
-          setMobileGroups([]);
+          backdropPressRef.current = null;
           requestAnimationFrame(() => {
             if (dialogRef.current?.open) return;
             const target = compactRef.current ? toggleRef.current : primaryRef.current?.querySelector<HTMLElement>("button, a");

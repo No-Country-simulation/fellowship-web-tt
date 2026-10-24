@@ -60,12 +60,10 @@
 .liveLink { padding-inline: 12px; }
 .liveLink { gap: 8px; }
 .desktop :is(a, button) { white-space: nowrap; }
-.disclosureTrigger:hover,
 .disclosureTrigger[aria-expanded="true"],
-.directLink:hover,
-.liveLink:hover { color: #ec4699; }
-.directLink:hover,
-.liveLink:hover { background: #1d283a; }
+.desktop .disclosureTrigger:hover,
+.desktop .directLink:hover,
+.desktop .liveLink:hover { color: #ec4699; }
 
 .header :is(a, button):focus-visible,
 .mobileDialog :is(a, button):focus-visible {
@@ -106,8 +104,8 @@
 .panelLink { gap: 8px; padding: 8px 12px; color: #9ca3af; }
 .panelLink > span { min-width: 0; }
 .externalIcon { width: 12px; height: 12px; flex: none; opacity: 0.5; }
-.panelLink:hover,
-.panelLink:focus-visible { color: var(--text-primary); background: rgb(255 255 255 / 5%); }
+.desktopPanel .panelLink:hover,
+.desktopPanel .panelLink:focus-visible { color: var(--text-primary); background: rgb(255 255 255 / 5%); }
 .liveSignal { flex: none; overflow: hidden; }
 .liveSignal path { animation: live-trace 2s linear infinite; }
 @keyframes live-trace { to { transform: translateX(-36px); } }
@@ -136,6 +134,8 @@
 
 .mobileDialog {
   position: fixed;
+  /* La salida conserva display:flex después de retirar [open]. */
+  flex-direction: column;
   inset: 0 0 auto;
   width: 100%;
   max-width: none;
@@ -145,11 +145,13 @@
   border: 0;
   background: #030711;
   color: #e1e7ef;
+  opacity: 0;
 }
 
-.mobileDialog[open] { display: flex; flex-direction: column; }
+.mobileDialog[open] { display: flex; opacity: 1; }
 .mobileDialog::backdrop { background: rgb(0 0 0 / 35%); }
-.mobileToolbar { flex: none; border-bottom: 1px solid #1d283a; }
+/* 64px de contenido + 1px de borde, igual que la fila y el header normales. */
+.mobileToolbar { min-height: 65px; flex: none; border-bottom: 1px solid #1d283a; }
 .mobileContent {
   min-height: 0;
   overflow-y: auto;
@@ -163,11 +165,16 @@
 
 .mobileList { display: flex; flex-direction: column; gap: 4px; }
 .mobileGroup { min-width: 0; }
-.mobileGroup .disclosureTrigger { width: 100%; gap: 4px; font-size: 1rem; line-height: 1.5; }
+.mobileGroup .disclosureTrigger { width: 100%; gap: 4px; }
 .mobileGroup .chevron { width: 16px; height: 16px; opacity: 1; }
 .mobilePanel { margin-block: 8px; padding-left: 16px; border-left: 1px solid var(--border-subtle); }
 .mobilePanel .panelLink { min-width: 0; padding: 8px 0; }
-.mobileContent :is(.directLink, .liveLink) { padding: 8px 0; }
+.mobileContent :is(.disclosureTrigger, .directLink, .liveLink) {
+  padding: 8px 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
 .mobileContent .liveSignal { order: 1; }
 .mobileContent :is(a, button) { min-width: 0; max-width: 100%; }
 .mobileContent .liveLink > span,
@@ -175,10 +182,34 @@
 .mobileContent :is(.disclosureTrigger, .liveLink) { flex-wrap: nowrap; }
 .mobileContent .chevron { margin-right: 4px; }
 
+/* El hover compacto solo cambia el texto y no queda pegado en pantallas táctiles. */
+@media (hover: hover) and (pointer: fine) {
+  .mobileContent :is(.disclosureTrigger, .directLink, .liveLink, .panelLink):hover { color: #ec4699; }
+}
+
+/* Sin soporte, el diálogo conserva su apertura/cierre nativos inmediatos. */
+@supports (transition-behavior: allow-discrete) and (overlay: auto) {
+  .mobileDialog {
+    transition: opacity 190ms ease, display 190ms allow-discrete, overlay 190ms allow-discrete;
+  }
+  .mobileDialog::backdrop {
+    background: transparent;
+    transition: background-color 190ms ease, display 190ms allow-discrete, overlay 190ms allow-discrete;
+  }
+  .mobileDialog[open]::backdrop { background: rgb(0 0 0 / 35%); }
+
+  @starting-style {
+    .mobileDialog[open] { opacity: 0; }
+    .mobileDialog[open]::backdrop { background: transparent; }
+  }
+}
+
 @media (min-width: 1024px) { .logoImage { height: 32px; } }
 @media (min-width: 1536px) { .primaryList { gap: 24px; } }
 @media (prefers-reduced-motion: reduce) {
   .header *,
-  .mobileDialog * { animation: none; transition: none; }
+  .mobileDialog,
+  .mobileDialog *,
+  .mobileDialog::backdrop { animation: none; transition: none; }
   .liveSignal path { animation: none; }
 }
