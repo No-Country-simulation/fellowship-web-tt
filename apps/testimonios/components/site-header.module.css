@@ -1,0 +1,215 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  overflow: visible;
+  border-bottom: 1px solid #1d283a;
+  background: rgb(3 7 17 / 80%);
+  backdrop-filter: blur(12px);
+  color: #e1e7ef;
+}
+
+.row,
+.mobileToolbar {
+  position: relative;
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-inline: 16px;
+}
+
+.logoSlot { flex: none; min-width: 0; max-width: calc(100% - 60px); }
+.logo { display: flex; width: fit-content; min-height: 44px; max-width: 100%; align-items: center; border-radius: 4px; }
+.logoImage { display: block; width: auto; height: 24px; aspect-ratio: 1229 / 207; max-width: 100%; object-fit: contain; }
+.desktopSlot { flex: 1; min-width: 0; }
+
+.desktop {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+.primary { flex: none; width: max-content; margin-inline: auto; }
+.primaryList,
+.actions { display: flex; width: max-content; align-items: center; }
+.primaryList { gap: 4px; }
+.actions { flex: none; gap: 16px; }
+.desktopGroup { position: relative; }
+
+.disclosureTrigger,
+.directLink,
+.liveLink,
+.panelLink {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 200ms, background-color 200ms;
+}
+
+.disclosureTrigger { gap: 4px; text-align: left; }
+.directLink,
+.liveLink { padding-inline: 12px; }
+.liveLink { gap: 8px; }
+.desktop :is(a, button) { white-space: nowrap; }
+.disclosureTrigger[aria-expanded="true"],
+.desktop .disclosureTrigger:hover,
+.desktop .directLink:hover,
+.desktop .liveLink:hover { color: #ec4699; }
+
+.header :is(a, button):focus-visible,
+.mobileDialog :is(a, button):focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 3px;
+}
+
+.chevron { width: 12px; height: 12px; flex: none; opacity: 0.5; transition: transform 200ms; }
+[aria-expanded="true"] > .chevron { transform: rotate(-180deg); }
+
+.desktopPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  width: max-content;
+  min-width: 100%;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - var(--site-header-height, 65px) - 12px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  /* 16px desde el texto: compensa el área táctil de 44px frente a la línea de 20px. */
+  margin-top: 4px;
+  padding: 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-base);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 40%), 0 4px 6px -4px rgb(0 0 0 / 40%);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.97);
+  transform-origin: top left;
+  transition: opacity 150ms, transform 150ms, visibility 0s 150ms;
+}
+
+.desktopPanel[data-open="true"] { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+.actions .desktopPanel { right: 0; left: auto; transform-origin: top right; }
+.panelLink { gap: 8px; padding: 8px 12px; color: #9ca3af; }
+.panelLink > span { min-width: 0; }
+.externalIcon { width: 12px; height: 12px; flex: none; opacity: 0.5; }
+.desktopPanel .panelLink:hover,
+.desktopPanel .panelLink:focus-visible { color: var(--text-primary); background: rgb(255 255 255 / 5%); }
+.liveSignal { flex: none; overflow: hidden; }
+.liveSignal path { animation: live-trace 2s linear infinite; }
+@keyframes live-trace { to { transform: translateX(-36px); } }
+
+.mobileToggle,
+.closeButton {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  cursor: pointer;
+  place-items: center;
+  border-radius: 6px;
+}
+
+.row[data-compact="false"] .mobileToggle { display: none; }
+
+/* El bloque oculto conserva medidas intrínsecas sin ampliar el documento. */
+.row[data-compact="true"] .desktopSlot {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mobileDialog {
+  position: fixed;
+  /* La salida conserva display:flex después de retirar [open]. */
+  flex-direction: column;
+  inset: 0 0 auto;
+  width: 100%;
+  max-width: none;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #030711;
+  color: #e1e7ef;
+  opacity: 0;
+}
+
+.mobileDialog[open] { display: flex; opacity: 1; }
+.mobileDialog::backdrop { background: rgb(0 0 0 / 35%); }
+/* 64px de contenido + 1px de borde, igual que la fila y el header normales. */
+.mobileToolbar { min-height: 65px; flex: none; border-bottom: 1px solid #1d283a; }
+.mobileContent {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.mobileList { display: flex; flex-direction: column; gap: 4px; }
+.mobileGroup { min-width: 0; }
+.mobileGroup .disclosureTrigger { width: 100%; gap: 4px; }
+.mobileGroup .chevron { width: 16px; height: 16px; opacity: 1; }
+.mobilePanel { margin-block: 8px; padding-left: 16px; border-left: 1px solid var(--border-subtle); }
+.mobilePanel .panelLink { min-width: 0; padding: 8px 0; }
+.mobileContent :is(.disclosureTrigger, .directLink, .liveLink) {
+  padding: 8px 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+.mobileContent .liveSignal { order: 1; }
+.mobileContent :is(a, button) { min-width: 0; max-width: 100%; }
+.mobileContent .liveLink > span,
+.mobileContent .disclosureTrigger > span { min-width: 0; }
+.mobileContent :is(.disclosureTrigger, .liveLink) { flex-wrap: nowrap; }
+.mobileContent .chevron { margin-right: 4px; }
+
+/* El hover compacto solo cambia el texto y no queda pegado en pantallas táctiles. */
+@media (hover: hover) and (pointer: fine) {
+  .mobileContent :is(.disclosureTrigger, .directLink, .liveLink, .panelLink):hover { color: #ec4699; }
+}
+
+/* Sin soporte, el diálogo conserva su apertura/cierre nativos inmediatos. */
+@supports (transition-behavior: allow-discrete) and (overlay: auto) {
+  .mobileDialog {
+    transition: opacity 190ms ease, display 190ms allow-discrete, overlay 190ms allow-discrete;
+  }
+  .mobileDialog::backdrop {
+    background: transparent;
+    transition: background-color 190ms ease, display 190ms allow-discrete, overlay 190ms allow-discrete;
+  }
+  .mobileDialog[open]::backdrop { background: rgb(0 0 0 / 35%); }
+
+  @starting-style {
+    .mobileDialog[open] { opacity: 0; }
+    .mobileDialog[open]::backdrop { background: transparent; }
+  }
+}
+
+@media (min-width: 1024px) { .logoImage { height: 32px; } }
+@media (min-width: 1536px) { .primaryList { gap: 24px; } }
+@media (prefers-reduced-motion: reduce) {
+  .header *,
+  .mobileDialog,
+  .mobileDialog *,
+  .mobileDialog::backdrop { animation: none; transition: none; }
+  .liveSignal path { animation: none; }
+}

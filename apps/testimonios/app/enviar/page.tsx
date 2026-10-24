@@ -13,7 +13,7 @@ export default function EnviarPage() {
   const conversationGradientId = useId();
 
   return (
-    <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-md py-md md:py-lg">
+    <main className="flex min-w-0 flex-1 flex-col wrap-anywhere px-md py-md md:py-lg">
       <div className="container-content max-w-3xl">
         <EnviarForm>
           <header className="flex items-center gap-lg">

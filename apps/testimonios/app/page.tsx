@@ -31,7 +31,7 @@ export default async function HomePage() {
   const heroStories = listed.ok ? selectHeroStories(listed.testimonials) : null;
 
   return (
-    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-bg-base">
+    <main className="min-w-0 flex-1 bg-bg-base">
       <GalleryHero stories={heroStories} />
       <section
         aria-labelledby="gallery-stories-title"

@@ -154,6 +154,13 @@
 
   html {
     @apply overflow-x-clip font-sans;
+    /* Mantiene el ancho del contenido al bloquear el scroll para un modal. */
+    scrollbar-gutter: stable;
+    scroll-padding-block-start: calc(var(--site-header-height, 0px) + 16px);
+  }
+
+  html:has(dialog:modal) {
+    overflow-y: hidden;
   }
 
   body {

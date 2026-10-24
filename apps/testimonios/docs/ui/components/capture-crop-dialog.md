@@ -56,6 +56,12 @@ import { CaptureCropDialog } from "@/components/capture-crop-dialog";
   puedan interrumpir una confirmación.
 - El panel tiene scroll propio limitado al viewport. El recuadro no se comprime
   para ocultar los controles; las acciones pueden envolver en ventanas estrechas.
+- El documento exterior bloquea su scroll mediante `html:has(dialog:modal)` en
+  `app/globals.css`. `scrollbar-gutter: stable` evita cambios de ancho; el cierre
+  conserva la posición y devuelve el foco sin desplazamiento automático.
+- El área de carga de `FileField` excluye su placeholder del anclaje mediante
+  `overflow-anchor: none`. Evita que el cambio a “Recortando…” desplace el fondo
+  al montar el diálogo, sin añadir otro bloqueo ni restauración imperativa del body.
 - `FileField` conserva la foto confirmada mientras este diálogo prepara un
   reemplazo. Cancelar o fallar el procesamiento conserva esa foto y su preview;
   la sustitución se aplica después de generar el nuevo archivo correctamente.
