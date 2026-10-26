@@ -199,7 +199,11 @@ export const CARD_DESIGN_OPTIONS: Record<TestimonialType, CardDesignOption[]> = 
   ],
   career_change: [
     PHOTO_OPTION,
-    { value: "shift", label: "Antes y ahora", description: "El oficio de antes y el rol de ahora." },
+    {
+      value: "shift",
+      label: "Antes y ahora",
+      description: "El camino del oficio de antes al rol de ahora, con la frase abajo.",
+    },
     { value: "profile", label: "Perfil", description: "Tarjeta de perfil con la foto como portada." },
   ],
 };
