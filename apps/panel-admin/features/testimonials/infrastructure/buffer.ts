@@ -1,5 +1,4 @@
 import type { BufferPostState, BufferPostStatus } from "../types/share";
-import { youtubeWatchUrl } from "./youtube";
 
 const BUFFER_API_URL = "https://api.buffer.com";
 const BUFFER_TIMEOUT_MS = 15000;
@@ -78,8 +77,6 @@ export type CreatePostInput = {
   text: string;
   /** Card PNG del testimonio. Es la misma en todas las redes. */
   imageUrl: string;
-  /** YouTube: LinkedIn lo suma al texto. Instagram no admite links en el caption. */
-  videoUrl?: string | null;
 };
 
 export async function createPost(
@@ -111,8 +108,6 @@ export async function createPost(
     payload.metadata = {
       instagram: { type: "post", shouldShareToFeed: true },
     };
-  } else {
-    payload.text = linkedInText(input.text, input.videoUrl);
   }
 
   try {
@@ -188,17 +183,6 @@ function bufferShareTiming() {
     mode: "customScheduled" as const,
     dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   };
-}
-
-function linkedInText(caption: string, videoUrl: string | null | undefined) {
-  const video = videoUrl?.trim();
-  if (!video) {
-    return caption;
-  }
-
-  return [caption, `Video: ${youtubeWatchUrl(video)}`].filter(Boolean).join(
-    "\n\n",
-  );
 }
 
 function parseHttpsUrl(value: string) {

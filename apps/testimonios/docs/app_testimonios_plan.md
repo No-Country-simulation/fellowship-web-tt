@@ -110,7 +110,7 @@ Totales: simulación 7 obligatorios (incluye país y avatar); empleo y reconvers
 Al enviar, el sistema arma los textos **sin IA**: recorta lo que escribió la persona.
 
 - **Quote** (la frase de la card): primeras ~200–240 caracteres o las primeras 2 oraciones, cortando en un punto o espacio.
-- **Captions** de Instagram y LinkedIn (misma plantilla, distinta red). El formulario guarda los dos. El panel publica un solo texto para Instagram y LinkedIn; Discord lleva la intro y la frase (ver abajo):
+- **Captions** de Instagram y LinkedIn (la misma plantilla vieja, distinta red). El formulario guarda los dos y no escribe `discord_caption`:
 
 ```
 Desde No Country compartimos esta historia de nuestro talento
@@ -123,7 +123,9 @@ Desde No Country compartimos esta historia de nuestro talento
 #NoCountry #DemoDay #TalentoIT
 ```
 
-En el panel (`/testimonials/[id]`) hay un solo **Texto del post** para Instagram y LinkedIn. Parte de `ig_caption`; si sigue la plantilla, lleva el Instagram y el LinkedIn de la persona (los que haya). Al guardar o publicar se escribe en `ig_caption` y se copia a `li_caption`. Discord no usa ese texto: lleva la intro y la frase. Si el texto sigue la plantilla y cambia el quote, se rearma con el mismo intro. Quote, nombre, redes y hashtags los arma el código. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
+`buildIgCaption` y `buildLiCaption` arman esa plantilla en `lib/testimonials/quote.ts`. No reciben el tipo ni arman Discord. El video no entra.
+
+El panel (`apps/panel-admin`, `/testimonials/[id]`) separa los textos. En revisión, si el texto está vacío, es copia de la otra red o sigue la plantilla vieja, cada tab (Instagram, LinkedIn, Discord) arranca con la plantilla de esa red: intro según red y tipo (simulación, primer empleo o reconversión), nombre, mención de esa red si existe, y hashtags solo en Instagram y LinkedIn. Discord no lleva mención ni hashtags y se guarda en `discord_caption`. Instagram usa el valor guardado (`@usuario`). LinkedIn escribe `@usuario` a partir de `linkedin.com/in/{usuario}` o de un handle suelto. La cita queda en la imagen y no se repite en el texto del post. Cambiar la cita no rearma la descripción. Un texto ya editado a mano, que no sigue la plantilla, se deja. Si hay video, la plantilla de LinkedIn y Discord trae `Video testimonial: watch?v=…` al final. La casilla lo agrega o lo saca entero: el link no se edita. Al publicar se manda ese texto. Instagram no lo lleva. Detalle: [COPY_PIPELINE.md](./COPY_PIPELINE.md).
 
 ## Guardar
 
@@ -137,7 +139,7 @@ Revisar y publicar está en `apps/panel-admin`, en `/testimonials` y `/testimoni
 
 Inbox master-detail (`InboxShell`): lista a la izquierda, ficha a la derecha. Los filtros viven en la URL: `?status=` (`in_review`, `published`, `rejected`), `?type=` (`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres de control). Un valor inválido redirige a la query válida. La lista aplica esos filtros en memoria. Al elegir un envío, el detalle muestra un esqueleto (`DetailLoading` / `[id]/loading.tsx`) hasta que carga `/testimonials/[id]`.
 
-En la ficha (`ReviewForm`): envío original arriba (desplegable) y una sola **Publicación** para las tres redes. A la izquierda, el diseño de la card y la preview 1080×1350; a la derecha, la **Frase de la imagen** (quote) y el **Texto del post**, los dos editables. Arriba se ve a qué redes sale (`ShareTargets`). Publicar, guardar borrador o rechazar.
+En la ficha (`ReviewForm`): envío original arriba (desplegable) y una sola **Publicación** para las tres redes. A la izquierda, el diseño de la card y la preview 1080×1350; a la derecha, la **Cita de la historia** (quote) y la **Descripción del post** de la red activa (tabs Instagram, LinkedIn y Discord). Arriba se ve a qué redes sale (`ShareTargets`). Publicar, guardar borrador o rechazar.
 
 Después de publicar, la ficha (`PublishedPanel`) muestra el estado por red, la card que salió y los botones para descargarla y copiar el texto. Si alguna red falla, un solo botón reintenta las que falten.
 
@@ -180,25 +182,25 @@ Cuerpo del `POST` (comunidad): solo `embeds[0]` (sin `content`). Username del we
 Cuerpo del post (embed), en `postCommunityTestimonial`:
 
 - Autor: `full_name` + avatar. El archivo **no se sube a Discord**. Se manda `embeds[0].author.icon_url` con la URL pública de Storage del avatar. Discord la descarga.
-- Descripción: la intro y la frase entre comillas. No es el texto de Instagram y LinkedIn.
+- Descripción: el texto de Discord. La cita queda en la imagen. No es el texto de Instagram ni el de LinkedIn.
 - Imagen grande: la **card** de `share-cards` (la misma que Instagram y LinkedIn).
-- Si hay YouTube, un campo **Video** con el link `watch?v=` (un embed no reproduce YouTube).
+- Si hay YouTube, el link va en la descripción solo cuando el admin lo deja en ese texto. Un embed no reproduce YouTube.
 - Color: magenta de No Country. Sin título ni footer.
 
 Si el webhook falla, el testimonio **igual queda publicado** (`published_at`). `discord_posted_at` queda null. La ficha muestra Falló y un solo botón reintenta las redes que falten. Si el POST sale bien, se escribe `discord_posted_at`. El webhook no devuelve la URL del mensaje: Discord no tiene **Ver post**.
 
 ### Cómo se usa cada media (sin galería)
 
-Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Las tres redes reciben **la misma card**. Instagram y LinkedIn comparten el texto; Discord lleva la intro y la frase. Solo cambia cómo va el video.
+Tabla por red: [MEDIA_FORMATS.md](./MEDIA_FORMATS.md). Las tres redes reciben **la misma card**. Cada una lleva su texto. La cita queda en la imagen. Solo cambia cómo va el video.
 
 - **Avatar** (cara / perfil, siempre hay): va en la **card generada**. En Discord, además, es el icono junto al nombre.
 - **Foto testimonial** (entorno de trabajo, opcional): es la foto de arriba de la card (si no hay, fallback de marca). No se postea cruda en ninguna red.
-- **YouTube** (URL, no un mp4 nuestro, opcional): en Discord va en un campo **Video** del embed; en LinkedIn se suma al final del texto (`Video: watch?v=…`). En Instagram no entra (no admite links en el caption y un Reel pide archivo). El Reel queda para v2.
+- **YouTube** (URL, no un mp4 nuestro, opcional): la plantilla de Discord y de LinkedIn lo trae al final (`Video testimonial: watch?v=…`). La casilla lo agrega o lo saca entero: el link no se edita. Al publicar se manda ese texto. En Instagram no entra (no admite links en el caption y un Reel pide archivo). El Reel queda para v2.
 
 **Discord, en la práctica**
 
-1. Siempre: nombre + avatar chico + intro y frase + la card de imagen grande.
-2. Si hay YouTube: el link `watch?v=` va en un campo del embed. Un embed **no** reproduce YouTube; el link queda clickeable. No se manda `content` aparte.
+1. Siempre: nombre + avatar chico + la descripción de Discord + la card de imagen grande.
+2. Si hay YouTube y el admin dejó el link en la descripción, ese texto lo incluye. Un embed **no** reproduce YouTube. No se manda `content` aparte ni un campo Video extra.
 3. No se sube el video como archivo. No hace falta.
 
 **La card (las tres redes)**
@@ -226,20 +228,20 @@ flowchart LR
   card --> storage[share-cards]
   storage --> discord[Discord]
   storage --> buffer[Buffer Instagram y LinkedIn]
-  intro[Intro y frase] --> discord
-  caption[Texto de Instagram y LinkedIn] --> buffer
+  intro[Texto de Discord] --> discord
+  caption[Texto de Instagram y de LinkedIn] --> buffer
 ```
 
 **LinkedIn, en la práctica (v1)**
 
-Buffer publica la card. Instagram y LinkedIn usan **el mismo texto**: si la persona tiene las dos redes, van las dos. Si hay YouTube, el link se suma al final en LinkedIn. En la base, `li_caption` guarda una copia de `ig_caption`.
+Buffer publica la card. Instagram y LinkedIn usan **cada una su texto**. El formulario dejó la plantilla vieja en `ig_caption` y `li_caption`; el panel guarda cada red por separado, incluida `discord_caption`. Si hay video, la plantilla de LinkedIn y Discord trae `Video testimonial: watch?v=…`. La casilla lo agrega o lo saca entero: el link no se edita. Al publicar se manda ese texto. Instagram no lo lleva.
 
-La app pública arma un texto por red (`buildIgCaption` y `buildLiCaption`), cada uno con su handle. En el panel se deja un solo texto a propósito: es la misma publicación y el admin lo edita una vez.
+La app pública arma la plantilla vieja (`buildIgCaption` y `buildLiCaption`, con la cita y sin tipo). En el panel cada tab edita el texto de su red.
 
 **Cómo se publica**
 
-1. En revisión (`/testimonials/[id]`): elegir el diseño, retocar la frase y el texto. Publicar.
-2. Al publicar: el update a `published` gana solo si la fila sigue `in_review`. El que gana sube el PNG a `share-cards`. Si el PNG no se genera, pasa de 5 MB o no llega, no se publica y el panel muestra **Reintentar imagen**. Si Storage falla, la fila vuelve a `in_review`. Después reserva cada red y postea: Discord (webhook, intro y frase), Instagram (Buffer: card + texto) y LinkedIn (Buffer: card + texto + YouTube). `BUFFER_ENV=production` publica ya (`shareNow`); `development` o si falta programa a 1 semana.
+1. En revisión (`/testimonials/[id]`): elegir el diseño, retocar la cita y la descripción de cada red. Publicar.
+2. Al publicar: el update a `published` gana solo si la fila sigue `in_review`. El que gana sube el PNG a `share-cards`. Si el PNG no se genera, pasa de 5 MB o no llega, no se publica y el panel muestra **Reintentar imagen**. Si Storage falla, la fila vuelve a `in_review`. Después reserva cada red y postea: Discord (webhook, el texto del campo), Instagram (Buffer: card + texto) y LinkedIn (Buffer: card + el texto del campo). El link del video no se agrega después. `BUFFER_ENV=production` publica ya (`shareNow`); `development` o si falta programa a 1 semana.
 3. Si Discord o Buffer fallan, el testimonio **igual queda en la galería**. La ficha reintenta las redes sin fecha, y las de Buffer cuyo estado es `error`, con un solo botón. Si Buffer creó el post y después informa error, ese reintento borra fecha e id solo si siguen siendo los de ese post. También se puede descargar la card y copiar el texto para subirlo a mano.
 4. Se guarda el id de cada post de Buffer (`buffer_*_post_id`). Al abrir la ficha publicada, el panel consulta el estado real en Buffer y, si ya salió, muestra **Ver post** con el link.
 5. Sin `BUFFER_API_KEY` o sin channel ID, esa red se saltea.

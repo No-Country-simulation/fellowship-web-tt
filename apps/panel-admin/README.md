@@ -37,20 +37,24 @@ esa query.
 Un id que no es un uuid responde 404 y no consulta Supabase. Si el id es válido y Supabase o la
 red fallan, la ficha muestra «No se pudo cargar».
 
-Hay **una sola card** PNG 1080×1350 para Discord, Instagram y LinkedIn. Instagram y LinkedIn
-comparten el texto; si la persona tiene las dos redes, van las dos. Discord lleva la intro y la
-frase entre comillas. El quote (que va dentro de la card) y el texto de Instagram y LinkedIn
-llegan armados por la plantilla del formulario y se editan a mano. No hay generación con IA. El
-texto se guarda en `ig_caption` y se copia a `li_caption`. El video es solo un link de YouTube:
-Discord y LinkedIn lo suman al post; Instagram no admite links.
+Hay **una sola card** PNG 1080×1350 para Discord, Instagram y LinkedIn. Cada red tiene su texto
+y su intro. Discord sigue la misma plantilla, sin mención y sin hashtags, y se guarda en
+`discord_caption`. La cita queda en la imagen. Los tres textos llegan armados por la plantilla y
+se editan a mano, en un tab por red. No hay generación con IA. Instagram usa el valor guardado
+(`@usuario`). LinkedIn escribe `@usuario` a partir del perfil. El video es solo un link de
+YouTube: la plantilla de Discord y LinkedIn trae `Video testimonial:` y el link al final de la descripción. El admin lo deja
+o lo saca en ese texto. Al publicar se manda el campo tal cual: el link no se agrega después.
+Instagram no admite links.
 
 Publicar arma la card en el browser. En el server, el update a `published` y `published_at`
 solo gana si la fila sigue `in_review`. El request que no cambia la fila no sube nada ni postea,
 y vuelve a la ficha. El que gana sube el PNG al bucket `share-cards` (`{slug}/instagram.png`).
 Si el PNG no se genera o pesa más de 5 MB, el testimonio sigue en revisión. Si no se puede
 subir, la fila vuelve a `in_review` con `published_at` en null. Con la card guardada reserva cada
-red (la fecha solo si sigue en null) y manda la card al webhook de Discord comunidad (intro y
-frase) y a Buffer (Instagram y LinkedIn, con el texto compartido). Si la llamada falla, borra esa fecha. Si Buffer respondió y no se
+red (la fecha solo si sigue en null) y manda la card al webhook de Discord comunidad y a Buffer.
+Cada red sale con su texto guardado. Discord tiene el suyo, sin mención ni hashtags; la cita queda
+en la imagen. Si `discord_caption` está vacío, el envío a Discord usa la plantilla de esa red
+(con el link del video si hay uno) y no reescribe la fila. Si la llamada falla, borra esa fecha. Si Buffer respondió y no se
 guarda el id, la fecha queda y Reintentar no crea otro post. `?share=ok` muestra «Salió en las
 redes.» en la ficha; `?share=failed` se conserva. Si el envío ya no está en revisión (por
 ejemplo, desde una pestaña vieja), no toca Storage. El límite de 5 MB es `SHARE_CARD_MAX_BYTES`
@@ -63,6 +67,13 @@ hora guardada. Si alguna red no tiene fecha, o Instagram o LinkedIn quedan en er
 el testimonio sigue publicado y un solo botón reintenta solo esas. Reintentar consulta el estado
 con el id guardado: si Buffer no responde, esa red no se toca; si es error, borra fecha e id
 condicionando al id viejo y vuelve a reservar y postear. Las que ya salieron no se mandan de nuevo.
+
+Antes de desplegar el panel hay que aplicar la migración
+`20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan
+para todos los envíos.
+
+Un reintento de LinkedIn de un testimonio publicado antes de este cambio ya no agrega el link del
+video al final: se manda el texto guardado.
 
 | Variable | Para qué |
 | --- | --- |

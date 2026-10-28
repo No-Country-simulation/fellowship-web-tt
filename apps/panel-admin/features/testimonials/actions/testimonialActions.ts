@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
-import { buildPostCaption, CAPTION_EDIT_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
+import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
+import { hasCommunityWebhook } from "../infrastructure/discord";
+import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
 import {
   getTestimonialById,
   isTestimonialId,
@@ -58,33 +60,22 @@ export async function reviewTestimonial(
 
   const quote = readString(formData, "quote");
   if (!quote) {
-    return { status: "error", message: "El quote no puede estar vacío." };
+    return { status: "error", message: "La cita de la historia no puede estar vacía." };
   }
   if (quote.length > QUOTE_EDIT_MAX_CHARS) {
     return {
       status: "error",
-      message: `El quote puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
+      message: `La cita de la historia puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
     };
   }
 
-  let caption = readString(formData, "caption");
-  if (!caption) {
-    caption = buildPostCaption({
-      quote,
-      fullName: current.testimonial.fullName,
-      instagram: current.testimonial.instagram,
-      linkedin: current.testimonial.linkedin,
-    });
-  }
-  if (caption.length > CAPTION_EDIT_MAX_CHARS) {
-    return {
-      status: "error",
-      message: `El texto del post puede tener hasta ${CAPTION_EDIT_MAX_CHARS} caracteres.`,
-    };
+  const captions = readCaptions(formData);
+  if ("message" in captions) {
+    return { status: "error", message: captions.message };
   }
 
   if (intent === "save") {
-    const saved = await saveReviewEdits(id, { quote, caption });
+    const saved = await saveReviewEdits(id, { quote, ...captions });
     if (!saved.ok) {
       return { status: "error", message: saved.message };
     }
@@ -104,7 +95,7 @@ export async function reviewTestimonial(
     return { status: "error", message: "No llegó la imagen. El testimonio no se publicó." };
   }
 
-  const published = await publishTestimonial(id, { quote, caption });
+  const published = await publishTestimonial(id, { quote, ...captions });
   if (!published.ok) {
     if ("lost" in published) {
       revalidateTestimonials(id);
@@ -180,6 +171,56 @@ function revalidateTestimonials(id: string) {
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+const CAPTION_INPUTS = [
+  {
+    field: "ig_caption",
+    network: "instagram",
+    label: "Instagram",
+    publishes: hasInstagramChannel,
+  },
+  {
+    field: "li_caption",
+    network: "linkedin",
+    label: "LinkedIn",
+    publishes: hasLinkedInChannel,
+  },
+  {
+    field: "discord_caption",
+    network: "discord",
+    label: "Discord",
+    publishes: hasCommunityWebhook,
+  },
+] as const;
+
+function readCaptions(
+  formData: FormData,
+): { igCaption: string; liCaption: string; discordCaption: string } | { message: string } {
+  const values = {
+    ig_caption: readString(formData, "ig_caption"),
+    li_caption: readString(formData, "li_caption"),
+    discord_caption: readString(formData, "discord_caption"),
+  };
+
+  for (const item of CAPTION_INPUTS) {
+    const text = values[item.field];
+    if (!text && item.publishes()) {
+      return { message: `El texto de ${item.label} no puede estar vacío.` };
+    }
+    const max = CAPTION_MAX_CHARS[item.network];
+    if (text.length > max) {
+      return {
+        message: `El texto de ${item.label} puede tener hasta ${max} caracteres.`,
+      };
+    }
+  }
+
+  return {
+    igCaption: values.ig_caption,
+    liCaption: values.li_caption,
+    discordCaption: values.discord_caption,
+  };
 }
 
 function redirectWithFilters(

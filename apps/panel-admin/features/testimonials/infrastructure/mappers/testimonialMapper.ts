@@ -1,5 +1,5 @@
 import type { TestimonialDto } from "../dtos/testimonialDto";
-import { buildPostCaption } from "../quote";
+import { reviewCaptions } from "../quote";
 import { youtubeEmbedSrc } from "../youtube";
 import {
   careerChangeFields,
@@ -21,7 +21,7 @@ export const TestimonialMapper = {
     const simulation = simulationFields(dto.payload);
     const firstJob = firstJobFields(dto.payload);
     const careerChange = careerChangeFields(dto.payload);
-    const { quote, caption } = reviewQuoteAndCaption(dto);
+    const { quote, igCaption, liCaption, discordCaption } = reviewQuoteAndCaptions(dto);
 
     return {
       id: dto.id,
@@ -36,7 +36,9 @@ export const TestimonialMapper = {
       linkedin: dto.linkedin ?? null,
       story: dto.story,
       quote,
-      caption,
+      igCaption,
+      liCaption,
+      discordCaption,
       avatarUrl: media.avatarUrl,
       captureUrl: media.captureUrl,
       videoUrl: dto.video_url,
@@ -97,23 +99,31 @@ export function inboxItemMeta(item: Pick<AdminInboxItem, "typeLabel" | "submitte
 }
 
 /**
- * Muestra el quote y el caption guardados. No los recorta ni los rearma,
- * ni en revisión ni publicados. Si falta el texto del post, arma la plantilla para revisar.
+ * En revisión, si `li_caption` está vacío o es copia de `ig_caption`, cada tab
+ * arranca con su plantilla. Publicado y rechazado muestran el texto guardado:
+ * es el que salió, o el que se va a copiar a mano.
  */
-function reviewQuoteAndCaption(dto: TestimonialDto) {
-  const quote = dto.quote;
-  if (!dto.ig_caption.trim()) {
-    return {
-      quote,
-      caption: buildPostCaption({
-        quote,
-        fullName: dto.full_name,
-        instagram: dto.instagram,
-        linkedin: dto.linkedin ?? null,
-      }),
-    };
+function reviewQuoteAndCaptions(dto: TestimonialDto) {
+  const igCaption = dto.ig_caption ?? "";
+  const liCaption = dto.li_caption ?? "";
+  const discordCaption = dto.discord_caption ?? "";
+  if (dto.status !== "in_review") {
+    return { quote: dto.quote, igCaption, liCaption, discordCaption };
   }
-  return { quote, caption: dto.ig_caption };
+  return {
+    quote: dto.quote,
+    ...reviewCaptions({
+      fullName: dto.full_name,
+      type: dto.type,
+      instagram: dto.instagram,
+      linkedin: dto.linkedin ?? null,
+      quote: dto.quote,
+      igCaption,
+      liCaption,
+      discordCaption,
+      videoUrl: dto.video_url,
+    }),
+  };
 }
 
 function formatEsAr(value: string) {

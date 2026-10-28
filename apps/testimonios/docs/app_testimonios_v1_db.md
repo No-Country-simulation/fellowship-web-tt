@@ -47,8 +47,9 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `linkedin` | `text` | sí | | Perfil (`linkedin.com/in/…`) o handle. El caption de LI lo menciona |
 | `story` | `text` | no | | Texto largo (experiencia / cómo ayudó / por qué cambió) |
 | `quote` | `text` | no | | Recorte literal de `story` |
-| `ig_caption` | `text` | no | | Intro No Country + quote entre comillas + nombre + IG + hashtags |
-| `li_caption` | `text` | no | `''` | Igual que IG, con LinkedIn en vez de Instagram. Solo admin |
+| `ig_caption` | `text` | no | | El formulario guarda intro genérica + cita entre comillas + nombre + IG + hashtags. El panel puede reemplazarla |
+| `li_caption` | `text` | no | `''` | Igual que IG, con LinkedIn. El panel puede reemplazarla |
+| `discord_caption` | `text` | no | `''` | La escribe solo el panel. Intro de Discord, sin mención ni hashtags. No entra en `testimonials_public` |
 | `avatar_path` | `text` | no | | Path en `avatars`. Foto de **perfil**. Obligatorio |
 | `capture_path` | `text` | sí | | Path en `captures`. Foto del **entorno de trabajo** (equipo, oficina, reunión), no la cara ni una captura del proyecto |
 | `video_url` | `text` | sí | | URL de YouTube |
@@ -68,7 +69,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). `payload_is_object` (`jsonb_typeof(payload) = 'object'`) y `payload_matches_type` ya están en la base (formas abajo). Los crea [`20260906000000_init.sql`](../supabase/migrations/20260906000000_init.sql); [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql) reemplaza `payload_matches_type`.
 
-`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `buffer_*_post_id` de [`20261020180000_buffer_post_ids.sql`](../supabase/migrations/20261020180000_buffer_post_ids.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `li_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
+`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `buffer_*_post_id` de [`20261020180000_buffer_post_ids.sql`](../supabase/migrations/20261020180000_buffer_post_ids.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `discord_caption` de [`20261027221527_discord_caption.sql`](../supabase/migrations/20261027221527_discord_caption.sql): la escribe solo el panel. `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `li_caption`, `discord_caption` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
 
 ---
 

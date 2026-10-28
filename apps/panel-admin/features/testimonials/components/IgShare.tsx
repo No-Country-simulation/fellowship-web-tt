@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
 import { canvasToPng, drawIgCard } from "../infrastructure/ig-card-canvas";
+import {
+  CaptionNetworkTabs,
+  useRememberedCaptionNetwork,
+  type CaptionTabNote,
+  type CaptionNetwork,
+} from "./CaptionNetworkTabs";
 import {
   igCardFilename,
   IG_CARD_HEIGHT,
@@ -14,11 +20,16 @@ import {
 
 type IgShareProps = IgCardContent & {
   slug: string;
-  caption: string;
-  /** `preview` muestra solo el canvas. `share` suma descarga y copia del caption. */
+  /** `preview` muestra solo el canvas. `share` suma descarga y copia del texto de la red activa. */
   mode?: "preview" | "share";
   /** PNG ya publicado. Si está, se muestra y se descarga ese en vez de dibujar la card. */
   imageUrl?: string | null;
+  igCaption?: string;
+  liCaption?: string;
+  discordCaption?: string;
+  /** Recuerda el tab activo entre revisión y la ficha publicada. */
+  testimonialId?: string;
+  tabNotes?: Partial<Record<CaptionNetwork, CaptionTabNote>>;
 };
 
 async function fetchPng(url: string) {
@@ -29,11 +40,10 @@ async function fetchPng(url: string) {
   return response.blob();
 }
 
-/** Preview, descarga PNG 1080×1350 y copia el texto del post (iguales en todas las redes). */
+/** Preview y descarga del PNG 1080×1350. En la ficha publicada, copiar usa el tab activo. */
 export function IgShare({
   slug,
   quote,
-  caption,
   type,
   design,
   fullName,
@@ -45,11 +55,19 @@ export function IgShare({
   previousRole,
   mode = "share",
   imageUrl = null,
+  igCaption = "",
+  liCaption = "",
+  discordCaption = "",
+  testimonialId,
+  tabNotes,
 }: IgShareProps) {
   const previewOnly = mode === "preview";
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const captionPanelId = useId();
   const [previewQuote, setPreviewQuote] = useState(quote);
-  const [previewCaption, setPreviewCaption] = useState(caption);
+  const [network, setNetwork] = useRememberedCaptionNetwork(testimonialId);
+  const caption =
+    network === "instagram" ? igCaption : network === "linkedin" ? liCaption : discordCaption;
   const [copied, setCopied] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -59,11 +77,6 @@ export function IgShare({
     const timeout = window.setTimeout(() => setPreviewQuote(quote), 400);
     return () => window.clearTimeout(timeout);
   }, [quote]);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => setPreviewCaption(caption), 400);
-    return () => window.clearTimeout(timeout);
-  }, [caption]);
 
   useEffect(() => {
     if (!copied) {
@@ -229,13 +242,28 @@ export function IgShare({
             {downloadError}
           </p>
         ) : null}
-        {previewCaption ? (
-          <p className="whitespace-pre-wrap text-admin-caption text-muted-foreground">
-            {previewCaption}
-          </p>
-        ) : (
-          <p className="text-admin-caption text-muted-foreground">Sin texto.</p>
-        )}
+        <CaptionNetworkTabs
+          value={network}
+          onChange={(next) => {
+            setNetwork(next);
+            setCopied(false);
+          }}
+          controls={captionPanelId}
+          notes={tabNotes}
+        />
+        <div
+          id={captionPanelId}
+          role="tabpanel"
+          aria-labelledby={`${captionPanelId}-${network}`}
+        >
+          {caption ? (
+            <p className="whitespace-pre-wrap text-admin-caption text-muted-foreground">
+              {caption}
+            </p>
+          ) : (
+            <p className="text-admin-caption text-muted-foreground">Sin texto.</p>
+          )}
+        </div>
       </div>
     </div>
   );

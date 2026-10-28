@@ -70,6 +70,7 @@ export default async function TestimonialDetailPage({
   if (inReview) {
     return (
       <ReviewForm
+        key={testimonial.id}
         testimonial={testimonial}
         submission={submission}
         channels={channels}
