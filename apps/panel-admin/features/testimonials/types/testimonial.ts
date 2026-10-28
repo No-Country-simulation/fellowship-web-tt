@@ -221,8 +221,12 @@ export type AdminTestimonial = {
   linkedin: string | null;
   story: string;
   quote: string;
-  /** Texto de Instagram y LinkedIn. Discord lleva intro + frase. */
-  caption: string;
+  /** Texto de Instagram. */
+  igCaption: string;
+  /** Texto de LinkedIn. El link del video va en este texto solo si el admin lo deja. */
+  liCaption: string;
+  /** Texto de Discord. La cita queda en la imagen. El link del video va en este texto solo si el admin lo deja. */
+  discordCaption: string;
   avatarUrl: string;
   captureUrl: string | null;
   videoUrl: string | null;

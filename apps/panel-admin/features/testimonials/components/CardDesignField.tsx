@@ -23,15 +23,15 @@ export function CardDesignField({
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="text-admin-caption text-foreground">Diseño de la imagen</legend>
-      <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-muted p-1">
+      <legend className="mb-2 text-admin-caption text-foreground">Diseño de la imagen</legend>
+      <div className="grid grid-cols-3 gap-0.5 rounded-md border border-border bg-muted p-0.5">
         {options.map((option) => {
           const checked = option.value === value;
           return (
             <label
               key={option.value}
-              className={`text-admin-caption ${cn(
-                "cursor-pointer rounded-md px-2 py-1.5 text-center transition-colors",
+              className={`text-admin-micro ${cn(
+                "cursor-pointer rounded px-1.5 py-1 text-center transition-colors",
                 "has-focus-visible:ring-2 has-focus-visible:ring-ring/40",
                 checked
                   ? "bg-background font-medium text-foreground shadow-sm"

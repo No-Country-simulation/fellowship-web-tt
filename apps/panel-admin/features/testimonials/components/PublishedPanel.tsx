@@ -27,7 +27,8 @@ type NetworkState = {
 
 /**
  * Después de publicar: la misma card sale por Discord, Instagram y LinkedIn.
- * Instagram y LinkedIn comparten el texto. Discord lleva intro + frase.
+ * Cada red tiene su texto. Discord no lleva mención ni hashtags; la cita queda en la imagen.
+ * El tab de cada texto muestra si esa red salió o falló.
  * Un solo reintento cubre las redes sin fecha y las de Buffer cuyo estado es error.
  */
 export function PublishedPanel({
@@ -104,6 +105,12 @@ export function PublishedPanel({
       : { label: "Pendiente", tone: "warning", detail: null };
   }
 
+  const networkStates = {
+    discord: stateOf("discord"),
+    instagram: stateOf("instagram"),
+    linkedin: stateOf("linkedin"),
+  };
+
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <section
@@ -120,8 +127,8 @@ export function PublishedPanel({
               {testimonial.publishedAt ? ` · ${formatSubmittedAt(testimonial.publishedAt)}` : null}
             </h2>
             <p className="text-admin-caption text-muted-foreground">
-              Ya está en la galería. La misma imagen sale en todas las redes. Instagram y
-              LinkedIn comparten el texto; Discord lleva la intro y la frase.
+              Ya está en la galería. La misma imagen sale en todas las redes. Cada red tiene su
+              texto. Discord no lleva mención ni hashtags; la cita queda en la imagen.
             </p>
           </div>
           {publicHref ? (
@@ -145,7 +152,7 @@ export function PublishedPanel({
 
         <ul aria-label="Estado por red" className="divide-y divide-border rounded-lg border border-border">
           {SHARE_NETWORKS.map((network) => {
-            const state = stateOf(network);
+            const state = networkStates[network];
             return (
               <li key={network} className="flex items-center justify-between gap-3 px-3 py-2.5">
                 <span className="flex min-w-0 flex-col">
@@ -213,14 +220,22 @@ export function PublishedPanel({
           </h2>
           <p className="text-admin-caption text-muted-foreground">
             {shareCardUrl
-              ? "La imagen que salió en las redes. Si hay que subirla a mano, descargala y copiá el texto."
-              : "No quedó guardada la imagen publicada: se muestra con el diseño base. Si hay que subirla a mano, descargala y copiá el texto."}
+              ? "La imagen que salió en las redes. Si hay que subirla a mano, descargala y copiá el texto de la red activa."
+              : "No quedó guardada la imagen publicada: se muestra con el diseño base. Si hay que subirla a mano, descargala y copiá el texto de la red activa."}
           </p>
         </header>
         <IgShare
           mode="share"
+          testimonialId={testimonial.id}
+          tabNotes={{
+            discord: { text: networkStates.discord.label, tone: networkStates.discord.tone },
+            instagram: { text: networkStates.instagram.label, tone: networkStates.instagram.tone },
+            linkedin: { text: networkStates.linkedin.label, tone: networkStates.linkedin.tone },
+          }}
           slug={testimonial.slug}
-          caption={testimonial.caption}
+          igCaption={testimonial.igCaption}
+          liCaption={testimonial.liCaption}
+          discordCaption={testimonial.discordCaption}
           imageUrl={shareCardUrl}
           {...card}
         />

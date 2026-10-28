@@ -74,26 +74,28 @@ export async function getTestimonialById(id: string): Promise<
   };
 }
 
-/** `li_caption` guarda el mismo texto que `ig_caption`. Discord no usa este caption. */
+/** Cada red guarda su texto. Discord va en `discord_caption`. */
 export async function saveReviewEdits(
   id: string,
-  edits: { quote: string; caption: string },
+  edits: { quote: string; igCaption: string; liCaption: string; discordCaption: string },
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   return updateReviewRow(id, {
     quote: edits.quote,
-    ig_caption: edits.caption,
-    li_caption: edits.caption,
+    ig_caption: edits.igCaption,
+    li_caption: edits.liCaption,
+    discord_caption: edits.discordCaption,
   });
 }
 
 export async function publishTestimonial(
   id: string,
-  edits: { quote: string; caption: string },
+  edits: { quote: string; igCaption: string; liCaption: string; discordCaption: string },
 ): Promise<{ ok: true; slug: string } | { ok: false; lost: true } | { ok: false; message: string }> {
   const updated = await updateReviewRow(id, {
     quote: edits.quote,
-    ig_caption: edits.caption,
-    li_caption: edits.caption,
+    ig_caption: edits.igCaption,
+    li_caption: edits.liCaption,
+    discord_caption: edits.discordCaption,
     status: "published",
     published_at: new Date().toISOString(),
   });
@@ -414,6 +416,7 @@ async function updateReviewRow(
     quote?: string;
     ig_caption?: string;
     li_caption?: string;
+    discord_caption?: string;
     status?: TestimonialStatus;
     published_at?: string;
   },

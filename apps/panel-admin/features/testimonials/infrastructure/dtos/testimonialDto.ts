@@ -27,6 +27,7 @@ export type Database = {
           quote: string;
           ig_caption: string;
           li_caption: string;
+          discord_caption: string;
           avatar_path: string;
           capture_path: string | null;
           video_url: string | null;
@@ -56,6 +57,7 @@ export type Database = {
           quote: string;
           ig_caption: string;
           li_caption?: string;
+          discord_caption?: string;
           avatar_path: string;
           capture_path?: string | null;
           video_url?: string | null;
@@ -85,6 +87,7 @@ export type Database = {
           quote?: string;
           ig_caption?: string;
           li_caption?: string;
+          discord_caption?: string;
           avatar_path?: string;
           capture_path?: string | null;
           video_url?: string | null;
