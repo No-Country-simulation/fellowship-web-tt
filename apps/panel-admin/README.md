@@ -46,6 +46,25 @@ YouTube: la plantilla de Discord y LinkedIn trae `Video testimonial:` y el link 
 o lo saca en ese texto. Al publicar se manda el campo tal cual: el link no se agrega después.
 Instagram no admite links.
 
+En la ficha en revisión se editan los datos que dibuja la card. El tipo queda solo lectura.
+Siempre se pueden cambiar el nombre, el país y la cita. El país es el mismo listado que el formulario público, con «Otro país» para escribir uno que no esté en la lista. Según el tipo, además:
+
+| Tipo | Campos |
+| --- | --- |
+| `simulation` | `primary_role` (puesto principal) |
+| `first_job` | `role_achieved` (puesto del primer empleo) y `company` (empresa) |
+| `career_change` | `previous_profession` (oficio anterior) y `new_role` (rol nuevo) |
+
+Al cambiar el nombre, cada descripción que todavía coincide con la plantilla armada con el
+nombre anterior se regenera con el nombre nuevo: se conserva la intro y, si el texto ya tenía
+la línea de video, se vuelve a poner al final. Si el admin la había sacado en LinkedIn o
+Discord, no vuelve. Una descripción editada a mano no se toca. Cambiar la cita, el país o los
+campos del tipo no regenera las descripciones.
+
+En el header del inbox, debajo de la búsqueda y el filtro, hay un control que copia
+`{GALLERY_URL}/enviar`. El mismo control aparece en el estado vacío de «En revisión». Si en
+producción falta `GALLERY_URL`, no se muestra y ese texto vacío nombra la ruta `/enviar`.
+
 Publicar arma la card en el browser. En el server, el update a `published` y `published_at`
 solo gana si la fila sigue `in_review`. El request que no cambia la fila no sube nada ni postea,
 y vuelve a la ficha. El que gana sube el PNG al bucket `share-cards` (`{slug}/instagram.png`).
@@ -79,7 +98,7 @@ video al final: se manda el texto guardado.
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Mismo proyecto que testimonios. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Lee el inbox y publica. |
-| `GALLERY_URL` | Solo server. Galería pública (`apps/testimonios`), para “Ver ficha pública” y el logo de Discord. En local: `http://localhost:3001`. Obligatoria en producción. No es la URL del panel. |
+| `GALLERY_URL` | Solo server. Galería pública (`apps/testimonios`), para “Ver ficha pública”, el logo de Discord y el link del formulario (`{GALLERY_URL}/enviar`) que se copia desde el inbox. En local: `http://localhost:3001`. Obligatoria en producción: si falta, el control de copiar no se muestra. No es la URL del panel. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. Vacío = no se manda. |
 | `BUFFER_ENV` | `development` programa a 1 semana; `production` publica ya. Si falta, se programa. |
 | `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |

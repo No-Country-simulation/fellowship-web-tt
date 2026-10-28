@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
 import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
 import { hasCommunityWebhook } from "../infrastructure/discord";
+import { validateCardEdits } from "../infrastructure/cardFields";
 import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
 import {
   getTestimonialById,
@@ -69,13 +70,35 @@ export async function reviewTestimonial(
     };
   }
 
+  const cardFields = validateCardEdits(current.testimonial.type, {
+    fullName: readString(formData, "full_name"),
+    country: readString(formData, "country"),
+    quote,
+    primary_role: readString(formData, "primary_role"),
+    company: readString(formData, "company"),
+    role_achieved: readString(formData, "role_achieved"),
+    previous_profession: readString(formData, "previous_profession"),
+    new_role: readString(formData, "new_role"),
+  });
+  if (!cardFields.ok) {
+    return { status: "error", message: cardFields.message };
+  }
+
   const captions = readCaptions(formData);
   if ("message" in captions) {
     return { status: "error", message: captions.message };
   }
 
+  const reviewEdits = {
+    quote,
+    ...captions,
+    fullName: cardFields.fullName,
+    country: cardFields.country,
+    payload: cardFields.payload,
+  };
+
   if (intent === "save") {
-    const saved = await saveReviewEdits(id, { quote, ...captions });
+    const saved = await saveReviewEdits(id, reviewEdits);
     if (!saved.ok) {
       return { status: "error", message: saved.message };
     }
@@ -95,7 +118,7 @@ export async function reviewTestimonial(
     return { status: "error", message: "No llegó la imagen. El testimonio no se publicó." };
   }
 
-  const published = await publishTestimonial(id, { quote, ...captions });
+  const published = await publishTestimonial(id, reviewEdits);
   if (!published.ok) {
     if ("lost" in published) {
       revalidateTestimonials(id);
@@ -206,12 +229,12 @@ function readCaptions(
   for (const item of CAPTION_INPUTS) {
     const text = values[item.field];
     if (!text && item.publishes()) {
-      return { message: `El texto de ${item.label} no puede estar vacío.` };
+      return { message: `La descripción del post de ${item.label} no puede estar vacía.` };
     }
     const max = CAPTION_MAX_CHARS[item.network];
     if (text.length > max) {
       return {
-        message: `El texto de ${item.label} puede tener hasta ${max} caracteres.`,
+        message: `La descripción del post de ${item.label} puede tener hasta ${max} caracteres.`,
       };
     }
   }

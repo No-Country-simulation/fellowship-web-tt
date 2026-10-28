@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { cn } from "@repo/ui/utils";
 
 import { textareaClassName } from "./fields";
 
@@ -12,6 +11,7 @@ export function CaptionField({
   hint,
   maxChars,
   emptyInvalid = false,
+  emptyMessage = "No puede estar vacío",
   describedByExtra,
   actions,
   footer,
@@ -25,6 +25,8 @@ export function CaptionField({
   maxChars: number;
   /** La red se publica y el texto, ya recortado, está vacío. */
   emptyInvalid?: boolean;
+  /** Reemplaza el contador cuando el texto está vacío. */
+  emptyMessage?: string;
   describedByExtra?: string;
   /** Botones a la derecha del label. */
   actions?: ReactNode;
@@ -55,7 +57,7 @@ export function CaptionField({
         {actions ? <div className="flex shrink-0 items-center gap-1">{actions}</div> : null}
       </div>
       {hint ? (
-        <p id={hintId} className="text-admin-caption text-muted-foreground">
+        <p id={hintId} className="text-admin-micro text-muted-foreground">
           {hint}
         </p>
       ) : null}
@@ -65,7 +67,7 @@ export function CaptionField({
         maxLength={Math.max(0, maxChars - reserved)}
         aria-describedby={describedBy}
         aria-invalid={emptyInvalid || over || undefined}
-        className={cn(textareaClassName, "min-h-32 resize-y whitespace-pre-wrap [field-sizing:content]")}
+        className={`${textareaClassName.replace("min-h-28", "min-h-32")} whitespace-pre-wrap [field-sizing:content]`}
         onChange={(event) => onChange(event.target.value)}
       />
       <div className="flex flex-col gap-1">
@@ -73,13 +75,12 @@ export function CaptionField({
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">{footer}</div>
           <p
             id={countId}
-            className={cn(
-              "ml-auto shrink-0 text-admin-caption",
-              emptyInvalid || over ? "text-destructive" : "text-muted-foreground",
-            )}
+            className={`ml-auto shrink-0 ${emptyInvalid ? "text-admin-caption" : "text-admin-micro"} ${
+              emptyInvalid || over ? "text-destructive" : "text-muted-foreground"
+            }`}
           >
             {emptyInvalid
-              ? "No puede estar vacío"
+              ? emptyMessage
               : `${counted.length}/${maxChars}${over ? " · Acortala" : ""}`}
           </p>
         </div>

@@ -220,8 +220,8 @@ export function PublishedPanel({
           </h2>
           <p className="text-admin-caption text-muted-foreground">
             {shareCardUrl
-              ? "La imagen que salió en las redes. Si hay que subirla a mano, descargala y copiá el texto de la red activa."
-              : "No quedó guardada la imagen publicada: se muestra con el diseño base. Si hay que subirla a mano, descargala y copiá el texto de la red activa."}
+              ? "La imagen que salió en las redes. Si hay que subirla a mano, descargala y copiá la descripción de la red activa."
+              : "No quedó guardada la imagen publicada: se muestra con el diseño base. Si hay que subirla a mano, descargala y copiá la descripción de la red activa."}
           </p>
         </header>
         <IgShare

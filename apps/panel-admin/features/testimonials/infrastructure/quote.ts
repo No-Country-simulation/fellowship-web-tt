@@ -21,3 +21,5 @@ export {
   extractCaptionIntro,
   followsShareCaptionTemplate,
 } from "./captionLegacy";
+
+export { rebuildCaptionsForName, captionRenameNotice } from "./captionRename";

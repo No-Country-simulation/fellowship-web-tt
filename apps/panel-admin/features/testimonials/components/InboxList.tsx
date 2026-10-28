@@ -8,6 +8,7 @@ import { cn } from "@repo/ui/utils";
 
 import { boundInboxSearch, INBOX_SEARCH_MAX } from "../infrastructure/inboxQuery";
 import { inboxItemMeta } from "../infrastructure/mappers/testimonialMapper";
+import { CopyFormLinkButton } from "./CopyFormLinkButton";
 import {
   STATUS_LABELS,
   TESTIMONIAL_STATUSES,
@@ -38,11 +39,13 @@ function normalize(value: string) {
 }
 
 export function InboxList({
+  formHref,
   items,
   loadError,
   selectedId,
   onSelect,
 }: {
+  formHref: string | null;
   items: AdminInboxItem[];
   loadError: string | null;
   selectedId?: string;
@@ -71,62 +74,65 @@ export function InboxList({
     <>
       <div className="flex flex-col gap-2 px-3 py-3">
         {selectedId ? null : <h1 className="sr-only">Inbox de testimonios</h1>}
-        <form
-          key={`${query}:${type}`}
-          role="search"
-          action={filters.pathname}
-          className="flex gap-1"
-          onSubmit={submitInboxFilters}
-        >
-          {filters.status ? <input type="hidden" name="status" value={filters.status} /> : null}
-          {filters.share ? <input type="hidden" name="share" value={filters.share} /> : null}
-          <div className="relative min-w-0 flex-1">
-            <Search
-              aria-hidden
-              className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              type="search"
-              name="s"
-              defaultValue={query}
-              maxLength={INBOX_SEARCH_MAX}
-              placeholder="Buscar nombre o cita"
-              aria-label="Buscar testimonios"
-              className="h-8 w-full rounded-md border border-input bg-background pl-7 pr-7 text-admin-caption text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
-            />
-            {query ? (
-              <Link
-                href={filters.href({ search: "" })}
-                scroll={false}
-                aria-label="Limpiar búsqueda"
-                className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
-              >
-                <X aria-hidden className="size-3.5" />
-              </Link>
-            ) : null}
-          </div>
-          <select
-            name="type"
-            defaultValue={type}
-            aria-label="Filtrar por tipo"
-            className={`h-8 w-28 shrink-0 cursor-pointer rounded-md border bg-background px-1.5 text-admin-caption outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-              type === "all" ? "border-input text-muted-foreground" : "border-primary text-foreground"
-            }`}
-            onChange={(event) => {
-              const select = event.currentTarget;
-              if (select.value === "all") select.removeAttribute("name");
-              else select.name = "type";
-              select.form?.requestSubmit();
-            }}
+        <div className="flex flex-col gap-1">
+          <form
+            key={`${query}:${type}`}
+            role="search"
+            action={filters.pathname}
+            className="flex gap-1"
+            onSubmit={submitInboxFilters}
           >
-            <option value="all">Todos</option>
-            {TESTIMONIAL_TYPES.map((value) => (
-              <option key={value} value={value}>
-                {TYPE_LABELS[value]}
-              </option>
-            ))}
-          </select>
-        </form>
+            {filters.status ? <input type="hidden" name="status" value={filters.status} /> : null}
+            {filters.share ? <input type="hidden" name="share" value={filters.share} /> : null}
+            <div className="relative min-w-0 flex-1">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+              />
+              <input
+                type="search"
+                name="s"
+                defaultValue={query}
+                maxLength={INBOX_SEARCH_MAX}
+                placeholder="Buscar nombre o cita"
+                aria-label="Buscar testimonios"
+                className="h-8 w-full rounded-md border border-input bg-background pl-7 pr-7 text-admin-caption text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+              />
+              {query ? (
+                <Link
+                  href={filters.href({ search: "" })}
+                  scroll={false}
+                  aria-label="Limpiar búsqueda"
+                  className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
+                >
+                  <X aria-hidden className="size-3.5" />
+                </Link>
+              ) : null}
+            </div>
+            <select
+              name="type"
+              defaultValue={type}
+              aria-label="Filtrar por tipo"
+              className={`h-8 w-28 shrink-0 cursor-pointer rounded-md border bg-background px-1.5 text-admin-caption outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                type === "all" ? "border-input text-muted-foreground" : "border-primary text-foreground"
+              }`}
+              onChange={(event) => {
+                const select = event.currentTarget;
+                if (select.value === "all") select.removeAttribute("name");
+                else select.name = "type";
+                select.form?.requestSubmit();
+              }}
+            >
+              <option value="all">Todos</option>
+              {TESTIMONIAL_TYPES.map((value) => (
+                <option key={value} value={value}>
+                  {TYPE_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          </form>
+          <CopyFormLinkButton href={formHref} />
+        </div>
         <div role="tablist" aria-label="Estado" className="grid grid-cols-3 gap-1">
           {TESTIMONIAL_STATUSES.map((value) => {
             const active = value === status;
@@ -176,9 +182,16 @@ export function InboxList({
           </p>
           <p className="mt-1 text-admin-caption text-muted-foreground">
             {status === "in_review"
-              ? "No hay envíos pendientes. Cuando alguien complete /enviar, aparece acá."
+              ? formHref
+                ? "No hay envíos pendientes. Cuando alguien complete el formulario, aparece acá."
+                : "No hay envíos pendientes. Cuando alguien complete /enviar, aparece acá."
               : `No hay testimonios con estado ${STATUS_LABELS[status].toLowerCase()}.`}
           </p>
+          {status === "in_review" && formHref ? (
+            <div className="mt-2">
+              <CopyFormLinkButton href={formHref} />
+            </div>
+          ) : null}
         </div>
       ) : (
         <ul className="flex flex-col gap-1 px-2 pb-4">

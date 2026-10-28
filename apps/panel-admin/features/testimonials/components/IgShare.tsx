@@ -64,7 +64,18 @@ export function IgShare({
   const previewOnly = mode === "preview";
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const captionPanelId = useId();
-  const [previewQuote, setPreviewQuote] = useState(quote);
+  const [drawn, setDrawn] = useState({
+    quote,
+    type,
+    design,
+    fullName,
+    country,
+    avatarUrl,
+    captureUrl,
+    company,
+    role,
+    previousRole,
+  });
   const [network, setNetwork] = useRememberedCaptionNetwork(testimonialId);
   const caption =
     network === "instagram" ? igCaption : network === "linkedin" ? liCaption : discordCaption;
@@ -74,9 +85,22 @@ export function IgShare({
   const [previewFailed, setPreviewFailed] = useState(false);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => setPreviewQuote(quote), 400);
+    const timeout = window.setTimeout(() => {
+      setDrawn({
+        quote,
+        type,
+        design,
+        fullName,
+        country,
+        avatarUrl,
+        captureUrl,
+        company,
+        role,
+        previousRole,
+      });
+    }, 400);
     return () => window.clearTimeout(timeout);
-  }, [quote]);
+  }, [quote, type, design, fullName, country, avatarUrl, captureUrl, company, role, previousRole]);
 
   useEffect(() => {
     if (!copied) {
@@ -88,23 +112,23 @@ export function IgShare({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !previewQuote) {
+    if (!canvas || !drawn.quote) {
       return;
     }
 
     let cancelled = false;
     setPreviewFailed(false);
     void drawIgCard(canvas, {
-      type,
-      design,
-      quote: previewQuote,
-      fullName,
-      country,
-      avatarUrl,
-      captureUrl,
-      company,
-      role,
-      previousRole,
+      type: drawn.type,
+      design: drawn.design,
+      quote: drawn.quote,
+      fullName: drawn.fullName,
+      country: drawn.country,
+      avatarUrl: drawn.avatarUrl,
+      captureUrl: drawn.captureUrl,
+      company: drawn.company,
+      role: drawn.role,
+      previousRole: drawn.previousRole,
     }).then(
       () => {
         if (!cancelled) {
@@ -121,18 +145,7 @@ export function IgShare({
     return () => {
       cancelled = true;
     };
-  }, [
-    previewQuote,
-    type,
-    design,
-    fullName,
-    country,
-    avatarUrl,
-    captureUrl,
-    company,
-    role,
-    previousRole,
-  ]);
+  }, [drawn]);
 
   async function downloadCard() {
     setDownloadError(null);
@@ -157,7 +170,7 @@ export function IgShare({
     await drawIgCard(canvas, {
       type,
       design,
-      quote: quote || previewQuote,
+      quote,
       fullName,
       country,
       avatarUrl,
