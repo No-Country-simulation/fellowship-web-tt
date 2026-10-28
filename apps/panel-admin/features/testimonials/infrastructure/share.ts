@@ -54,7 +54,7 @@ export function readShareCard(formData: FormData): ShareCardRead {
  * Instagram o LinkedIn en error vuelven a poder postearse: se consulta Buffer con el
  * id guardado y, si el estado es `error`, se borran fecha e id. La red queda sin fecha
  * solo en este objeto si ese update ganó, y `sharePublished` reserva y postea.
- * Si Buffer no responde, o no hay id, la fecha no se toca.
+ * Si Buffer no responde, no hay id, o el post ya no existe, la fecha no se toca.
  */
 export async function prepareErroredBufferRetries(
   testimonial: AdminTestimonial,

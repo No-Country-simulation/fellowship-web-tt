@@ -137,11 +137,13 @@ Tablas, enums y SQL: [app_testimonios_v1_db.md](app_testimonios_v1_db.md).
 
 Revisar y publicar está en `apps/panel-admin`, en `/testimonials` y `/testimonials/[id]`, dentro del mismo shell que el resto del panel. No hay login propio ni generación con IA: el quote y los captions salen de la plantilla y se editan a mano.
 
-Inbox master-detail (`InboxShell`): lista a la izquierda, ficha a la derecha. Los filtros viven en la URL: `?status=` (`in_review`, `published`, `rejected`), `?type=` (`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres de control). Un valor inválido redirige a la query válida. La lista aplica esos filtros en memoria. Al elegir un envío, el detalle muestra un esqueleto (`DetailLoading` / `[id]/loading.tsx`) hasta que carga `/testimonials/[id]`.
+Inbox master-detail (`InboxShell`): lista a la izquierda, ficha a la derecha. Los filtros viven en la URL: `?status=` (`in_review`, `published`, `archived`, `rejected`), `?type=` (`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres de control). Un valor inválido redirige a la query válida. La lista aplica esos filtros en memoria. Al elegir un envío, el detalle muestra un esqueleto (`DetailLoading` / `[id]/loading.tsx`) hasta que carga `/testimonials/[id]`.
 
 En la ficha (`ReviewForm`): envío original arriba (desplegable) y una sola **Publicación** para las tres redes. A la izquierda, el diseño de la card y la preview 1080×1350; a la derecha, la **Cita de la historia** (quote) y la **Descripción del post** de la red activa (tabs Instagram, LinkedIn y Discord). Arriba se ve a qué redes sale (`ShareTargets`). Publicar, guardar borrador o rechazar.
 
 Después de publicar, la ficha (`PublishedPanel`) muestra el estado por red, la card que salió y los botones para descargarla y copiar el texto. Si alguna red falla, un solo botón reintenta las que falten.
+
+Flujo de estados: `in_review` pasa a `published` o a `rejected`. Un publicado se archiva con motivo (`published` → `archived`): sale de la galería y `archive_reason` guarda el texto (obligatorio, hasta 500 caracteres). Los posts ya enviados y sus ids no se tocan. Desde archivado se puede volver a publicar (`archived` → `published`, sin reenviar a Discord, Instagram ni LinkedIn) o rechazar (`archived` → `rejected`; el motivo queda null). `rejected` es el rechazo del admin, no un archivo.
 
 ## Publicar en Discord de comunidad (post validación)
 

@@ -9,6 +9,7 @@ export type TestimonialType = (typeof TESTIMONIAL_TYPES)[number];
 export const TESTIMONIAL_STATUSES = [
   "in_review",
   "published",
+  "archived",
   "rejected",
 ] as const;
 
@@ -86,8 +87,12 @@ export const TYPE_LABELS: Record<TestimonialType, string> = {
 export const STATUS_LABELS: Record<TestimonialStatus, string> = {
   in_review: "En revisión",
   published: "Publicado",
+  archived: "Archivado",
   rejected: "Rechazado",
 };
+
+/** Tope del motivo de archivo. Lo comparten el formulario y la action. */
+export const ARCHIVE_REASON_MAX_CHARS = 500;
 
 export function isTestimonialStatus(value: string): value is TestimonialStatus {
   return (TESTIMONIAL_STATUSES as readonly string[]).includes(value);
@@ -214,6 +219,8 @@ export type AdminTestimonial = {
   type: TestimonialType;
   typeLabel: string;
   status: TestimonialStatus;
+  /** Motivo guardado al archivar. Null en cualquier otro estado. */
+  archiveReason: string | null;
   fullName: string;
   country: string | null;
   email: string;

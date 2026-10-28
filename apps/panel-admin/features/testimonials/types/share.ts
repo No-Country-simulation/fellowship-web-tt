@@ -32,8 +32,19 @@ export type BufferPostState = {
   errorMessage: string | null;
 };
 
-/** `null` por red si no hay id guardado o Buffer no respondió. */
-export type BufferPostStates = Record<"instagram" | "linkedin", BufferPostState | null>;
+/** Buffer confirmó que el id guardado ya no existe. No es un fallo de red ni de auth. */
+export type BufferPostNotFound = {
+  status: "not_found";
+};
+
+/**
+ * `null` por red si no hay id guardado o Buffer no respondió.
+ * `not_found` si Buffer confirma que ese id no existe.
+ */
+export type BufferPostStates = Record<
+  "instagram" | "linkedin",
+  BufferPostState | BufferPostNotFound | null
+>;
 
 /** Tope del PNG de la card. El bucket `share-cards` corta en este tamaño. */
 export const SHARE_CARD_MAX_BYTES = 5 * 1024 * 1024;

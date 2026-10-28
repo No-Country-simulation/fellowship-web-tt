@@ -15,6 +15,7 @@ import {
   type ShareNetwork,
 } from "../types/share";
 import type { AdminTestimonial } from "../types/testimonial";
+import { ArchiveDialog } from "./ArchiveDialog";
 import { IgShare } from "./IgShare";
 import { ShareRetry } from "./ShareRetry";
 
@@ -52,20 +53,6 @@ export function PublishedPanel({
   /** Buffer programa el post en vez de publicarlo ya. */
   scheduled: boolean;
 }) {
-  if (testimonial.status !== "published") {
-    return (
-      <section className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-        <header className="flex flex-col gap-1">
-          <h2 className="text-admin-heading font-semibold text-foreground">Rechazado</h2>
-          <p className="text-admin-caption text-muted-foreground">
-            No sale en la galería ni en las redes. El envío queda guardado arriba por si hace falta
-            volver a verlo.
-          </p>
-        </header>
-      </section>
-    );
-  }
-
   const postedAt: Record<ShareNetwork, string | null> = {
     discord: testimonial.discordPostedAt,
     instagram: testimonial.bufferInstagramPostedAt,
@@ -84,6 +71,13 @@ export function PublishedPanel({
 
   function stateOf(network: ShareNetwork): NetworkState {
     const live = network === "discord" ? null : bufferStates?.[network];
+    if (live?.status === "not_found") {
+      return {
+        label: "No está en Buffer",
+        tone: "warning",
+        detail: "El id guardado ya no existe.",
+      };
+    }
     if (live) {
       return bufferState(live);
     }
@@ -131,14 +125,17 @@ export function PublishedPanel({
               texto. Discord no lleva mención ni hashtags; la cita queda en la imagen.
             </p>
           </div>
-          {publicHref ? (
-            <a
-              href={publicHref}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              Ver ficha pública
-            </a>
-          ) : null}
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {publicHref ? (
+              <a
+                href={publicHref}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Ver ficha pública
+              </a>
+            ) : null}
+            <ArchiveDialog id={testimonial.id} />
+          </div>
         </header>
 
         {shareStatus === "ok" ? (

@@ -29,6 +29,7 @@ export const TestimonialMapper = {
       type: dto.type,
       typeLabel,
       status: dto.status,
+      archiveReason: dto.archive_reason ?? null,
       fullName: dto.full_name,
       country: dto.country,
       email: dto.email,
