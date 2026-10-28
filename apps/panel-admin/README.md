@@ -18,9 +18,10 @@ mismo shell, sin un chequeo propio.
 
 Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código vive en
 `features/testimonials` (`components/`, `types/`, `infrastructure/` y `actions/`). Las páginas
-piden datos al repository. Publicar, guardar, rechazar y reintentar son Server Actions: llaman
-al repository y después a Discord y Buffer. No hay mocks: el repository lee y escribe Supabase
-con `service_role`. El resto del panel sigue en mock.
+piden datos al repository. Publicar, guardar, rechazar, archivar, volver a publicar y
+reintentar son Server Actions. Publicar y reintentar llaman al repository y después a Discord
+y Buffer. Archivar, volver a publicar y rechazar un archivado no mandan posts. No hay mocks:
+el repository lee y escribe Supabase con `service_role`. El resto del panel sigue en mock.
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
 
@@ -29,9 +30,9 @@ No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya
 | `/testimonials` | Inbox: lista de envíos y, al elegir uno, la ficha al lado |
 | `/testimonials/[id]` | Ficha: envío y una sola card para las tres redes |
 
-Los filtros del inbox viven en la URL: `?status=` (`in_review`, `published`, `rejected`), `?type=`
-(`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres de
-control). Un valor inválido redirige a la query válida. La lista, la ficha y las actions conservan
+Los filtros del inbox viven en la URL: `?status=` (`in_review`, `published`, `archived`, `rejected`),
+`?type=` (`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres
+de control). Un valor inválido redirige a la query válida. La lista, la ficha y las actions conservan
 esa query.
 
 Un id que no es un uuid responde 404 y no consulta Supabase. Si el id es válido y Supabase o la
@@ -87,9 +88,18 @@ el testimonio sigue publicado y un solo botón reintenta solo esas. Reintentar c
 con el id guardado: si Buffer no responde, esa red no se toca; si es error, borra fecha e id
 condicionando al id viejo y vuelve a reservar y postear. Las que ya salieron no se mandan de nuevo.
 
+Archivar un publicado pide un motivo obligatorio (hasta 500 caracteres) y lo pasa a `archived`.
+El detalle queda con `?status=archived` y el inbox lo lista en Archivados. Sale de la galería.
+Archivar no borra los posts ya enviados a Discord, Instagram ni LinkedIn, ni los ids de Buffer,
+ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar lo devuelve a
+`published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
+de publicados vuelve a ofrecer Reintentar. Rechazar un archivado lo pasa a `rejected`, limpia el
+motivo y vuelve a `/testimonials` con los filtros del inbox.
+
 Antes de desplegar el panel hay que aplicar la migración
 `20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan
-para todos los envíos.
+para todos los envíos. Archivar además necesita `20261028190000_archived_status.sql` y
+`20261028190001_archive_reason.sql` (el estado `archived` y el motivo).
 
 Un reintento de LinkedIn de un testimonio publicado antes de este cambio ya no agrega el link del
 video al final: se manda el texto guardado.

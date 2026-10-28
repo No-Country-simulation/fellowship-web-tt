@@ -3,23 +3,27 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
+import { INBOX_FILTERS_FIELD, inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
 import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
 import { hasCommunityWebhook } from "../infrastructure/discord";
 import { validateCardEdits } from "../infrastructure/cardFields";
 import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
 import {
+  archiveTestimonial,
   getTestimonialById,
   isTestimonialId,
   prepareShareCard,
   publishTestimonial,
+  rejectArchivedTestimonial,
   rejectTestimonial,
+  republishTestimonial,
   revertPublishedTestimonial,
   saveReviewEdits,
   storedShareCardUrl,
 } from "../infrastructure/repositories/testimonialRepository";
 import { prepareErroredBufferRetries, readShareCard, sharePublished } from "../infrastructure/share";
-import type { ReviewState } from "../types/reviewState";
+import type { ArchiveState, ReviewState } from "../types/reviewState";
+import { ARCHIVE_REASON_MAX_CHARS } from "../types/testimonial";
 import {
   SHARE_CARD_TOO_LARGE_MESSAGE,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
@@ -186,6 +190,99 @@ export async function retryShare(id: string, formData: FormData) {
   redirectShared(id, share, formData);
 }
 
+/**
+ * Publicado → archivado. El motivo sale del formulario (`reason`), no del cliente de confianza.
+ * Error para `useActionState`. Éxito: detalle con el filtro `archived`.
+ */
+export async function archiveAction(
+  id: string,
+  _prev: ArchiveState,
+  formData: FormData,
+): Promise<ArchiveState> {
+  if (!isTestimonialId(id)) {
+    return { status: "error", message: "No encontramos ese testimonio." };
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    return { status: "error", message: current.message };
+  }
+
+  if (current.testimonial.status !== "published") {
+    return { status: "error", message: "Este testimonio ya no está publicado." };
+  }
+
+  const reason = readString(formData, "reason");
+  if (!reason) {
+    return { status: "error", message: "El motivo no puede estar vacío." };
+  }
+  if (reason.length > ARCHIVE_REASON_MAX_CHARS) {
+    return {
+      status: "error",
+      message: `El motivo puede tener hasta ${ARCHIVE_REASON_MAX_CHARS} caracteres.`,
+    };
+  }
+
+  const archived = await archiveTestimonial(id, reason);
+  if (!archived.ok) {
+    return { status: "error", message: archived.message };
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters(`/testimonials/${id}`, formData, { status: "archived" });
+}
+
+/**
+ * Archivado → publicado. No llama a `sharePublished`: vuelve a la galería
+ * sin reenviar a Discord, Instagram ni LinkedIn.
+ */
+export async function republishAction(id: string, formData: FormData): Promise<void> {
+  if (!isTestimonialId(id)) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  if (current.testimonial.status !== "archived") {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  const republished = await republishTestimonial(id);
+  if (!republished.ok) {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters(`/testimonials/${id}`, formData, { status: "published" });
+}
+
+/** Archivado → rechazado. Igual que el rechazo de revisión: inbox con los filtros del form. */
+export async function rejectArchivedAction(id: string, formData: FormData): Promise<void> {
+  if (!isTestimonialId(id)) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  if (current.testimonial.status !== "archived") {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  const rejected = await rejectArchivedTestimonial(id);
+  if (!rejected.ok) {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters("/testimonials", formData);
+}
+
 function revalidateTestimonials(id: string) {
   revalidatePath("/testimonials");
   revalidatePath(`/testimonials/${id}`);
@@ -251,7 +348,7 @@ function redirectWithFilters(
   formData: FormData,
   extra?: Record<string, string>,
 ): never {
-  redirect(inboxHref(path, inboxQueryFromField(formData.get("filters")), extra));
+  redirect(inboxHref(path, inboxQueryFromField(formData.get(INBOX_FILTERS_FIELD)), extra));
 }
 
 function redirectShared(id: string, share: ShareResult, formData: FormData): never {

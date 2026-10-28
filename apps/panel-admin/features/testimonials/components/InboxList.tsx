@@ -133,7 +133,7 @@ export function InboxList({
           </form>
           <CopyFormLinkButton href={formHref} />
         </div>
-        <div role="tablist" aria-label="Estado" className="grid grid-cols-3 gap-1">
+        <div role="tablist" aria-label="Estado" className="grid grid-cols-2 gap-1">
           {TESTIMONIAL_STATUSES.map((value) => {
             const active = value === status;
             return (
@@ -185,7 +185,9 @@ export function InboxList({
               ? formHref
                 ? "No hay envíos pendientes. Cuando alguien complete el formulario, aparece acá."
                 : "No hay envíos pendientes. Cuando alguien complete /enviar, aparece acá."
-              : `No hay testimonios con estado ${STATUS_LABELS[status].toLowerCase()}.`}
+              : status === "archived"
+                ? "No hay testimonios archivados."
+                : `No hay testimonios con estado ${STATUS_LABELS[status].toLowerCase()}.`}
           </p>
           {status === "in_review" && formHref ? (
             <div className="mt-2">

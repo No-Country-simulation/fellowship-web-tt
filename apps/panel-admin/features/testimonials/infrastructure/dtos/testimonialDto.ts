@@ -7,7 +7,7 @@ export type Json =
   | Json[];
 
 export type TestimonialType = "simulation" | "first_job" | "career_change";
-export type TestimonialStatus = "in_review" | "published" | "rejected";
+export type TestimonialStatus = "in_review" | "published" | "archived" | "rejected";
 
 export type Database = {
   public: {
@@ -17,6 +17,7 @@ export type Database = {
           id: string;
           type: TestimonialType;
           status: TestimonialStatus;
+          archive_reason: string | null;
           slug: string;
           full_name: string;
           country: string | null;
@@ -47,6 +48,7 @@ export type Database = {
           id?: string;
           type: TestimonialType;
           status?: TestimonialStatus;
+          archive_reason?: string | null;
           slug: string;
           full_name: string;
           country?: string | null;
@@ -77,6 +79,7 @@ export type Database = {
           id?: string;
           type?: TestimonialType;
           status?: TestimonialStatus;
+          archive_reason?: string | null;
           slug?: string;
           full_name?: string;
           country?: string | null;

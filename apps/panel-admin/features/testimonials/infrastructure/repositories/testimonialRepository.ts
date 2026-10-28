@@ -262,13 +262,63 @@ export async function rejectTestimonial(
   return updated.ok ? { ok: true } : updated;
 }
 
+const notPublishedAnymore = "Este testimonio ya no está publicado.";
+const notArchivedAnymore = "Este testimonio ya no está archivado.";
+
+/**
+ * Publicado → archivado. Solo toca `status` y `archive_reason`.
+ * Fechas e ids de posts quedan como estaban.
+ */
+export async function archiveTestimonial(
+  id: string,
+  reason: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "published",
+    { status: "archived", archive_reason: reason },
+    notPublishedAnymore,
+    "No pudimos archivar el testimonio. Probá de nuevo.",
+  );
+}
+
+/** Archivado → publicado. Conserva `published_at` y no reenvía posts. */
+export async function republishTestimonial(
+  id: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "archived",
+    { status: "published", archive_reason: null },
+    notArchivedAnymore,
+    "No pudimos volver a publicar el testimonio. Probá de nuevo.",
+  );
+}
+
+/** Archivado → rechazado. Limpia el motivo para cumplir el check de la columna. */
+export async function rejectArchivedTestimonial(
+  id: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "archived",
+    { status: "rejected", archive_reason: null },
+    notArchivedAnymore,
+    "No pudimos rechazar el testimonio. Probá de nuevo.",
+  );
+}
+
 /** URL pública de la card que se guardó al publicar, o `null` si no quedó ninguna. */
 export async function storedShareCardUrl(slug: string): Promise<string | null> {
   const path = `${slug}/${SHARE_CARD_NAME}`;
   return (await shareCardExists(path)) ? publicStorageUrl(SHARE_CARDS_BUCKET, path) : null;
 }
 
-/** Estado de los posts de Buffer con id guardado. Sin id (envíos viejos) la red queda en `null`. */
+/**
+ * Estado de los posts de Buffer con id guardado.
+ * Sin id, o si Buffer no responde, la red queda en `null`.
+ * Si Buffer dice que ese id no existe, queda `not_found` y el id de la fila no se toca.
+ */
 export async function bufferPostStates(testimonial: AdminTestimonial): Promise<BufferPostStates> {
   const { bufferInstagramPostId, bufferLinkedinPostId } = testimonial;
   const [instagram, linkedin] = await Promise.all([
@@ -436,6 +486,48 @@ function reviewRowValues(edits: ReviewEdits): ReviewRowValues {
     country: edits.country,
     payloadPatch: edits.payload,
   };
+}
+
+type StatusTransition = {
+  status: TestimonialStatus;
+  archive_reason: string | null;
+};
+
+/** Update atómico: gana solo la fila que sigue en `from`. No manda otras columnas. */
+async function transitionStatus(
+  id: string,
+  from: TestimonialStatus,
+  values: StatusTransition,
+  lostMessage: string,
+  errorMessage: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!isTestimonialId(id)) {
+    return { ok: false, message: testimonialNotFound.message };
+  }
+
+  if (!hasSupabaseServiceRoleEnv()) {
+    return { ok: false, message: missingServiceRole };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .update(values)
+    .eq("id", id)
+    .eq("status", from)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Testimonial status transition failed");
+    return { ok: false, message: errorMessage };
+  }
+
+  if (!data) {
+    return { ok: false, message: lostMessage };
+  }
+
+  return { ok: true };
 }
 
 async function updateReviewRow(
