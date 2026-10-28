@@ -17,23 +17,29 @@ function selectedIdFromPath(pathname: string) {
 /** Lista a la izquierda y ficha a la derecha, dentro del padding del shell. */
 export function InboxShell({
   inbox,
+  formHref,
   children,
 }: {
   inbox: AdminInboxData;
+  formHref: string | null;
   children: ReactNode;
 }) {
   return (
     <InboxFiltersProvider>
-      <InboxFrame inbox={inbox}>{children}</InboxFrame>
+      <InboxFrame formHref={formHref} inbox={inbox}>
+        {children}
+      </InboxFrame>
     </InboxFiltersProvider>
   );
 }
 
 function InboxFrame({
   inbox,
+  formHref,
   children,
 }: {
   inbox: AdminInboxData;
+  formHref: string | null;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -58,6 +64,7 @@ function InboxFrame({
         )}
       >
         <InboxList
+          formHref={formHref}
           items={inbox.items}
           loadError={inbox.loadError}
           selectedId={activeId}

@@ -5,7 +5,7 @@ import type {
   TestimonialStatus,
 } from "../../types/testimonial";
 import { getPost, hasInstagramChannel, hasLinkedInChannel } from "../buffer";
-import type { TestimonialDto } from "../dtos/testimonialDto";
+import type { Database, Json, TestimonialDto } from "../dtos/testimonialDto";
 import { hasCommunityWebhook } from "../discord";
 import { TestimonialMapper } from "../mappers/testimonialMapper";
 import { hasSupabaseServiceRoleEnv } from "../supabase/env";
@@ -74,28 +74,31 @@ export async function getTestimonialById(id: string): Promise<
   };
 }
 
+export type ReviewEdits = {
+  quote: string;
+  igCaption: string;
+  liCaption: string;
+  discordCaption: string;
+  fullName: string;
+  country: string;
+  /** Claves del tipo, ya validadas. Se mezclan sobre el payload de la fila. */
+  payload: Record<string, string>;
+};
+
 /** Cada red guarda su texto. Discord va en `discord_caption`. */
 export async function saveReviewEdits(
   id: string,
-  edits: { quote: string; igCaption: string; liCaption: string; discordCaption: string },
+  edits: ReviewEdits,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  return updateReviewRow(id, {
-    quote: edits.quote,
-    ig_caption: edits.igCaption,
-    li_caption: edits.liCaption,
-    discord_caption: edits.discordCaption,
-  });
+  return updateReviewRow(id, reviewRowValues(edits));
 }
 
 export async function publishTestimonial(
   id: string,
-  edits: { quote: string; igCaption: string; liCaption: string; discordCaption: string },
+  edits: ReviewEdits,
 ): Promise<{ ok: true; slug: string } | { ok: false; lost: true } | { ok: false; message: string }> {
   const updated = await updateReviewRow(id, {
-    quote: edits.quote,
-    ig_caption: edits.igCaption,
-    li_caption: edits.liCaption,
-    discord_caption: edits.discordCaption,
+    ...reviewRowValues(edits),
     status: "published",
     published_at: new Date().toISOString(),
   });
@@ -410,16 +413,34 @@ function clearedBufferPost(network: "instagram" | "linkedin") {
   return { buffer_linkedin_posted_at: null, buffer_linkedin_post_id: null };
 }
 
+type ReviewRowValues = {
+  quote?: string;
+  ig_caption?: string;
+  li_caption?: string;
+  discord_caption?: string;
+  full_name?: string;
+  country?: string;
+  /** Claves a mezclar. Si no viene, el payload de la fila no se toca. */
+  payloadPatch?: Record<string, string>;
+  status?: TestimonialStatus;
+  published_at?: string;
+};
+
+function reviewRowValues(edits: ReviewEdits): ReviewRowValues {
+  return {
+    quote: edits.quote,
+    ig_caption: edits.igCaption,
+    li_caption: edits.liCaption,
+    discord_caption: edits.discordCaption,
+    full_name: edits.fullName,
+    country: edits.country,
+    payloadPatch: edits.payload,
+  };
+}
+
 async function updateReviewRow(
   id: string,
-  values: {
-    quote?: string;
-    ig_caption?: string;
-    li_caption?: string;
-    discord_caption?: string;
-    status?: TestimonialStatus;
-    published_at?: string;
-  },
+  values: ReviewRowValues,
 ): Promise<{ ok: true; slug: string } | { ok: false; message: string; lost?: boolean }> {
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
@@ -438,10 +459,39 @@ async function updateReviewRow(
     };
   }
 
+  const update: Database["public"]["Tables"]["testimonials"]["Update"] = {};
+  if (values.quote !== undefined) {
+    update.quote = values.quote;
+  }
+  if (values.ig_caption !== undefined) {
+    update.ig_caption = values.ig_caption;
+  }
+  if (values.li_caption !== undefined) {
+    update.li_caption = values.li_caption;
+  }
+  if (values.discord_caption !== undefined) {
+    update.discord_caption = values.discord_caption;
+  }
+  if (values.full_name !== undefined) {
+    update.full_name = values.full_name;
+  }
+  if (values.country !== undefined) {
+    update.country = values.country;
+  }
+  if (values.status !== undefined) {
+    update.status = values.status;
+  }
+  if (values.published_at !== undefined) {
+    update.published_at = values.published_at;
+  }
+  if (values.payloadPatch) {
+    update.payload = mergeCardPayload(current.testimonial.payload, values.payloadPatch);
+  }
+
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase
     .from("testimonials")
-    .update(values)
+    .update(update)
     .eq("id", id)
     .eq("status", "in_review")
     .select("slug")
@@ -463,6 +513,17 @@ async function updateReviewRow(
   }
 
   return { ok: true, slug: data.slug };
+}
+
+function mergeCardPayload(current: Json, patch: Record<string, string>): Json {
+  if (!isJsonObject(current)) {
+    return { ...patch };
+  }
+  return { ...current, ...patch };
+}
+
+function isJsonObject(value: Json): value is { [key: string]: Json | undefined } {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function mapTestimonial(row: TestimonialDto): AdminTestimonial {

@@ -23,14 +23,14 @@ export function CardDesignField({
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-admin-caption text-foreground">Diseño de la imagen</legend>
+      <legend className="mb-2 text-admin-body font-semibold text-foreground">Diseño de la imagen</legend>
       <div className="grid grid-cols-3 gap-0.5 rounded-md border border-border bg-muted p-0.5">
         {options.map((option) => {
           const checked = option.value === value;
           return (
             <label
               key={option.value}
-              className={`text-admin-micro ${cn(
+              className={`text-admin-caption ${cn(
                 "cursor-pointer rounded px-1.5 py-1 text-center transition-colors",
                 "has-focus-visible:ring-2 has-focus-visible:ring-ring/40",
                 checked
@@ -52,7 +52,7 @@ export function CardDesignField({
         })}
       </div>
       {selected ? (
-        <p className="text-admin-caption text-muted-foreground">{selected.description}</p>
+        <p className="text-admin-micro text-muted-foreground">{selected.description}</p>
       ) : null}
     </fieldset>
   );

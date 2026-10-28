@@ -22,3 +22,12 @@ export function galleryTestimonialHref(slug: string): string | null {
     return null;
   }
 }
+
+/** Formulario público `/enviar`. Null si falta el origen en producción. */
+export function galleryFormHref(): string | null {
+  try {
+    return `${getGalleryUrl()}/enviar`;
+  } catch {
+    return null;
+  }
+}

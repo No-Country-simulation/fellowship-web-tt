@@ -22,7 +22,7 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 
 El video del envío es solo un link de YouTube (`youtube.com` o `youtu.be`). No hay upload de mp4.
 
-Quote y captions de Instagram y LinkedIn salen de la plantilla en `lib/testimonials/quote.ts` al enviar. El equipo los edita a mano en el panel. No hay generación con IA.
+Quote y captions de Instagram y LinkedIn salen de la plantilla en `lib/testimonials/quote.ts` al enviar. En el panel el equipo edita nombre, país, cita y los campos de la card según el tipo; el tipo no se cambia. Si cambia el nombre y una descripción sigue la plantilla, se regenera; las editadas a mano quedan igual. No hay generación con IA.
 
 | Doc | Contenido |
 | --- | --- |
