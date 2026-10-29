@@ -29,7 +29,7 @@ Este checklist resume el estado de desarrollo de Testimonios. Las secciones sigu
 - [ ] Verificar los controles de autenticación y autorización del panel antes de utilizar datos reales.
 - [x] Límites de la card PNG y Storage: la card y el bucket `share-cards` cortan en 5 MB. El body de la Server Action queda en 8 MB para que entren la card y el texto.
 - [x] Recuperación si Buffer falla después de crear el post: el reintento borra fecha e id solo si siguen siendo los de ese post y vuelve a publicar esa red.
-- [ ] Definir la política de conservación o eliminación de testimonios rechazados y sus archivos.
+- [x] Definir la política de conservación o eliminación de testimonios rechazados y sus archivos: se borran en lote desde la pestaña Rechazados (tope 100 por vez), de forma definitiva, con avatar, foto testimonial y card. Si Storage falla en una, esa fila queda para reintentar. Sin migración.
 
 ### V2 — Fuera del alcance actual
 
@@ -143,7 +143,7 @@ En la ficha (`ReviewForm`): envío original arriba (desplegable) y una sola **Pu
 
 Después de publicar, la ficha (`PublishedPanel`) muestra el estado por red, la card que salió y los botones para descargarla y copiar el texto. Si alguna red falla, un solo botón reintenta las que falten.
 
-Flujo de estados: `in_review` pasa a `published` o a `rejected`. Un publicado se archiva con motivo (`published` → `archived`): sale de la galería y `archive_reason` guarda el texto (obligatorio, hasta 500 caracteres). Los posts ya enviados y sus ids no se tocan. Desde archivado se puede volver a publicar (`archived` → `published`, sin reenviar a Discord, Instagram ni LinkedIn) o rechazar (`archived` → `rejected`; el motivo queda null). `rejected` es el rechazo del admin, no un archivo.
+Flujo de estados: `in_review` pasa a `published` o a `rejected`. Un publicado se archiva con motivo (`published` → `archived`): sale de la galería y `archive_reason` guarda el texto (obligatorio, hasta 500 caracteres). Los posts ya enviados y sus ids no se tocan. Desde archivado se puede volver a publicar (`archived` → `published`, sin reenviar a Discord, Instagram ni LinkedIn) o rechazar (`archived` → `rejected`; el motivo queda null). `rejected` es el rechazo del admin, no un archivo. Desde la pestaña Rechazados del inbox se marcan varios o todos los visibles (tope 100 por operación). «Eliminar definitivamente» pide confirmación con la cantidad y solo corre sobre filas que siguen `rejected`. Por cada una borra primero el avatar (bucket `avatars`), la foto testimonial (bucket `captures`, si existe) y `share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla en una, esa fila queda y se puede reintentar. Al terminar se queda en el inbox con los filtros de la URL y muestra un resultado. No requiere migración (`service_role`).
 
 ## Publicar en Discord de comunidad (post validación)
 

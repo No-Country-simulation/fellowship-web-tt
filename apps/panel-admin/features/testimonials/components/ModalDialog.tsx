@@ -9,6 +9,7 @@ const MODAL_FOCUSABLE = "button:not([disabled]), textarea:not([disabled])";
 /**
  * Diálogo del panel: portal, foco en el primer control habilitado, Escape y clic afuera
  * cancelan, Tab queda adentro y al cerrar vuelve el foco a donde estaba.
+ * Si no queda ningún control habilitado, el foco se queda en el diálogo.
  */
 export function ModalDialog({
   open,
@@ -54,7 +55,9 @@ export function ModalDialog({
       const nodes = [...dialog.querySelectorAll<HTMLElement>(MODAL_FOCUSABLE)];
       const first = nodes[0];
       const last = nodes[nodes.length - 1];
-      if (!first || !last) {
+      if (!first || !last || !dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        (first ?? dialog).focus({ preventScroll: true });
         return;
       }
       if (event.shiftKey && document.activeElement === first) {
@@ -66,9 +69,20 @@ export function ModalDialog({
       }
     }
 
+    function onFocusIn(event: FocusEvent) {
+      const dialog = dialogRef.current;
+      if (!dialog || !(event.target instanceof Node) || dialog.contains(event.target)) {
+        return;
+      }
+      const first = dialog.querySelector<HTMLElement>(MODAL_FOCUSABLE);
+      (first ?? dialog).focus({ preventScroll: true });
+    }
+
     document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("focusin", onFocusIn);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("focusin", onFocusIn);
       previouslyFocused?.focus();
     };
   }, [open]);
@@ -92,6 +106,7 @@ export function ModalDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
+        tabIndex={-1}
         className="flex max-h-[80vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-lg border border-border bg-card p-4 shadow-lg"
       >
         {children}
