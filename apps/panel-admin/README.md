@@ -18,9 +18,10 @@ mismo shell, sin un chequeo propio.
 
 Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código vive en
 `features/testimonials` (`components/`, `types/`, `infrastructure/` y `actions/`). Las páginas
-piden datos al repository. Publicar, guardar, rechazar, archivar, volver a publicar y
-reintentar son Server Actions. Publicar y reintentar llaman al repository y después a Discord
-y Buffer. Archivar, volver a publicar y rechazar un archivado no mandan posts. No hay mocks:
+piden datos al repository. Publicar, guardar, rechazar, archivar, volver a publicar,
+reintentar y eliminar rechazados son Server Actions. Publicar y reintentar llaman al
+repository y después a Discord y Buffer. Archivar, volver a publicar, rechazar un archivado
+y eliminar rechazados no mandan posts. No hay mocks:
 el repository lee y escribe Supabase con `service_role`. El resto del panel sigue en mock.
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
@@ -95,6 +96,16 @@ ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar
 `published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
 de publicados vuelve a ofrecer Reintentar. Rechazar un archivado lo pasa a `rejected`, limpia el
 motivo y vuelve a `/testimonials` con los filtros del inbox.
+
+### Eliminar rechazados
+
+En la pestaña Rechazados del inbox se marcan varios testimonios o todos los visibles
+(tope 100 por operación). «Eliminar definitivamente» pide confirmación con la cantidad.
+Solo corre sobre filas que siguen `rejected`. Por cada una borra primero el avatar
+(bucket `avatars`), la foto testimonial (bucket `captures`, si existe) y
+`share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla en una, esa fila
+queda y se puede reintentar. Al terminar se queda en el inbox con los filtros de la URL
+y muestra un resultado. No requiere migración: usa `service_role`.
 
 Antes de desplegar el panel hay que aplicar la migración
 `20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan

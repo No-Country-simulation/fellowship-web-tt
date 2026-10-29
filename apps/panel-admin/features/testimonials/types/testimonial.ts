@@ -94,6 +94,9 @@ export const STATUS_LABELS: Record<TestimonialStatus, string> = {
 /** Tope del motivo de archivo. Lo comparten el formulario y la action. */
 export const ARCHIVE_REASON_MAX_CHARS = 500;
 
+/** Tope de un borrado de rechazados. Lo comparten la lista, la action y el repositorio. */
+export const BULK_DELETE_MAX = 100;
+
 export function isTestimonialStatus(value: string): value is TestimonialStatus {
   return (TESTIMONIAL_STATUSES as readonly string[]).includes(value);
 }

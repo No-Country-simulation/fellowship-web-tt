@@ -51,11 +51,13 @@ function InboxFrame({
       (pathname === pending.from || pathname === `/testimonials/${pending.id}`),
   );
   const activeId = showLoading ? pending?.id : selectedId;
-  const ListTag = activeId ? "aside" : "section";
 
   return (
     <div className="flex h-[calc(100vh-6rem)] min-h-0 overflow-hidden rounded-lg border border-border bg-card">
-      <ListTag
+      {/* Mismo nodo con o sin ficha. Cambiar aside/section remonta la lista,
+          pierde el aviso de borrado y no refresca al salir de la ficha. */}
+      <div
+        role={activeId ? "complementary" : "region"}
         aria-label="Inbox de testimonios"
         className={cn(
           "flex w-full shrink-0 flex-col overflow-y-auto bg-card",
@@ -70,7 +72,7 @@ function InboxFrame({
           selectedId={activeId}
           onSelect={(id) => setPending({ id, from: pathname })}
         />
-      </ListTag>
+      </div>
 
       <div
         className={cn(

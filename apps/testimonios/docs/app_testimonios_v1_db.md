@@ -26,7 +26,7 @@ Los datos que **cambian según el tipo** van en un solo `payload jsonb`. Así `t
 
 - `in_review` — entra así el form
 - `published` — sale a galería y redes
-- `rejected` — lo rechazó un admin; no es un archivo
+- `rejected` — lo rechazó un admin; no es un archivo. El panel los borra en lote (tope 100), solo si la fila sigue `rejected`: primero avatar (`avatars`), foto testimonial (`captures`, si existe) y `share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla, la fila queda para reintentar. Sin migración (`service_role`)
 - `archived` — sale de la galería; el motivo queda en `archive_reason`. Los posts ya enviados no se borran
 
 ---

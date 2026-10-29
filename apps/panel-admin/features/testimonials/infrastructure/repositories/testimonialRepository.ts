@@ -1,8 +1,9 @@
 import type { BufferPostStates, ShareChannels } from "../../types/share";
-import type {
-  AdminInboxData,
-  AdminTestimonial,
-  TestimonialStatus,
+import {
+  BULK_DELETE_MAX,
+  type AdminInboxData,
+  type AdminTestimonial,
+  type TestimonialStatus,
 } from "../../types/testimonial";
 import { getPost, hasInstagramChannel, hasLinkedInChannel } from "../buffer";
 import type { Database, Json, TestimonialDto } from "../dtos/testimonialDto";
@@ -21,6 +22,14 @@ const missingServiceRole =
   "Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY. El inbox no puede leer ni publicar todavía.";
 
 const SHARE_CARD_NAME = "instagram.png";
+
+/** Filas que se borran en paralelo. Cada una termina sus archivos antes de tocar la fila. */
+const DELETE_BATCH = 5;
+
+/** Ruta de la card en el bucket de share cards: `{slug}/instagram.png`. */
+export function shareCardPath(slug: string) {
+  return `${slug}/${SHARE_CARD_NAME}`;
+}
 
 /** `testimonials.id` es uuid. Otro formato hace fallar PostgREST en lugar de devolver vacío. */
 const TESTIMONIAL_ID =
@@ -308,9 +317,85 @@ export async function rejectArchivedTestimonial(
   );
 }
 
+export type DeleteRejectedTestimonialsResult =
+  | {
+      ok: true;
+      deletedIds: string[];
+      failedIds: string[];
+      skippedIds: string[];
+    }
+  | { ok: false; message: string };
+
+/**
+ * Borra rechazados de forma definitiva. Valida ids, deduplica y corta en
+ * `BULK_DELETE_MAX`. Primero avatar, captura (si hay) y card; la fila solo si
+ * Storage salió bien y sigue en `rejected`. Un `remove` de un objeto que no
+ * existe no falla, así que el reintento es idempotente. Si un archivo falla,
+ * la fila queda en `failedIds`.
+ */
+export async function deleteRejectedTestimonials(
+  ids: readonly string[],
+): Promise<DeleteRejectedTestimonialsResult> {
+  const unique = uniqueInOrder(ids);
+  const validIds = unique.filter(isTestimonialId).slice(0, BULK_DELETE_MAX);
+  const skippedIds = unique.filter((id) => !isTestimonialId(id));
+
+  if (validIds.length === 0) {
+    return { ok: true, deletedIds: [], failedIds: [], skippedIds };
+  }
+
+  if (!hasSupabaseServiceRoleEnv()) {
+    return { ok: false, message: missingServiceRole };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("id, slug, avatar_path, capture_path")
+    .in("id", validIds)
+    .eq("status", "rejected");
+
+  if (error) {
+    console.error("Rejected testimonials lookup failed");
+    return {
+      ok: false,
+      message: "No pudimos eliminar los testimonios. Probá de nuevo.",
+    };
+  }
+
+  const byId = new Map((data ?? []).map((row) => [row.id, row]));
+  const rows: RejectedFileRow[] = [];
+  for (const id of validIds) {
+    const row = byId.get(id);
+    if (!row) {
+      skippedIds.push(id);
+      continue;
+    }
+    rows.push(row);
+  }
+
+  const deletedIds: string[] = [];
+  const failedIds: string[] = [];
+
+  for (let index = 0; index < rows.length; index += DELETE_BATCH) {
+    const batch = rows.slice(index, index + DELETE_BATCH);
+    const outcomes = await Promise.all(batch.map((row) => deleteRejectedRow(supabase, row)));
+    for (let offset = 0; offset < outcomes.length; offset += 1) {
+      const row = batch[offset];
+      const outcome = outcomes[offset];
+      if (!row || !outcome) continue;
+      if (outcome === "deleted") deletedIds.push(row.id);
+      else if (outcome === "failed") failedIds.push(row.id);
+      else skippedIds.push(row.id);
+    }
+  }
+
+  return { ok: true, deletedIds, failedIds, skippedIds };
+}
+
 /** URL pública de la card que se guardó al publicar, o `null` si no quedó ninguna. */
 export async function storedShareCardUrl(slug: string): Promise<string | null> {
-  const path = `${slug}/${SHARE_CARD_NAME}`;
+  const path = shareCardPath(slug);
   return (await shareCardExists(path)) ? publicStorageUrl(SHARE_CARDS_BUCKET, path) : null;
 }
 
@@ -330,7 +415,7 @@ export async function bufferPostStates(testimonial: AdminTestimonial): Promise<B
 
 /** Sube la card del post (la misma para las tres redes) o confirma que ya está. Devuelve la URL pública. */
 export async function prepareShareCard(slug: string, file: File | null): Promise<string | null> {
-  const path = `${slug}/${SHARE_CARD_NAME}`;
+  const path = shareCardPath(slug);
   if (file) {
     const uploaded = await uploadShareCard(path, file);
     if (!uploaded) {
@@ -646,6 +731,72 @@ async function uploadShareCard(path: string, file: File) {
   }
 
   return true;
+}
+
+type RejectedFileRow = Pick<TestimonialDto, "id" | "slug" | "avatar_path" | "capture_path">;
+
+type ServiceRoleClient = ReturnType<typeof createServiceRoleClient>;
+
+function uniqueInOrder(ids: readonly string[]) {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const id of ids) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    unique.push(id);
+  }
+  return unique;
+}
+
+/** Storage primero. Si algo falla, no se borra la fila. */
+async function deleteRejectedRow(
+  supabase: ServiceRoleClient,
+  row: RejectedFileRow,
+): Promise<"deleted" | "failed" | "skipped"> {
+  try {
+    const removed = await removeRejectedFiles(supabase, row);
+    if (!removed) return "failed";
+
+    const { data, error } = await supabase
+      .from("testimonials")
+      .delete()
+      .eq("id", row.id)
+      .eq("status", "rejected")
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Rejected testimonial row delete failed");
+      return "failed";
+    }
+
+    return data ? "deleted" : "skipped";
+  } catch {
+    console.error("Rejected testimonial row delete failed");
+    return "failed";
+  }
+}
+
+async function removeRejectedFiles(supabase: ServiceRoleClient, row: RejectedFileRow) {
+  const removals = [
+    supabase.storage.from(AVATARS_BUCKET).remove([row.avatar_path]),
+    supabase.storage.from(SHARE_CARDS_BUCKET).remove([shareCardPath(row.slug)]),
+  ];
+  if (row.capture_path) {
+    removals.push(supabase.storage.from(CAPTURES_BUCKET).remove([row.capture_path]));
+  }
+
+  try {
+    const results = await Promise.all(removals);
+    if (results.some((result) => result.error)) {
+      console.error("Rejected testimonial file delete failed");
+      return false;
+    }
+    return true;
+  } catch {
+    console.error("Rejected testimonial file delete failed");
+    return false;
+  }
 }
 
 async function shareCardExists(path: string) {

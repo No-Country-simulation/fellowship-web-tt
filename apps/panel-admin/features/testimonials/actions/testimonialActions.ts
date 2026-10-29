@@ -14,6 +14,7 @@ import {
   isTestimonialId,
   prepareShareCard,
   publishTestimonial,
+  deleteRejectedTestimonials,
   rejectArchivedTestimonial,
   rejectTestimonial,
   republishTestimonial,
@@ -22,8 +23,8 @@ import {
   storedShareCardUrl,
 } from "../infrastructure/repositories/testimonialRepository";
 import { prepareErroredBufferRetries, readShareCard, sharePublished } from "../infrastructure/share";
-import type { ArchiveState, ReviewState } from "../types/reviewState";
-import { ARCHIVE_REASON_MAX_CHARS } from "../types/testimonial";
+import type { ArchiveState, BulkDeleteState, ReviewState } from "../types/reviewState";
+import { ARCHIVE_REASON_MAX_CHARS, BULK_DELETE_MAX } from "../types/testimonial";
 import {
   SHARE_CARD_TOO_LARGE_MESSAGE,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
@@ -283,9 +284,57 @@ export async function rejectArchivedAction(id: string, formData: FormData): Prom
   redirectWithFilters("/testimonials", formData);
 }
 
-function revalidateTestimonials(id: string) {
+/**
+ * Borra los rechazados marcados. No redirige: la URL y sus filtros quedan.
+ * Solo confía en los ids; el repositorio vuelve a leer la fila y exige `rejected`.
+ * No revalida: el render que sigue a `revalidatePath` pide de nuevo la ficha
+ * abierta y, si esa fila ya no está, `notFound()` parpadea. La lista se refresca
+ * en el cliente.
+ */
+export async function deleteRejectedAction(formData: FormData): Promise<BulkDeleteState> {
+  const ids = readIdList(formData);
+  if (ids.length === 0) {
+    return { status: "error", message: "Elegí al menos un testimonio rechazado." };
+  }
+  if (ids.length > BULK_DELETE_MAX) {
+    return {
+      status: "error",
+      message: `Podés eliminar hasta ${BULK_DELETE_MAX} testimonios por vez.`,
+    };
+  }
+
+  const deleted = await deleteRejectedTestimonials(ids);
+  if (!deleted.ok) {
+    return { status: "error", message: deleted.message };
+  }
+
+  return {
+    status: "done",
+    deletedIds: deleted.deletedIds,
+    failed: deleted.failedIds.length,
+    skipped: deleted.skippedIds.length,
+  };
+}
+
+function revalidateTestimonials(id: string | readonly string[]) {
   revalidatePath("/testimonials");
-  revalidatePath(`/testimonials/${id}`);
+  const ids = typeof id === "string" ? [id] : id;
+  for (const itemId of ids) {
+    if (isTestimonialId(itemId)) {
+      revalidatePath(`/testimonials/${itemId}`);
+    }
+  }
+}
+
+function readIdList(formData: FormData) {
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (const value of formData.getAll("ids")) {
+    if (typeof value !== "string" || seen.has(value)) continue;
+    seen.add(value);
+    ids.push(value);
+  }
+  return ids;
 }
 
 function readString(formData: FormData, key: string): string {
