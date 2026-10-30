@@ -1,0 +1,265 @@
+/* Valores de ig-card-canvas.ts: drawQuoteDesign, drawBody y drawAuthorInline.
+ * Se mantienen locales: los tokens globales de la web usan otra paleta. */
+.frame {
+  container-type: inline-size;
+  min-width: 0;
+  height: 100%;
+}
+
+.publication {
+  --quote-lines: 6;
+  --publication-pink: #ff3d9a;
+  --publication-ink: #16132b;
+  --publication-white: #ffffff;
+  --publication-indigo: #8b5cf6;
+  --publication-blue: #38bdf8;
+  --publication-text: var(--publication-white);
+  --publication-muted: rgb(255 255 255 / 82%);
+  --publication-divider: rgb(255 255 255 / 18%);
+  --publication-hex: rgb(255 255 255 / 14%);
+  --publication-kicker: rgb(255 255 255 / 92%);
+  --publication-mark: rgb(255 255 255 / 32%);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 125cqi;
+  height: 100%;
+  margin: 0;
+  padding: 16px;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #e63292, #0e1f99);
+  color: var(--publication-text);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.publication[data-type="first_job"] {
+  --quote-lines: 5;
+  --publication-text: var(--publication-ink);
+  --publication-muted: #5c5670;
+  --publication-divider: #e2dcea;
+  --publication-hex: rgb(255 61 154 / 16%);
+  --publication-kicker: var(--publication-pink);
+  --publication-mark: var(--publication-pink);
+  background: #f4f2f6;
+}
+
+.publication[data-type="career_change"] {
+  --quote-lines: 5;
+  --publication-hex: rgb(255 61 154 / 22%);
+  --publication-kicker: var(--publication-pink);
+  --publication-mark: var(--publication-pink);
+  background: #070b18;
+}
+
+.decoration {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  fill: none;
+  stroke: var(--publication-hex);
+  stroke-width: 3;
+  pointer-events: none;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Equivale al tintado source-in del logo original. */
+.logo {
+  display: block;
+  flex-shrink: 0;
+  width: clamp(4.5rem, 27.778cqi, 6.25rem);
+  max-width: 100%;
+  aspect-ratio: 1229 / 207;
+  background: currentColor;
+  mask: url("/brand/logo-no-country.png") center / contain no-repeat;
+}
+
+.badge {
+  max-width: 100%;
+  padding: 0.45em 1em;
+  border-radius: 999px;
+  background: var(--publication-white);
+  color: var(--publication-ink);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.064em;
+}
+
+.publication[data-type="first_job"] .badge {
+  background: linear-gradient(90deg, var(--publication-pink), var(--publication-blue));
+  color: var(--publication-white);
+}
+
+.publication[data-type="career_change"] .badge {
+  background: linear-gradient(90deg, #c026d3, #7c3aed);
+  color: var(--publication-white);
+}
+
+.content {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  /* Espacio propio del hero compacto, sin trasladar coordenadas fijas del Canvas. */
+  padding-block-start: clamp(2rem, 12cqi, 2.75rem);
+  padding-block-end: 0.75rem;
+}
+
+.quoteGroup { position: relative; }
+
+.quoteMark {
+  position: absolute;
+  top: -0.48em;
+  left: -0.035em;
+  z-index: -1;
+  color: var(--publication-mark);
+  font-size: clamp(3.5rem, 22cqi, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.kicker {
+  color: var(--publication-kicker);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.123em;
+}
+
+/* El texto íntegro permanece en el DOM. El enlace exterior lleva a la historia completa. */
+.quote {
+  margin-top: 0.5rem;
+  font-size: clamp(1.0625rem, 6.05cqi, 1.375rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.quoteText {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--quote-lines);
+  overflow: hidden;
+}
+
+.company {
+  display: flex;
+  flex-wrap: wrap;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.625rem;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  color: var(--publication-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.companyLabel {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4375rem 0.625rem;
+  background: linear-gradient(135deg, #ff2d8a, var(--publication-indigo));
+  font-size: 0.625rem;
+  letter-spacing: 0.067em;
+  text-transform: uppercase;
+}
+
+.check { width: 1rem; height: 0.875rem; flex-shrink: 0; }
+
+.companyName {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.4375rem 0.625rem;
+  background: linear-gradient(90deg, #6366f1, var(--publication-blue));
+}
+
+.transition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.previousRole, .newRole {
+  min-width: 0;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--publication-pink);
+  border-radius: 999px;
+  background: rgb(255 61 154 / 16%);
+}
+
+.previousRole {
+  border-color: transparent;
+  background: rgb(255 255 255 / 14%);
+}
+
+.arrow { color: var(--publication-pink); }
+
+.author {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--publication-divider);
+}
+
+.avatarBorder, .avatar {
+  clip-path: polygon(50% 0, 93.301% 25%, 93.301% 75%, 50% 100%, 6.699% 75%, 6.699% 25%);
+}
+
+.avatarBorder {
+  display: block;
+  flex-shrink: 0;
+  width: clamp(44px, 15.294cqi, 52px);
+  aspect-ratio: 1;
+  padding: 2px;
+  background: var(--publication-pink);
+}
+
+.avatar {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: #24143f;
+  color: var(--publication-white);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.avatarImage { object-fit: cover; }
+.authorDetails { min-width: 0; }
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(0.9375rem, 4.706cqi, 1.0625rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.country { margin-top: 0.125rem; color: var(--publication-muted); font-size: 0.75rem; font-weight: 600; line-height: 1.35; }
+.role { margin-top: 0.125rem; font-size: 0.75rem; font-weight: 600; line-height: 1.4; }
+.publication[data-type="first_job"] .role { color: var(--publication-pink); }

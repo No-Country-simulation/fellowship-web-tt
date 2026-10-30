@@ -2,7 +2,7 @@
 
 ## Estado actual de implementación
 
-**Última revisión:** 22 de octubre de 2026.
+**Última revisión:** 30 de octubre de 2026.
 
 Este checklist resume el estado de desarrollo de Testimonios. Las secciones siguientes conservan la planificación y las decisiones originales del proyecto.
 
@@ -11,8 +11,9 @@ Este checklist resume el estado de desarrollo de Testimonios. Las secciones sigu
 - [x] Formulario `/enviar` de cinco pasos y tres categorías de testimonios.
 - [x] Validaciones, avatar obligatorio y fotografía testimonial opcional.
 - [x] Consentimiento, resumen y confirmación del envío pendiente de moderación.
-- [x] Galería pública con búsqueda, filtros, contador y estados vacíos.
-- [x] Carrusel de hasta tres testimonios publicados.
+- [x] Landing de captación con mensaje neutro latinoamericano y CTA «Compartir mi testimonio» hacia `/enviar`, sin promesa de publicación automática.
+- [x] Galería con búsqueda, filtros, contador y estados vacíos implementada y conservada, temporalmente fuera del home.
+- [x] Carrusel manual de hasta tres testimonios publicados, con réplica HTML de la plantilla Canvas `quote` (Cita) y variantes por tipo real.
 - [x] Ficha individual con historia completa, fotografía testimonial y video de YouTube.
 - [x] Mejoras responsive, de accesibilidad y adaptación a texto ampliado.
 - [x] Documentación UI de los componentes implementados y modificados.
@@ -22,6 +23,16 @@ Este checklist resume el estado de desarrollo de Testimonios. Las secciones sigu
 - [x] Panel administrativo de revisión, edición y moderación de testimonios.
 - [x] Generación de cards para redes sociales.
 - [x] Integraciones con Discord y Buffer, demostradas funcionando por el equipo en dev.
+
+### Issue 1 — Landing de captación y carrusel social
+
+La consulta pública existente y `force-dynamic` se conservan. El home solo compone el hero; se retira el mapeo destinado a la galería, sin modificar Supabase ni la selección de publicados. Las fichas continúan accesibles y sus enlaces de retorno dicen «Volver al inicio». Navbar, footer y formulario no se rediseñan.
+
+`HeroTestimonialCard` traslada únicamente la presentación de `drawQuoteDesign`, `drawBody`, `learningGradient`, `drawAuthorInline` y sus recursos relacionados de `apps/panel-admin/features/testimonials/infrastructure/ig-card-canvas.ts`. No importa código administrativo ni duplica edición, validaciones, captions, exportación o publicación. El contrato mínimo se deriva de `PublicTestimonial` en servidor, sin nuevas consultas ni datos privados.
+
+La réplica HTML no es el PNG final de Storage. El dibujante soporta las tres categorías, pero el selector administrativo solo ofrece Cita para Simulación; las variantes HTML no cambian ese selector. El pulido del 30/10 reduce la tarjeta a un máximo de 340px y mantiene 4:5 como referencia mínima. La cita tiene truncado visual CSS de cinco/seis líneas y el nombre una línea con elipsis; los textos completos permanecen en los datos y el DOM. País y puesto ocupan filas independientes. Metadatos extensos y fuente ampliada pueden hacer crecer la tarjeta. Las herramientas siguen fuera de la publicación; la aprobación visual humana continúa pendiente.
+
+Referencias: [tarjeta y diferencias con Canvas](./ui/components/hero-testimonial-card.md), [hero](./ui/components/gallery-hero.md), [carrusel](./ui/components/gallery-hero-carousel.md) y [QA con capturas](./ui/capture-landing-qa.md). La aprobación visual del equipo y la internacionalización del formulario quedan fuera de esta issue.
 
 ### Pendientes de revisión técnica
 

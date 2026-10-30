@@ -4,7 +4,7 @@ Wrapper de página: `<main>` en el flujo del documento + eyebrow, título y desc
 
 **Archivo:** `components/page-shell.tsx`
 
-Uso actual: estado de error de `/t/[slug]`. La ficha exitosa usa la composición propia de [`TestimonialDetail`](./testimonial-detail.md). La galería usa un `<main>` propio con `GalleryHero` y `TestimonialsGallery` para extender el fondo del hero sin cambiar este componente compartido. `/enviar` también compone su propio `<main>` y encabezado editorial en `app/enviar/page.tsx`, conservando el ancho `max-w-3xl`. Todas las rutas usan el scroll del documento.
+Uso actual: estado de error de `/t/[slug]`. La ficha exitosa usa la composición propia de [`TestimonialDetail`](./testimonial-detail.md). La landing de captación usa un `<main>` propio con `GalleryHero`; `TestimonialsGallery` se conserva sin montarse. `/enviar` también compone su propio `<main>` y encabezado editorial en `app/enviar/page.tsx`, conservando el ancho `max-w-3xl`. Todas las rutas usan el scroll del documento.
 
 ## Import
 

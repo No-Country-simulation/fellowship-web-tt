@@ -18,8 +18,8 @@ const CLOSING_COPY = {
   title: "Tu historia también cuenta.",
   description:
     "Cada experiencia puede inspirar a alguien que está empezando su camino.",
-  primaryAction: "Enviar testimonio",
-  secondaryAction: "Ver más historias",
+  primaryAction: "Compartir mi testimonio",
+  secondaryAction: "Volver al inicio",
 } as const;
 
 type TestimonialDetailProps = {
@@ -50,7 +50,7 @@ export function TestimonialDetail({ testimonial }: TestimonialDetailProps) {
           className="inline-flex min-h-11 items-center gap-xs rounded-sm text-sm font-medium text-text-secondary transition-colors hover:text-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan motion-reduce:transition-none"
         >
           <ArrowLeft aria-hidden="true" className="size-4 shrink-0" />
-          Volver a la galería
+          Volver al inicio
         </Link>
 
         <header className="flex flex-col gap-lg pt-lg pb-2xl md:flex-row-reverse md:items-center md:justify-between md:gap-xl md:pt-xl md:pb-3xl">
