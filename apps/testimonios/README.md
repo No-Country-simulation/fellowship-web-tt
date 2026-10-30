@@ -16,7 +16,7 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 
 | Ruta | Qué es |
 | --- | --- |
-| `/` | Galería (publicados) |
+| `/` | Landing de captación hacia `/enviar`, con carrusel de hasta tres publicados |
 | `/enviar` | Formulario público, sin login (país y avatar obligatorios; captura, YouTube, Instagram y LinkedIn opcionales) |
 | `/t/[slug]` | Ficha de un testimonio publicado |
 
@@ -57,6 +57,6 @@ Deploy: en Vercel, Root Directory `apps/testimonios`.
 
 ## UI
 
-Tokens y type scale alineados al [design system de la landing](../landing-contratar/docs/ui/design-system.md) (DM Sans, paleta oscura). Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). Sin chrome de marketing: esta app es el formulario y la galería. Scrollbar fino en `app/globals.css` (thumb de borde, hover cyan).
+Tokens y type scale: DM Sans y paleta oscura de `app/globals.css`, con el [design system de la landing](../landing-contratar/docs/ui/design-system.md) como referencia interna. Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). El home prioriza captar testimonios; conserva el chrome institucional y la galería implementada, temporalmente sin montar. El carrusel utiliza una réplica HTML de Cita, con variables locales fieles al Canvas administrativo; no muestra PNG finales. Scrollbar fino en `app/globals.css` (thumb de borde, hover cyan).
 
 Componentes reutilizables (PageShell, TestimonialCard, Field, etc.): [docs/ui](./docs/ui/README.md).

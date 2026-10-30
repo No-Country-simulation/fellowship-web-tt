@@ -7,38 +7,33 @@ import { cn } from "@/lib/utils";
 
 import styles from "./gallery-hero.module.css";
 
-// Copy provisional para revisar junto con la composición de la galería.
+// Captación de talento: compartir no implica publicación automática.
 const HERO_COPY = {
-  eyebrow: "Galería de testimonios",
-  title: "Historias de",
-  highlight: "talento real.",
+  eyebrow: "Tu historia en No Country",
+  title: "Tu experiencia merece",
+  highlight: "ser compartida.",
   description:
-    "Conocé las experiencias reales de nuestra comunidad y cómo la tecnología transformó sus carreras.",
-  action: "Enviar testimonio",
+    "Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales.",
+  action: "Compartir mi testimonio",
 } as const;
 
 type GalleryHeroProps = {
   stories: readonly HeroStory[] | null;
 };
 
-/** Hero de servidor: publicados seleccionados, vacío honesto o null si falló la carga. */
+/** Landing de captación de servidor, con publicados seleccionados y estados vacío/error. */
 export function GalleryHero({ stories }: GalleryHeroProps) {
   return (
     <section
       aria-labelledby="gallery-title"
-      className={cn(
-        styles.hero,
-        "@container border-b border-border-subtle px-md py-xl md:px-lg md:py-3xl",
-      )}
-    >
+      className={cn(styles.hero, "@container border-b border-border-subtle py-xl 2xl:py-3xl")}>
       <div aria-hidden="true" className={styles.backdrop}>
         <svg
           className={styles.art}
           viewBox="0 0 1440 550"
           preserveAspectRatio="xMidYMid slice"
           aria-hidden="true"
-          focusable="false"
-        >
+          focusable="false">
           <defs>
             <radialGradient id="gallery-hero-purple-wash">
               <stop offset="0" stopColor="var(--brand-pink)" stopOpacity=".25" />
@@ -67,8 +62,7 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
               y1="0"
               x2="1"
               y2=".7"
-              gradientUnits="objectBoundingBox"
-            >
+              gradientUnits="objectBoundingBox">
               <stop offset="0" stopColor="var(--brand-pink)" stopOpacity=".18" />
               <stop offset=".45" stopColor="var(--hero-violet)" stopOpacity=".61" />
               <stop offset="1" stopColor="var(--brand-cyan)" stopOpacity=".52" />
@@ -79,8 +73,7 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
               y1="0"
               x2="1"
               y2="1"
-              gradientUnits="objectBoundingBox"
-            >
+              gradientUnits="objectBoundingBox">
               <stop offset="0" stopColor="var(--hero-violet)" stopOpacity=".47" />
               <stop offset=".45" stopColor="var(--hero-blue)" stopOpacity=".38" />
               <stop offset="1" stopColor="var(--brand-cyan)" stopOpacity=".65" />
@@ -135,7 +128,11 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
         <span className={cn(styles.points, styles.pointsTop)} />
         <span className={cn(styles.points, styles.pointsBottom)} />
       </div>
-      <div className="mx-auto grid w-full max-w-[70rem] gap-lg lg:@min-[56rem]:grid-cols-[minmax(0,1fr)_26rem] lg:@min-[56rem]:items-center xl:gap-2xl xl:@min-[56rem]:grid-cols-[minmax(0,1fr)_28rem]">
+      <div
+        className={cn(
+          "mx-auto grid w-full max-w-[70rem] gap-lg",
+          stories && stories.length > 0 && styles.withStories,
+        )}>
         <div className="min-w-0 wrap-anywhere">
           <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
             <span
@@ -146,12 +143,9 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
           </p>
           <h1
             id="gallery-title"
-            className="mt-md text-[2.125rem] font-bold leading-[1.1] tracking-tight text-text-primary sm:text-5xl"
-          >
+            className="mt-md text-[2.125rem] font-bold leading-[1.1] tracking-tight text-text-primary sm:text-5xl">
             {HERO_COPY.title}{" "}
-            <span className="text-brand-gradient inline-block">
-              {HERO_COPY.highlight}
-            </span>
+            <span className="text-brand-gradient inline-block">{HERO_COPY.highlight}</span>
           </h1>
           <p className="mt-md max-w-[36rem] text-base leading-relaxed text-text-secondary sm:text-lg">
             {HERO_COPY.description}
@@ -161,16 +155,19 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
             className={cn(
               buttonVariants({ variant: "gradient", size: "lg" }),
               "mt-md h-auto min-h-12 max-w-full px-[min(var(--spacing-md),24px)] py-xs text-base whitespace-normal focus-visible:border-transparent motion-reduce:transition-none",
-            )}
-          >
+            )}>
             {HERO_COPY.action}
           </Link>
         </div>
-        {stories === null ? null : stories.length > 0 ? (
+        {stories === null ? (
+          <p role="status" className="text-sm leading-relaxed text-text-secondary">
+            En este momento no se pueden mostrar las historias de la comunidad.
+          </p>
+        ) : stories.length > 0 ? (
           <GalleryHeroCarousel stories={stories} />
         ) : (
-          <p className="w-full max-w-[28rem] justify-self-center text-base leading-relaxed text-text-secondary lg:justify-self-end">
-            Pronto vas a encontrar historias de nuestra comunidad.
+          <p className="max-w-[36rem] text-sm leading-relaxed text-text-secondary">
+            Tu historia puede inspirar a otras personas de la comunidad.
           </p>
         )}
       </div>

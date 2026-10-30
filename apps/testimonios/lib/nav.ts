@@ -1,5 +1,5 @@
 export const publicNav = [
-  { href: "/", label: "Galería" },
+  { href: "/", label: "Inicio" },
   { href: "/enviar", label: "Enviar" },
 ] as const;
 

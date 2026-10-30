@@ -1,6 +1,25 @@
 .hero {
   position: relative;
   isolation: isolate;
+  padding-inline: min(var(--spacing-md), 24px);
+}
+
+@media (min-width: 48rem) {
+  .hero { padding-inline: min(var(--spacing-lg), 32px); }
+}
+
+/* Columna de 340px para la publicación y hasta 32px de reserva para la pila. */
+@media (min-width: 64rem) {
+  @container (min-width: 56rem) {
+    .withStories {
+      grid-template-columns: minmax(0, 1fr) 372px;
+      align-items: center;
+    }
+  }
+}
+
+@media (min-width: 80rem) {
+  .withStories { column-gap: var(--spacing-2xl); }
 }
 
 /* Solo esta capa recorta la decoración, sin cortar tarjetas ni indicadores de foco. */

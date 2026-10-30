@@ -19,9 +19,10 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [SiteHeader](./components/site-header.md) | Navbar institucional sticky, disclosures y diálogo móvil |
 | [SiteFooter](./components/site-footer.md) | Footer institucional de servidor, navegación, redes y destinos pendientes |
 | [Propuesta para la web oficial](./official-chrome-improvements.md) | Registro de hallazgos, diferencias deliberadas y QA integral del chrome |
-| [GalleryHero](./components/gallery-hero.md) | Presentación de servidor, CTA y composición del hero |
+| [GalleryHero](./components/gallery-hero.md) | Landing de captación, CTA y composición del hero |
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Hasta tres testimonios publicados, apilados y con navegación manual |
-| [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla de historias |
+| [HeroTestimonialCard](./components/hero-testimonial-card.md) | Réplica HTML de la plantilla Canvas Cita, con variantes por tipo |
+| [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla; temporalmente fuera del home |
 | [TestimonialDetail](./components/testimonial-detail.md) | Ficha editorial de servidor, contexto profesional y medios opcionales |
 | [TestimonialCapture](./components/testimonial-capture.md) | Foto testimonial a tamaño natural, sin pie visible y con ampliación accesible |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
@@ -58,7 +59,9 @@ No documentar formularios de una sola ruta ni utilidades no-UI (`lib/`).
 
 Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fino: thumb `border`, hover cyan).
 
-## Composición de la galería
+## Composición de la landing
+
+El home prioriza la captación hacia `/enviar`. La galería permanece implementada pero no se monta; el carrusel utiliza únicamente publicados y las fichas `/t/[slug]` siguen disponibles. Véase [QA de la landing y comparación con Canvas](./capture-landing-qa.md).
 
 El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--etapa-4) documenta la matriz responsive, teclado y regresiones de las tres rutas. Distingue pruebas vivas, estados aislados y pendientes manuales; el cierre no equivale a certificación de accesibilidad ni aprobación visual humana.
 
@@ -68,13 +71,13 @@ El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--
 
 Las tres rutas usan el scroll del documento. El layout es una columna flexible con altura mínima de `100dvh`; cada `<main>` crece con su contenido y no crea un scroll independiente. El header institucional es sticky y publica su altura real para el offset de scroll. El formulario enfoca pasos y errores sin scroll automático y luego desplaza el documento, descontando la altura real del header y 16px de separación. Su contenedor permite cortar palabras demasiado anchas y sus botones de navegación admiten varias líneas para no depender del antiguo scroll horizontal al ampliar la fuente. Los diálogos modales bloquean el scroll raíz mediante `html:has(dialog:modal)`; `scrollbar-gutter: stable` conserva el ancho al abrirlos y cerrarlos. Los paneles de diálogo mantienen su scroll interno cuando hace falta.
 
-`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente que recibe hasta tres testimonios de la misma consulta pública de `app/page.tsx`. `selectHeroStories` selecciona en servidor sin reemplazo, con aleatoriedad cuando hay más de tres, y transmite solo `id`, `slug`, `quote`, `fullName`, `typeLabel` y `avatarUrl`. No hay ejemplos ficticios ni consultas adicionales. Con cero publicados, el hero muestra un texto discreto; ante un error, conserva el aviso único de la sección inferior. `TestimonialsGallery` es un límite cliente independiente: recibe únicamente `id`, `slug`, `type`, `typeLabel`, `fullName`, `quote` y `avatarUrl`; busca por nombre o extracto y filtra por categoría en memoria sin consultar nuevamente Supabase. El orden de publicación recibido se conserva.
+`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente que recibe hasta tres testimonios de la misma consulta pública de `app/page.tsx`. `selectHeroStories` selecciona sin reemplazo y transmite exclusivamente identidad, slug y datos públicos de presentación; incluye tipo real, país, rol, empresa y profesión anterior cuando existen para la réplica de Cita. No hay ejemplos ficticios ni consultas adicionales. El hero distingue cero publicados y error de carga, manteniendo el CTA. La galería preservada filtra en memoria y no se monta en el home.
 
-La grilla usa una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Los textos provisionales están agrupados en constantes locales en la página y sus componentes. Las historias y avatares de la grilla provienen de los datos publicados.
+Para una futura reutilización, `TestimonialsGallery` conserva su contrato y distribución: una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. No se eliminan historias, componentes ni páginas de detalle al ocultar esa sección.
 
-La sección «Explorá las historias» conserva su `h2` y asociación accesible, con el eyebrow «VOCES DE LA COMUNIDAD» y una línea de degradado de marca encima, separados del título por 24px como en el hero. El contador aparece sobre una única barra de búsqueda y filtros. Hasta `lg`, la búsqueda ocupa la primera fila y los filtros quedan debajo: en una grilla 2 × 2 antes de `sm`, y con ancho natural y wrapping desde `sm`. Desde `lg`, los filtros quedan a la izquierda y el buscador a la derecha, con 288px de ancho y 320px desde `xl`, sin ocupar todo el espacio sobrante.
+La barra preservada de `TestimonialsGallery` mantiene búsqueda, filtros y contador para usos futuros. Su API y su distribución se describen en la ficha correspondiente; el home ya no presenta el encabezado «Explorá las historias» ni los estados de esa sección.
 
-Al ampliar la fuente, el CTA puede ocupar varias líneas, el hero apila sus columnas si no dispone de `56rem` y la barra permite filas adicionales; sus filtros pasan a una columna si el ancho interior es menor que `14rem`. La sección de exploración permite cortar palabras que excedan su ancho, evitando desbordamientos sin ocultar contenido. La composición anterior se conserva con fuente base de 16px. Los detalles están documentados en cada componente.
+Al ampliar la fuente, el CTA puede ocupar varias líneas y el hero apila sus columnas si no dispone de `56rem`. La publicación tiene hasta 340px de ancho, cita limitada visualmente a cinco/seis líneas y autor en filas de nombre, país y puesto. Los textos completos se conservan en el DOM; el nombre muestra elipsis en una línea. Solo los metadatos y la fuente ampliada pueden hacer crecer la tarjeta por encima de la referencia 4:5. Los controles permanecen fuera de su área visual. Los detalles están documentados en cada componente.
 
 ## Composición de la ficha
 
