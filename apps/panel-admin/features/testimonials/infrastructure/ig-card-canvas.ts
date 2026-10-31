@@ -18,7 +18,14 @@ const INLINE_AUTHOR_H = 132;
 const QUOTE_AUTHOR_H = 208;
 const QUOTE_AVATAR_R = 92;
 const QUOTE_NAME_SIZE = 56;
+/** Piso de una línea en la cita (~80%). En dos líneas el nombre baja a 40px. */
+const QUOTE_NAME_MIN = 44;
+const QUOTE_NAME_TWO_LINE = 40;
 const QUOTE_META_SIZE = 36;
+/** Separación entre nombre, país y puesto. */
+const AUTHOR_LINE_GAP = 10;
+/** Si la pila supera la caja por este margen, el nombre baja un paso más. */
+const AUTHOR_BOX_MARGIN = 12;
 
 const PINK = "#ff3d9a";
 const INK = "#16132b";
@@ -224,6 +231,8 @@ function drawQuoteDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }
     hexR: QUOTE_AVATAR_R,
     blockH: QUOTE_AUTHOR_H,
     nameSize: QUOTE_NAME_SIZE,
+    nameMin: QUOTE_NAME_MIN,
+    twoLineSize: QUOTE_NAME_TWO_LINE,
     metaSize: QUOTE_META_SIZE,
   });
 }
@@ -289,16 +298,23 @@ function drawProfileDesign({ ctx, input, variant, copy, logo, avatar, photo, fon
   const sideW = cardX + cardW - 40 - sideX;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
-  const nameSize = fitFont(ctx, input.fullName, sideW, 52, 34, 800, fontFamily);
-  ctx.font = `800 ${nameSize}px ${fontFamily}`;
+  const nameFit = fitName(ctx, input.fullName, sideW, 52, 34, 800, fontFamily);
+  ctx.font = `800 ${nameFit.size}px ${fontFamily}`;
   ctx.fillStyle = "#ffffff";
   const nameY = bannerBottom + 22;
-  ctx.fillText(truncateToWidth(ctx, input.fullName, sideW), sideX, nameY);
+  nameFit.lines.forEach((line, i) => {
+    ctx.fillText(line, sideX, nameY + i * (nameFit.size + AUTHOR_LINE_GAP));
+  });
+  const nameBlockH =
+    nameFit.lines.length === 0
+      ? 0
+      : nameFit.lines.length * nameFit.size +
+        Math.max(0, nameFit.lines.length - 1) * AUTHOR_LINE_GAP;
   drawPreviousLine(ctx, {
     previous: input.previousRole?.trim() || null,
     country: input.country?.trim() || null,
     x: sideX,
-    y: nameY + nameSize + 14,
+    y: nameY + nameBlockH + 14,
     maxWidth: sideW,
     fontFamily,
   });
@@ -329,7 +345,7 @@ function drawProfileDesign({ ctx, input, variant, copy, logo, avatar, photo, fon
   );
 }
 
-/** "Antes: rol tachado · país", recortado al ancho. */
+/** "Antes: rol tachado · país". Si no entra, se recorta el oficio y se conserva el país. */
 function drawPreviousLine(
   ctx: CanvasRenderingContext2D,
   {
@@ -362,19 +378,40 @@ function drawPreviousLine(
 
   const label = "Antes: ";
   const labelW = ctx.measureText(label).width;
-  const withCountry = country ? ` · ${country}` : "";
-  const fitsAll = labelW + ctx.measureText(`${previous}${withCountry}`).width <= maxWidth;
-  const suffix = fitsAll ? withCountry : "";
-  const shown = truncateToWidth(ctx, previous, maxWidth - labelW);
-  const shownW = ctx.measureText(shown).width;
-  ctx.fillText(label, x, y);
-  ctx.fillText(shown, x + labelW, y);
-  if (suffix) {
-    ctx.fillText(suffix, x + labelW + shownW, y);
+  const sep = " · ";
+  let sepText = "";
+  let countryText = "";
+  if (country) {
+    sepText = sep;
+    const sepW = ctx.measureText(sep).width;
+    const countryRoom = Math.max(0, maxWidth - labelW - sepW);
+    countryText =
+      ctx.measureText(country).width <= countryRoom
+        ? country
+        : truncateToWidth(ctx, country, countryRoom);
   }
 
-  ctx.fillStyle = PINK;
-  ctx.fillRect(x + labelW - 2, y + size * 0.56, shownW + 4, 3);
+  const tailW = ctx.measureText(`${sepText}${countryText}`).width;
+  const roleRoom = maxWidth - labelW - tailW;
+  let shown = truncateToWidth(ctx, previous, Math.max(0, roleRoom));
+  if (country && ctx.measureText(shown).width > roleRoom) {
+    shown = "";
+    sepText = "";
+    countryText = truncateToWidth(ctx, country, Math.max(0, maxWidth - labelW));
+  }
+
+  const shownW = shown ? ctx.measureText(shown).width : 0;
+  ctx.fillText(label, x, y);
+  if (shown) {
+    ctx.fillText(shown, x + labelW, y);
+  }
+  if (countryText) {
+    ctx.fillText(`${sepText}${countryText}`, x + labelW + shownW, y);
+  }
+  if (shown) {
+    ctx.fillStyle = PINK;
+    ctx.fillRect(x + labelW - 2, y + size * 0.56, shownW + 4, 3);
+  }
 }
 
 /** Simulación: la persona al centro en un hexágono grande y la frase debajo. */
@@ -400,16 +437,26 @@ function drawPortraitDesign({ ctx, input, variant, copy, logo, avatar, fontFamil
   drawHexAvatar(ctx, avatar, input.fullName, cx, cy, r, fontFamily);
 
   const maxWidth = IG_CARD_WIDTH - PAD * 2;
+  const nameTop = 700;
+  const nameFit = fitName(ctx, input.fullName, maxWidth, 54, 44, 700, fontFamily, 40);
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   ctx.fillStyle = "#ffffff";
-  ctx.font = `700 54px ${fontFamily}`;
-  ctx.fillText(truncateToWidth(ctx, input.fullName, maxWidth), cx, 700);
-  const meta = [input.role?.trim(), input.country?.trim()].filter(Boolean).join(" · ");
+  ctx.font = `700 ${nameFit.size}px ${fontFamily}`;
+  nameFit.lines.forEach((line, i) => {
+    ctx.fillText(line, cx, nameTop + i * (nameFit.size + AUTHOR_LINE_GAP));
+  });
+  const nameBlockH =
+    nameFit.lines.length === 0
+      ? 0
+      : nameFit.lines.length * nameFit.size +
+        Math.max(0, nameFit.lines.length - 1) * AUTHOR_LINE_GAP;
+  const metaY = Math.min(830, Math.max(770, nameTop + nameBlockH + AUTHOR_LINE_GAP));
+  ctx.font = `600 30px ${fontFamily}`;
+  const meta = roleKeepingCountry(ctx, input.role, input.country, maxWidth);
   if (meta) {
-    ctx.font = `600 30px ${fontFamily}`;
     ctx.fillStyle = "rgba(255,255,255,0.85)";
-    ctx.fillText(truncateToWidth(ctx, meta, maxWidth), cx, 770);
+    ctx.fillText(meta, cx, metaY);
   }
   ctx.textAlign = "left";
 
@@ -618,7 +665,7 @@ function drawTimelineCard(
     sublineLines.forEach((text, i) => ctx.fillText(text, textX, y + i * sublineLineH));
   }
 
-  const placed = journeyQuotePlacement(input);
+  const placed = journeyQuotePlacement(ctx, input, fontFamily);
   const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
   const blockTop = placed.quoteTop + Math.max(0, (placed.room - quoteLayout.height) / 2);
   const authorY = blockTop + quoteLayout.height + placed.authorGap;
@@ -633,16 +680,11 @@ function drawTimelineCard(
 
   paintQuote(ctx, quoteLayout, placed.quoteX, blockTop, placed.quoteW, "#ffffff", fontFamily);
 
-  const country = input.country?.trim();
-  ctx.font = `600 30px ${fontFamily}`;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "#e04fd0";
-  ctx.fillText(
-    truncateToWidth(ctx, `— ${input.fullName}${country ? ` · ${country}` : ""}`, placed.quoteW),
-    placed.quoteX,
-    authorY,
-  );
+  paintAuthorLayout(ctx, placed.author, placed.quoteX, authorY, fontFamily, {
+    name: "#e04fd0",
+    country: "rgba(224, 79, 208, 0.72)",
+    role: "#e04fd0",
+  });
 }
 
 function drawGlow(
@@ -703,6 +745,190 @@ function fitFont(
     }
   }
   return minSize;
+}
+
+function nameFloor(nameMax: number) {
+  return Math.min(nameMax, Math.max(4, Math.round((nameMax * 0.8) / 4) * 4));
+}
+
+type AuthorParts = {
+  fullName: string;
+  country: string | null;
+  role: string | null;
+};
+
+type AuthorLayoutOptions = {
+  maxWidth: number;
+  nameMax: number;
+  nameMin: number;
+  metaSize: number;
+  /** Alto de la caja. Si la pila no entra con margen, el nombre baja 4px. */
+  blockH?: number;
+  /** Tamaño de las dos líneas. Por defecto es el piso de una línea. */
+  twoLineSize?: number;
+  weight?: number;
+};
+
+type AuthorLayout = {
+  nameLines: string[];
+  nameSize: number;
+  country: string | null;
+  role: string | null;
+  metaSize: number;
+  height: number;
+  weight: number;
+};
+
+function authorStackHeight(sizes: number[]) {
+  if (sizes.length === 0) {
+    return 0;
+  }
+  return sizes.reduce((sum, size) => sum + size, 0) + AUTHOR_LINE_GAP * (sizes.length - 1);
+}
+
+/**
+ * Una línea al tamaño actual, baja de a 4px hasta el piso y, si no entra,
+ * dos líneas. Si aún sobra texto, la segunda línea cierra con elipsis.
+ */
+function fitName(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxSize: number,
+  minSize: number,
+  weight: number,
+  fontFamily: string,
+  twoLineSize = minSize,
+) {
+  const value = text.trim();
+  if (!value) {
+    return { size: maxSize, lines: [] as string[] };
+  }
+  for (let size = maxSize; size > minSize; size -= 4) {
+    ctx.font = `${weight} ${size}px ${fontFamily}`;
+    if (ctx.measureText(value).width <= maxWidth) {
+      return { size, lines: [value] };
+    }
+  }
+  ctx.font = `${weight} ${minSize}px ${fontFamily}`;
+  if (ctx.measureText(value).width <= maxWidth) {
+    return { size: minSize, lines: [value] };
+  }
+  const fitted = fitLines(
+    ctx,
+    value,
+    maxWidth,
+    twoLineSize,
+    twoLineSize,
+    weight,
+    fontFamily,
+    2,
+  );
+  ctx.font = `${weight} ${fitted.size}px ${fontFamily}`;
+  if (fitted.lines.length > 0 && wrapText(ctx, value, maxWidth).length > fitted.lines.length) {
+    const last = fitted.lines.length - 1;
+    fitted.lines[last] = ellipsizeLine(ctx, fitted.lines[last] ?? "", maxWidth);
+  }
+  return fitted;
+}
+
+/** Líneas de nombre, país y puesto, y la altura real de esa pila. */
+function layoutAuthor(
+  ctx: CanvasRenderingContext2D,
+  input: AuthorParts,
+  fontFamily: string,
+  options: AuthorLayoutOptions,
+): AuthorLayout {
+  const weight = options.weight ?? 700;
+  const twoLineSize = options.twoLineSize ?? options.nameMin;
+  const fitted = fitName(
+    ctx,
+    input.fullName,
+    options.maxWidth,
+    options.nameMax,
+    options.nameMin,
+    weight,
+    fontFamily,
+    twoLineSize,
+  );
+  let nameSize = fitted.size;
+  let nameLines = fitted.lines;
+
+  ctx.font = `600 ${options.metaSize}px ${fontFamily}`;
+  const country = input.country?.trim()
+    ? truncateToWidth(ctx, input.country.trim(), options.maxWidth)
+    : null;
+  const role = input.role?.trim()
+    ? truncateToWidth(ctx, input.role.trim(), options.maxWidth)
+    : null;
+
+  const stackHeight = (lines: string[], size: number) =>
+    authorStackHeight([
+      ...lines.map(() => size),
+      ...(country ? [options.metaSize] : []),
+      ...(role ? [options.metaSize] : []),
+    ]);
+
+  let height = stackHeight(nameLines, nameSize);
+  const limit = options.blockH == null ? null : options.blockH - AUTHOR_BOX_MARGIN;
+  if (limit != null && height > limit && nameSize - 4 >= 4) {
+    const shrunk = nameSize - 4;
+    const again = fitName(
+      ctx,
+      input.fullName,
+      options.maxWidth,
+      shrunk,
+      shrunk,
+      weight,
+      fontFamily,
+      shrunk,
+    );
+    nameSize = again.size;
+    nameLines = again.lines;
+    height = stackHeight(nameLines, nameSize);
+  }
+
+  return {
+    nameLines,
+    nameSize,
+    country,
+    role,
+    metaSize: options.metaSize,
+    height,
+    weight,
+  };
+}
+
+/** "puesto · país": si el puesto no entra, se recorta y el país se conserva. */
+function roleKeepingCountry(
+  ctx: CanvasRenderingContext2D,
+  role: string | null,
+  country: string | null,
+  maxWidth: number,
+) {
+  const roleText = role?.trim() ?? "";
+  const countryText = country?.trim() ?? "";
+  if (!roleText && !countryText) {
+    return null;
+  }
+  if (!roleText) {
+    return truncateToWidth(ctx, countryText, maxWidth);
+  }
+  if (!countryText) {
+    return truncateToWidth(ctx, roleText, maxWidth);
+  }
+  const sep = " · ";
+  const sepW = ctx.measureText(sep).width;
+  const countryW = ctx.measureText(countryText).width;
+  if (sepW + countryW >= maxWidth) {
+    return truncateToWidth(ctx, countryText, maxWidth);
+  }
+  const roleRoom = maxWidth - sepW - countryW;
+  const shownRole = truncateToWidth(ctx, roleText, roleRoom);
+  if (ctx.measureText(shownRole).width > roleRoom) {
+    return truncateToWidth(ctx, countryText, maxWidth);
+  }
+  return `${shownRole}${sep}${countryText}`;
 }
 
 export function canvasToPng(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -907,12 +1133,15 @@ function drawHiredPill(
   ctx.font = `700 18px ${fontFamily}`;
   const label = "CONTRATADO POR";
   const labelWidth = measureTracked(ctx, label, 1.2);
-  ctx.font = `700 34px ${fontFamily}`;
-  const nameWidth = ctx.measureText(name).width;
   const check = 28;
   const leftW = 28 + check + 14 + labelWidth + 26;
-  const rightW = 32 + nameWidth + 32;
   const maxRight = IG_CARD_WIDTH - PAD * 2 - leftW;
+  const textMax = Math.max(0, Math.max(160, maxRight) - 64);
+  const nameSize = fitFont(ctx, name, textMax, 34, 28, 700, fontFamily);
+  ctx.font = `700 ${nameSize}px ${fontFamily}`;
+  const shown = truncateToWidth(ctx, name, textMax);
+  const nameWidth = ctx.measureText(shown).width;
+  const rightW = 32 + nameWidth + 32;
   const usedRight = Math.min(rightW, Math.max(160, maxRight));
   const total = leftW + usedRight;
   const x = pillX ?? (IG_CARD_WIDTH - total) / 2;
@@ -941,8 +1170,7 @@ function drawHiredPill(
   ctx.textBaseline = "middle";
   fillTracked(ctx, label, x + 28 + check + 14, midY, 1.2);
 
-  ctx.font = `700 34px ${fontFamily}`;
-  const shown = truncateToWidth(ctx, name, usedRight - 64);
+  ctx.font = `700 ${nameSize}px ${fontFamily}`;
   ctx.fillText(shown, x + leftW + 32, midY);
 }
 
@@ -1000,14 +1228,14 @@ function quoteFrame(
     case "offer":
       return offerQuotePlacement(ctx, input, fontFamily).frame;
     case "journey":
-      return journeyQuotePlacement(input).frame;
+      return journeyQuotePlacement(ctx, input, fontFamily).frame;
     case "shift": {
       const previous = input.previousRole?.trim();
       const role = input.role?.trim();
       if (!previous || !role) {
         return quoteDesignPlacement(input, variant).frame;
       }
-      return journeyQuotePlacement(input).frame;
+      return journeyQuotePlacement(ctx, input, fontFamily).frame;
     }
     case "profile":
       return profileQuotePlacement(ctx, input, fontFamily).frame;
@@ -1118,13 +1346,29 @@ function offerQuotePlacement(
   };
 }
 
-function journeyQuotePlacement(input: IgCardContent) {
+function journeyQuotePlacement(
+  ctx: CanvasRenderingContext2D,
+  input: IgCardContent,
+  fontFamily: string,
+) {
   const r = 160;
   const cy = 610;
   const lineBottom = cy + r + 80;
   const quoteX = PAD + 44;
   const quoteW = IG_CARD_WIDTH - PAD - quoteX;
-  const authorH = 30;
+  const author = layoutAuthor(
+    ctx,
+    { fullName: input.fullName, country: input.country, role: null },
+    fontFamily,
+    {
+      maxWidth: quoteW,
+      nameMax: 30,
+      nameMin: 24,
+      metaSize: 26,
+      weight: 600,
+    },
+  );
+  const authorH = author.height;
   const authorGap = 28;
   const quoteTop = lineBottom + 70;
   const room = IG_CARD_HEIGHT - PAD - quoteTop - authorH - authorGap;
@@ -1132,6 +1376,7 @@ function journeyQuotePlacement(input: IgCardContent) {
     quoteX,
     quoteW,
     authorH,
+    author,
     authorGap,
     quoteTop,
     room,
@@ -1361,6 +1606,7 @@ function drawAuthor(
     x: textX,
     cy: hexCy,
     maxWidth: x + width - 36 - textX,
+    blockH: AUTHOR_H,
   });
 }
 
@@ -1378,6 +1624,8 @@ function drawAuthorInline(
     hexR?: number;
     blockH?: number;
     nameSize?: number;
+    nameMin?: number;
+    twoLineSize?: number;
     metaSize?: number;
   },
 ) {
@@ -1397,7 +1645,10 @@ function drawAuthorInline(
     x: textX,
     cy: hexCy,
     maxWidth: IG_CARD_WIDTH - PAD - textX,
+    blockH,
     nameSize: input.nameSize ?? 40,
+    nameMin: input.nameMin,
+    twoLineSize: input.twoLineSize,
     metaSize: input.metaSize ?? 28,
   });
 }
@@ -1413,96 +1664,68 @@ function drawAuthorText(
     x: number;
     cy: number;
     maxWidth: number;
+    blockH?: number;
     nameSize?: number;
+    nameMin?: number;
+    twoLineSize?: number;
     metaSize?: number;
   },
 ) {
-  const role = input.role?.trim() || null;
-  const country = input.country?.trim() || null;
-  const { light } = input;
-  const nameSize = input.nameSize ?? 40;
+  const nameMax = input.nameSize ?? 40;
   const metaSize = input.metaSize ?? 28;
-  const nameGap = 10;
-  ctx.textAlign = "left";
-  ctx.fillStyle = light ? INK : "#ffffff";
-  if (role) {
-    const block = nameSize + nameGap + metaSize;
-    const textY = input.cy - block / 2;
-    ctx.textBaseline = "top";
-    drawNameAndCountry(
-      ctx,
-      input.fullName,
-      country,
-      input.x,
-      textY,
-      input.maxWidth,
-      input.fontFamily,
-      light,
-      nameSize,
-      metaSize,
-    );
-    ctx.font = `600 ${metaSize}px ${input.fontFamily}`;
-    ctx.fillStyle = light ? PINK : "#ffffff";
-    ctx.fillText(
-      truncateToWidth(ctx, role, input.maxWidth),
-      input.x,
-      textY + nameSize + nameGap,
-    );
-    return;
-  }
-
-  ctx.textBaseline = "middle";
-  drawNameAndCountry(
+  const layout = layoutAuthor(
     ctx,
-    input.fullName,
-    country,
-    input.x,
-    input.cy - nameSize / 2,
-    input.maxWidth,
+    {
+      fullName: input.fullName,
+      country: input.country,
+      role: input.role,
+    },
     input.fontFamily,
-    light,
-    nameSize,
-    metaSize,
+    {
+      maxWidth: input.maxWidth,
+      nameMax,
+      nameMin: input.nameMin ?? nameFloor(nameMax),
+      metaSize,
+      blockH: input.blockH,
+      twoLineSize: input.twoLineSize,
+    },
   );
+  paintAuthorLayout(ctx, layout, input.x, input.cy - layout.height / 2, input.fontFamily, {
+    name: input.light ? INK : "#ffffff",
+    country: input.light ? "#5c5670" : "rgba(255,255,255,0.82)",
+    role: input.light ? PINK : "#ffffff",
+  });
 }
 
-function drawNameAndCountry(
+function paintAuthorLayout(
   ctx: CanvasRenderingContext2D,
-  fullName: string,
-  country: string | null,
+  layout: AuthorLayout,
   x: number,
-  y: number,
-  maxWidth: number,
+  top: number,
   fontFamily: string,
-  light: boolean,
-  nameSize: number,
-  metaSize: number,
+  colors: { name: string; country: string; role: string },
 ) {
-  ctx.textBaseline = "top";
-  ctx.font = `700 ${nameSize}px ${fontFamily}`;
-  ctx.fillStyle = light ? INK : "#ffffff";
-  if (!country) {
-    ctx.fillText(truncateToWidth(ctx, fullName, maxWidth), x, y);
-    return;
+  const rows: { text: string; size: number; color: string; weight: number }[] = [];
+  for (const line of layout.nameLines) {
+    rows.push({ text: line, size: layout.nameSize, color: colors.name, weight: layout.weight });
   }
-
-  const gap = 14;
-  ctx.font = `600 ${metaSize}px ${fontFamily}`;
-  const countryLabel = `· ${country}`;
-  const countryWidth = Math.min(ctx.measureText(countryLabel).width, maxWidth * 0.42);
-  ctx.font = `700 ${nameSize}px ${fontFamily}`;
-  ctx.fillStyle = light ? INK : "#ffffff";
-  const nameMax = Math.max(80, maxWidth - gap - countryWidth);
-  const name = truncateToWidth(ctx, fullName, nameMax);
-  ctx.fillText(name, x, y);
-  const nameWidth = ctx.measureText(name).width;
-  ctx.font = `600 ${metaSize}px ${fontFamily}`;
-  ctx.fillStyle = light ? "#5c5670" : "rgba(255,255,255,0.82)";
-  ctx.fillText(
-    truncateToWidth(ctx, countryLabel, maxWidth - nameWidth - gap),
-    x + nameWidth + gap,
-    y + Math.round((nameSize - metaSize) * 0.65),
-  );
+  if (layout.country) {
+    rows.push({ text: layout.country, size: layout.metaSize, color: colors.country, weight: 600 });
+  }
+  if (layout.role) {
+    rows.push({ text: layout.role, size: layout.metaSize, color: colors.role, weight: 600 });
+  }
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  let y = top;
+  rows.forEach((row, index) => {
+    ctx.font = `${row.weight} ${row.size}px ${fontFamily}`;
+    ctx.fillStyle = row.color;
+    ctx.fillText(row.text, x, y);
+    if (index < rows.length - 1) {
+      y += row.size + AUTHOR_LINE_GAP;
+    }
+  });
 }
 
 function drawHexAvatar(
