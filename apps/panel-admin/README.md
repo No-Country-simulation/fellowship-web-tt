@@ -97,11 +97,21 @@ ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar
 de publicados vuelve a ofrecer Reintentar. Rechazar un archivado lo pasa a `rejected`, limpia el
 motivo y vuelve a `/testimonials` con los filtros del inbox.
 
+Desde el detalle de un rechazado se puede devolver el envío a revisión (`rejected` → `in_review`).
+Pide confirmación. El update solo gana si la fila sigue `rejected`: el estado pasa a `in_review`
+y `archive_reason` sigue null. No modifica `published_at`, la cita, los captions, `payload`, los
+ids ni las fechas de los posts, ni los archivos de Storage, y no manda nada a Discord, Instagram
+ni LinkedIn. Al confirmar, el detalle abre el formulario de revisión (guardar, publicar o rechazar
+de nuevo) y queda con `?status=in_review`. Si la fila ya no está `rejected`, el diálogo muestra
+«Este testimonio ya no está rechazado.»; si falla la lectura, «No encontramos ese testimonio.».
+No aparece en publicados ni archivados. El archivado sigue con «Volver a publicar». Sin migración.
+
 ### Eliminar rechazados
 
 En la pestaña Rechazados del inbox se marcan varios testimonios o todos los visibles
 (tope 100 por operación). «Eliminar definitivamente» pide confirmación con la cantidad.
-Solo corre sobre filas que siguen `rejected`. Por cada una borra primero el avatar
+Solo corre sobre filas que siguen `rejected`. Una fila devuelta a revisión ya no está `rejected`
+y no se borra. Por cada una borra primero el avatar
 (bucket `avatars`), la foto testimonial (bucket `captures`, si existe) y
 `share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla en una, esa fila
 queda y se puede reintentar. Al terminar se queda en el inbox con los filtros de la URL

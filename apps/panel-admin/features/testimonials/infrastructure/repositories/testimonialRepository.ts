@@ -273,6 +273,7 @@ export async function rejectTestimonial(
 
 const notPublishedAnymore = "Este testimonio ya no está publicado.";
 const notArchivedAnymore = "Este testimonio ya no está archivado.";
+const notRejectedAnymore = "Este testimonio ya no está rechazado.";
 
 /**
  * Publicado → archivado. Solo toca `status` y `archive_reason`.
@@ -301,6 +302,22 @@ export async function republishTestimonial(
     { status: "published", archive_reason: null },
     notArchivedAnymore,
     "No pudimos volver a publicar el testimonio. Probá de nuevo.",
+  );
+}
+
+/**
+ * Rechazado → en revisión. No publica y no toca archivos ni otras columnas
+ * además de `status` y `archive_reason` null.
+ */
+export async function returnRejectedToReview(
+  id: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "rejected",
+    { status: "in_review", archive_reason: null },
+    notRejectedAnymore,
+    "No pudimos devolver el testimonio a revisión. Probá de nuevo.",
   );
 }
 

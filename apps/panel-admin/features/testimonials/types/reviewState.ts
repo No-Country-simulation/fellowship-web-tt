@@ -10,6 +10,11 @@ export type ArchiveState = { status: "idle" } | { status: "error"; message: stri
 
 export const initialArchiveState: ArchiveState = { status: "idle" };
 
+/** Estado de `returnRejectedToReviewAction` para `useActionState`. El éxito redirige y no vuelve acá. */
+export type ReturnToReviewState = { status: "idle" } | { status: "error"; message: string };
+
+export const initialReturnToReviewState: ReturnToReviewState = { status: "idle" };
+
 /** Estado de `deleteRejectedAction`. El éxito no redirige: la lista muestra el resultado. */
 export type BulkDeleteState =
   | { status: "idle" }
