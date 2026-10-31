@@ -194,6 +194,9 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
   la foto testimonial conserva 16:9 y muestra “Agregar fotografía” cuando está
   vacía; el avatar muestra “Agregar foto de perfil”. Un ícono decorativo acompaña la selección. El avatar no necesita repetir
   instrucciones de recorte: las presenta el diálogo al elegir el archivo.
+- El label de carga usa `overflow-anchor: none`: sus cambios de placeholder al
+  abrir/cerrar el recorte no deben convertirse en desplazamientos del documento.
+  No modifica dimensiones, foco, validaciones ni el archivo seleccionado.
 - `requirements` presenta formato y tamaño sin reemplazar el hint que explica
   el propósito de la foto ni cambiar la reserva de errores. `/enviar` muestra
   JPG, PNG o WebP y el máximo de 5 MB para el avatar u 8 MB para la foto

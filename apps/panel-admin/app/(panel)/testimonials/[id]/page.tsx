@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
+import { ArchivedPanel } from "@features/testimonials/components/ArchivedPanel";
 import { DetailHeader } from "@features/testimonials/components/DetailHeader";
 import { InboxBackLink } from "@features/testimonials/components/InboxFilters";
 import { PublishedPanel } from "@features/testimonials/components/PublishedPanel";
@@ -70,6 +71,7 @@ export default async function TestimonialDetailPage({
   if (inReview) {
     return (
       <ReviewForm
+        key={testimonial.id}
         testimonial={testimonial}
         submission={submission}
         channels={channels}
@@ -87,15 +89,29 @@ export default async function TestimonialDetailPage({
       <DetailHeader testimonial={testimonial} />
       <div className="mt-6 flex min-w-0 flex-col gap-6">
         {submission}
-        <PublishedPanel
-          testimonial={testimonial}
-          channels={channels}
-          shareStatus={shareStatus}
-          shareCardUrl={shareCardUrl}
-          bufferStates={bufferStates}
-          publicHref={galleryTestimonialHref(testimonial.slug)}
-          scheduled={!bufferPublishesImmediately()}
-        />
+        {testimonial.status === "published" ? (
+          <PublishedPanel
+            testimonial={testimonial}
+            channels={channels}
+            shareStatus={shareStatus}
+            shareCardUrl={shareCardUrl}
+            bufferStates={bufferStates}
+            publicHref={galleryTestimonialHref(testimonial.slug)}
+            scheduled={!bufferPublishesImmediately()}
+          />
+        ) : null}
+        {testimonial.status === "archived" ? <ArchivedPanel testimonial={testimonial} /> : null}
+        {testimonial.status === "rejected" ? (
+          <section className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
+            <header className="flex flex-col gap-1">
+              <h2 className="text-admin-heading font-semibold text-foreground">Rechazado</h2>
+              <p className="text-admin-caption text-muted-foreground">
+                No sale en la galería ni en las redes. El envío queda guardado arriba por si hace
+                falta volver a verlo.
+              </p>
+            </header>
+          </section>
+        ) : null}
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ Exploración interactiva de las historias publicadas: buscador, filtros, contado
 
 **Archivo:** `components/testimonials-gallery.tsx`
 
+**Estado:** temporalmente fuera del home desde la landing de captación (issue 1). Se conserva la implementación completa para reutilización futura: no se monta, no carga su bundle ni expone buscador, filtros, contador o estados de exploración en `/`.
+
 ## Import y uso
 
 ```tsx
@@ -29,7 +31,7 @@ import { TestimonialsGallery } from "@/components/testimonials-gallery";
 - Búsqueda y categoría actúan juntas e inmediatamente sobre el array recibido. `visible` se deriva de las props y de los estados `filter` y `query`, sin guardar otra copia de los resultados. No cambian el orden, la URL ni realizan consultas adicionales; tampoco requieren debounce.
 - Cambiar de categoría conserva el texto. El botón con `X`, “Limpiar búsqueda”, vacía solo el texto y devuelve el foco al input. La consulta conserva lo escrito visualmente; espacios exteriores y diferencias de acentos/caso no alteran la coincidencia. Una consulta solo de espacios se considera inactiva.
 - El contador indica la cantidad visible, con singular/plural. Solo su nodo es una región `aria-live="polite"`, con `aria-atomic`.
-- El error de carga se representa en `app/page.tsx` con `role="alert"`, en lugar de montar este componente con resultados aparentes.
+- Quien reutilice este componente debe resolver los errores de carga antes de montarlo, sin presentarlos como resultados vacíos. Actualmente el error del home se comunica en `GalleryHero` y no monta esta galería.
 
 ## Estados vacíos
 

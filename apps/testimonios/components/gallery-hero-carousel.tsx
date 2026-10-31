@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, UserRound } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { HeroStory } from "@/components/gallery-hero-data";
+import { HeroTestimonialCard } from "@/components/hero-testimonial-card";
 import { cn } from "@/lib/utils";
 
 import styles from "./gallery-hero-carousel.module.css";
@@ -100,9 +100,10 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
         ? "Testimonios publicados de la comunidad"
         : "Testimonio publicado de la comunidad"}
       aria-roledescription={hasNavigation ? "carrusel" : undefined}
-      className="w-full min-w-0 max-w-[28rem] justify-self-center lg:justify-self-end"
+      data-count={total}
+      className={styles.carousel}
     >
-      <div className={total === 3 ? "sm:pr-10" : hasNavigation ? "sm:pr-6" : undefined}>
+      <div className={styles.viewport}>
         <div className="relative isolate">
           {/* La celda comparte altura y crece solo si el contenido obligatorio lo necesita. */}
           <div
@@ -117,7 +118,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
               const active = position === 0;
 
               return (
-                <figure
+                <div
                   key={story.id}
                   role={hasNavigation ? "group" : undefined}
                   aria-roledescription={hasNavigation ? "diapositiva" : undefined}
@@ -134,64 +135,26 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
                           : undefined
                       : undefined
                   }
-                  className={cn(
-                    styles.card,
-                    "flex min-w-0 flex-col rounded-card border border-transparent p-5 sm:p-md",
-                  )}
+                  className={styles.card}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="text-brand-gradient block h-9 w-fit shrink-0 text-6xl font-bold leading-none"
-                  >
-                    “
-                  </span>
-                  <blockquote className={cn(styles.quoteSpace, "mt-xs flex-1 text-xl font-medium leading-snug tracking-tight text-text-primary wrap-anywhere sm:text-[1.375rem]")}>
-                    <p className={cn(styles.quote, "line-clamp-1")}>{story.quote}</p>
-                  </blockquote>
-                  <figcaption
-                    className={cn(
-                      "mt-md flex min-w-0 shrink-0 flex-wrap items-center gap-xs",
-                      hasNavigation && "pb-14 sm:pr-28 sm:pb-0",
-                    )}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="relative flex size-10 shrink-0 self-start items-center justify-center overflow-hidden rounded-full border border-accent-indigo-light/30 bg-accent-indigo/20 text-accent-indigo-light"
-                    >
-                      {story.avatarUrl ? (
-                        <Image
-                          src={story.avatarUrl}
-                          alt=""
-                          fill
-                          sizes="40px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <UserRound className="size-5" strokeWidth={1.5} />
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-[1_1_6rem]">
-                      <p className="text-sm font-medium leading-snug text-text-primary wrap-anywhere">
-                        {story.fullName}
-                      </p>
-                      <p className="mt-1 text-[0.625rem] leading-relaxed tracking-[0.12em] text-text-secondary uppercase wrap-anywhere">
-                        {story.typeLabel}
-                      </p>
-                      <Link
-                        href={`/t/${story.slug}`}
-                        className="mt-1 inline-flex min-h-11 max-w-full items-center rounded-button text-xs font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
-                      >
-                        Ver historia
-                      </Link>
-                    </div>
-                  </figcaption>
-                </figure>
+                  <HeroTestimonialCard story={story} />
+                </div>
               );
             })}
           </div>
-          {/* Fuera de las tarjetas: no se remontan ni se desplazan al navegar. */}
-          {hasNavigation ? (
-            <div className="absolute right-5 bottom-5 z-10 flex gap-xs sm:right-md sm:bottom-md">
+        </div>
+      </div>
+      {/* Fuera de la publicación: no cubren el autor ni forman parte de su diseño. */}
+      <div className="mt-sm flex min-w-0 flex-wrap items-center justify-between gap-xs">
+        <Link
+          href={`/t/${stories[activeIndex].slug}`}
+          aria-label={`Leer la historia de ${stories[activeIndex].fullName}`}
+          className="inline-flex min-h-11 max-w-full items-center rounded-button text-sm font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+        >
+          Leer historia
+        </Link>
+        {hasNavigation ? (
+            <div className="flex items-center gap-xs">
               <button
                 type="button"
                 aria-label="Testimonio anterior"
@@ -201,6 +164,9 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
               >
                 <ChevronLeft aria-hidden="true" className="size-5" />
               </button>
+              <span aria-hidden="true" className="text-xs tabular-nums text-text-secondary">
+                {activeIndex + 1} / {total}
+              </span>
               <button
                 type="button"
                 aria-label="Siguiente testimonio"
@@ -211,8 +177,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
                 <ChevronRight aria-hidden="true" className="size-5" />
               </button>
             </div>
-          ) : null}
-        </div>
+        ) : null}
       </div>
       {hasNavigation ? (
         <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">

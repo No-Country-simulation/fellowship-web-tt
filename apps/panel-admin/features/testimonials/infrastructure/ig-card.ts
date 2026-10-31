@@ -5,6 +5,7 @@ import type {
   SimulationPayload,
   TestimonialType,
 } from "../types/testimonial";
+import { applyCardEdits, readCardEdits, type CardEdits } from "./cardFields";
 
 /** Instagram feed portrait, 4:5. */
 export const IG_CARD_WIDTH = 1080;
@@ -42,30 +43,38 @@ export function igCardContent(
   },
   quote: string,
   design: CardDesign,
+  edits?: CardEdits,
 ): IgCardContent {
+  const base = { ...source, quote };
+  const edited = applyCardEdits(base, edits ?? readCardEdits(base));
   return {
-    type: source.type,
+    type: edited.type,
     design,
-    quote,
-    fullName: source.fullName,
-    country: source.country,
+    quote: edited.quote,
+    fullName: edited.fullName,
+    country: edited.country,
     avatarUrl: source.avatarUrl,
     captureUrl: source.captureUrl,
-    company: source.firstJob?.company ?? null,
+    company: blankToNull(edited.firstJob?.company),
     role: capitalizeFirst(
-      source.simulation?.primary_role ??
-        source.firstJob?.role_achieved ??
-        source.careerChange?.new_role ??
+      edited.simulation?.primary_role ??
+        edited.firstJob?.role_achieved ??
+        edited.careerChange?.new_role ??
         null,
     ),
-    previousRole: source.careerChange?.previous_profession ?? null,
+    previousRole: blankToNull(edited.careerChange?.previous_profession),
   };
 }
 
-function capitalizeFirst(value: string | null) {
+function capitalizeFirst(value: string | null | undefined) {
   const trimmed = value?.trim() ?? "";
   if (!trimmed) {
     return null;
   }
   return trimmed.charAt(0).toLocaleUpperCase("es") + trimmed.slice(1);
+}
+
+function blankToNull(value: string | null | undefined) {
+  const trimmed = value?.trim() ?? "";
+  return trimmed ? trimmed : null;
 }

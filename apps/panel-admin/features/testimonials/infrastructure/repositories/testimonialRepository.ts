@@ -1,11 +1,12 @@
 import type { BufferPostStates, ShareChannels } from "../../types/share";
-import type {
-  AdminInboxData,
-  AdminTestimonial,
-  TestimonialStatus,
+import {
+  BULK_DELETE_MAX,
+  type AdminInboxData,
+  type AdminTestimonial,
+  type TestimonialStatus,
 } from "../../types/testimonial";
 import { getPost, hasInstagramChannel, hasLinkedInChannel } from "../buffer";
-import type { TestimonialDto } from "../dtos/testimonialDto";
+import type { Database, Json, TestimonialDto } from "../dtos/testimonialDto";
 import { hasCommunityWebhook } from "../discord";
 import { TestimonialMapper } from "../mappers/testimonialMapper";
 import { hasSupabaseServiceRoleEnv } from "../supabase/env";
@@ -21,6 +22,14 @@ const missingServiceRole =
   "Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY. El inbox no puede leer ni publicar todavía.";
 
 const SHARE_CARD_NAME = "instagram.png";
+
+/** Filas que se borran en paralelo. Cada una termina sus archivos antes de tocar la fila. */
+const DELETE_BATCH = 5;
+
+/** Ruta de la card en el bucket de share cards: `{slug}/instagram.png`. */
+export function shareCardPath(slug: string) {
+  return `${slug}/${SHARE_CARD_NAME}`;
+}
 
 /** `testimonials.id` es uuid. Otro formato hace fallar PostgREST en lugar de devolver vacío. */
 const TESTIMONIAL_ID =
@@ -74,26 +83,31 @@ export async function getTestimonialById(id: string): Promise<
   };
 }
 
-/** `li_caption` guarda el mismo texto que `ig_caption`. Discord no usa este caption. */
+export type ReviewEdits = {
+  quote: string;
+  igCaption: string;
+  liCaption: string;
+  discordCaption: string;
+  fullName: string;
+  country: string;
+  /** Claves del tipo, ya validadas. Se mezclan sobre el payload de la fila. */
+  payload: Record<string, string>;
+};
+
+/** Cada red guarda su texto. Discord va en `discord_caption`. */
 export async function saveReviewEdits(
   id: string,
-  edits: { quote: string; caption: string },
+  edits: ReviewEdits,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  return updateReviewRow(id, {
-    quote: edits.quote,
-    ig_caption: edits.caption,
-    li_caption: edits.caption,
-  });
+  return updateReviewRow(id, reviewRowValues(edits));
 }
 
 export async function publishTestimonial(
   id: string,
-  edits: { quote: string; caption: string },
+  edits: ReviewEdits,
 ): Promise<{ ok: true; slug: string } | { ok: false; lost: true } | { ok: false; message: string }> {
   const updated = await updateReviewRow(id, {
-    quote: edits.quote,
-    ig_caption: edits.caption,
-    li_caption: edits.caption,
+    ...reviewRowValues(edits),
     status: "published",
     published_at: new Date().toISOString(),
   });
@@ -257,13 +271,139 @@ export async function rejectTestimonial(
   return updated.ok ? { ok: true } : updated;
 }
 
+const notPublishedAnymore = "Este testimonio ya no está publicado.";
+const notArchivedAnymore = "Este testimonio ya no está archivado.";
+
+/**
+ * Publicado → archivado. Solo toca `status` y `archive_reason`.
+ * Fechas e ids de posts quedan como estaban.
+ */
+export async function archiveTestimonial(
+  id: string,
+  reason: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "published",
+    { status: "archived", archive_reason: reason },
+    notPublishedAnymore,
+    "No pudimos archivar el testimonio. Probá de nuevo.",
+  );
+}
+
+/** Archivado → publicado. Conserva `published_at` y no reenvía posts. */
+export async function republishTestimonial(
+  id: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "archived",
+    { status: "published", archive_reason: null },
+    notArchivedAnymore,
+    "No pudimos volver a publicar el testimonio. Probá de nuevo.",
+  );
+}
+
+/** Archivado → rechazado. Limpia el motivo para cumplir el check de la columna. */
+export async function rejectArchivedTestimonial(
+  id: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  return transitionStatus(
+    id,
+    "archived",
+    { status: "rejected", archive_reason: null },
+    notArchivedAnymore,
+    "No pudimos rechazar el testimonio. Probá de nuevo.",
+  );
+}
+
+export type DeleteRejectedTestimonialsResult =
+  | {
+      ok: true;
+      deletedIds: string[];
+      failedIds: string[];
+      skippedIds: string[];
+    }
+  | { ok: false; message: string };
+
+/**
+ * Borra rechazados de forma definitiva. Valida ids, deduplica y corta en
+ * `BULK_DELETE_MAX`. Primero avatar, captura (si hay) y card; la fila solo si
+ * Storage salió bien y sigue en `rejected`. Un `remove` de un objeto que no
+ * existe no falla, así que el reintento es idempotente. Si un archivo falla,
+ * la fila queda en `failedIds`.
+ */
+export async function deleteRejectedTestimonials(
+  ids: readonly string[],
+): Promise<DeleteRejectedTestimonialsResult> {
+  const unique = uniqueInOrder(ids);
+  const validIds = unique.filter(isTestimonialId).slice(0, BULK_DELETE_MAX);
+  const skippedIds = unique.filter((id) => !isTestimonialId(id));
+
+  if (validIds.length === 0) {
+    return { ok: true, deletedIds: [], failedIds: [], skippedIds };
+  }
+
+  if (!hasSupabaseServiceRoleEnv()) {
+    return { ok: false, message: missingServiceRole };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("id, slug, avatar_path, capture_path")
+    .in("id", validIds)
+    .eq("status", "rejected");
+
+  if (error) {
+    console.error("Rejected testimonials lookup failed");
+    return {
+      ok: false,
+      message: "No pudimos eliminar los testimonios. Probá de nuevo.",
+    };
+  }
+
+  const byId = new Map((data ?? []).map((row) => [row.id, row]));
+  const rows: RejectedFileRow[] = [];
+  for (const id of validIds) {
+    const row = byId.get(id);
+    if (!row) {
+      skippedIds.push(id);
+      continue;
+    }
+    rows.push(row);
+  }
+
+  const deletedIds: string[] = [];
+  const failedIds: string[] = [];
+
+  for (let index = 0; index < rows.length; index += DELETE_BATCH) {
+    const batch = rows.slice(index, index + DELETE_BATCH);
+    const outcomes = await Promise.all(batch.map((row) => deleteRejectedRow(supabase, row)));
+    for (let offset = 0; offset < outcomes.length; offset += 1) {
+      const row = batch[offset];
+      const outcome = outcomes[offset];
+      if (!row || !outcome) continue;
+      if (outcome === "deleted") deletedIds.push(row.id);
+      else if (outcome === "failed") failedIds.push(row.id);
+      else skippedIds.push(row.id);
+    }
+  }
+
+  return { ok: true, deletedIds, failedIds, skippedIds };
+}
+
 /** URL pública de la card que se guardó al publicar, o `null` si no quedó ninguna. */
 export async function storedShareCardUrl(slug: string): Promise<string | null> {
-  const path = `${slug}/${SHARE_CARD_NAME}`;
+  const path = shareCardPath(slug);
   return (await shareCardExists(path)) ? publicStorageUrl(SHARE_CARDS_BUCKET, path) : null;
 }
 
-/** Estado de los posts de Buffer con id guardado. Sin id (envíos viejos) la red queda en `null`. */
+/**
+ * Estado de los posts de Buffer con id guardado.
+ * Sin id, o si Buffer no responde, la red queda en `null`.
+ * Si Buffer dice que ese id no existe, queda `not_found` y el id de la fila no se toca.
+ */
 export async function bufferPostStates(testimonial: AdminTestimonial): Promise<BufferPostStates> {
   const { bufferInstagramPostId, bufferLinkedinPostId } = testimonial;
   const [instagram, linkedin] = await Promise.all([
@@ -275,7 +415,7 @@ export async function bufferPostStates(testimonial: AdminTestimonial): Promise<B
 
 /** Sube la card del post (la misma para las tres redes) o confirma que ya está. Devuelve la URL pública. */
 export async function prepareShareCard(slug: string, file: File | null): Promise<string | null> {
-  const path = `${slug}/${SHARE_CARD_NAME}`;
+  const path = shareCardPath(slug);
   if (file) {
     const uploaded = await uploadShareCard(path, file);
     if (!uploaded) {
@@ -408,15 +548,76 @@ function clearedBufferPost(network: "instagram" | "linkedin") {
   return { buffer_linkedin_posted_at: null, buffer_linkedin_post_id: null };
 }
 
+type ReviewRowValues = {
+  quote?: string;
+  ig_caption?: string;
+  li_caption?: string;
+  discord_caption?: string;
+  full_name?: string;
+  country?: string;
+  /** Claves a mezclar. Si no viene, el payload de la fila no se toca. */
+  payloadPatch?: Record<string, string>;
+  status?: TestimonialStatus;
+  published_at?: string;
+};
+
+function reviewRowValues(edits: ReviewEdits): ReviewRowValues {
+  return {
+    quote: edits.quote,
+    ig_caption: edits.igCaption,
+    li_caption: edits.liCaption,
+    discord_caption: edits.discordCaption,
+    full_name: edits.fullName,
+    country: edits.country,
+    payloadPatch: edits.payload,
+  };
+}
+
+type StatusTransition = {
+  status: TestimonialStatus;
+  archive_reason: string | null;
+};
+
+/** Update atómico: gana solo la fila que sigue en `from`. No manda otras columnas. */
+async function transitionStatus(
+  id: string,
+  from: TestimonialStatus,
+  values: StatusTransition,
+  lostMessage: string,
+  errorMessage: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!isTestimonialId(id)) {
+    return { ok: false, message: testimonialNotFound.message };
+  }
+
+  if (!hasSupabaseServiceRoleEnv()) {
+    return { ok: false, message: missingServiceRole };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("testimonials")
+    .update(values)
+    .eq("id", id)
+    .eq("status", from)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Testimonial status transition failed");
+    return { ok: false, message: errorMessage };
+  }
+
+  if (!data) {
+    return { ok: false, message: lostMessage };
+  }
+
+  return { ok: true };
+}
+
 async function updateReviewRow(
   id: string,
-  values: {
-    quote?: string;
-    ig_caption?: string;
-    li_caption?: string;
-    status?: TestimonialStatus;
-    published_at?: string;
-  },
+  values: ReviewRowValues,
 ): Promise<{ ok: true; slug: string } | { ok: false; message: string; lost?: boolean }> {
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
@@ -435,10 +636,39 @@ async function updateReviewRow(
     };
   }
 
+  const update: Database["public"]["Tables"]["testimonials"]["Update"] = {};
+  if (values.quote !== undefined) {
+    update.quote = values.quote;
+  }
+  if (values.ig_caption !== undefined) {
+    update.ig_caption = values.ig_caption;
+  }
+  if (values.li_caption !== undefined) {
+    update.li_caption = values.li_caption;
+  }
+  if (values.discord_caption !== undefined) {
+    update.discord_caption = values.discord_caption;
+  }
+  if (values.full_name !== undefined) {
+    update.full_name = values.full_name;
+  }
+  if (values.country !== undefined) {
+    update.country = values.country;
+  }
+  if (values.status !== undefined) {
+    update.status = values.status;
+  }
+  if (values.published_at !== undefined) {
+    update.published_at = values.published_at;
+  }
+  if (values.payloadPatch) {
+    update.payload = mergeCardPayload(current.testimonial.payload, values.payloadPatch);
+  }
+
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase
     .from("testimonials")
-    .update(values)
+    .update(update)
     .eq("id", id)
     .eq("status", "in_review")
     .select("slug")
@@ -460,6 +690,17 @@ async function updateReviewRow(
   }
 
   return { ok: true, slug: data.slug };
+}
+
+function mergeCardPayload(current: Json, patch: Record<string, string>): Json {
+  if (!isJsonObject(current)) {
+    return { ...patch };
+  }
+  return { ...current, ...patch };
+}
+
+function isJsonObject(value: Json): value is { [key: string]: Json | undefined } {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function mapTestimonial(row: TestimonialDto): AdminTestimonial {
@@ -490,6 +731,72 @@ async function uploadShareCard(path: string, file: File) {
   }
 
   return true;
+}
+
+type RejectedFileRow = Pick<TestimonialDto, "id" | "slug" | "avatar_path" | "capture_path">;
+
+type ServiceRoleClient = ReturnType<typeof createServiceRoleClient>;
+
+function uniqueInOrder(ids: readonly string[]) {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const id of ids) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    unique.push(id);
+  }
+  return unique;
+}
+
+/** Storage primero. Si algo falla, no se borra la fila. */
+async function deleteRejectedRow(
+  supabase: ServiceRoleClient,
+  row: RejectedFileRow,
+): Promise<"deleted" | "failed" | "skipped"> {
+  try {
+    const removed = await removeRejectedFiles(supabase, row);
+    if (!removed) return "failed";
+
+    const { data, error } = await supabase
+      .from("testimonials")
+      .delete()
+      .eq("id", row.id)
+      .eq("status", "rejected")
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Rejected testimonial row delete failed");
+      return "failed";
+    }
+
+    return data ? "deleted" : "skipped";
+  } catch {
+    console.error("Rejected testimonial row delete failed");
+    return "failed";
+  }
+}
+
+async function removeRejectedFiles(supabase: ServiceRoleClient, row: RejectedFileRow) {
+  const removals = [
+    supabase.storage.from(AVATARS_BUCKET).remove([row.avatar_path]),
+    supabase.storage.from(SHARE_CARDS_BUCKET).remove([shareCardPath(row.slug)]),
+  ];
+  if (row.capture_path) {
+    removals.push(supabase.storage.from(CAPTURES_BUCKET).remove([row.capture_path]));
+  }
+
+  try {
+    const results = await Promise.all(removals);
+    if (results.some((result) => result.error)) {
+      console.error("Rejected testimonial file delete failed");
+      return false;
+    }
+    return true;
+  } catch {
+    console.error("Rejected testimonial file delete failed");
+    return false;
+  }
 }
 
 async function shareCardExists(path: string) {

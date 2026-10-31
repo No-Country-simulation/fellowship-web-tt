@@ -15,6 +15,7 @@ import {
   type ShareNetwork,
 } from "../types/share";
 import type { AdminTestimonial } from "../types/testimonial";
+import { ArchiveDialog } from "./ArchiveDialog";
 import { IgShare } from "./IgShare";
 import { ShareRetry } from "./ShareRetry";
 
@@ -27,7 +28,8 @@ type NetworkState = {
 
 /**
  * Después de publicar: la misma card sale por Discord, Instagram y LinkedIn.
- * Instagram y LinkedIn comparten el texto. Discord lleva intro + frase.
+ * Cada red tiene su texto. Discord no lleva mención ni hashtags; la cita queda en la imagen.
+ * El estado de cada red queda en la lista de arriba; los tabs solo cambian el texto.
  * Un solo reintento cubre las redes sin fecha y las de Buffer cuyo estado es error.
  */
 export function PublishedPanel({
@@ -51,20 +53,6 @@ export function PublishedPanel({
   /** Buffer programa el post en vez de publicarlo ya. */
   scheduled: boolean;
 }) {
-  if (testimonial.status !== "published") {
-    return (
-      <section className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-        <header className="flex flex-col gap-1">
-          <h2 className="text-admin-heading font-semibold text-foreground">Rechazado</h2>
-          <p className="text-admin-caption text-muted-foreground">
-            No sale en la galería ni en las redes. El envío queda guardado arriba por si hace falta
-            volver a verlo.
-          </p>
-        </header>
-      </section>
-    );
-  }
-
   const postedAt: Record<ShareNetwork, string | null> = {
     discord: testimonial.discordPostedAt,
     instagram: testimonial.bufferInstagramPostedAt,
@@ -83,6 +71,13 @@ export function PublishedPanel({
 
   function stateOf(network: ShareNetwork): NetworkState {
     const live = network === "discord" ? null : bufferStates?.[network];
+    if (live?.status === "not_found") {
+      return {
+        label: "No está en Buffer",
+        tone: "warning",
+        detail: "El id guardado ya no existe.",
+      };
+    }
     if (live) {
       return bufferState(live);
     }
@@ -104,6 +99,12 @@ export function PublishedPanel({
       : { label: "Pendiente", tone: "warning", detail: null };
   }
 
+  const networkStates = {
+    discord: stateOf("discord"),
+    instagram: stateOf("instagram"),
+    linkedin: stateOf("linkedin"),
+  };
+
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <section
@@ -120,18 +121,21 @@ export function PublishedPanel({
               {testimonial.publishedAt ? ` · ${formatSubmittedAt(testimonial.publishedAt)}` : null}
             </h2>
             <p className="text-admin-caption text-muted-foreground">
-              Ya está en la galería. La misma imagen sale en todas las redes. Instagram y
-              LinkedIn comparten el texto; Discord lleva la intro y la frase.
+              Ya está en la galería. La misma imagen sale en todas las redes. Cada red tiene su
+              texto. Discord no lleva mención ni hashtags; la cita queda en la imagen.
             </p>
           </div>
-          {publicHref ? (
-            <a
-              href={publicHref}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              Ver ficha pública
-            </a>
-          ) : null}
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {publicHref ? (
+              <a
+                href={publicHref}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Ver ficha pública
+              </a>
+            ) : null}
+            <ArchiveDialog id={testimonial.id} />
+          </div>
         </header>
 
         {shareStatus === "ok" ? (
@@ -145,7 +149,7 @@ export function PublishedPanel({
 
         <ul aria-label="Estado por red" className="divide-y divide-border rounded-lg border border-border">
           {SHARE_NETWORKS.map((network) => {
-            const state = stateOf(network);
+            const state = networkStates[network];
             return (
               <li key={network} className="flex items-center justify-between gap-3 px-3 py-2.5">
                 <span className="flex min-w-0 flex-col">
@@ -213,14 +217,17 @@ export function PublishedPanel({
           </h2>
           <p className="text-admin-caption text-muted-foreground">
             {shareCardUrl
-              ? "La imagen que salió en las redes. Si hay que subirla a mano, descargala y copiá el texto."
-              : "No quedó guardada la imagen publicada: se muestra con el diseño base. Si hay que subirla a mano, descargala y copiá el texto."}
+              ? "La imagen que salió en las redes. Si hay que subirla a mano, descargala y copiá la descripción de la red activa."
+              : "No quedó guardada la imagen publicada: se muestra con el diseño base. Si hay que subirla a mano, descargala y copiá la descripción de la red activa."}
           </p>
         </header>
         <IgShare
           mode="share"
+          testimonialId={testimonial.id}
           slug={testimonial.slug}
-          caption={testimonial.caption}
+          igCaption={testimonial.igCaption}
+          liCaption={testimonial.liCaption}
+          discordCaption={testimonial.discordCaption}
           imageUrl={shareCardUrl}
           {...card}
         />

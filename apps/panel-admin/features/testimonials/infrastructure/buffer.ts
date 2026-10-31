@@ -1,5 +1,4 @@
-import type { BufferPostState, BufferPostStatus } from "../types/share";
-import { youtubeWatchUrl } from "./youtube";
+import type { BufferPostNotFound, BufferPostState, BufferPostStatus } from "../types/share";
 
 const BUFFER_API_URL = "https://api.buffer.com";
 const BUFFER_TIMEOUT_MS = 15000;
@@ -78,8 +77,6 @@ export type CreatePostInput = {
   text: string;
   /** Card PNG del testimonio. Es la misma en todas las redes. */
   imageUrl: string;
-  /** YouTube: LinkedIn lo suma al texto. Instagram no admite links en el caption. */
-  videoUrl?: string | null;
 };
 
 export async function createPost(
@@ -111,8 +108,6 @@ export async function createPost(
     payload.metadata = {
       instagram: { type: "post", shouldShareToFeed: true },
     };
-  } else {
-    payload.text = linkedInText(input.text, input.videoUrl);
   }
 
   try {
@@ -120,13 +115,18 @@ export async function createPost(
       input: payload,
     });
 
-    if (!response) {
+    if (!response.ok) {
+      logGraphqlFailure(response.failure);
       return { status: "failed" };
     }
 
-    const created = parseCreatePostPayload(response.createPost);
+    if (!response.data) {
+      return { status: "failed" };
+    }
+
+    const created = parseCreatePostPayload(response.data.createPost);
     if (!created) {
-      const message = mutationErrorMessage(response.createPost);
+      const message = mutationErrorMessage(response.data.createPost);
       console.error("Buffer createPost failed", message ?? "MutationError");
       return { status: "failed" };
     }
@@ -138,8 +138,14 @@ export async function createPost(
   }
 }
 
-/** Estado actual de un post creado con `createPost`. `null` si falta la key o Buffer no responde. */
-export async function getPost(id: string): Promise<BufferPostState | null> {
+/**
+ * Estado actual de un post creado con `createPost`.
+ * `null` si falta la key o Buffer no responde (red, auth u otro error).
+ * `{ status: "not_found" }` solo cuando la lectura por id confirma que ese post no existe.
+ */
+export async function getPost(
+  id: string,
+): Promise<BufferPostState | BufferPostNotFound | null> {
   const key = apiKey();
   if (!key) {
     return null;
@@ -147,11 +153,19 @@ export async function getPost(id: string): Promise<BufferPostState | null> {
 
   try {
     const response = await bufferGraphql(key, POST_QUERY, { input: { id } });
-    if (!response) {
+    if (!response.ok) {
+      if (isMissingPostFailure(response.failure)) {
+        return { status: "not_found" };
+      }
+      logGraphqlFailure(response.failure);
       return null;
     }
 
-    const post = parsePost(response.post);
+    if (!response.data) {
+      return null;
+    }
+
+    const post = parsePost(response.data.post);
     if (!post) {
       console.error("Buffer getPost failed: unexpected payload");
     }
@@ -190,17 +204,6 @@ function bufferShareTiming() {
   };
 }
 
-function linkedInText(caption: string, videoUrl: string | null | undefined) {
-  const video = videoUrl?.trim();
-  if (!video) {
-    return caption;
-  }
-
-  return [caption, `Video: ${youtubeWatchUrl(video)}`].filter(Boolean).join(
-    "\n\n",
-  );
-}
-
 function parseHttpsUrl(value: string) {
   try {
     const url = new URL(value);
@@ -227,11 +230,20 @@ type BufferPost = {
   sentAt: string | null;
 };
 
+type GraphqlFailure = {
+  httpStatus: number | null;
+  errors: { message?: string }[] | null;
+};
+
+type GraphqlCall =
+  | { ok: true; data: GraphqlBody["data"] }
+  | { ok: false; failure: GraphqlFailure };
+
 async function bufferGraphql(
   key: string,
   query: string,
   variables: Record<string, unknown>,
-): Promise<GraphqlBody["data"] | null> {
+): Promise<GraphqlCall> {
   const response = await fetch(BUFFER_API_URL, {
     method: "POST",
     headers: {
@@ -243,17 +255,36 @@ async function bufferGraphql(
   });
 
   if (!response.ok) {
-    console.error("Buffer GraphQL failed", response.status);
-    return null;
+    return { ok: false, failure: { httpStatus: response.status, errors: null } };
   }
 
   const body = (await response.json()) as GraphqlBody;
   if (body.errors?.length) {
-    console.error("Buffer GraphQL failed", body.errors[0]?.message);
-    return null;
+    return { ok: false, failure: { httpStatus: null, errors: body.errors } };
   }
 
-  return body.data ?? null;
+  return { ok: true, data: body.data };
+}
+
+function logGraphqlFailure(failure: GraphqlFailure) {
+  if (failure.httpStatus != null) {
+    console.error("Buffer GraphQL failed", failure.httpStatus);
+    return;
+  }
+  console.error("Buffer GraphQL failed", failure.errors?.[0]?.message);
+}
+
+/** Solo la lectura por id. Crear un post sigue tratando cualquier error como fallo. */
+function isMissingPostFailure(failure: GraphqlFailure) {
+  const errors = failure.errors;
+  return (
+    failure.httpStatus == null &&
+    !!errors?.length &&
+    errors.every(
+      (error) =>
+        typeof error.message === "string" && error.message.trimStart().startsWith("Post not found"),
+    )
+  );
 }
 
 function parseCreatePostPayload(payload: unknown): BufferPost | null {

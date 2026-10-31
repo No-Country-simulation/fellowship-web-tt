@@ -254,7 +254,7 @@ export function FileField({
         <label
           htmlFor={id}
           className={cn(
-            "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base",
+            "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base [overflow-anchor:none]",
             "hover:border-accent-cyan/70 hover:bg-bg-white-a5",
             "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
             preview === "avatar"

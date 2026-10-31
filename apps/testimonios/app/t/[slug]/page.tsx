@@ -42,7 +42,7 @@ export default async function TestimonyPage({
       >
         <div className="mt-lg">
           <Link href="/" className={buttonVariants({ variant: "outline" })}>
-            Volver a la galería
+            Volver al inicio
           </Link>
         </div>
       </PageShell>

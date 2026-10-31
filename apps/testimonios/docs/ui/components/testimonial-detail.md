@@ -20,7 +20,7 @@ Es un componente de servidor. No consulta Supabase. `app/t/[slug]/page.tsx` cons
 
 ## Composición y responsive
 
-- Proporciona el único `<main>` de la ficha: no envolver en `PageShell` ni otro `<main>`. Conserva `flex-1 min-h-0 min-w-0 overflow-y-auto`, necesario porque el body del layout no scrollea.
+- Proporciona el único `<main>` de la ficha: no envolver en `PageShell` ni otro `<main>`. Conserva `flex-1 min-w-0`, crece con el contenido y utiliza el scroll del documento.
 - Un contenedor `mx-auto w-full max-w-[70rem]` agrupa encabezado, historia, foto testimonial, video y cierre. El padding exterior es `px-md` (24px) y `md:px-lg` (32px). No hay columnas vacías ni offsets interiores por sección.
 - El relato limita su ancho a `44rem` (704px) y permanece alineado a la izquierda. Se imprime una única vez, siempre, sin comparar con `quote`, con `whitespace-pre-wrap`, 18px e interlineado 1.85. No se divide, recorta ni reescribe el contenido. `wrap-anywhere` evita overflow con palabras o URLs extensas.
 - El avatar aparece encima de la información en mobile y a la derecha desde `md` (768px). Usa `next/image`, `alt=""` y un anillo degradado; el nombre es el único `h1`.
@@ -46,8 +46,8 @@ País y fecha son opcionales; el separador requiere ambos. La fecha conserva `fo
 - Foto y video tienen contenedores `mt-md w-full max-w-3xl`: máximo 48rem (768px), alineados a la izquierda con la historia y a todo el ancho disponible en mobile. El límite pertenece a esta ficha, sin cambiar otros usos de los componentes.
 - La foto conserva proporciones y dimensiones intrínsecas: no se recortan archivos verticales o cuadrados ni se amplían imágenes pequeñas. El marco interno se ajusta al ancho disponible.
 - `youtubeEmbedUrl` habilita “En video” mediante `YoutubeEmbed`, con proporción 16:9 y título específico del participante. La URL, los permisos y `allowFullScreen` se conservan sin cambios.
-- `CLOSING_COPY` agrupa los textos provisionales del título, la descripción y las dos acciones. “Enviar testimonio” enlaza a `/enviar` con `buttonVariants({ variant: "gradient" })`; “Ver más historias” enlaza a `/`.
-- El diálogo de la foto conserva su límite de viewport: no hereda el máximo de 768px de la vista integrada. `.page:has(dialog[open])` bloquea el scroll del main; al cerrarlo recupera su comportamiento automáticamente, sin mutar el layout ni el body.
+- `CLOSING_COPY` agrupa el título, la descripción y las dos acciones. «Compartir mi testimonio» enlaza a `/enviar` con `buttonVariants({ variant: "gradient" })`; «Volver al inicio» enlaza a la landing `/`. El enlace superior y el retorno desde el error de carga también dicen «Volver al inicio», porque el home ya no muestra la galería.
+- El diálogo de la foto conserva su límite de viewport: no hereda el máximo de 768px de la vista integrada. La regla global `html:has(dialog:modal)` bloquea el scroll del documento mientras está abierto; `scrollbar-gutter: stable` evita cambios de ancho. Al cerrar, se retira el bloqueo sin cambiar la posición ni la gestión de foco del componente.
 
 El máximo CSS cambia solamente el tamaño de visualización. No reduce la resolución del archivo ni los bytes descargados: vista integrada y diálogo conservan la misma URL pública. Una miniatura independiente requeriría evaluar variantes y procesamiento como mejora futura; este componente no transforma URLs ni modifica Storage.
 

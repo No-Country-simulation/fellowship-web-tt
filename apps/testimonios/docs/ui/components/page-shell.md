@@ -1,10 +1,10 @@
 # PageShell
 
-Wrapper de página: `<main>` scrolleable + eyebrow, título y descripción.
+Wrapper de página: `<main>` en el flujo del documento + eyebrow, título y descripción.
 
 **Archivo:** `components/page-shell.tsx`
 
-Uso actual: estado de error de `/t/[slug]`. La ficha exitosa usa la composición propia de [`TestimonialDetail`](./testimonial-detail.md). La galería usa un `<main>` propio con `GalleryHero` y `TestimonialsGallery` para extender el fondo del hero sin cambiar este componente compartido. `/enviar` también compone su propio `<main>` y encabezado editorial en `app/enviar/page.tsx`, conservando el ancho `max-w-3xl` y el scroll interior.
+Uso actual: estado de error de `/t/[slug]`. La ficha exitosa usa la composición propia de [`TestimonialDetail`](./testimonial-detail.md). La landing de captación usa un `<main>` propio con `GalleryHero`; `TestimonialsGallery` se conserva sin montarse. `/enviar` también compone su propio `<main>` y encabezado editorial en `app/enviar/page.tsx`, conservando el ancho `max-w-3xl`. Todas las rutas usan el scroll del documento.
 
 ## Import
 
@@ -78,7 +78,7 @@ import { PageShell } from "@/components/page-shell";
 
 ## Notas
 
-- El `<main>` ocupa el resto de la columna del `body` (`flex-1`, `overflow-y-auto`). El header queda fijo.
+- El `<main>` ocupa el resto de la columna del `body` (`flex-1`) y crece con su contenido. El documento proporciona el scroll; el header institucional es sticky y su altura real forma parte del offset de scroll.
 - Padding de página: `px-md py-md`. El inner usa `container-content`.
 - `className` ajusta el contenedor (ancho), no el `<main>`. Por ejemplo: `className="max-w-5xl"`.
 - `featured` apila el título y las acciones en mobile; desde `md` (768px) los ubica en una fila. El título puede ocupar varias líneas y las acciones permiten wrapping dentro de su contenedor.

@@ -9,6 +9,7 @@ export type TestimonialType = (typeof TESTIMONIAL_TYPES)[number];
 export const TESTIMONIAL_STATUSES = [
   "in_review",
   "published",
+  "archived",
   "rejected",
 ] as const;
 
@@ -86,8 +87,15 @@ export const TYPE_LABELS: Record<TestimonialType, string> = {
 export const STATUS_LABELS: Record<TestimonialStatus, string> = {
   in_review: "En revisión",
   published: "Publicado",
+  archived: "Archivado",
   rejected: "Rechazado",
 };
+
+/** Tope del motivo de archivo. Lo comparten el formulario y la action. */
+export const ARCHIVE_REASON_MAX_CHARS = 500;
+
+/** Tope de un borrado de rechazados. Lo comparten la lista, la action y el repositorio. */
+export const BULK_DELETE_MAX = 100;
 
 export function isTestimonialStatus(value: string): value is TestimonialStatus {
   return (TESTIMONIAL_STATUSES as readonly string[]).includes(value);
@@ -199,7 +207,11 @@ export const CARD_DESIGN_OPTIONS: Record<TestimonialType, CardDesignOption[]> = 
   ],
   career_change: [
     PHOTO_OPTION,
-    { value: "shift", label: "Antes y ahora", description: "El oficio de antes y el rol de ahora." },
+    {
+      value: "shift",
+      label: "Antes y ahora",
+      description: "El camino del oficio de antes al rol de ahora, con la frase abajo.",
+    },
     { value: "profile", label: "Perfil", description: "Tarjeta de perfil con la foto como portada." },
   ],
 };
@@ -210,6 +222,8 @@ export type AdminTestimonial = {
   type: TestimonialType;
   typeLabel: string;
   status: TestimonialStatus;
+  /** Motivo guardado al archivar. Null en cualquier otro estado. */
+  archiveReason: string | null;
   fullName: string;
   country: string | null;
   email: string;
@@ -217,8 +231,12 @@ export type AdminTestimonial = {
   linkedin: string | null;
   story: string;
   quote: string;
-  /** Texto de Instagram y LinkedIn. Discord lleva intro + frase. */
-  caption: string;
+  /** Texto de Instagram. */
+  igCaption: string;
+  /** Texto de LinkedIn. El link del video va en este texto solo si el admin lo deja. */
+  liCaption: string;
+  /** Texto de Discord. La cita queda en la imagen. El link del video va en este texto solo si el admin lo deja. */
+  discordCaption: string;
   avatarUrl: string;
   captureUrl: string | null;
   videoUrl: string | null;

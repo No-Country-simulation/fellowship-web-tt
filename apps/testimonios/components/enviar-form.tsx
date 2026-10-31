@@ -72,12 +72,11 @@ const TYPE_ICONS = {
 function focusAndReveal(control: HTMLElement | null) {
   if (!control) return;
   control.focus({ preventScroll: true });
-  const main = control.closest("main");
-  if (!main) return;
+  const header = document.querySelector<HTMLElement>("body > header");
+  const headerHeight = header?.getBoundingClientRect().height ?? 0;
   const anchor = control.closest<HTMLElement>("[data-field], label") ?? control;
-  main.scrollTo({
-    top: main.scrollTop + anchor.getBoundingClientRect().top -
-      main.getBoundingClientRect().top - 16,
+  window.scrollTo({
+    top: Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - headerHeight - 16),
     behavior: "instant",
   });
 }
@@ -878,7 +877,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             type="button"
             variant="outline"
             size="lg"
-            className="min-h-11 px-sm"
+            className="h-auto min-h-11 max-w-full px-sm whitespace-normal"
             disabled={step === 1 || pending}
             onClick={() => navigateTo(Math.max(1, step - 1))}
           >
@@ -891,7 +890,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             type="button"
             variant="gradient"
             size="lg"
-            className={step === 1 ? "min-h-11 w-full px-md sm:w-auto" : "min-h-11 px-md"}
+            className={step === 1 ? "h-auto min-h-11 w-full max-w-full px-md whitespace-normal sm:w-auto" : "h-auto min-h-11 max-w-full px-md whitespace-normal"}
             onClick={goNext}
           >
             Siguiente
@@ -902,7 +901,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             type="submit"
             variant="gradient"
             size="lg"
-            className="min-h-11 px-sm sm:px-md"
+            className="h-auto min-h-11 max-w-full px-sm whitespace-normal sm:px-md"
             disabled={pending}
           >
             {pending ? "Enviando…" : "Enviar testimonio"}

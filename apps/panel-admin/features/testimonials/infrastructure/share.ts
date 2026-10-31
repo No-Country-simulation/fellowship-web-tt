@@ -1,6 +1,7 @@
 import { SHARE_CARD_MAX_BYTES, type ShareOutcome, type ShareResult } from "../types/share";
 import type { AdminTestimonial } from "../types/testimonial";
 import { createPost, getPost, hasInstagramChannel, hasLinkedInChannel } from "./buffer";
+import { buildDiscordCaption } from "./quote";
 import { hasCommunityWebhook, postCommunityTestimonial } from "./discord";
 import {
   claimBufferPost,
@@ -17,9 +18,12 @@ type ShareSource = Pick<
   | "id"
   | "slug"
   | "fullName"
+  | "type"
   | "avatarUrl"
   | "quote"
-  | "caption"
+  | "igCaption"
+  | "liCaption"
+  | "discordCaption"
   | "videoUrl"
   | "discordPostedAt"
   | "bufferInstagramPostedAt"
@@ -50,7 +54,7 @@ export function readShareCard(formData: FormData): ShareCardRead {
  * Instagram o LinkedIn en error vuelven a poder postearse: se consulta Buffer con el
  * id guardado y, si el estado es `error`, se borran fecha e id. La red queda sin fecha
  * solo en este objeto si ese update ganó, y `sharePublished` reserva y postea.
- * Si Buffer no responde, o no hay id, la fecha no se toca.
+ * Si Buffer no responde, no hay id, o el post ya no existe, la fecha no se toca.
  */
 export async function prepareErroredBufferRetries(
   testimonial: AdminTestimonial,
@@ -96,8 +100,8 @@ async function clearBufferNetworkInError(
 }
 
 /**
- * Una sola card para las tres redes. Instagram y LinkedIn comparten el texto.
- * Discord lleva intro + frase.
+ * Una sola card para las tres redes. Cada red lleva su texto.
+ * Discord tiene el suyo: sin mención ni hashtags; la cita queda en la imagen.
  * Cada red se reserva en la fila antes de la llamada. Si la reserva no toca
  * ninguna fila, no se llama a Discord ni a Buffer.
  */
@@ -139,12 +143,21 @@ async function postDiscord(testimonial: ShareSource, imageUrl: string): Promise<
     return claim === "taken" ? "skipped" : "failed";
   }
 
+  // Publicados anteriores a la migración tienen discord_caption vacío.
+  // El fallback no se guarda: solo es el texto del embed.
+  const text = testimonial.discordCaption.trim()
+    ? testimonial.discordCaption
+    : buildDiscordCaption({
+        fullName: testimonial.fullName,
+        type: testimonial.type,
+        videoUrl: testimonial.videoUrl,
+      });
+
   const status = await postCommunityTestimonial({
     fullName: testimonial.fullName,
     avatarUrl: testimonial.avatarUrl,
-    quote: testimonial.quote,
+    text,
     imageUrl,
-    videoUrl: testimonial.videoUrl,
   });
   if (status !== "posted") {
     await releaseDiscordPost(testimonial.id);
@@ -166,9 +179,8 @@ async function postBuffer(
 
   const created = await createPost({
     network,
-    text: testimonial.caption,
+    text: network === "instagram" ? testimonial.igCaption : testimonial.liCaption,
     imageUrl,
-    videoUrl: network === "linkedin" ? testimonial.videoUrl : undefined,
   });
   if (created.status !== "created") {
     await releaseBufferPost(testimonial.id, network);

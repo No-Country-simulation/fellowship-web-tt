@@ -57,17 +57,17 @@ export function Submission({ testimonial }: { testimonial: AdminTestimonial }) {
 
             {testimonial.youtubeEmbedUrl ? (
               <div>
-                <p className="text-admin-caption font-medium text-foreground">Video</p>
+                <p className="text-admin-caption font-medium text-foreground">Video testimonial</p>
                 <div className="mt-1">
                   <YoutubeEmbed
                     src={testimonial.youtubeEmbedUrl}
-                    title={`Video de ${testimonial.fullName}`}
+                    title={`Video testimonial de ${testimonial.fullName}`}
                   />
                 </div>
               </div>
             ) : testimonial.videoUrl ? (
               <div>
-                <p className="text-admin-caption font-medium text-foreground">Video</p>
+                <p className="text-admin-caption font-medium text-foreground">Video testimonial</p>
                 <a
                   href={testimonial.videoUrl}
                   target="_blank"

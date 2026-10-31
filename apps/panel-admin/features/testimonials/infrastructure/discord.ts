@@ -1,6 +1,4 @@
-import { buildDiscordDescription } from "./quote";
 import { getGalleryUrl, SITE_BRAND } from "./site";
-import { youtubeWatchUrl } from "./youtube";
 
 const BRAND_COLOR = 0xfe0096;
 const WEBHOOK_TIMEOUT_MS = 8000;
@@ -13,14 +11,13 @@ export function hasCommunityWebhook() {
 
 /**
  * Post al canal de comunidad: la misma card que Instagram y LinkedIn.
- * El texto es intro + frase, como en la app pública. El aviso de inbox se queda ahí.
+ * El texto es el de esa red. La cita queda en la imagen. El aviso de inbox se queda ahí.
  */
 export async function postCommunityTestimonial(post: {
   fullName: string;
   avatarUrl: string;
-  quote: string;
+  text: string;
   imageUrl: string;
-  videoUrl: string | null;
 }): Promise<DiscordPostStatus> {
   const webhookUrl = communityWebhookUrl();
   if (!webhookUrl) {
@@ -29,14 +26,10 @@ export async function postCommunityTestimonial(post: {
 
   const embed: DiscordEmbed = {
     author: { name: post.fullName, icon_url: post.avatarUrl },
-    description: buildDiscordDescription(post.quote),
+    description: post.text,
     color: BRAND_COLOR,
     image: { url: post.imageUrl },
   };
-
-  if (post.videoUrl) {
-    embed.fields = [{ name: "Video", value: youtubeWatchUrl(post.videoUrl), inline: false }];
-  }
 
   return postWebhook(webhookUrl, {
     username: SITE_BRAND,

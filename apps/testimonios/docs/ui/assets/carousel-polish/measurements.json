@@ -1,0 +1,232 @@
+{
+  "date": "2026-10-30",
+  "rootFont": 16,
+  "unit": "CSS px",
+  "measurements": [
+    {
+      "source": "fixtures",
+      "scenario": "normal",
+      "viewport": 375,
+      "before": {
+        "cardWidth": 317,
+        "cardHeight": 504.109375,
+        "carouselWidth": 317,
+        "quoteFont": 20,
+        "visibleQuoteLines": 5,
+        "nameFont": 16.4364,
+        "visibleNameLines": 1,
+        "heroHeight": 1045.78125
+      },
+      "after": {
+        "cardWidth": 317,
+        "cardHeight": 396.25,
+        "carouselWidth": 317,
+        "quoteFont": 19.1785,
+        "visibleQuoteLines": 4,
+        "nameFont": 15,
+        "visibleNameLines": 1,
+        "heroHeight": 937.921875
+      }
+    },
+    {
+      "source": "fixtures",
+      "scenario": "normal",
+      "viewport": 1024,
+      "before": {
+        "cardWidth": 376,
+        "cardHeight": 522.25,
+        "carouselWidth": 416,
+        "quoteFont": 23.673,
+        "visibleQuoteLines": 5,
+        "nameFont": 19.4956,
+        "visibleNameLines": 1,
+        "heroHeight": 743.25
+      },
+      "after": {
+        "cardWidth": 340,
+        "cardHeight": 425,
+        "carouselWidth": 372,
+        "quoteFont": 20.57,
+        "visibleQuoteLines": 4,
+        "nameFont": 16.0004,
+        "visibleNameLines": 1,
+        "heroHeight": 646
+      }
+    },
+    {
+      "source": "fixtures",
+      "scenario": "normal",
+      "viewport": 1440,
+      "before": {
+        "cardWidth": 408,
+        "cardHeight": 548.640625,
+        "carouselWidth": 448,
+        "quoteFont": 25.6877,
+        "visibleQuoteLines": 5,
+        "nameFont": 21.1548,
+        "visibleNameLines": 1,
+        "heroHeight": 769.640625
+      },
+      "after": {
+        "cardWidth": 340,
+        "cardHeight": 425,
+        "carouselWidth": 372,
+        "quoteFont": 20.57,
+        "visibleQuoteLines": 4,
+        "nameFont": 16.0004,
+        "visibleNameLines": 1,
+        "heroHeight": 646
+      }
+    },
+    {
+      "source": "fixtures",
+      "scenario": "long",
+      "viewport": 375,
+      "before": {
+        "cardWidth": 317,
+        "cardHeight": 958.234375,
+        "carouselWidth": 317,
+        "quoteFont": 20,
+        "visibleQuoteLines": 14,
+        "nameFont": 16.4364,
+        "visibleNameLines": 3,
+        "heroHeight": 1499.90625
+      },
+      "after": {
+        "cardWidth": 317,
+        "cardHeight": 528.703125,
+        "carouselWidth": 317,
+        "quoteFont": 19.1785,
+        "visibleQuoteLines": 6,
+        "nameFont": 15,
+        "visibleNameLines": 1,
+        "heroHeight": 1070.375
+      }
+    },
+    {
+      "source": "fixtures",
+      "scenario": "long",
+      "viewport": 1024,
+      "before": {
+        "cardWidth": 376,
+        "cardHeight": 956.5625,
+        "carouselWidth": 416,
+        "quoteFont": 23.673,
+        "visibleQuoteLines": 13,
+        "nameFont": 19.4956,
+        "visibleNameLines": 3,
+        "heroHeight": 1177.5625
+      },
+      "after": {
+        "cardWidth": 340,
+        "cardHeight": 542.09375,
+        "carouselWidth": 372,
+        "quoteFont": 20.57,
+        "visibleQuoteLines": 6,
+        "nameFont": 16.0004,
+        "visibleNameLines": 1,
+        "heroHeight": 763.09375
+      }
+    },
+    {
+      "source": "fixtures",
+      "scenario": "long",
+      "viewport": 1440,
+      "before": {
+        "cardWidth": 408,
+        "cardHeight": 1007.546875,
+        "carouselWidth": 448,
+        "quoteFont": 25.6877,
+        "visibleQuoteLines": 13,
+        "nameFont": 21.1548,
+        "visibleNameLines": 3,
+        "heroHeight": 1228.546875
+      },
+      "after": {
+        "cardWidth": 340,
+        "cardHeight": 542.09375,
+        "carouselWidth": 372,
+        "quoteFont": 20.57,
+        "visibleQuoteLines": 6,
+        "nameFont": 16.0004,
+        "visibleNameLines": 1,
+        "heroHeight": 763.09375
+      }
+    },
+    {
+      "source": "published",
+      "scenario": "normal",
+      "viewport": 375,
+      "before": {
+        "cardWidth": 317,
+        "cardHeight": 571.984375,
+        "carouselWidth": 317,
+        "quoteFont": 20,
+        "visibleQuoteLines": 8,
+        "nameFont": 16.4364,
+        "visibleNameLines": 1,
+        "heroHeight": 1113.65625
+      },
+      "after": {
+        "cardWidth": 317,
+        "cardHeight": 403.734375,
+        "carouselWidth": 317,
+        "quoteFont": 19.1785,
+        "visibleQuoteLines": 5,
+        "nameFont": 15,
+        "visibleNameLines": 1,
+        "heroHeight": 945.40625
+      }
+    },
+    {
+      "source": "published",
+      "scenario": "normal",
+      "viewport": 1024,
+      "before": {
+        "cardWidth": 376,
+        "cardHeight": 563.015625,
+        "carouselWidth": 416,
+        "quoteFont": 23.673,
+        "visibleQuoteLines": 8,
+        "nameFont": 19.4956,
+        "visibleNameLines": 1,
+        "heroHeight": 784.015625
+      },
+      "after": {
+        "cardWidth": 340,
+        "cardHeight": 425,
+        "carouselWidth": 372,
+        "quoteFont": 20.57,
+        "visibleQuoteLines": 5,
+        "nameFont": 16.0004,
+        "visibleNameLines": 1,
+        "heroHeight": 646
+      }
+    },
+    {
+      "source": "published",
+      "scenario": "normal",
+      "viewport": 1440,
+      "before": {
+        "cardWidth": 408,
+        "cardHeight": 600.609375,
+        "carouselWidth": 448,
+        "quoteFont": 25.6877,
+        "visibleQuoteLines": 8,
+        "nameFont": 21.1548,
+        "visibleNameLines": 1,
+        "heroHeight": 821.609375
+      },
+      "after": {
+        "cardWidth": 340,
+        "cardHeight": 425,
+        "carouselWidth": 372,
+        "quoteFont": 20.57,
+        "visibleQuoteLines": 5,
+        "nameFont": 16.0004,
+        "visibleNameLines": 1,
+        "heroHeight": 646
+      }
+    }
+  ]
+}

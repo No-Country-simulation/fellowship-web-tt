@@ -18,9 +18,11 @@ mismo shell, sin un chequeo propio.
 
 Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código vive en
 `features/testimonials` (`components/`, `types/`, `infrastructure/` y `actions/`). Las páginas
-piden datos al repository. Publicar, guardar, rechazar y reintentar son Server Actions: llaman
-al repository y después a Discord y Buffer. No hay mocks: el repository lee y escribe Supabase
-con `service_role`. El resto del panel sigue en mock.
+piden datos al repository. Publicar, guardar, rechazar, archivar, volver a publicar,
+reintentar y eliminar rechazados son Server Actions. Publicar y reintentar llaman al
+repository y después a Discord y Buffer. Archivar, volver a publicar, rechazar un archivado
+y eliminar rechazados no mandan posts. No hay mocks:
+el repository lee y escribe Supabase con `service_role`. El resto del panel sigue en mock.
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
 
@@ -29,28 +31,51 @@ No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya
 | `/testimonials` | Inbox: lista de envíos y, al elegir uno, la ficha al lado |
 | `/testimonials/[id]` | Ficha: envío y una sola card para las tres redes |
 
-Los filtros del inbox viven en la URL: `?status=` (`in_review`, `published`, `rejected`), `?type=`
-(`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres de
-control). Un valor inválido redirige a la query válida. La lista, la ficha y las actions conservan
+Los filtros del inbox viven en la URL: `?status=` (`in_review`, `published`, `archived`, `rejected`),
+`?type=` (`simulation`, `first_job`, `career_change`) y `?s=` (hasta 100 caracteres, sin caracteres
+de control). Un valor inválido redirige a la query válida. La lista, la ficha y las actions conservan
 esa query.
 
 Un id que no es un uuid responde 404 y no consulta Supabase. Si el id es válido y Supabase o la
 red fallan, la ficha muestra «No se pudo cargar».
 
-Hay **una sola card** PNG 1080×1350 para Discord, Instagram y LinkedIn. Instagram y LinkedIn
-comparten el texto; si la persona tiene las dos redes, van las dos. Discord lleva la intro y la
-frase entre comillas. El quote (que va dentro de la card) y el texto de Instagram y LinkedIn
-llegan armados por la plantilla del formulario y se editan a mano. No hay generación con IA. El
-texto se guarda en `ig_caption` y se copia a `li_caption`. El video es solo un link de YouTube:
-Discord y LinkedIn lo suman al post; Instagram no admite links.
+Hay **una sola card** PNG 1080×1350 para Discord, Instagram y LinkedIn. Cada red tiene su texto
+y su intro. Discord sigue la misma plantilla, sin mención y sin hashtags, y se guarda en
+`discord_caption`. La cita queda en la imagen. Los tres textos llegan armados por la plantilla y
+se editan a mano, en un tab por red. No hay generación con IA. Instagram usa el valor guardado
+(`@usuario`). LinkedIn escribe `@usuario` a partir del perfil. El video es solo un link de
+YouTube: la plantilla de Discord y LinkedIn trae `Video testimonial:` y el link al final de la descripción. El admin lo deja
+o lo saca en ese texto. Al publicar se manda el campo tal cual: el link no se agrega después.
+Instagram no admite links.
+
+En la ficha en revisión se editan los datos que dibuja la card. El tipo queda solo lectura.
+Siempre se pueden cambiar el nombre, el país y la cita. El país es el mismo listado que el formulario público, con «Otro país» para escribir uno que no esté en la lista. Según el tipo, además:
+
+| Tipo | Campos |
+| --- | --- |
+| `simulation` | `primary_role` (puesto principal) |
+| `first_job` | `role_achieved` (puesto del primer empleo) y `company` (empresa) |
+| `career_change` | `previous_profession` (oficio anterior) y `new_role` (rol nuevo) |
+
+Al cambiar el nombre, cada descripción que todavía coincide con la plantilla armada con el
+nombre anterior se regenera con el nombre nuevo: se conserva la intro y, si el texto ya tenía
+la línea de video, se vuelve a poner al final. Si el admin la había sacado en LinkedIn o
+Discord, no vuelve. Una descripción editada a mano no se toca. Cambiar la cita, el país o los
+campos del tipo no regenera las descripciones.
+
+En el header del inbox, debajo de la búsqueda y el filtro, hay un control que copia
+`{GALLERY_URL}/enviar`. El mismo control aparece en el estado vacío de «En revisión». Si en
+producción falta `GALLERY_URL`, no se muestra y ese texto vacío nombra la ruta `/enviar`.
 
 Publicar arma la card en el browser. En el server, el update a `published` y `published_at`
 solo gana si la fila sigue `in_review`. El request que no cambia la fila no sube nada ni postea,
 y vuelve a la ficha. El que gana sube el PNG al bucket `share-cards` (`{slug}/instagram.png`).
 Si el PNG no se genera o pesa más de 5 MB, el testimonio sigue en revisión. Si no se puede
 subir, la fila vuelve a `in_review` con `published_at` en null. Con la card guardada reserva cada
-red (la fecha solo si sigue en null) y manda la card al webhook de Discord comunidad (intro y
-frase) y a Buffer (Instagram y LinkedIn, con el texto compartido). Si la llamada falla, borra esa fecha. Si Buffer respondió y no se
+red (la fecha solo si sigue en null) y manda la card al webhook de Discord comunidad y a Buffer.
+Cada red sale con su texto guardado. Discord tiene el suyo, sin mención ni hashtags; la cita queda
+en la imagen. Si `discord_caption` está vacío, el envío a Discord usa la plantilla de esa red
+(con el link del video si hay uno) y no reescribe la fila. Si la llamada falla, borra esa fecha. Si Buffer respondió y no se
 guarda el id, la fecha queda y Reintentar no crea otro post. `?share=ok` muestra «Salió en las
 redes.» en la ficha; `?share=failed` se conserva. Si el envío ya no está en revisión (por
 ejemplo, desde una pestaña vieja), no toca Storage. El límite de 5 MB es `SHARE_CARD_MAX_BYTES`
@@ -64,11 +89,37 @@ el testimonio sigue publicado y un solo botón reintenta solo esas. Reintentar c
 con el id guardado: si Buffer no responde, esa red no se toca; si es error, borra fecha e id
 condicionando al id viejo y vuelve a reservar y postear. Las que ya salieron no se mandan de nuevo.
 
+Archivar un publicado pide un motivo obligatorio (hasta 500 caracteres) y lo pasa a `archived`.
+El detalle queda con `?status=archived` y el inbox lo lista en Archivados. Sale de la galería.
+Archivar no borra los posts ya enviados a Discord, Instagram ni LinkedIn, ni los ids de Buffer,
+ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar lo devuelve a
+`published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
+de publicados vuelve a ofrecer Reintentar. Rechazar un archivado lo pasa a `rejected`, limpia el
+motivo y vuelve a `/testimonials` con los filtros del inbox.
+
+### Eliminar rechazados
+
+En la pestaña Rechazados del inbox se marcan varios testimonios o todos los visibles
+(tope 100 por operación). «Eliminar definitivamente» pide confirmación con la cantidad.
+Solo corre sobre filas que siguen `rejected`. Por cada una borra primero el avatar
+(bucket `avatars`), la foto testimonial (bucket `captures`, si existe) y
+`share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla en una, esa fila
+queda y se puede reintentar. Al terminar se queda en el inbox con los filtros de la URL
+y muestra un resultado. No requiere migración: usa `service_role`.
+
+Antes de desplegar el panel hay que aplicar la migración
+`20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan
+para todos los envíos. Archivar además necesita `20261028190000_archived_status.sql` y
+`20261028190001_archive_reason.sql` (el estado `archived` y el motivo).
+
+Un reintento de LinkedIn de un testimonio publicado antes de este cambio ya no agrega el link del
+video al final: se manda el texto guardado.
+
 | Variable | Para qué |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Mismo proyecto que testimonios. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Lee el inbox y publica. |
-| `GALLERY_URL` | Solo server. Galería pública (`apps/testimonios`), para “Ver ficha pública” y el logo de Discord. En local: `http://localhost:3001`. Obligatoria en producción. No es la URL del panel. |
+| `GALLERY_URL` | Solo server. Galería pública (`apps/testimonios`), para “Ver ficha pública”, el logo de Discord y el link del formulario (`{GALLERY_URL}/enviar`) que se copia desde el inbox. En local: `http://localhost:3001`. Obligatoria en producción: si falta, el control de copiar no se muestra. No es la URL del panel. |
 | `DISCORD_COMMUNITY_WEBHOOK_URL` | Post al canal de comunidad al publicar. Vacío = no se manda. |
 | `BUFFER_ENV` | `development` programa a 1 semana; `production` publica ya. Si falta, se programa. |
 | `BUFFER_API_KEY` | Bearer de Buffer. Sin esto, Instagram/LinkedIn no se ofrecen. |

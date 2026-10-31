@@ -14,6 +14,11 @@ const PAD = 52;
 const PHOTO_ASPECT = 16 / 9;
 const AUTHOR_H = 168;
 const INLINE_AUTHOR_H = 132;
+/** Formato cita: avatar, nombre y datos de la persona más grandes que en el resto. */
+const QUOTE_AUTHOR_H = 208;
+const QUOTE_AVATAR_R = 92;
+const QUOTE_NAME_SIZE = 56;
+const QUOTE_META_SIZE = 36;
 
 const PINK = "#ff3d9a";
 const INK = "#16132b";
@@ -25,7 +30,7 @@ const COPY: Record<
   { badge: string; kicker: string }
 > = {
   learning: { badge: "APRENDIZAJE", kicker: "LO QUE APRENDÍ" },
-  job: { badge: "PRIMER EMPLEO", kicker: "MI PRIMER EMPLEO" },
+  job: { badge: "Conseguí empleo", kicker: "MI PRIMER EMPLEO" },
   change: { badge: "RECONVERSIÓN PROFESIONAL", kicker: "MI RECONVERSIÓN" },
 };
 
@@ -110,9 +115,9 @@ function drawPhotoDesign({ ctx, input, variant, copy, logo, avatar, photo, fontF
 
   const placed = photoQuotePlacement(input, variant, hasPhoto);
   if (hasPhoto && variant === "job") {
-    drawHiredPill(ctx, input.company, fontFamily, IG_PHOTO_HEIGHT - 38);
+    drawHiredPill(ctx, input.company, fontFamily, IG_PHOTO_HEIGHT - 38, PAD);
   } else if (!hasPhoto && variant === "job" && input.company?.trim()) {
-    drawHiredPill(ctx, input.company, fontFamily, 156);
+    drawHiredPill(ctx, input.company, fontFamily, 156, PAD);
   }
 
   const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
@@ -216,6 +221,10 @@ function drawQuoteDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }
     fontFamily,
     y: placed.authorTop,
     light,
+    hexR: QUOTE_AVATAR_R,
+    blockH: QUOTE_AUTHOR_H,
+    nameSize: QUOTE_NAME_SIZE,
+    metaSize: QUOTE_META_SIZE,
   });
 }
 
@@ -477,7 +486,40 @@ function drawOfferDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }
 }
 
 /** Primer empleo: línea de recorrido desde la simulación hasta el puesto, con la frase abajo. */
-function drawJourneyDesign({ ctx, input, variant, copy, logo, avatar, fontFamily }: Scene) {
+function drawJourneyDesign(scene: Scene) {
+  const company = scene.input.company?.trim();
+  drawTimelineCard(scene, {
+    nodeLabel: "Simulación Laboral",
+    headline: scene.input.role?.trim() || "Primer empleo",
+    subline: company ? `en ${company}` : null,
+  });
+}
+
+/** Reconversión: el mismo recorrido, del oficio de antes al rol de ahora. */
+function drawShiftDesign(scene: Scene) {
+  const previous = scene.input.previousRole?.trim();
+  const role = scene.input.role?.trim();
+  if (!previous || !role) {
+    drawQuoteDesign(scene);
+    return;
+  }
+  drawTimelineCard(scene, {
+    nodeLabel: previous,
+    headline: role,
+    subline: null,
+  });
+}
+
+type TimelineCopy = {
+  nodeLabel: string;
+  headline: string;
+  subline: string | null;
+};
+
+function drawTimelineCard(
+  { ctx, input, variant, copy, logo, avatar, fontFamily }: Scene,
+  timeline: TimelineCopy,
+) {
   const bg = ctx.createLinearGradient(0, 0, 0, IG_CARD_HEIGHT);
   bg.addColorStop(0, "#150a33");
   bg.addColorStop(1, "#1b0d3f");
@@ -513,11 +555,17 @@ function drawJourneyDesign({ ctx, input, variant, copy, logo, avatar, fontFamily
   ctx.stroke();
 
   const nodeX = cx + 50;
+  const nodeMax = IG_CARD_WIDTH - PAD - nodeX;
   ctx.font = `600 40px ${fontFamily}`;
   ctx.fillStyle = "rgba(255,255,255,0.92)";
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
-  const nodeLines = wrapText(ctx, "Simulación en No Country", IG_CARD_WIDTH - PAD - nodeX).slice(0, 2);
+  const wrappedNode = wrapText(ctx, timeline.nodeLabel, nodeMax);
+  const nodeLines = wrappedNode.slice(0, 2);
+  if (wrappedNode.length > nodeLines.length) {
+    const last = nodeLines.length - 1;
+    nodeLines[last] = ellipsizeLine(ctx, nodeLines[last] ?? "", nodeMax);
+  }
   const nodeLineH = 50;
   const nodeTop = nodeY - (nodeLines.length * nodeLineH) / 2 + 4;
   nodeLines.forEach((text, i) => ctx.fillText(text, nodeX, nodeTop + i * nodeLineH));
@@ -540,34 +588,34 @@ function drawJourneyDesign({ ctx, input, variant, copy, logo, avatar, fontFamily
 
   const textX = cx + r * (Math.sqrt(3) / 2) + 56;
   const textW = IG_CARD_WIDTH - PAD - textX;
-  const role = input.role?.trim() || "Primer empleo";
-  const roleFit = fitLines(ctx, role, textW, 80, 40, 800, fontFamily, 3);
-  const roleLineH = roleFit.size * 1.1;
-  const company = input.company?.trim();
+  const headlineFit = fitLines(ctx, timeline.headline, textW, 80, 40, 800, fontFamily, 3);
+  const headlineLineH = headlineFit.size * 1.1;
+  const subline = timeline.subline?.trim() || null;
   ctx.font = `700 44px ${fontFamily}`;
-  const companyWrapped = company ? wrapText(ctx, `en ${company}`, textW) : [];
-  const companyLines =
-    companyWrapped.length > 2
-      ? [companyWrapped[0] ?? "", truncateToWidth(ctx, `${companyWrapped.slice(1).join(" ")}…`, textW)]
-      : companyWrapped;
-  const companyLineH = 54;
+  const sublineWrapped = subline ? wrapText(ctx, subline, textW) : [];
+  const sublineLines =
+    sublineWrapped.length > 2
+      ? [sublineWrapped[0] ?? "", truncateToWidth(ctx, `${sublineWrapped.slice(1).join(" ")}…`, textW)]
+      : sublineWrapped;
+  const sublineLineH = 54;
   const blockH =
-    roleFit.lines.length * roleLineH + (companyLines.length ? 14 + companyLines.length * companyLineH : 0);
+    headlineFit.lines.length * headlineLineH +
+    (sublineLines.length ? 14 + sublineLines.length * sublineLineH : 0);
   let y = cy - blockH / 2;
 
-  ctx.font = `800 ${roleFit.size}px ${fontFamily}`;
-  const roleFill = ctx.createLinearGradient(textX, 0, textX + textW, 0);
-  roleFill.addColorStop(0, "#e04fd0");
-  roleFill.addColorStop(0.55, "#8b5cf6");
-  roleFill.addColorStop(1, "#38bdf8");
-  ctx.fillStyle = roleFill;
-  roleFit.lines.forEach((text, i) => ctx.fillText(text, textX, y + i * roleLineH));
-  y += roleFit.lines.length * roleLineH + 14;
+  ctx.font = `800 ${headlineFit.size}px ${fontFamily}`;
+  const headlineFill = ctx.createLinearGradient(textX, 0, textX + textW, 0);
+  headlineFill.addColorStop(0, "#e04fd0");
+  headlineFill.addColorStop(0.55, "#8b5cf6");
+  headlineFill.addColorStop(1, "#38bdf8");
+  ctx.fillStyle = headlineFill;
+  headlineFit.lines.forEach((text, i) => ctx.fillText(text, textX, y + i * headlineLineH));
+  y += headlineFit.lines.length * headlineLineH + 14;
 
-  if (companyLines.length) {
+  if (sublineLines.length) {
     ctx.font = `700 44px ${fontFamily}`;
     ctx.fillStyle = "#ffffff";
-    companyLines.forEach((text, i) => ctx.fillText(text, textX, y + i * companyLineH));
+    sublineLines.forEach((text, i) => ctx.fillText(text, textX, y + i * sublineLineH));
   }
 
   const placed = journeyQuotePlacement(input);
@@ -597,131 +645,6 @@ function drawJourneyDesign({ ctx, input, variant, copy, logo, avatar, fontFamily
   );
 }
 
-/** Reconversión: el oficio de antes en contorno y tachado, una flecha y el rol de ahora en grande. */
-function drawShiftDesign(scene: Scene) {
-  const { ctx, input, variant, copy, logo, avatar, fontFamily } = scene;
-  const previous = input.previousRole?.trim();
-  const role = input.role?.trim();
-  if (!previous || !role) {
-    drawQuoteDesign(scene);
-    return;
-  }
-
-  drawBody(ctx, variant, 0);
-  drawGlow(ctx, 930, 560, 560, "192, 38, 211", 0.34);
-  drawGlow(ctx, 90, 1240, 520, "124, 58, 237", 0.26);
-  drawDotGrid(ctx, 0.05);
-  drawLogo(ctx, logo, fontFamily, "#ffffff");
-  drawBadge(ctx, copy.badge, variant, fontFamily);
-
-  const x = PAD;
-  const width = IG_CARD_WIDTH - PAD * 2;
-
-  const beforeLabelY = 200;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.font = `700 24px ${fontFamily}`;
-  ctx.fillStyle = "rgba(255,255,255,0.5)";
-  fillTracked(ctx, "ANTES", x, beforeLabelY, 4);
-  const beforeLabelW = measureTracked(ctx, "ANTES", 4);
-  ctx.fillRect(x + beforeLabelW + 18, beforeLabelY + 11, 64, 2);
-
-  const placed = shiftQuotePlacement(ctx, input, fontFamily, previous, role);
-  const before = placed.before;
-  const beforeTop = placed.beforeTop;
-  const beforeLineH = placed.beforeLineH;
-  ctx.font = `800 ${before.size}px ${fontFamily}`;
-  ctx.lineJoin = "round";
-  before.lines.forEach((line, i) => {
-    const lineTop = beforeTop + i * beforeLineH;
-    const lineW = ctx.measureText(line).width;
-    ctx.fillStyle = "rgba(255,255,255,0.08)";
-    ctx.fillText(line, x, lineTop);
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
-    ctx.lineWidth = 2.5;
-    ctx.strokeText(line, x, lineTop);
-    ctx.save();
-    ctx.strokeStyle = PINK;
-    ctx.lineWidth = Math.max(5, before.size * 0.07);
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(x - 6, lineTop + before.size * 0.64);
-    ctx.lineTo(x + lineW + 10, lineTop + before.size * 0.4);
-    ctx.stroke();
-    ctx.restore();
-  });
-  const arrowTop = placed.arrowTop;
-  const arrowX = x + 34;
-  const arrowEndX = x + 150;
-  const arrowEndY = placed.arrowEndY;
-  const arrow = ctx.createLinearGradient(arrowX, arrowTop, arrowEndX, arrowEndY);
-  arrow.addColorStop(0, "rgba(255,61,154,0.35)");
-  arrow.addColorStop(1, PINK);
-  ctx.save();
-  ctx.strokeStyle = arrow;
-  ctx.lineWidth = 8;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(arrowX, arrowTop);
-  ctx.bezierCurveTo(arrowX, arrowTop + 88, arrowX + 30, arrowEndY, arrowEndX, arrowEndY);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(arrowEndX - 22, arrowEndY - 20);
-  ctx.lineTo(arrowEndX + 2, arrowEndY);
-  ctx.lineTo(arrowEndX - 22, arrowEndY + 20);
-  ctx.strokeStyle = PINK;
-  ctx.stroke();
-  ctx.restore();
-
-  ctx.font = `800 26px ${fontFamily}`;
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = PINK;
-  fillTracked(ctx, "AHORA", arrowEndX + 28, arrowEndY + 1, 4);
-  ctx.textBaseline = "top";
-
-  const afterTop = placed.afterTop;
-  const after = placed.after;
-  ctx.font = `800 ${after.size}px ${fontFamily}`;
-  const afterFill = ctx.createLinearGradient(x, 0, x + width, 0);
-  afterFill.addColorStop(0, "#ff5fae");
-  afterFill.addColorStop(0.5, "#d946ef");
-  afterFill.addColorStop(1, "#8b5cf6");
-  ctx.fillStyle = afterFill;
-  const afterLineH = placed.afterLineH;
-  after.lines.forEach((line, i) => ctx.fillText(line, x, afterTop + i * afterLineH));
-
-  const quoteLayout = layoutQuote(ctx, placed.frame, fontFamily);
-  const bar = ctx.createLinearGradient(0, placed.quoteTop, 0, placed.quoteTop + quoteLayout.height);
-  bar.addColorStop(0, PINK);
-  bar.addColorStop(1, "#8b5cf6");
-  ctx.fillStyle = bar;
-  ctx.beginPath();
-  roundRect(ctx, x, placed.quoteTop + 4, 6, Math.max(20, quoteLayout.height - 8), 3);
-  ctx.fill();
-  paintQuote(
-    ctx,
-    quoteLayout,
-    x + 34,
-    placed.quoteTop,
-    placed.quoteMax,
-    "rgba(255,255,255,0.94)",
-    fontFamily,
-  );
-
-  ctx.fillStyle = "rgba(255,255,255,0.16)";
-  ctx.fillRect(PAD, placed.authorTop - 36, width, 2);
-  drawAuthorInline(ctx, {
-    fullName: input.fullName,
-    country: input.country,
-    role: null,
-    avatar,
-    fontFamily,
-    y: placed.authorTop,
-    light: false,
-  });
-}
-
 function drawGlow(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -735,15 +658,6 @@ function drawGlow(
   glow.addColorStop(1, `rgba(${rgb}, 0)`);
   ctx.fillStyle = glow;
   ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-}
-
-function drawDotGrid(ctx: CanvasRenderingContext2D, alpha: number) {
-  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-  for (let y = 24; y < IG_CARD_HEIGHT; y += 36) {
-    for (let x = 24; x < IG_CARD_WIDTH; x += 36) {
-      ctx.fillRect(x, y, 3, 3);
-    }
-  }
 }
 
 /** Tamaño más grande en que el texto entra en `maxLines` líneas. */
@@ -1093,7 +1007,7 @@ function quoteFrame(
       if (!previous || !role) {
         return quoteDesignPlacement(input, variant).frame;
       }
-      return shiftQuotePlacement(ctx, input, fontFamily, previous, role).frame;
+      return journeyQuotePlacement(input).frame;
     }
     case "profile":
       return profileQuotePlacement(ctx, input, fontFamily).frame;
@@ -1129,7 +1043,7 @@ function photoQuotePlacement(input: IgCardContent, variant: Variant, hasPhoto: b
 }
 
 function quoteDesignPlacement(input: IgCardContent, variant: Variant) {
-  const authorTop = IG_CARD_HEIGHT - PAD - INLINE_AUTHOR_H;
+  const authorTop = IG_CARD_HEIGHT - PAD - QUOTE_AUTHOR_H;
   const contentTop = 340;
   const contentBottom = authorTop - 72;
   const kickerBlock = 26 + 28;
@@ -1226,48 +1140,6 @@ function journeyQuotePlacement(input: IgCardContent) {
       maxWidth: quoteW,
       maxHeight: room,
       maxFont: 52,
-    },
-  };
-}
-
-function shiftQuotePlacement(
-  ctx: CanvasRenderingContext2D,
-  input: IgCardContent,
-  fontFamily: string,
-  previous: string,
-  role: string,
-) {
-  const width = IG_CARD_WIDTH - PAD * 2;
-  const beforeTop = 244;
-  const before = fitLines(ctx, previous, width, 96, 48, 800, fontFamily, 2);
-  const beforeLineH = before.size * 1.04;
-  const beforeBottom = beforeTop + before.lines.length * beforeLineH;
-  const arrowTop = beforeBottom + 20;
-  const arrowEndY = arrowTop + 118;
-  const afterTop = arrowEndY + 48;
-  const after = fitLines(ctx, role, width, 124, 56, 800, fontFamily, 2);
-  const afterLineH = after.size * 1.04;
-  const afterBottom = afterTop + after.lines.length * afterLineH;
-  const authorTop = IG_CARD_HEIGHT - PAD - INLINE_AUTHOR_H;
-  const quoteTop = afterBottom + 56;
-  const quoteMax = width - 34;
-  return {
-    before,
-    beforeTop,
-    beforeLineH,
-    arrowTop,
-    arrowEndY,
-    after,
-    afterTop,
-    afterLineH,
-    authorTop,
-    quoteTop,
-    quoteMax,
-    frame: {
-      text: stripWrappingQuotes(input.quote),
-      maxWidth: quoteMax,
-      maxHeight: Math.max(80, authorTop - 64 - quoteTop),
-      maxFont: 44,
     },
   };
 }
@@ -1492,7 +1364,7 @@ function drawAuthor(
   });
 }
 
-/** Autor sin caja: hexágono grande y texto al lado. */
+/** Autor sin caja: hexágono y texto al lado. El formato cita pasa tamaños más grandes. */
 function drawAuthorInline(
   ctx: CanvasRenderingContext2D,
   input: {
@@ -1503,11 +1375,16 @@ function drawAuthorInline(
     fontFamily: string;
     y: number;
     light: boolean;
+    hexR?: number;
+    blockH?: number;
+    nameSize?: number;
+    metaSize?: number;
   },
 ) {
-  const hexR = 60;
+  const hexR = input.hexR ?? 60;
+  const blockH = input.blockH ?? INLINE_AUTHOR_H;
   const hexCx = PAD + hexR;
-  const hexCy = input.y + INLINE_AUTHOR_H / 2;
+  const hexCy = input.y + blockH / 2;
   drawHexAvatar(ctx, input.avatar, input.fullName, hexCx, hexCy, hexR, input.fontFamily);
 
   const textX = hexCx + hexR + 32;
@@ -1520,6 +1397,8 @@ function drawAuthorInline(
     x: textX,
     cy: hexCy,
     maxWidth: IG_CARD_WIDTH - PAD - textX,
+    nameSize: input.nameSize ?? 40,
+    metaSize: input.metaSize ?? 28,
   });
 }
 
@@ -1534,15 +1413,20 @@ function drawAuthorText(
     x: number;
     cy: number;
     maxWidth: number;
+    nameSize?: number;
+    metaSize?: number;
   },
 ) {
   const role = input.role?.trim() || null;
   const country = input.country?.trim() || null;
   const { light } = input;
+  const nameSize = input.nameSize ?? 40;
+  const metaSize = input.metaSize ?? 28;
+  const nameGap = 10;
   ctx.textAlign = "left";
   ctx.fillStyle = light ? INK : "#ffffff";
   if (role) {
-    const block = 40 + 10 + 28;
+    const block = nameSize + nameGap + metaSize;
     const textY = input.cy - block / 2;
     ctx.textBaseline = "top";
     drawNameAndCountry(
@@ -1554,10 +1438,16 @@ function drawAuthorText(
       input.maxWidth,
       input.fontFamily,
       light,
+      nameSize,
+      metaSize,
     );
-    ctx.font = `600 28px ${input.fontFamily}`;
+    ctx.font = `600 ${metaSize}px ${input.fontFamily}`;
     ctx.fillStyle = light ? PINK : "#ffffff";
-    ctx.fillText(truncateToWidth(ctx, role, input.maxWidth), input.x, textY + 50);
+    ctx.fillText(
+      truncateToWidth(ctx, role, input.maxWidth),
+      input.x,
+      textY + nameSize + nameGap,
+    );
     return;
   }
 
@@ -1567,10 +1457,12 @@ function drawAuthorText(
     input.fullName,
     country,
     input.x,
-    input.cy - 20,
+    input.cy - nameSize / 2,
     input.maxWidth,
     input.fontFamily,
     light,
+    nameSize,
+    metaSize,
   );
 }
 
@@ -1583,9 +1475,11 @@ function drawNameAndCountry(
   maxWidth: number,
   fontFamily: string,
   light: boolean,
+  nameSize: number,
+  metaSize: number,
 ) {
   ctx.textBaseline = "top";
-  ctx.font = `700 40px ${fontFamily}`;
+  ctx.font = `700 ${nameSize}px ${fontFamily}`;
   ctx.fillStyle = light ? INK : "#ffffff";
   if (!country) {
     ctx.fillText(truncateToWidth(ctx, fullName, maxWidth), x, y);
@@ -1593,21 +1487,21 @@ function drawNameAndCountry(
   }
 
   const gap = 14;
-  ctx.font = `600 28px ${fontFamily}`;
+  ctx.font = `600 ${metaSize}px ${fontFamily}`;
   const countryLabel = `· ${country}`;
   const countryWidth = Math.min(ctx.measureText(countryLabel).width, maxWidth * 0.42);
-  ctx.font = `700 40px ${fontFamily}`;
+  ctx.font = `700 ${nameSize}px ${fontFamily}`;
   ctx.fillStyle = light ? INK : "#ffffff";
   const nameMax = Math.max(80, maxWidth - gap - countryWidth);
   const name = truncateToWidth(ctx, fullName, nameMax);
   ctx.fillText(name, x, y);
   const nameWidth = ctx.measureText(name).width;
-  ctx.font = `600 28px ${fontFamily}`;
+  ctx.font = `600 ${metaSize}px ${fontFamily}`;
   ctx.fillStyle = light ? "#5c5670" : "rgba(255,255,255,0.82)";
   ctx.fillText(
     truncateToWidth(ctx, countryLabel, maxWidth - nameWidth - gap),
     x + nameWidth + gap,
-    y + 8,
+    y + Math.round((nameSize - metaSize) * 0.65),
   );
 }
 

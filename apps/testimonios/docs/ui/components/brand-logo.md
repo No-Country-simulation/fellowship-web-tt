@@ -10,11 +10,11 @@ import { BrandLogo } from "@repo/ui/brand-logo";
 
 ## Uso en esta app
 
-El header pasa el nombre del producto como `children`. Si hace falta el wordmark **sin** link, usá el mismo PNG: `BrandLogo` siempre apunta a `/`.
+`BrandLogo` siempre apunta a `/` y sigue disponible para navegación local. El navbar institucional utiliza el mismo PNG con `next/image` y un `<a>` al inicio oficial de No Country, sin modificar el componente compartido. Si hace falta el wordmark **sin** link, usá el mismo PNG.
 
 ```tsx
 <BrandLogo loading="eager">
-  <span className="text-body-small text-text-secondary">{SITE_NAME}</span>
+  <span className="text-body-small text-text-secondary">Testimonios</span>
 </BrandLogo>
 ```
 

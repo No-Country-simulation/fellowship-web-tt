@@ -3,20 +3,28 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
-import { buildPostCaption, CAPTION_EDIT_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
+import { INBOX_FILTERS_FIELD, inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
+import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
+import { hasCommunityWebhook } from "../infrastructure/discord";
+import { validateCardEdits } from "../infrastructure/cardFields";
+import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
 import {
+  archiveTestimonial,
   getTestimonialById,
   isTestimonialId,
   prepareShareCard,
   publishTestimonial,
+  deleteRejectedTestimonials,
+  rejectArchivedTestimonial,
   rejectTestimonial,
+  republishTestimonial,
   revertPublishedTestimonial,
   saveReviewEdits,
   storedShareCardUrl,
 } from "../infrastructure/repositories/testimonialRepository";
 import { prepareErroredBufferRetries, readShareCard, sharePublished } from "../infrastructure/share";
-import type { ReviewState } from "../types/reviewState";
+import type { ArchiveState, BulkDeleteState, ReviewState } from "../types/reviewState";
+import { ARCHIVE_REASON_MAX_CHARS, BULK_DELETE_MAX } from "../types/testimonial";
 import {
   SHARE_CARD_TOO_LARGE_MESSAGE,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
@@ -58,33 +66,44 @@ export async function reviewTestimonial(
 
   const quote = readString(formData, "quote");
   if (!quote) {
-    return { status: "error", message: "El quote no puede estar vacío." };
+    return { status: "error", message: "La cita de la historia no puede estar vacía." };
   }
   if (quote.length > QUOTE_EDIT_MAX_CHARS) {
     return {
       status: "error",
-      message: `El quote puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
+      message: `La cita de la historia puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
     };
   }
 
-  let caption = readString(formData, "caption");
-  if (!caption) {
-    caption = buildPostCaption({
-      quote,
-      fullName: current.testimonial.fullName,
-      instagram: current.testimonial.instagram,
-      linkedin: current.testimonial.linkedin,
-    });
+  const cardFields = validateCardEdits(current.testimonial.type, {
+    fullName: readString(formData, "full_name"),
+    country: readString(formData, "country"),
+    quote,
+    primary_role: readString(formData, "primary_role"),
+    company: readString(formData, "company"),
+    role_achieved: readString(formData, "role_achieved"),
+    previous_profession: readString(formData, "previous_profession"),
+    new_role: readString(formData, "new_role"),
+  });
+  if (!cardFields.ok) {
+    return { status: "error", message: cardFields.message };
   }
-  if (caption.length > CAPTION_EDIT_MAX_CHARS) {
-    return {
-      status: "error",
-      message: `El texto del post puede tener hasta ${CAPTION_EDIT_MAX_CHARS} caracteres.`,
-    };
+
+  const captions = readCaptions(formData);
+  if ("message" in captions) {
+    return { status: "error", message: captions.message };
   }
+
+  const reviewEdits = {
+    quote,
+    ...captions,
+    fullName: cardFields.fullName,
+    country: cardFields.country,
+    payload: cardFields.payload,
+  };
 
   if (intent === "save") {
-    const saved = await saveReviewEdits(id, { quote, caption });
+    const saved = await saveReviewEdits(id, reviewEdits);
     if (!saved.ok) {
       return { status: "error", message: saved.message };
     }
@@ -104,7 +123,7 @@ export async function reviewTestimonial(
     return { status: "error", message: "No llegó la imagen. El testimonio no se publicó." };
   }
 
-  const published = await publishTestimonial(id, { quote, caption });
+  const published = await publishTestimonial(id, reviewEdits);
   if (!published.ok) {
     if ("lost" in published) {
       revalidateTestimonials(id);
@@ -172,9 +191,150 @@ export async function retryShare(id: string, formData: FormData) {
   redirectShared(id, share, formData);
 }
 
-function revalidateTestimonials(id: string) {
+/**
+ * Publicado → archivado. El motivo sale del formulario (`reason`), no del cliente de confianza.
+ * Error para `useActionState`. Éxito: detalle con el filtro `archived`.
+ */
+export async function archiveAction(
+  id: string,
+  _prev: ArchiveState,
+  formData: FormData,
+): Promise<ArchiveState> {
+  if (!isTestimonialId(id)) {
+    return { status: "error", message: "No encontramos ese testimonio." };
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    return { status: "error", message: current.message };
+  }
+
+  if (current.testimonial.status !== "published") {
+    return { status: "error", message: "Este testimonio ya no está publicado." };
+  }
+
+  const reason = readString(formData, "reason");
+  if (!reason) {
+    return { status: "error", message: "El motivo no puede estar vacío." };
+  }
+  if (reason.length > ARCHIVE_REASON_MAX_CHARS) {
+    return {
+      status: "error",
+      message: `El motivo puede tener hasta ${ARCHIVE_REASON_MAX_CHARS} caracteres.`,
+    };
+  }
+
+  const archived = await archiveTestimonial(id, reason);
+  if (!archived.ok) {
+    return { status: "error", message: archived.message };
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters(`/testimonials/${id}`, formData, { status: "archived" });
+}
+
+/**
+ * Archivado → publicado. No llama a `sharePublished`: vuelve a la galería
+ * sin reenviar a Discord, Instagram ni LinkedIn.
+ */
+export async function republishAction(id: string, formData: FormData): Promise<void> {
+  if (!isTestimonialId(id)) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  if (current.testimonial.status !== "archived") {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  const republished = await republishTestimonial(id);
+  if (!republished.ok) {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters(`/testimonials/${id}`, formData, { status: "published" });
+}
+
+/** Archivado → rechazado. Igual que el rechazo de revisión: inbox con los filtros del form. */
+export async function rejectArchivedAction(id: string, formData: FormData): Promise<void> {
+  if (!isTestimonialId(id)) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    redirectWithFilters("/testimonials", formData);
+  }
+
+  if (current.testimonial.status !== "archived") {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  const rejected = await rejectArchivedTestimonial(id);
+  if (!rejected.ok) {
+    redirectWithFilters(`/testimonials/${id}`, formData);
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters("/testimonials", formData);
+}
+
+/**
+ * Borra los rechazados marcados. No redirige: la URL y sus filtros quedan.
+ * Solo confía en los ids; el repositorio vuelve a leer la fila y exige `rejected`.
+ * No revalida: el render que sigue a `revalidatePath` pide de nuevo la ficha
+ * abierta y, si esa fila ya no está, `notFound()` parpadea. La lista se refresca
+ * en el cliente.
+ */
+export async function deleteRejectedAction(formData: FormData): Promise<BulkDeleteState> {
+  const ids = readIdList(formData);
+  if (ids.length === 0) {
+    return { status: "error", message: "Elegí al menos un testimonio rechazado." };
+  }
+  if (ids.length > BULK_DELETE_MAX) {
+    return {
+      status: "error",
+      message: `Podés eliminar hasta ${BULK_DELETE_MAX} testimonios por vez.`,
+    };
+  }
+
+  const deleted = await deleteRejectedTestimonials(ids);
+  if (!deleted.ok) {
+    return { status: "error", message: deleted.message };
+  }
+
+  return {
+    status: "done",
+    deletedIds: deleted.deletedIds,
+    failed: deleted.failedIds.length,
+    skipped: deleted.skippedIds.length,
+  };
+}
+
+function revalidateTestimonials(id: string | readonly string[]) {
   revalidatePath("/testimonials");
-  revalidatePath(`/testimonials/${id}`);
+  const ids = typeof id === "string" ? [id] : id;
+  for (const itemId of ids) {
+    if (isTestimonialId(itemId)) {
+      revalidatePath(`/testimonials/${itemId}`);
+    }
+  }
+}
+
+function readIdList(formData: FormData) {
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (const value of formData.getAll("ids")) {
+    if (typeof value !== "string" || seen.has(value)) continue;
+    seen.add(value);
+    ids.push(value);
+  }
+  return ids;
 }
 
 function readString(formData: FormData, key: string): string {
@@ -182,12 +342,62 @@ function readString(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+const CAPTION_INPUTS = [
+  {
+    field: "ig_caption",
+    network: "instagram",
+    label: "Instagram",
+    publishes: hasInstagramChannel,
+  },
+  {
+    field: "li_caption",
+    network: "linkedin",
+    label: "LinkedIn",
+    publishes: hasLinkedInChannel,
+  },
+  {
+    field: "discord_caption",
+    network: "discord",
+    label: "Discord",
+    publishes: hasCommunityWebhook,
+  },
+] as const;
+
+function readCaptions(
+  formData: FormData,
+): { igCaption: string; liCaption: string; discordCaption: string } | { message: string } {
+  const values = {
+    ig_caption: readString(formData, "ig_caption"),
+    li_caption: readString(formData, "li_caption"),
+    discord_caption: readString(formData, "discord_caption"),
+  };
+
+  for (const item of CAPTION_INPUTS) {
+    const text = values[item.field];
+    if (!text && item.publishes()) {
+      return { message: `La descripción del post de ${item.label} no puede estar vacía.` };
+    }
+    const max = CAPTION_MAX_CHARS[item.network];
+    if (text.length > max) {
+      return {
+        message: `La descripción del post de ${item.label} puede tener hasta ${max} caracteres.`,
+      };
+    }
+  }
+
+  return {
+    igCaption: values.ig_caption,
+    liCaption: values.li_caption,
+    discordCaption: values.discord_caption,
+  };
+}
+
 function redirectWithFilters(
   path: string,
   formData: FormData,
   extra?: Record<string, string>,
 ): never {
-  redirect(inboxHref(path, inboxQueryFromField(formData.get("filters")), extra));
+  redirect(inboxHref(path, inboxQueryFromField(formData.get(INBOX_FILTERS_FIELD)), extra));
 }
 
 function redirectShared(id: string, share: ShareResult, formData: FormData): never {
