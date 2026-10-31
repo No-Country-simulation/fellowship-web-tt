@@ -18,12 +18,18 @@ import {
   rejectArchivedTestimonial,
   rejectTestimonial,
   republishTestimonial,
+  returnRejectedToReview,
   revertPublishedTestimonial,
   saveReviewEdits,
   storedShareCardUrl,
 } from "../infrastructure/repositories/testimonialRepository";
 import { prepareErroredBufferRetries, readShareCard, sharePublished } from "../infrastructure/share";
-import type { ArchiveState, BulkDeleteState, ReviewState } from "../types/reviewState";
+import type {
+  ArchiveState,
+  BulkDeleteState,
+  ReturnToReviewState,
+  ReviewState,
+} from "../types/reviewState";
 import { ARCHIVE_REASON_MAX_CHARS, BULK_DELETE_MAX } from "../types/testimonial";
 import {
   SHARE_CARD_TOO_LARGE_MESSAGE,
@@ -258,6 +264,37 @@ export async function republishAction(id: string, formData: FormData): Promise<v
 
   revalidateTestimonials(id);
   redirectWithFilters(`/testimonials/${id}`, formData, { status: "published" });
+}
+
+/**
+ * Rechazado → en revisión. No publica ni toca archivos.
+ * Error para `useActionState`. Éxito: detalle con el filtro `in_review`.
+ */
+export async function returnRejectedToReviewAction(
+  id: string,
+  _prev: ReturnToReviewState,
+  formData: FormData,
+): Promise<ReturnToReviewState> {
+  if (!isTestimonialId(id)) {
+    return { status: "error", message: "No encontramos ese testimonio." };
+  }
+
+  const current = await getTestimonialById(id);
+  if (!current.ok) {
+    return { status: "error", message: current.message };
+  }
+
+  if (current.testimonial.status !== "rejected") {
+    return { status: "error", message: "Este testimonio ya no está rechazado." };
+  }
+
+  const restored = await returnRejectedToReview(id);
+  if (!restored.ok) {
+    return { status: "error", message: restored.message };
+  }
+
+  revalidateTestimonials(id);
+  redirectWithFilters(`/testimonials/${id}`, formData, { status: "in_review" });
 }
 
 /** Archivado → rechazado. Igual que el rechazo de revisión: inbox con los filtros del form. */

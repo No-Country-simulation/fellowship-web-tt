@@ -67,6 +67,7 @@ import {
 import { CardDesignField } from "./CardDesignField";
 import { DetailHeader } from "./DetailHeader";
 import { IgShare } from "./IgShare";
+import { ModalDialog } from "./ModalDialog";
 import { PublishConfirmDialog } from "./PublishConfirmDialog";
 import { inputClassName, textareaClassName } from "./fields";
 
@@ -167,6 +168,11 @@ export function ReviewForm({
   const [cardError, setCardError] = useState<string | null>(null);
   const [cardAttempt, setCardAttempt] = useState<"publish" | "retry" | null>(null);
   const [confirmPublish, setConfirmPublish] = useState(false);
+  const [confirmReject, setConfirmReject] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const rejectLock = useRef(false);
+  const rejectSawPending = useRef(false);
+  const formId = `admin-review-form-${testimonial.id}`;
   const [copied, setCopied] = useState(false);
   const [baseline, setBaseline] = useState<CaptionSnapshot>(opened);
   const [appliedSave, setAppliedSave] = useState(initialReviewState);
@@ -369,6 +375,38 @@ export function ReviewForm({
     return () => window.clearTimeout(timeout);
   }, [applyNameToCaptions, fields.fullName]);
 
+  if (pending && intent === "reject") {
+    rejectSawPending.current = true;
+  } else if (!pending && rejectSawPending.current) {
+    rejectSawPending.current = false;
+    rejectLock.current = false;
+    if (rejecting) {
+      setRejecting(false);
+    }
+  }
+
+  function submitReject(form: HTMLFormElement) {
+    if (rejectLock.current || rejecting || pending || preparingCard) {
+      return;
+    }
+    rejectLock.current = true;
+    allowUnload.current = true;
+    setIntent("reject");
+    setRejecting(true);
+    const formData = new FormData(form);
+    formData.set("intent", "reject");
+    startTransition(() => {
+      formAction(formData);
+    });
+  }
+
+  function closeRejectDialog() {
+    if (rejectLock.current || rejecting || (pending && intent === "reject")) {
+      return;
+    }
+    setConfirmReject(false);
+  }
+
   async function publishWithCard(attempt: "publish" | "retry") {
     const form = formRef.current;
     if (!form || preparingCardRef.current) {
@@ -450,12 +488,15 @@ export function ReviewForm({
 
   return (
     <form
+      id={formId}
       ref={formRef}
       action={formAction}
       onSubmit={(event) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         const value = submitter instanceof HTMLButtonElement ? submitter.value : "";
         if (value === "reject") {
+          event.preventDefault();
+          submitReject(event.currentTarget);
           return;
         }
         event.preventDefault();
@@ -728,25 +769,14 @@ export function ReviewForm({
       <footer className="shrink-0 border-t border-border bg-card px-5 py-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <button
-            type="submit"
-            name="intent"
-            value="reject"
-            disabled={pending || preparingCard}
+            type="button"
+            disabled={pending || preparingCard || rejecting}
             className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
-            onClick={(event) => {
-              if (
-                !window.confirm(
-                  "¿Rechazar este testimonio? No sale en la galería ni en las redes.",
-                )
-              ) {
-                event.preventDefault();
-                return;
-              }
-              allowUnload.current = true;
-              setIntent("reject");
-            }}
+            aria-haspopup="dialog"
+            aria-expanded={confirmReject}
+            onClick={() => setConfirmReject(true)}
           >
-            {pending && intent === "reject" ? "Rechazando…" : "Rechazar"}
+            {rejecting || (pending && intent === "reject") ? "Rechazando…" : "Rechazar"}
           </button>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
@@ -755,7 +785,7 @@ export function ReviewForm({
                 Cambios guardados. Todavía no está publicado.
               </p>
             ) : null}
-            {state.status === "error" ? (
+            {state.status === "error" && !(confirmReject && intent === "reject") ? (
               <p className="text-admin-caption text-destructive" role="alert">
                 {state.message}
               </p>
@@ -822,7 +852,89 @@ export function ReviewForm({
           void publishWithCard("publish");
         }}
       />
+      <RejectConfirmDialog
+        open={confirmReject}
+        formId={formId}
+        pending={pending || preparingCard || rejecting}
+        submitting={rejecting || (pending && intent === "reject")}
+        error={intent === "reject" && state.status === "error" ? state.message : null}
+        onCancel={closeRejectDialog}
+        onFallbackSubmit={submitReject}
+      />
     </form>
+  );
+}
+
+function RejectConfirmDialog({
+  open,
+  formId,
+  pending,
+  submitting,
+  error,
+  onCancel,
+  onFallbackSubmit,
+}: {
+  open: boolean;
+  formId: string;
+  pending: boolean;
+  submitting: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onFallbackSubmit: (form: HTMLFormElement) => void;
+}) {
+  const titleId = useId();
+  const descriptionId = useId();
+  const errorId = useId();
+
+  return (
+    <ModalDialog open={open} onClose={onCancel} titleId={titleId} descriptionId={descriptionId}>
+      <div className="flex flex-col gap-2">
+        <h2 id={titleId} className="text-admin-heading font-semibold text-foreground">
+          ¿Rechazar este testimonio?
+        </h2>
+        <p id={descriptionId} className="text-admin-caption text-muted-foreground">
+          No sale en la galería ni en las redes.
+        </p>
+      </div>
+      {error ? (
+        <p id={errorId} className="text-admin-caption text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap justify-end gap-2">
+        <button
+          type="button"
+          disabled={pending}
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+          onClick={onCancel}
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          form={formId}
+          name="intent"
+          value="reject"
+          disabled={pending}
+          className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
+          onClick={(event) => {
+            if (pending) {
+              event.preventDefault();
+              return;
+            }
+            const form = document.getElementById(formId);
+            if (!(form instanceof HTMLFormElement) || event.currentTarget.form !== form) {
+              event.preventDefault();
+              if (form instanceof HTMLFormElement) {
+                onFallbackSubmit(form);
+              }
+            }
+          }}
+        >
+          {submitting ? "Rechazando…" : "Rechazar"}
+        </button>
+      </div>
+    </ModalDialog>
   );
 }
 
