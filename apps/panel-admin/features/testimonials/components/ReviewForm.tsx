@@ -24,6 +24,7 @@ import {
   CARD_FIELD_MAX_CHARS,
   CARD_FIELDS_BY_TYPE,
   CARD_NAME_MAX_CHARS,
+  cardNameHintLimit,
   readCardInputs,
   sameCardInputs,
   validateCardEdits,
@@ -580,6 +581,11 @@ export function ReviewForm({
                       {testimonial.typeLabel}
                     </p>
                   </div>
+                  {fields.fullName.trim().length > cardNameHintLimit(cardDesign) ? (
+                    <p id="admin-name-long" className="text-admin-caption text-tone-warning" role="status">
+                      Este nombre es un poco largo. En la card se lee mejor si usas iniciales.
+                    </p>
+                  ) : null}
                   <div className="grid gap-3 sm:grid-cols-2">
                     <CardTextField
                       label="Nombre"
@@ -587,6 +593,11 @@ export function ReviewForm({
                       value={fields.fullName}
                       maxLength={CARD_NAME_MAX_CHARS}
                       error={cardValidation.ok ? undefined : cardValidation.errors.fullName}
+                      describedBy={
+                        fields.fullName.trim().length > cardNameHintLimit(cardDesign)
+                          ? "admin-name-long"
+                          : undefined
+                      }
                       autoComplete="name"
                       onChange={(value) => {
                         setFields((current) => ({ ...current, fullName: value }));
@@ -1032,6 +1043,7 @@ function CardTextField({
   value,
   maxLength,
   error,
+  describedBy,
   autoComplete,
   onChange,
   onBlur,
@@ -1041,6 +1053,7 @@ function CardTextField({
   value: string;
   maxLength: number;
   error?: string;
+  describedBy?: string;
   autoComplete?: string;
   onChange: (value: string) => void;
   onBlur?: (value: string) => void;
@@ -1049,6 +1062,7 @@ function CardTextField({
   const errorId = `${id}-error`;
   const countId = `${id}-count`;
   const invalid = Boolean(error);
+  const describedByIds = [describedBy, countId, invalid ? errorId : null].filter(Boolean).join(" ");
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
@@ -1072,7 +1086,7 @@ function CardTextField({
         maxLength={maxLength}
         autoComplete={autoComplete}
         aria-invalid={invalid || undefined}
-        aria-describedby={invalid ? `${countId} ${errorId}` : countId}
+        aria-describedby={describedByIds}
         className={inputClassName}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur ? (event) => onBlur(event.currentTarget.value) : undefined}

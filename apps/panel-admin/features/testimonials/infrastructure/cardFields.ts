@@ -1,4 +1,5 @@
 import type {
+  CardDesign,
   CareerChangePayload,
   FirstJobPayload,
   SimulationPayload,
@@ -11,6 +12,21 @@ import type {
  */
 export const CARD_NAME_MAX_CHARS = 120;
 export const CARD_FIELD_MAX_CHARS = 120;
+/**
+ * Foto y Empresa usan 40px (piso 32px). Recorrido y Antes y ahora usan 30px.
+ * A partir de este largo se recomienda usar iniciales.
+ */
+export const CARD_NAME_LONG_CHARS = 40;
+/**
+ * Cita (56px), Retrato (54px) y Perfil (52px al lado del avatar) dejan entrar menos texto.
+ */
+export const CARD_NAME_TIGHT_CHARS = 35;
+
+const TIGHT_NAME_DESIGNS = new Set<CardDesign>(["quote", "portrait", "profile"]);
+
+export function cardNameHintLimit(design: CardDesign) {
+  return TIGHT_NAME_DESIGNS.has(design) ? CARD_NAME_TIGHT_CHARS : CARD_NAME_LONG_CHARS;
+}
 
 export const CARD_PAYLOAD_KEYS = [
   "primary_role",
