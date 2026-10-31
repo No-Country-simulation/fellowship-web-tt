@@ -29,7 +29,7 @@ type NetworkState = {
 /**
  * Después de publicar: la misma card sale por Discord, Instagram y LinkedIn.
  * Cada red tiene su texto. Discord no lleva mención ni hashtags; la cita queda en la imagen.
- * El tab de cada texto muestra si esa red salió o falló.
+ * El estado de cada red queda en la lista de arriba; los tabs solo cambian el texto.
  * Un solo reintento cubre las redes sin fecha y las de Buffer cuyo estado es error.
  */
 export function PublishedPanel({
@@ -224,11 +224,6 @@ export function PublishedPanel({
         <IgShare
           mode="share"
           testimonialId={testimonial.id}
-          tabNotes={{
-            discord: { text: networkStates.discord.label, tone: networkStates.discord.tone },
-            instagram: { text: networkStates.instagram.label, tone: networkStates.instagram.tone },
-            linkedin: { text: networkStates.linkedin.label, tone: networkStates.linkedin.tone },
-          }}
           slug={testimonial.slug}
           igCaption={testimonial.igCaption}
           liCaption={testimonial.liCaption}
