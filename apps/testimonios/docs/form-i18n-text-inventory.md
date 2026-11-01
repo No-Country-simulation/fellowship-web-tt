@@ -1,6 +1,10 @@
 # Issue 2 — Inventario editorial del formulario
 
-Fecha: 31 de octubre de 2026. Documento de auditoría; **no es un catálogo implementado ni una aprobación editorial/legal**. Diagnóstico y plan: [form-i18n-audit.md](./form-i18n-audit.md).
+Inventario original: 31 de octubre de 2026. Estado actualizado: 1 de noviembre de 2026. **Referencia histórica; sus textos originales se conservan.** Diagnóstico, implementación de etapa 1 y plan: [form-i18n-audit.md](./form-i18n-audit.md).
+
+La arquitectura general de diccionarios locales tipados ES/PT-BR, sin dependencias adicionales, fue aprobada. Las 163 claves sugeridas de las tablas ya existen en [messages/es.ts](../lib/form-i18n/messages/es.ts) y [messages/pt-BR.ts](../lib/form-i18n/messages/pt-BR.ts), bajo el contrato compartido [FormMessages](../lib/form-i18n/types.ts). Los catálogos se basan en las columnas propuestas, sin cambiar los textos vigentes de ningún componente. **Todavía no se integran al formulario ni a su navegación.** Las columnas «Texto actual» corresponden al checkout auditado y se mantienen como referencia.
+
+Implementación de claves no equivale a aprobación de sus textos: PT-BR sigue pendiente de revisión humana brasileña; la autorización ES/PT está marcada en [FORM_CONSENT_REVIEW_STATUS](../lib/form-i18n/messages.ts) como pendiente de revisión editorial/legal. Se mantienen íntegros el cuerpo ES vigente y la propuesta PT, solo galería y Discord. El matiz de la pregunta de empleo, el footer y el destino del logo continúan abiertos.
 
 Los textos actuales se verificaron en el código del checkout `feat/testimonios-form-i18n`. Las propuestas `es` y `pt-BR` son borradores, salvo las tres etiquetas ES confirmadas por el equipo. Una fila puede cubrir varias apariciones de la misma cadena; las variantes parametrizadas representan todos los valores de sus parámetros. No se traduce contenido introducido por participantes.
 

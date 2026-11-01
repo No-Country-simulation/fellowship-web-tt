@@ -1,10 +1,89 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
-Fecha: 31 de octubre de 2026. Rama verificada: `feat/testimonios-form-i18n`.
+Auditoría original: 31 de octubre de 2026. Actualización de etapa 1: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
 
-**Etapa: diagnóstico y propuesta para revisión. No se implementó internacionalización, no se cambiaron componentes ni reglas y no se ejecutaron envíos.** Únicos entregables de esta etapa: este informe y el [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md).
+**Estado actual: infraestructura implementada, integración pendiente.** La propuesta general de diccionarios locales tipados ES/PT-BR sin dependencias adicionales fue aprobada. Los componentes, las rutas, las validaciones, el envío y la apariencia siguen intactos. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva sus textos históricos como referencia.
 
-## 1. Recomendación concreta
+## 0. Etapa 1 implementada — infraestructura sin conexión a la UI
+
+Los módulos siguientes son puros y compartibles entre Server Components y Client Components. No contienen providers, hooks de navegación, detección automática, cookies ni persistencia. Ninguna página ni componente existente los importa todavía: **visitar `?lang=pt-BR` aún no traduce el formulario**.
+
+| Archivo | Implementación |
+| --- | --- |
+| [locales.ts](../lib/form-i18n/locales.ts) | `FormLocale`, normalización estricta, resolución desde query y constructor de enlaces relativos. |
+| [types.ts](../lib/form-i18n/types.ts) | Contrato compartido `FormMessages`, claves hoja `FormMessageKey` y claves de países. Hojas `string`, independientes de los literales españoles. |
+| [messages/es.ts](../lib/form-i18n/messages/es.ts), [messages/pt-BR.ts](../lib/form-i18n/messages/pt-BR.ts) | 163 claves por idioma, basadas en las propuestas del inventario, con `satisfies FormMessages`. Incluyen los tres labels confirmados del formulario; no sustituyen labels globales. |
+| [format.ts](../lib/form-i18n/format.ts) | Contrato de nueve mensajes parametrizados; deriva tipos de argumentos y valida sus tipos en ejecución. Interpolación de texto plano. |
+| [messages.ts](../lib/form-i18n/messages.ts) | Acceso serializable a catálogos, `createFormTranslator`, lookup con fallback y metadatos de revisión del consentimiento. |
+| [limits.ts](../lib/form-i18n/limits.ts) | Valores de presentación derivados de las constantes existentes de `parse.ts`; no introduce reglas de validación. |
+| [countries.ts](../lib/form-i18n/countries.ts) | Mapea los 19 valores actuales a claves semánticas; traduce etiquetas sin cambiar valores ni orden. |
+| [infrastructure.test.ts](../lib/form-i18n/infrastructure.test.ts) | Pruebas de infraestructura y aserciones negativas compiladas de tipos. |
+| [scripts/test-form-i18n.mjs](../scripts/test-form-i18n.mjs) | Runner con TypeScript existente y `node:test`; compila en un directorio temporal y lo elimina tras terminar. No añade framework ni modifica `package.json`. |
+
+### Locale y enlaces
+
+- Solo `es` y `pt-BR` son válidos, respetando exactamente mayúsculas y guion. El valor predeterminado es `es`.
+- `resolveFormLocale` acepta el objeto de `searchParams` de una página o una interfaz cliente con `getAll`. La página deberá esperar su promesa antes de llamar a la utilidad.
+- Un `lang` ausente, vacío, desconocido o repetido vuelve a ES. También se rechazan arrays, incluso de un elemento; no se selecciona arbitrariamente el primer valor. `lang=pt-BR&lang=pt-BR` es repetido y vuelve a ES.
+- No se normalizan alias como `pt`, `pt-br` o espacios. No se infiere nada de país, IP, navegador o relato.
+- `buildFormHref("es")` devuelve `/enviar?lang=es`; `buildFormHref("pt-BR")` devuelve `/enviar?lang=pt-BR`. También `/enviar` se resuelve como ES, sin redirección.
+- El constructor admite `search` y `hash`, conserva parámetros ajenos y reemplaza cualquier `lang` anterior por un único valor canónico. Devuelve un enlace relativo codificado; no navega, escribe History API ni modifica estado.
+
+### Contrato, interpolación y fallback
+
+Cada catálogo usa el mismo contrato de secciones y claves semánticas. `FormMessageKey` admite solo hojas traducibles; los parámetros de `FormTranslator` se derivan de `FORM_MESSAGE_PARAMETERS`. Faltas de claves, parámetros mal escritos o tipos incorrectos se detectan en TypeScript; las pruebas verifican además los placeholders reales de ambos catálogos.
+
+Ejemplos para consumidores futuros, sin integración actual:
+
+```ts
+import { createFormTranslator } from "@/lib/form-i18n/messages";
+import { FORM_LIMITS } from "@/lib/form-i18n/limits";
+
+const t = createFormTranslator("pt-BR");
+t("form.progress", { step: 2, total: 5, title: t("form.steps.identity.title") });
+// Etapa 2 de 5 · Nome, país, e-mail e foto
+t("form.story.hintWithLimits", { hint: t("form.story.defaultHint"), ...FORM_LIMITS.story });
+// Com suas próprias palavras. Entre 20 e 4000 caracteres.
+t("form.fields.avatar.requirements", FORM_LIMITS.avatar);
+// JPG, PNG ou WebP · Máximo de 5 MB.
+t("form.story.counter", { current: 38, max: FORM_LIMITS.story.max });
+// 38/4000
+```
+
+Los números de límites se importan de las reglas existentes; el catálogo solo contiene placeholders. Los mensajes son frases completas por idioma, sin interpolación de HTML ni concatenación de fragmentos gramaticales. El resultado es un `string` para renderizar como texto; no se utiliza `dangerouslySetInnerHTML`.
+
+Fallbacks implementados:
+
+1. Locale no admitido → catálogo ES completo.
+2. Clave conocida ausente o vacía en un catálogo → texto ES de esa clave.
+3. Clave desconocida recibida en ejecución → error público genérico del idioma seleccionado, con último fallback ES. Los tipos impiden usarla normalmente.
+4. Parámetro obligatorio ausente, de tipo incorrecto o numérico no finito → `TypeError` explícito; no se exponen tokens sin resolver ni valores personales en ese error. No se oculta un fallo de programación como traducción válida.
+
+### Revisión humana e integración pendiente
+
+El catálogo copia el consentimiento ES vigente íntegro y la propuesta PT del inventario. `FORM_CONSENT_REVIEW_STATUS` marca **ambos idiomas como `pending-editorial-legal-review`**. Ese estado es metadata técnica; no se añade al texto de autorización. Se conservan galería y Discord, sin ampliar canales.
+
+Las propuestas PT-BR requieren revisión brasileña; también siguen pendientes el matiz de la pregunta sobre empleo, el footer y el destino del logo. La lista de países sigue siendo provisional. Implementar sus claves no equivale a aprobación editorial/legal. Al integrar las categorías se debe conservar el orden existente de `TESTIMONIAL_TYPES`/`TYPE_OPTIONS`, consultando el catálogo por ID; el orden de propiedades del diccionario no define opciones ni lógica de negocio.
+
+Para etapa 2 quedan preparados los catálogos, el acceso puro, los tipos, el formateo, los límites y los enlaces. Siguen pendientes el provider, el selector, la lectura de query desde la página, metadata/lang, el header, las traducciones visibles y la migración de errores a códigos. No se cambió la representación actual de errores ni sus comparaciones literales.
+
+### Verificación de esta etapa
+
+Desde `apps/testimonios`, ejecutar `node scripts/test-form-i18n.mjs`, `pnpm.cmd exec tsc --noEmit --incremental false` y `pnpm.cmd run lint`. Desde la raíz, `git diff --check`. En Windows se utiliza `pnpm.cmd` para evitar la restricción local de scripts PowerShell; no se modifica esa política.
+
+Resultados del 1 de noviembre de 2026:
+
+- `node scripts/test-form-i18n.mjs`: **33/33 pruebas correctas**, siete grupos, sin omitidas; también compila las aserciones negativas del contrato.
+- `pnpm.cmd exec tsc --noEmit --incremental false`: correcto, sin errores.
+- `pnpm.cmd run lint`: correcto, sin errores ni advertencias de ESLint.
+- `git diff --check`: correcto, sin errores de whitespace; también se verificó whitespace en los archivos nuevos y referencias locales de los documentos.
+- Manifests raíz/app y `pnpm-lock.yaml`: sin diferencias. Sin dependencias nuevas.
+
+La suite cubre locales válidos/ausentes/inválidos/repetidos, enlaces y encoding, 163 claves y estructura idéntica, placeholders, interpolación, constantes reales, categorías, países, consentimiento y fallback. La cobertura de claves usa el inventario histórico; no congela las traducciones propuestas, que podrán corregirse tras revisión conservando la referencia histórica.
+
+No se inicia navegador, servidor Next ni batería funcional del formulario, y no se ejecutan envíos ni escrituras externas. El plan de QA funcional de la sección 10 sigue pendiente para la integración.
+
+## 1. Arquitectura aprobada y propuesta de integración
 
 Usar **diccionarios locales tipados, un contexto exclusivo del formulario y el parámetro `lang`**, con `/enviar` en español por defecto y `/enviar?lang=pt-BR` para portugués brasileño. Evitar una biblioteca y prefijos de ruta en esta primera entrega.
 
@@ -286,12 +365,12 @@ No se modifican ahora. Lista para dimensionar la futura issue:
 
 No deberían cambiar `lib/testimonials/types.ts`/labels globales, valores del listado de países, `quote.ts`, generación de cards, hero/carrusel, formulario de consentimiento como flujo, panel, `packages/ui`, esquema, migraciones o servicios. No añadir dependencias por defecto. El nombre final de los módulos es orientativo; no obliga a fragmentar más de lo necesario.
 
-## 10. Plan de implementación y QA — todavía no ejecutado
+## 10. Plan de integración y QA funcional — pendiente
 
 ### Etapas propuestas
 
 1. **Revisión del diagnóstico**: aprobar copy ES/PT, etiquetas y alcance; resolver footer/destino del logo y revisar autorización con el equipo. No bloquear la auditoría esperando esa decisión.
-2. **Catálogo y errores semánticos**: contrato de locales/mensajes, catálogos, parámetros y discriminantes de errores. Mantener límites, normalizadores y payload. Caracterizar con pruebas los casos de validación y overrides que cambien de representación.
+2. **Catálogo y errores semánticos**: contrato de locales/mensajes, catálogos y parámetros ya implementados en etapa 1. Discriminantes de errores pendientes. Mantener límites, normalizadores y payload. Caracterizar con pruebas los casos de validación y overrides que cambien de representación.
 3. **Idioma en el mismo wizard**: provider/query, traducción de intro/campos/pasos/resumen/éxito/recorte, `lang`, metadata e invitación. Probar no desmontaje antes de cambiar el chrome.
 4. **Header aislado por arquitectura**: root común y grupo público, nuevo header del formulario, contrato de altura/foco y decisión de footer aplicada solo cuando esté aprobada. Comprobar URLs, 404 y ausencia de regresiones públicas.
 5. **QA y revisión humana**: fixtures temporales, respuestas simuladas y entorno de pruebas autorizado. Entregar capturas ES/PT, resultados y diferencias. Detenerse antes de commit/PR si se mantiene la restricción.
@@ -323,13 +402,13 @@ Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integr
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Recomendaciones**: query `lang`, diccionarios/provider, errores por códigos, distribución de layouts, copy propuesto y nombres de archivos. Ninguna se presenta como implementada o aprobada.
+**Estado de las propuestas**: query `lang` y diccionarios locales tipados sin dependencias adicionales aprobados; utilidades y catálogos implementados en etapa 1, sin integración. Provider, errores por códigos y distribución de layouts todavía pendientes. El copy PT y el consentimiento siguen sujetos a revisión humana.
 
 **Decisiones pendientes**: revisión brasileña de traducciones, autorización equivalente, footer, destino del logo y matiz editorial de la categoría de empleo. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
 No se verificó paridad pregunta por pregunta con Tally porque no se adjuntó su definición/URL. Para confirmar la sustitución completa más adelante hará falta contrastar esa referencia; no se inventa ni se declara cubierta aquí.
 
-No se hicieron envíos, consultas de datos de participantes, cambios de backend o pruebas de UI/producción en esta etapa. No se abrieron archivos `.env*` ni credenciales. No se ejecutaron operaciones Git de escritura. Los únicos archivos creados son documentos de auditoría.
+No se hicieron envíos, consultas de datos de participantes, cambios de backend o pruebas de UI/producción. No se abrieron archivos `.env*` ni credenciales. No se ejecutaron operaciones Git de escritura. La auditoría original creó solo documentos; etapa 1 añade exclusivamente los módulos y pruebas de infraestructura descritos en la sección 0 y actualiza estos documentos.
 
 ## 12. Fuentes técnicas consultadas
 
