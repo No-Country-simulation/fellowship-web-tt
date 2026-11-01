@@ -53,7 +53,6 @@ import {
   SHARE_CARD_MAX_BYTES,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
   SHARE_NETWORK_LABELS,
-  SHARE_NETWORKS,
   type ShareChannels,
 } from "../types/share";
 import type { AdminTestimonial, CardDesign } from "../types/testimonial";
@@ -69,7 +68,10 @@ import { CardDesignField } from "./CardDesignField";
 import { DetailHeader } from "./DetailHeader";
 import { IgShare } from "./IgShare";
 import { ModalDialog } from "./ModalDialog";
-import { PublishConfirmDialog } from "./PublishConfirmDialog";
+import {
+  PublishConfirmDialog,
+  type PublishConfirmNetwork,
+} from "./PublishConfirmDialog";
 import { inputClassName, textareaClassName } from "./fields";
 
 type Intent = "save" | "publish" | "reject";
@@ -88,20 +90,6 @@ function captionHint(network: CaptionNetwork) {
 /** Deja el link completo o lo saca. Un link cortado no se conserva. */
 function settleVideo(caption: string, videoUrl: string | null, include: boolean) {
   return setCaptionVideo(caption, videoUrl, include && Boolean(videoUrl));
-}
-
-function captionLead(text: string) {
-  const line = text
-    .split("\n")
-    .map((part) => part.trim())
-    .find(Boolean);
-  if (!line) {
-    return "Sin descripción.";
-  }
-  if (line.length <= 140) {
-    return line;
-  }
-  return `${line.slice(0, 139)}…`;
 }
 
 function mentionNote(network: CaptionNetwork, testimonial: AdminTestimonial) {
@@ -247,12 +235,10 @@ export function ReviewForm({
   const activeCaption = captions[captionNetwork];
   const activeMax = CAPTION_MAX_CHARS[captionNetwork];
   const activeEmpty = channels[captionNetwork] && activeCaption.trim().length === 0;
-  const targets = SHARE_NETWORKS.filter((network) => channels[network]);
   const tabNotes: Partial<Record<CaptionNetwork, CaptionTabNote>> = {};
   for (const network of CAPTION_NETWORKS) {
     tabNotes[network] = {
       publishes: channels[network],
-      edited: captions[network] !== templates[network],
       text: channels[network] ? undefined : "sin configurar",
     };
   }
@@ -281,17 +267,24 @@ export function ReviewForm({
   const instagramLinks =
     captionNetwork === "instagram" && testimonial.videoUrl ? "Instagram no admite links" : null;
   const showCaptionNotes = Boolean(mention || instagramLinks);
-  const publishLead = targets.length
-    ? `Sale en la galería y se publica en ${formatNetworkList(targets)} con la misma imagen y la descripción de cada red.`
-    : "Sale en la galería.";
-  const publishSummaries = CAPTION_NETWORKS.map((network) => {
-    const lead = captionLead(captions[network]);
-    const summary = channels[network]
-      ? lead
-      : lead === "Sin descripción."
-        ? "No se publica."
-        : `No se publica. ${lead}`;
-    return { label: SHARE_NETWORK_LABELS[network], summary };
+  const configuredNetworks = CAPTION_NETWORKS.filter((network) => channels[network]);
+  const publishLead =
+    configuredNetworks.length > 0
+      ? [
+          `Sale en la galería y en ${formatNetworkList(configuredNetworks)}.`,
+          "La imagen es la misma. Abajo, la descripción de cada red.",
+        ]
+      : ["Sale en la galería."];
+  const publishNetworks: PublishConfirmNetwork[] = CAPTION_NETWORKS.map((network) => {
+    const label = SHARE_NETWORK_LABELS[network];
+    if (!channels[network]) {
+      return { label, publishes: false };
+    }
+    return {
+      label,
+      publishes: true,
+      caption: captions[network],
+    };
   });
 
   useEffect(() => {
@@ -854,8 +847,8 @@ export function ReviewForm({
       <PublishConfirmDialog
         open={confirmPublish}
         lead={publishLead}
-        clipNote={quoteClipped ? "En este diseño la card corta la cita con “…”." : null}
-        networks={publishSummaries}
+        clipNote={quoteClipped ? "En la imagen, la cita se corta con “…”." : null}
+        networks={publishNetworks}
         onCancel={() => setConfirmPublish(false)}
         onConfirm={() => {
           setConfirmPublish(false);

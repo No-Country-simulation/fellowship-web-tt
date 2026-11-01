@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Pencil } from "lucide-react";
 import { cn } from "@repo/ui/utils";
 
 import type { VisualTone } from "@shared/ui/patterns/visualTone";
@@ -32,8 +31,6 @@ export type CaptionTabNote = {
   tone?: VisualTone;
   /** Punto verde si la red se publica; gris si no está configurada. */
   publishes?: boolean;
-  /** Lápiz cuando el texto no es la plantilla. */
-  edited?: boolean;
 };
 
 function isCaptionNetwork(value: string | null): value is CaptionNetwork {
@@ -84,9 +81,6 @@ function tabAria(network: CaptionNetwork, note: CaptionTabNote | undefined) {
   const parts = [LABELS[network]];
   if (note?.text) {
     parts.push(note.text);
-  }
-  if (note?.edited && note.text !== "editado") {
-    parts.push("editado");
   }
   return parts.join(", ");
 }
@@ -194,7 +188,6 @@ export function CaptionNetworkTabs({
                 />
               ) : null}
               <span className="max-w-full truncate text-admin-caption">{LABELS[network]}</span>
-              {note?.edited ? <Pencil aria-hidden className="size-3 shrink-0" /> : null}
             </span>
             {note?.text ? (
               <span
