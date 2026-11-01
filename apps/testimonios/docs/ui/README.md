@@ -30,6 +30,7 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
 | [Field](./components/field.md) | Label, hint, error y classes de input |
 | [CaptureCropDialog](./components/capture-crop-dialog.md) | Recorte de foto: 16:9 o cuadrado |
+| [FormLanguageSelect](./components/form-language-select.md) | Selector ES/PT-BR del formulario y portal al recorte activo |
 
 ## Convención al agregar un componente
 
@@ -67,7 +68,9 @@ El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--
 
 `SiteFooter` completa el chrome institucional después del contenido de cada ruta. Es un componente de servidor con enlaces absolutos centralizados, decoración propia y altura natural; los destinos aún sin aprobar se muestran como texto. El footer continúa en el flujo del documento y no modifica el scroll ni el bloqueo de los diálogos.
 
-`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio contiene un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` compone su propio encabezado editorial y `<main>` en `app/enviar/page.tsx`, con ancho `max-w-3xl`. El encabezado se pasa como `children` de servidor a `EnviarForm`: aparece durante los pasos y se retira al mostrar el éxito. En ese estado, `SuccessCard` proporciona el único `h1` y recibe el foco existente.
+La etapa 3 de i18n conecta ES/PT-BR exclusivamente en `/enviar`, con `FormLocaleProvider` y un único [FormLanguageSelect](./components/form-language-select.md). No cambia este chrome institucional. La introducción es ahora un consumidor cliente del contexto que conserva el SVG y su composición; sigue entrando como children a `EnviarForm` y desaparece en éxito. Véase la [auditoría](../form-i18n-audit.md) para metadata, estado, QA y límites de revisión.
+
+`app/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio contiene un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` resuelve query y metadata en `app/enviar/page.tsx` y conserva su `<main>` de ancho `max-w-3xl` mediante `EnviarExperience`. `EnviarIntro` se pasa como children a `EnviarForm`: aparece durante los pasos y se retira al mostrar el éxito. En ese estado, `SuccessCard` proporciona el único `h1` y recibe el foco existente; el selector permanece disponible.
 
 Las tres rutas usan el scroll del documento. El layout es una columna flexible con altura mínima de `100dvh`; cada `<main>` crece con su contenido y no crea un scroll independiente. El header institucional es sticky y publica su altura real para el offset de scroll. El formulario enfoca pasos y errores sin scroll automático y luego desplaza el documento, descontando la altura real del header y 16px de separación. Su contenedor permite cortar palabras demasiado anchas y sus botones de navegación admiten varias líneas para no depender del antiguo scroll horizontal al ampliar la fuente. Los diálogos modales bloquean el scroll raíz mediante `html:has(dialog:modal)`; `scrollbar-gutter: stable` conserva el ancho al abrirlos y cerrarlos. Los paneles de diálogo mantienen su scroll interno cuando hace falta.
 

@@ -1,8 +1,8 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
-Auditoría original: 31 de octubre de 2026. Etapas 1 y 2 actualizadas: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
+Auditoría original: 31 de octubre de 2026. Etapas 1–3 actualizadas: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
 
-**Estado actual: infraestructura y errores semánticos implementados; formulario bilingüe pendiente.** Se preservan reglas, datos, navegación y composición visual. Solo los errores visibles consumen por ahora el catálogo ES neutro aprobado, mediante una adaptación de presentación. Las rutas y el consentimiento no cambian. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva sus textos históricos como referencia.
+**Estado actual: integración bilingüe ES/PT-BR implementada; pendiente de revisión visual y editorial humana antes del lanzamiento.** Se preservan reglas, datos, navegación de cinco pasos y composición visual. Navbar y footer institucionales permanecen. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva los textos históricos; los catálogos existentes alimentan ahora todo el árbol propio del formulario.
 
 ## 0. Etapa 1 — estado al cerrar la infraestructura
 
@@ -169,7 +169,73 @@ Para esta corrección pasaron las 74 pruebas, TypeScript, ESLint y `git diff --c
 
 Para etapa 3 quedan pendientes provider/selector, query en la página, metadata/lang y traducción de todo el formulario, incluido el recorte y éxito. La prueba de foco con navegador, el cambio real de idioma durante una petición y los lectores de pantalla se harán al integrar esa UI. Las traducciones PT y la revisión editorial/legal del consentimiento siguen abiertas. No se cambiaron tablas, servicios, payloads, `FormData`, timestamps, generación de publicaciones, otras aplicaciones o `packages/ui`. No hubo envíos reales, lectura de credenciales ni operaciones Git de escritura.
 
-## 1. Arquitectura aprobada y propuesta de integración
+## 0.c. Etapa 3 — formulario bilingüe integrado
+
+### Archivos y arquitectura
+
+| Archivo | Responsabilidad implementada |
+| --- | --- |
+| [form-locale-provider.tsx](../components/form-locale-provider.tsx), nuevo | Contexto exclusivo de formulario: locale, traductor tipado y `setLocale`; sin wrapper DOM, cookies ni storage. `useSearchParams` es la fuente de verdad. |
+| [form-language-select.tsx](../components/form-language-select.tsx), nuevo | Una instancia del selector nativo reutilizable, con label traducido y nombres propios de idiomas. Ubicación provisional en el contenido; portal al recorte activo. |
+| [enviar-experience.tsx](../components/enviar-experience.tsx), nuevo | Mantiene el `<main>` y ancho existente, añade `lang` reactivo y mantiene selector fuera de la rama de éxito. |
+| [enviar-intro.tsx](../components/enviar-intro.tsx), nuevo | Extrae la composición editorial/SVG existente y convierte únicamente sus textos en consumidores del contexto. |
+| [app/enviar/page.tsx](../app/enviar/page.tsx) | Espera el query, normaliza locale inicial y compone provider bajo Suspense. `generateMetadata` resuelve título absoluto y descripción solo de `/enviar`. |
+| [metadata.ts](../lib/form-i18n/metadata.ts), nuevo | Una función pura compartida entre metadata inicial y sincronización cliente; añade solo la identidad No Country, evitando el sufijo español heredado. |
+| [enviar-form.tsx](../components/enviar-form.tsx) | Traduce pasos, categorías, campos, resumen, consentimiento, botones, errores y éxito. Utiliza locale vigente después del resolvedor, sin transformar `state`. |
+| [enviar-fields.tsx](../components/enviar-fields.tsx), [capture-crop-dialog.tsx](../components/capture-crop-dialog.tsx) | Copy propio, requisitos recibidos, ARIA, sr-only y diálogo localizados, conservando procesamiento y refs. |
+| [infrastructure.test.ts](../lib/form-i18n/infrastructure.test.ts) | Agrega cobertura de metadata y conserva la autorización ES exacta contra el inventario histórico, ya que ahora la UI consume el catálogo. |
+| [qa-form-i18n.mjs](../scripts/qa-form-i18n.mjs), nuevo | QA de navegador con Chrome/CDP existente, fixtures de respuesta y bloqueo de todos los POST, sin dependencias nuevas. |
+| Catálogos ES/PT y docs UI | Solo se actualizan los comentarios de estado de los catálogos; sus valores no se modifican. Se documentan contexto y selector reutilizable. |
+
+`/enviar`, `?lang=es` y query ausente/inválido/repetido se resuelven a ES; `?lang=pt-BR` a portugués. El selector usa `history.replaceState(null, "", href)` con el constructor validado, conservando parámetros ajenos y fragmento. La integración nativa de Next notifica a `useSearchParams`, incluso con navegación atrás/adelante. No hay `router.refresh`, recarga, otro segmento o key por locale. La preferencia vive únicamente en la URL; una recarga mantiene idioma y pierde borrador, archivos y paso como antes.
+
+La página espera `searchParams`, por lo que `/enviar` pasa de estática a dinámica por petición. La lectura cliente está bajo Suspense explícito y el build de Next 16.3 confirmó esa composición. El provider permanece en la misma posición; sus cambios de contexto actualizan copy sin sustituir `EnviarForm`, `FileField` o `CaptureCropDialog`.
+
+### Selector, recorte y accesibilidad
+
+Un diálogo nativo deja inerte el exterior. Para permitir cambiar idioma durante el recorte hay **un solo `FormLanguageSelect`**, que se presenta mediante portal en el host registrado por el diálogo. No se duplica la lógica ni hay dos selectores montados. Al cerrar vuelve a la zona provisional. Se conserva el effect original de apertura/retorno de foco y se incorpora el `select` a la guarda de Tab/Shift+Tab.
+
+El `<main>`, el selector y el diálogo declaran `lang` reactivo. Las opciones usan sus propios `lang="es"`/`lang="pt-BR"`. El root, navbar y footer siguen en español; no se cambia idioma de otras rutas. Indicadores siguen siendo decorativos y no se añade edición desde el resumen.
+
+### Datos, errores, consentimiento y éxito
+
+Las categorías se recorren en `TESTIMONIAL_TYPES`, conservando orden e IDs; las etiquetas y preguntas vienen del catálogo exclusivo. No se modifican opciones/labels globales. Los países usan valores originales y labels traducidos, incluido el resumen. El país libre queda tal como fue escrito y se conserva al alternar «Otro país».
+
+Se mantiene `resolveFormErrors(state, validation, type, pending)` antes de `presentFormErrors(resolved, locale)`. Contexto no revalida ni limpia incidencias; las correcciones parciales y respuestas recibidas durante un cambio de idioma utilizan el mismo mecanismo semántico de etapa 2. El mismo DOM de formulario y los handlers de estado, foco y envío se preservan. Los límites se interpolan desde constantes; no se concatenan fragmentos gramaticales ni se interpreta HTML.
+
+El consentimiento ES coincide exactamente con la autorización histórica; PT usa el texto existente, todavía pendiente de revisión editorial/legal. No cambian ubicación, obligatoriedad, valor `1` o timestamp. No se envía locale ni una versión de consentimiento. Los textos y datos introducidos por participantes nunca se traducen.
+
+La introducción sigue desapareciendo al recibir éxito, que mantiene un único H1 y el foco. El selector permanece disponible. La URL de invitación se deriva en cada render del origen ya utilizado y del locale vigente; cambia también después del éxito. Se preserva el comportamiento de copia y confirmación de dos segundos.
+
+La metadata inicial utiliza el mismo catálogo y helper que el effect cliente que actualiza `document.title` y la descripción existente al cambiar locale. No se agrega otro meta tag ni se modifica el layout o la metadata de home/fichas. El idioma accesible se aplica a la región del formulario, sin cambiar globalmente `<html lang>`.
+
+### QA ejecutado y evidencias
+
+- `node scripts/test-form-i18n.mjs`: **75/75 pruebas**, 12 grupos; incluye las 74 de infraestructura/errores previas y la nueva prueba de metadata.
+- `pnpm.cmd exec tsc --noEmit --incremental false`, `pnpm.cmd run lint` y `pnpm.cmd run build`: correctos, sin errores; ESLint sin advertencias. `git diff --check`, whitespace de archivos nuevos y referencias locales de la documentación: correctos.
+- `node scripts/qa-form-i18n.mjs`: **PASS en Chrome de producción**, sin errores de navegador/hidratación; usa el Chrome instalado, CDP y un perfil temporal propio. Admite una ruta a Chrome como argumento opcional. Servidor local y navegador propios se cierran al terminar.
+- Se verificaron ambos idiomas, cinco pasos, tres categorías y retorno a los datos profesionales conservados; datos parciales/completos, país libre, valor canónico de España y label «Espanha», enlaces, consentimiento y archivos JPEG confirmados.
+- Se comprobó identidad del mismo formulario, selector único, recorte abierto con mismo nodo/zoom/transform/original object URL, preview confirmado, nombre accesible del select en el árbol de Chrome, ciclo de Tab/Shift+Tab, foco inicial y retorno al input.
+- SSR y metadata en query válido, inválido y repetido, actualización de título/description sin navegación, query ajeno/hash, historial atrás/adelante y recarga sin borrador persistido.
+- Dos POST reales del navegador fueron **interceptados antes de llegar a Next** y respondidos con fixtures Flight: error de validación y éxito, ambos retenidos para cambiar idioma durante `pending`. Se comprobó respuesta en idioma vigente, corrección parcial, foco al campo, mismo `FormData`, un POST por intento, éxito, enlace actualizado y portapapeles. No se ejecutó ninguna Server Action, escritura de Storage, webhook o publicación real durante ese QA.
+- Se comprobó ausencia de desbordamiento horizontal y controles fuera del viewport a **375 y 1440 px**. Las cuatro capturas se revisaron para evitar artefactos del header sticky y corresponden exclusivamente a datos sintéticos de QA.
+
+Evidencia reproducible: [qa-results.json](./ui/assets/form-i18n/qa-results.json).
+
+| Captura | Estado representativo |
+| --- | --- |
+| [ES · 375 px](./ui/assets/form-i18n/form-es-375.png) | Datos y correcciones locales; avatar aún obligatorio. |
+| [PT · recorte · 375 px](./ui/assets/form-i18n/crop-pt-375.png) | Selector único dentro del diálogo, zoom conservado y acciones accesibles. |
+| [PT · resumen · 1440 px](./ui/assets/form-i18n/form-pt-1440.png) | Campos completos, contenido del participante sin traducir y consentimiento. |
+| [ES · éxito simulado · 1440 px](./ui/assets/form-i18n/success-es-1440.png) | H1, selector persistente, invitación y botón de copia. La dirección mostrada es local de QA. |
+
+### Pendientes y etapa 4
+
+La integración está implementada y verificada técnicamente; **no equivale a revisión visual humana, revisión brasileña definitiva o aprobación legal del consentimiento**. Tampoco es certificación con lectores de pantalla reales. Los errores de transporte previos a la acción y la experiencia del picker nativo de cada sistema siguen fuera de los dobles empleados.
+
+La etapa 4 reutilizará el mismo selector en el header simplificado y resolverá la composición de layouts/route groups y el footer. Esta entrega conserva navbar/footer, no persiste borradores, no añade navegación por indicadores ni edición del resumen y no cambia backend, servicios, otras apps o `packages/ui`. No incorpora dependencias ni operaciones Git de escritura.
+
+## 1. Arquitectura aprobada e integración
 
 Usar **diccionarios locales tipados, un contexto exclusivo del formulario y el parámetro `lang`**, con `/enviar` en español por defecto y `/enviar?lang=pt-BR` para portugués brasileño. Evitar una biblioteca y prefijos de ruta en esta primera entrega.
 
@@ -459,7 +525,7 @@ No deberían cambiar `lib/testimonials/types.ts`/labels globales, valores del li
 
 1. **Revisión del diagnóstico**: aprobar copy ES/PT, etiquetas y alcance; resolver footer/destino del logo y revisar autorización con el equipo. No bloquear la auditoría esperando esa decisión.
 2. **Catálogo y errores semánticos, completados**: catálogos/parámetros de etapa 1 y discriminantes/reconciliación/localización de etapa 2 verificados con pruebas. Límites, normalizadores y payload conservados. Falta integrar el locale vigente en etapa 3.
-3. **Idioma en el mismo wizard**: provider/query, traducción de intro/campos/pasos/resumen/éxito/recorte, `lang`, metadata e invitación. Probar no desmontaje antes de cambiar el chrome.
+3. **Idioma en el mismo wizard, implementado**: provider/query, traducción de intro/campos/pasos/resumen/éxito/recorte, `lang`, metadata e invitación; verificación de no desmontaje en Chrome. Pendiente revisión visual y editorial humana.
 4. **Header aislado por arquitectura**: root común y grupo público, nuevo header del formulario, contrato de altura/foco y decisión de footer aplicada solo cuando esté aprobada. Comprobar URLs, 404 y ausencia de regresiones públicas.
 5. **QA y revisión humana**: fixtures temporales, respuestas simuladas y entorno de pruebas autorizado. Entregar capturas ES/PT, resultados y diferencias. Detenerse antes de commit/PR si se mantiene la restricción.
 
@@ -484,19 +550,19 @@ No deberían cambiar `lib/testimonials/types.ts`/labels globales, valores del li
 | Persistencia y social | Comparar `FormData`/payload antes y después, sin campos UI filtrados a negocio ni traducción de relato/captions/cards. |
 | Técnico | TypeScript, ESLint, build de producción y `git diff --check`, una vez implementado. No ejecutarlos como sustituto de la auditoría editorial o aprobación visual. |
 
-Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integración real de envío, si se requiere al implementar, debe hacerse en un entorno de pruebas expresamente autorizado, sin testimonios reales ni webhooks/redes de producción. En esta auditoría no se lanza esa batería ni se escribe en servicios.
+Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integración real de envío, si se requiere más adelante, debe hacerse en un entorno de pruebas expresamente autorizado, sin testimonios reales ni webhooks/redes de producción. Las etapas 2 y 3 ejecutaron pruebas locales con dobles; no se lanzó una batería de envíos contra servicios.
 
 ## 11. Coordinación y límites de certeza
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Estado de las propuestas**: utilidades/catálogos de etapa 1 y errores semánticos de etapa 2 implementados sin dependencias adicionales. La UI solo consume los errores ES. Provider, selector, traducción completa y distribución de layouts pendientes. El copy PT y el consentimiento siguen sujetos a revisión humana.
+**Estado de las propuestas**: etapas 1–3 implementadas sin dependencias adicionales. La UI propia del formulario consume los catálogos ES/PT-BR, con selector, query, metadata e idioma accesible. La distribución de layouts, header simplificado y footer pertenecen a etapa 4. Revisión visual, copy PT y consentimiento siguen sujetos a revisión humana.
 
 **Decisiones pendientes**: revisión brasileña de traducciones, autorización equivalente, footer, destino del logo y matiz editorial de la categoría de empleo. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
 No se verificó paridad pregunta por pregunta con Tally porque no se adjuntó su definición/URL. Para confirmar la sustitución completa más adelante hará falta contrastar esa referencia; no se inventa ni se declara cubierta aquí.
 
-No se hicieron envíos, consultas de datos de participantes, cambios en servicios o pruebas de UI/producción. Se modificó exclusivamente el contrato de errores del código local de servidor; sus operaciones de persistencia se conservan. No se abrieron archivos `.env*` ni credenciales. El build puede cargarlos automáticamente según las reglas del proyecto, sin inspeccionar sus valores. No se ejecutaron operaciones Git de escritura. El alcance por etapa queda registrado en las secciones 0 y 0.b.
+No se hicieron envíos reales, consultas de datos de participantes o cambios en servicios. Las pruebas de UI se ejecutaron en un servidor de producción local con datos sintéticos y respuestas interceptadas. El contrato local de errores cambió en etapa 2 y se mantuvo en etapa 3; sus operaciones de persistencia se conservan. No se abrieron archivos `.env*` ni credenciales. Build y servidor pueden cargarlos automáticamente según las reglas del proyecto, sin inspeccionar sus valores. No se ejecutaron operaciones Git de escritura. El alcance por etapa queda registrado en las secciones 0, 0.b y 0.c.
 
 ## 12. Fuentes técnicas consultadas
 

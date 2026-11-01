@@ -1,6 +1,6 @@
 import type { FormMessages } from "../types";
 
-/** Editorial draft; consent remains pending editorial/legal review. Not wired to the UI. */
+/** Brazilian editorial draft; consent remains pending editorial/legal review before release. */
 export const ptBR = {
   form: {
     metadata: {

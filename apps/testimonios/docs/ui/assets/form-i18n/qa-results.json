@@ -1,0 +1,20 @@
+{
+  "result": "PASS",
+  "checks": [
+    "SSR/query/metadata: valid, absent, invalid and repeated locales; hydration",
+    "same form identity, local errors/partial corrections, country values/free text, URL/hash/history",
+    "single selector operable in modal, crop/zoom/object URL identity, confirm and focus return",
+    "all five steps/three categories, retained professional data/story/links, translated country label, exact ES consent, responsive 375/1440",
+    "pending locale changes with intercepted error/success, partial server corrections and focus, unchanged actual FormData, one POST per attempt, localized success/invite/clipboard",
+    "reload preserves only locale, no draft storage, no browser/hydration errors"
+  ],
+  "interceptedPosts": 2,
+  "realSubmissions": 0,
+  "screenshots": [
+    "form-es-375.png",
+    "crop-pt-375.png",
+    "form-pt-1440.png",
+    "success-es-1440.png"
+  ],
+  "browserErrors": []
+}

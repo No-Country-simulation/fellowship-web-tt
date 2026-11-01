@@ -33,6 +33,7 @@ import {
 import { es } from "./messages/es";
 import { ptBR } from "./messages/pt-BR";
 import type { FormMessageKey, FormMessages } from "./types";
+import { getFormMetadata } from "./metadata";
 
 function flatten(value: object, prefix = ""): Record<string, string> {
   return Object.fromEntries(Object.entries(value).flatMap(([key, item]) => {
@@ -223,8 +224,9 @@ describe("categories, countries and consent remain presentation-only", () => {
   });
 
   it("preserves current ES authorization verbatim and marks both versions for review", () => {
-    const form = readFileSync(join(process.cwd(), "components/enviar-form.tsx"), "utf8").replace(/\s+/g, " ");
-    assert.ok(form.includes(es.form.consent.body));
+    const inventory = readFileSync(join(process.cwd(), "docs/form-i18n-text-inventory.md"), "utf8");
+    const row = inventory.split(/\r?\n/).find(line => line.endsWith("`form.consent.body` |"));
+    assert.equal(es.form.consent.body, row?.split("|")[2].trim());
     for (const locale of FORM_LOCALES) assert.equal(FORM_CONSENT_REVIEW_STATUS[locale], "pending-editorial-legal-review");
     assert.match(ptBR.form.consent.body, /galeria e no Discord/);
     assert.doesNotMatch(ptBR.form.consent.body, /Instagram|LinkedIn/);
@@ -232,6 +234,15 @@ describe("categories, countries and consent remain presentation-only", () => {
 });
 
 describe("fallback policy", () => {
+  it("shares localized title/description between initial metadata and client updates", () => {
+    for (const locale of FORM_LOCALES) {
+      const metadata = getFormMetadata(locale);
+      assert.equal(metadata.title, `${getFormMessages(locale).form.metadata.title} · No Country`);
+      assert.equal(metadata.description, getFormMessages(locale).form.metadata.description);
+      assert.ok(!metadata.title.includes("Testimonios"));
+    }
+    assert.deepEqual(getFormMetadata("invalid"), getFormMetadata("es"));
+  });
   it("uses the complete ES catalog for unsupported locales", () => {
     assert.equal(getFormMessages("en"), es);
     assert.equal(getFormMessages(), es);

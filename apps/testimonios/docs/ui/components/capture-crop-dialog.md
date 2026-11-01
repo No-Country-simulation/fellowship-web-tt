@@ -35,6 +35,8 @@ import { CaptureCropDialog } from "@/components/capture-crop-dialog";
 
 ## Notas
 
+- Requiere `FormLocaleProvider`. Título, descripción, controles, alt, instrucciones y `lang` siguen el locale vigente. El diálogo registra un host para el único selector de idioma, que se mueve aquí por portal mientras el exterior es inerte. La guarda de Tab incluye `select`; cambiar idioma conserva instancia, zoom, posición, object URL y refs. Véase [FormLanguageSelect](./form-language-select.md).
+
 - `react-easy-crop` solo marca el recuadro (arrastrar y zoom) y devuelve los píxeles. El JPG lo recorta `lib/testimonials/prepare-image.ts` con canvas: 1080×608 (16:9) la testimonial, 720×720 el perfil.
 - El recorte de perfil es un cuadrado chico (`18rem` / `40vh`) para que el modal no se estire.
 - Se abre con `showModal()`, sin animaciones de escala. El título recibe el foco

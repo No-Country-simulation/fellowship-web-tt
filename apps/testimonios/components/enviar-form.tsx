@@ -15,11 +15,16 @@ import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
+import { useFormLocale } from "./form-locale-provider";
+import { getFormMessages } from "@/lib/form-i18n/messages";
+import { getFormCountryOptions } from "@/lib/form-i18n/countries";
+import { buildFormHref } from "@/lib/form-i18n/locales";
+import { FORM_LIMITS } from "@/lib/form-i18n/limits";
 import { presentFormErrors } from "@/lib/form-i18n/issues";
 import type { FormIssue } from "@/lib/testimonials/issues";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
-import { COUNTRY_OPTIONS, OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countries";
+import { OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countries";
 import {
   FIELD_STEP,
   STORY_MAX_CHARS,
@@ -39,9 +44,8 @@ import {
   type FormValues,
 } from "@/lib/testimonials/form-validation";
 import {
-  TYPE_OPTIONS,
+  TESTIMONIAL_TYPES,
   isTestimonialType,
-  typeOption,
   type TestimonialType,
 } from "@/lib/testimonials/types";
 import { cn } from "@/lib/utils";
@@ -53,18 +57,10 @@ import {
   textareaClassName,
 } from "./enviar-fields";
 
-const STEPS = 5;
+const STEP_KEYS = ["type", "identity", "story", "media", "consent"] as const;
+const STEPS = STEP_KEYS.length;
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp";
 
-const STEP_TITLES = [
-  "Qué querés contar",
-  "Nombre, país, email y foto",
-  "Tu historia",
-  "Foto testimonial y enlaces",
-  "Consentimiento",
-] as const;
-
-const STEP_LABELS = ["Tipo", "Datos", "Historia", "Links", "Consentimiento"] as const;
 const TYPE_ICONS = {
   simulation: Laptop,
   first_job: BriefcaseBusiness,
@@ -83,8 +79,11 @@ function focusAndReveal(control: HTMLElement | null) {
   });
 }
 
-/** Recibe el encabezado de servidor como children y lo retira al mostrar el éxito. */
+/** Recibe la introducción traducible como children y la retira al mostrar el éxito. */
 export function EnviarForm({ children }: { children: ReactNode }) {
+  const { locale, t } = useFormLocale();
+  const formMessages = getFormMessages(locale).form;
+  const countryOptions = getFormCountryOptions(locale);
   const [state, formAction, pending] = useActionState(
     submitTestimonial,
     initialSubmitState,
@@ -141,7 +140,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     return <SuccessCard inviteUrl={inviteUrl} />;
   }
 
-  const selected = type ? typeOption(type) : null;
+  const selected = type ? formMessages.categories[type] : null;
   const isOtherCountry = countrySelection === OTHER_COUNTRY_VALUE;
   const country = isOtherCountry ? customCountry : countrySelection;
   const values: FormValues = {
@@ -164,18 +163,17 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   };
   const resolvedErrors = resolveFormErrors(state, validation, type, pending);
   const { fieldErrors, serverErrors } = resolvedErrors;
-  // Stage 2: translate only the resolved errors in ES; the locale/provider comes in stage 3.
   const { fieldErrors: fieldMessages, serverErrors: serverMessages, unknownErrors, message: serverMessage } =
-    presentFormErrors(resolvedErrors, "es");
+    presentFormErrors(resolvedErrors, locale);
   const correctionStep = Object.keys(serverErrors).length
     ? firstErrorStep(serverErrors)
     : undefined;
   const professionalSummary = type === "simulation"
-    ? (primaryRole.trim() ? [["Puesto principal", primaryRole.trim()]] : [])
+    ? (primaryRole.trim() ? [[t("form.fields.primary_role.label"), primaryRole.trim()]] : [])
     : type === "first_job"
-      ? [["Empresa", company.trim() || "Falta completar"], ["Puesto", roleAchieved.trim() || "Falta completar"]]
+      ? [[t("form.fields.company.label"), company.trim() || t("form.review.missing")], [t("form.fields.role_achieved.label"), roleAchieved.trim() || t("form.review.missing")]]
       : type === "career_change"
-        ? [["Oficio anterior", previousProfession.trim() || "Falta completar"], ["Rol nuevo", newRole.trim() || "Falta completar"]]
+        ? [[t("form.fields.previous_profession.label"), previousProfession.trim() || t("form.review.missing")], [t("form.fields.new_role.label"), newRole.trim() || t("form.review.missing")]]
         : [];
 
   function updateErrors(updates: FieldErrors) {
@@ -308,11 +306,12 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         className={cn(step === 1 && "flex flex-col")}
       >
         <legend className="mb-sm text-lg font-semibold text-text-primary">
-          Elegí el tipo de experiencia <span aria-hidden="true" className="text-brand-pink">*</span>
-          <span className="sr-only"> (obligatorio)</span>
+          {t("form.categories.legend")} <span aria-hidden="true" className="text-brand-pink">*</span>
+          <span className="sr-only"> {t("form.common.required")}</span>
         </legend>
         <div className="grid gap-sm md:grid-cols-3">
-          {TYPE_OPTIONS.map((option) => {
+          {TESTIMONIAL_TYPES.map((value) => {
+            const option = { value, ...formMessages.categories[value] };
             const checked = type === option.value;
             const Icon = TYPE_ICONS[option.value];
             return (
@@ -389,12 +388,12 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         hidden={step !== 2}
         className={cn(step === 2 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Nombre, país, email y foto</legend>
+        <legend className="sr-only">{t("form.steps.identity.title")}</legend>
         <div className="grid items-start gap-md md:grid-cols-[12rem_minmax(0,1fr)] md:gap-lg">
           <FileField
             name="avatar"
-            label="Foto de perfil"
-            requirements="JPG, PNG o WebP · Máximo 5 MB."
+            label={t("form.fields.avatar.label")}
+            requirements={t("form.fields.avatar.requirements", FORM_LIMITS.avatar)}
             required
             className="max-w-36 md:max-w-48"
             error={fieldMessages.avatar}
@@ -409,14 +408,14 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             }}
           />
           <div className="flex min-w-0 flex-col gap-xs">
-            <Field label="Nombre completo" required error={fieldMessages.full_name}>
+            <Field label={t("form.fields.full_name.label")} required error={fieldMessages.full_name}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
                   name="full_name"
                   type="text"
                   autoComplete="name"
-                  placeholder="María López"
+                  placeholder={t("form.fields.full_name.placeholder")}
                   value={fullName}
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
@@ -428,7 +427,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 />
               )}
             </Field>
-            <Field label="País" required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldMessages.country}>
+            <Field label={t("form.fields.country.label")} required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldMessages.country}>
               {({ id, describedBy, invalid }) => (
                 <div className="relative">
                   <select
@@ -445,11 +444,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                       revalidateField("country", selection === OTHER_COUNTRY_VALUE ? customCountry : selection);
                     }}
                   >
-                    <option value="">Seleccioná un país</option>
-                    {COUNTRY_OPTIONS.map((option) => (
-                      <option key={option} value={option}>{option}</option>
+                    <option value="">{t("form.fields.country.placeholder")}</option>
+                    {countryOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
-                    <option value={OTHER_COUNTRY_VALUE}>Otro país</option>
+                    <option value={OTHER_COUNTRY_VALUE}>{t("form.fields.country.other")}</option>
                   </select>
                   <ChevronDown
                     aria-hidden="true"
@@ -459,7 +458,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               )}
             </Field>
             {isOtherCountry ? (
-              <Field label="Especificá tu país" required error={fieldMessages.country}>
+              <Field label={t("form.fields.country.customLabel")} required error={fieldMessages.country}>
                 {({ id, describedBy, invalid }) => (
                   <input
                     id={id}
@@ -478,14 +477,14 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 )}
               </Field>
             ) : null}
-            <Field label="Email" required error={fieldMessages.email}>
+            <Field label={t("form.fields.email.label")} required error={fieldMessages.email}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
                   name="email"
                   type="email"
                   autoComplete="email"
-                  placeholder="tu@email.com"
+                  placeholder={t("form.fields.email.placeholder")}
                   value={email}
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
@@ -505,11 +504,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         hidden={step !== 3}
         className={cn(step === 3 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Tu historia</legend>
+        <legend className="sr-only">{t("form.steps.story.title")}</legend>
         {type === "simulation" ? (
           <Field
-            label="Puesto principal"
-            hint="El rol que tuviste en la simulación."
+            label={t("form.fields.primary_role.label")}
+            hint={t("form.fields.primary_role.hint")}
             error={fieldMessages.primary_role}
           >
             {({ id, describedBy, invalid }) => (
@@ -531,7 +530,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         ) : null}
         {type === "first_job" ? (
           <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
-            <Field label="Empresa" required error={fieldMessages.company}>
+            <Field label={t("form.fields.company.label")} required error={fieldMessages.company}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -548,7 +547,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 />
               )}
             </Field>
-            <Field label="Puesto" required error={fieldMessages.role_achieved}>
+            <Field label={t("form.fields.role_achieved.label")} required error={fieldMessages.role_achieved}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -570,7 +569,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         {type === "career_change" ? (
           <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
             <Field
-              label="Oficio anterior"
+              label={t("form.fields.previous_profession.label")}
               required
               error={fieldMessages.previous_profession}
             >
@@ -590,7 +589,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 />
               )}
             </Field>
-            <Field label="Rol nuevo" required error={fieldMessages.new_role}>
+            <Field label={t("form.fields.new_role.label")} required error={fieldMessages.new_role}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -612,19 +611,19 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         <div className="flex min-w-0 flex-col gap-xs">
           {storyNeedsReview ? (
             <p id="story-review-notice" className="text-body-small leading-relaxed text-accent-cyan">
-              Cambiaste el tipo de experiencia. Revisá que tu historia responda a la nueva pregunta.
+              {t("form.story.reviewNotice")}
             </p>
           ) : null}
           <Field
-            label={selected?.storyLabel ?? "Tu historia"}
+            label={selected?.storyLabel ?? t("form.steps.story.title")}
             required
             reserveErrorSpace
             className="gap-xs"
-            hint={`${selected?.storyHint ?? "En tus palabras."} Entre ${STORY_MIN_CHARS} y ${STORY_MAX_CHARS} caracteres.`}
+            hint={t("form.story.hintWithLimits", { hint: selected?.storyHint ?? t("form.story.defaultHint"), min: STORY_MIN_CHARS, max: STORY_MAX_CHARS })}
             error={fieldMessages.story}
             trailingInfo={(
               <span className="text-xs text-text-secondary tabular-nums">
-                {story.trim().length}/{STORY_MAX_CHARS}
+                {t("form.story.counter", { current: story.trim().length, max: STORY_MAX_CHARS })}
               </span>
             )}
           >
@@ -652,16 +651,16 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         hidden={step !== 4}
         className={cn(step === 4 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Foto testimonial y enlaces</legend>
+        <legend className="sr-only">{t("form.steps.media.title")}</legend>
         <p className="text-body-small text-text-secondary">
-          Todo este paso es opcional.
+          {t("form.media.optionalStep")}
         </p>
         <div className="grid items-start gap-md md:grid-cols-2 md:gap-lg">
           <FileField
             name="capture"
-            label="Foto testimonial"
-            hint="Una foto real de tu experiencia: trabajando, con tu equipo o en una reunión."
-            requirements="JPG, PNG o WebP · Máximo 8 MB."
+            label={t("form.fields.capture.label")}
+            hint={t("form.fields.capture.hint")}
+            requirements={t("form.fields.capture.requirements", FORM_LIMITS.capture)}
             error={fieldMessages.capture}
             accept={IMAGE_ACCEPT}
             preview="capture"
@@ -675,8 +674,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
           />
           <div className="flex min-w-0 flex-col gap-md">
             <Field
-              label="Video de YouTube"
-              hint="Solo un link de YouTube. No se sube un archivo."
+              label={t("form.fields.video_url.label")}
+              hint={t("form.fields.video_url.hint")}
               error={fieldMessages.video_url}
             >
               {({ id, describedBy, invalid }) => (
@@ -685,7 +684,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                   name="video_url"
                   type="url"
                   inputMode="url"
-                  placeholder="https://www.youtube.com/watch?v="
+                  placeholder={t("form.fields.video_url.placeholder")}
                   value={videoUrl}
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
@@ -698,8 +697,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               )}
             </Field>
             <Field
-              label="Instagram"
-              hint="Para mencionarte en el caption si publicamos."
+              label={t("form.fields.instagram.label")}
+              hint={t("form.fields.instagram.hint")}
               error={fieldMessages.instagram}
             >
               {({ id, describedBy, invalid }) => (
@@ -708,7 +707,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                   name="instagram"
                   type="text"
                   autoComplete="off"
-                  placeholder="@tu.usuario"
+                  placeholder={t("form.fields.instagram.placeholder")}
                   value={instagram}
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
@@ -721,8 +720,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               )}
             </Field>
             <Field
-              label="LinkedIn"
-              hint="Para mencionarte en el post de LinkedIn si publicamos."
+              label={t("form.fields.linkedin.label")}
+              hint={t("form.fields.linkedin.hint")}
               error={fieldMessages.linkedin}
             >
               {({ id, describedBy, invalid }) => (
@@ -731,7 +730,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                   name="linkedin"
                   type="text"
                   autoComplete="off"
-                  placeholder="https://www.linkedin.com/in/tu-usuario"
+                  placeholder={t("form.fields.linkedin.placeholder")}
                   value={linkedin}
                   aria-invalid={invalid}
                   aria-describedby={describedBy}
@@ -751,23 +750,23 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         hidden={step !== 5}
         className={cn(step === 5 && "flex flex-col gap-md")}
       >
-        <legend className="sr-only">Consentimiento</legend>
+        <legend className="sr-only">{t("form.steps.consent.title")}</legend>
         <div>
-          <h3 className="text-heading-3 text-text-primary">Revisá tu testimonio</h3>
+          <h3 className="text-heading-3 text-text-primary">{t("form.review.title")}</h3>
           <p className="mt-xs text-body-small leading-relaxed text-text-secondary">
-            Comprobá que los datos estén correctos antes de enviarlo.
+            {t("form.review.description")}
           </p>
         </div>
         <section aria-labelledby="testimonial-summary-title" className="rounded-card border border-border bg-card p-sm sm:p-md">
-          <h4 id="testimonial-summary-title" className="text-body font-semibold text-text-primary">Resumen</h4>
+          <h4 id="testimonial-summary-title" className="text-body font-semibold text-text-primary">{t("form.review.summaryTitle")}</h4>
           <div className="mt-sm flex flex-col gap-md">
             <section aria-labelledby="summary-testimonial-title">
-              <h5 id="summary-testimonial-title" className="text-body-small font-semibold text-text-primary">Datos de tu testimonio</h5>
+              <h5 id="summary-testimonial-title" className="text-body-small font-semibold text-text-primary">{t("form.review.testimonialTitle")}</h5>
               <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
                 {[
-                  ["Tipo de experiencia", selected?.label ?? "Sin seleccionar"],
-                  ["Nombre", fullName.trim() || "Falta completar"],
-                  ["País", country.trim() || "Falta completar"],
+                  [t("form.review.typeLabel"), selected?.label ?? t("form.review.notSelected")],
+                  [t("form.review.nameLabel"), fullName.trim() || t("form.review.missing")],
+                  [t("form.fields.country.label"), (isOtherCountry ? country.trim() : countryOptions.find(option => option.value === country)?.label ?? country.trim()) || t("form.review.missing")],
                   ...professionalSummary,
                 ].map(([label, value]) => (
                   <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
@@ -776,30 +775,30 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                   </div>
                 ))}
                 <div className="min-w-0 border-t border-border-subtle py-xs sm:col-span-2 sm:py-sm">
-                  <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? "Tu historia"}</dt>
-                  <dd className="mt-1 text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : "Falta completar"}</dd>
+                  <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? t("form.steps.story.title")}</dt>
+                  <dd className="mt-1 text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : t("form.review.missing")}</dd>
                 </div>
               </dl>
             </section>
             <section aria-labelledby="summary-contact-title">
-              <h5 id="summary-contact-title" className="text-body-small font-semibold text-text-primary">Datos de contacto</h5>
+              <h5 id="summary-contact-title" className="text-body-small font-semibold text-text-primary">{t("form.review.contactTitle")}</h5>
               <dl className="mt-xs">
                 <div className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
-                  <dt className="text-body-small text-text-secondary">Email</dt>
-                  <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{email.trim() || "Falta completar"}</dd>
+                  <dt className="text-body-small text-text-secondary">{t("form.fields.email.label")}</dt>
+                  <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{email.trim() || t("form.review.missing")}</dd>
                 </div>
               </dl>
-              <p className="text-body-small leading-relaxed text-text-secondary">El email es privado: se usa como dato de contacto y no se publica.</p>
+              <p className="text-body-small leading-relaxed text-text-secondary">{t("form.review.emailPrivacy")}</p>
             </section>
             <section aria-labelledby="summary-media-title">
-              <h5 id="summary-media-title" className="text-body-small font-semibold text-text-primary">Fotografías y enlaces</h5>
+              <h5 id="summary-media-title" className="text-body-small font-semibold text-text-primary">{t("form.review.mediaTitle")}</h5>
               <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
                 {[
-                  ["Foto de perfil", avatarFile ? "Lista" : "Falta (obligatoria)"],
-                  ["Foto testimonial", captureFile ? "Adjunta" : "No agregada (opcional)"],
-                  ...(videoUrl.trim() ? [["YouTube", videoUrl.trim()]] : []),
-                  ...(instagram.trim() ? [["Instagram", instagram.trim()]] : []),
-                  ...(linkedin.trim() ? [["LinkedIn", linkedin.trim()]] : []),
+                  [t("form.fields.avatar.label"), avatarFile ? t("form.review.avatarReady") : t("form.review.avatarMissing")],
+                  [t("form.fields.capture.label"), captureFile ? t("form.review.captureAttached") : t("form.review.captureMissing")],
+                  ...(videoUrl.trim() ? [[t("form.fields.video_url.summaryLabel"), videoUrl.trim()]] : []),
+                  ...(instagram.trim() ? [[t("form.fields.instagram.label"), instagram.trim()]] : []),
+                  ...(linkedin.trim() ? [[t("form.fields.linkedin.label"), linkedin.trim()]] : []),
                 ].map(([label, value]) => (
                   <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
                     <dt className="text-body-small text-text-secondary">{label}</dt>
@@ -809,11 +808,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               </dl>
             </section>
           </div>
-          <p className="mt-sm text-body-small leading-relaxed text-text-secondary">El equipo de No Country revisará tu testimonio antes de publicarlo.</p>
+          <p className="mt-sm text-body-small leading-relaxed text-text-secondary">{t("form.review.moderationHint")}</p>
         </section>
         <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
           <h4 id="testimonial-consent-title" className="mb-sm text-body font-semibold text-text-primary">
-            Consentimiento<span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
+            {t("form.consent.title")}<span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
           </h4>
           <label className="relative flex min-h-11 cursor-pointer items-start gap-sm text-body-small leading-relaxed text-text-secondary">
             <input
@@ -830,10 +829,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               }}
             />
             <span>
-              Acepto que No Country publique mi testimonio (nombre, foto y texto)
-              en la galería y en Discord. El email no se muestra en público. El
-              equipo lo revisa antes de publicarlo.
-              <span className="sr-only"> (obligatorio)</span>
+              {t("form.consent.body")}
+              <span className="sr-only"> {t("form.common.required")}</span>
             </span>
           </label>
           <div className="mt-1 min-h-6">
@@ -869,7 +866,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 className="min-h-11 self-start px-sm"
                 onClick={() => navigateTo(correctionStep, serverErrors)}
               >
-                Ir a corregir
+                {t("form.navigation.correct")}
               </Button>
             ) : null}
           </div>
@@ -886,7 +883,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             disabled={step === 1 || pending}
             onClick={() => navigateTo(Math.max(1, step - 1))}
           >
-            Atrás
+            {t("form.navigation.back")}
           </Button>
         ) : null}
         {step < STEPS ? (
@@ -898,7 +895,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             className={step === 1 ? "h-auto min-h-11 w-full max-w-full px-md whitespace-normal sm:w-auto" : "h-auto min-h-11 max-w-full px-md whitespace-normal"}
             onClick={goNext}
           >
-            Siguiente
+            {t("form.navigation.next")}
           </Button>
         ) : (
           <Button
@@ -909,7 +906,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             className="h-auto min-h-11 max-w-full px-sm whitespace-normal sm:px-md"
             disabled={pending}
           >
-            {pending ? "Enviando…" : "Enviar testimonio"}
+            {pending ? t("form.submit.pending") : t("form.submit.label")}
           </Button>
         )}
       </div>
@@ -923,18 +920,21 @@ function StepProgress({ step, headingRef }: {
   step: number;
   headingRef: React.RefObject<HTMLHeadingElement | null>;
 }) {
+  const { locale, t } = useFormLocale();
+  const steps = getFormMessages(locale).form.steps;
   return (
     <div>
       <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
-        Paso {step} de {STEPS} · {STEP_TITLES[step - 1]}
+        {t("form.progress", { step, total: STEPS, title: steps[STEP_KEYS[step - 1]].title })}
       </h2>
       {/* El h2 enfocado comunica el progreso; los círculos son solo visuales, sin barra duplicada. */}
       <ol aria-hidden="true" className="mt-md grid grid-cols-5">
-        {STEP_LABELS.map((label, index) => {
+        {STEP_KEYS.map((key, index) => {
+          const label = steps[key].short;
           const current = step === index + 1;
           const completed = step > index + 1;
           return (
-            <li key={label} className="relative flex min-w-0 flex-col items-center gap-xs text-center">
+            <li key={key} className="relative flex min-w-0 flex-col items-center gap-xs text-center">
               {index < STEPS - 1 ? (
                 <span className={cn("absolute top-5 left-1/2 h-px w-full", completed ? "bg-accent-cyan/60" : "bg-border")} />
               ) : null}
@@ -959,7 +959,9 @@ function StepProgress({ step, headingRef }: {
   );
 }
 
-function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
+function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
+  const { locale, t } = useFormLocale();
+  const inviteUrl = new URL(buildFormHref(locale), baseInviteUrl).toString();
   const [copied, setCopied] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -979,19 +981,19 @@ function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
 
   return (
     <div className="mt-lg rounded-card border border-border bg-card p-md sm:p-lg">
-      <p className="text-overline text-accent-cyan">Listo</p>
+      <p className="text-overline text-accent-cyan">{t("form.success.eyebrow")}</p>
       <h1 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-        Gracias por tu testimonio
+        {t("form.success.title")}
       </h1>
       <p className="mt-sm text-body text-text-secondary">
-        Recibimos tu testimonio. El equipo de No Country lo revisará antes de publicarlo.
+        {t("form.success.description")}
       </p>
       <div className="mt-md border-t border-border pt-md">
         <p className="text-body text-text-primary">
-          Ahora ayudá a que otra persona se anime
+          {t("form.success.inviteTitle")}
         </p>
         <p className="mt-xs text-body text-text-secondary">
-          Si conocés a alguien con una experiencia para compartir, pasale este enlace. Su historia también puede ayudar a otras personas.
+          {t("form.success.inviteDescription")}
         </p>
         <p className="mt-sm break-all text-body">
           <a
@@ -1003,10 +1005,10 @@ function SuccessCard({ inviteUrl }: { inviteUrl: string }) {
         </p>
         <div className="mt-md flex flex-col gap-sm sm:flex-row sm:flex-wrap">
           <Button type="button" variant="gradient" className="min-h-11 px-sm" onClick={copyInviteLink}>
-            {copied ? "Enlace copiado" : "Copiar enlace"}
+            {copied ? t("form.success.copied") : t("form.success.copy")}
           </Button>
           <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>
-            Volver al inicio
+            {t("form.navigation.home")}
           </Link>
         </div>
       </div>

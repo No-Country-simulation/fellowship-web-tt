@@ -9,22 +9,19 @@ import {
   CAPTURE_ASPECT,
 } from "@/lib/testimonials/prepare-image";
 import { cn } from "@/lib/utils";
+import { useFormLocale } from "./form-locale-provider";
 
 type CropKind = "capture" | "avatar";
 
 const COPY: Record<
   CropKind,
-  { title: string; description: string; frameClass: string; aspect: number }
+  { frameClass: string; aspect: number }
 > = {
   capture: {
-    title: "Recortá la foto",
-    description: "Mové la foto o hacé zoom hasta que quede como te guste. Así se va a ver en tu testimonio.",
     frameClass: "aspect-video",
     aspect: CAPTURE_ASPECT,
   },
   avatar: {
-    title: "Recortá la foto",
-    description: "Mové la foto o hacé zoom hasta que tu cara quede centrada. Así se va a ver junto a tu nombre.",
     frameClass: "mx-auto aspect-square w-[min(18rem,40vh)] max-w-full",
     aspect: AVATAR_ASPECT,
   },
@@ -48,7 +45,12 @@ export function CaptureCropDialog({
   confirming = false,
   returnFocusRef,
 }: CaptureCropDialogProps) {
-  const copy = COPY[kind];
+  const { locale, t, setSelectorHost } = useFormLocale();
+  const copy = {
+    ...COPY[kind],
+    title: t("form.crop.title"),
+    description: kind === "avatar" ? t("form.crop.avatarDescription") : t("form.crop.captureDescription"),
+  };
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [area, setArea] = useState<Area | null>(null);
@@ -98,7 +100,7 @@ export function CaptureCropDialog({
     if (event.key !== "Tab") return;
     const dialog = event.currentTarget;
     const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
-      "button:not(:disabled), input:not(:disabled), [tabindex='0']:not(:disabled)",
+      "button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex='0']:not(:disabled)",
     )).filter((control) => !control.closest("[inert]"));
     const first = controls[0];
     const last = controls.at(-1);
@@ -119,6 +121,7 @@ export function CaptureCropDialog({
   return (
     <dialog
       ref={dialogRef}
+      lang={locale}
       closedby="none"
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
@@ -140,6 +143,7 @@ export function CaptureCropDialog({
       }}
     >
       <div className="flex flex-col gap-md">
+        <div ref={setSelectorHost} />
         <div>
           <h2
             ref={titleRef}
@@ -165,10 +169,10 @@ export function CaptureCropDialog({
             crop={crop}
             zoom={zoom}
             aspect={copy.aspect}
-            mediaProps={{ alt: "Foto para recortar" }}
+            mediaProps={{ alt: t("form.crop.imageAlt") }}
             cropperProps={{
               role: "group",
-              "aria-label": "Área de recorte",
+              "aria-label": t("form.crop.areaLabel"),
               "aria-describedby": keyboardHintId,
             }}
             classes={{
@@ -182,10 +186,10 @@ export function CaptureCropDialog({
           />
         </div>
         <p id={keyboardHintId} className="sr-only">
-          Usá las flechas para mover la foto. Mantené Shift para ajustar con más precisión.
+          {t("form.crop.keyboardHint")}
         </p>
         <label className="flex flex-col gap-1">
-          <span className="text-body-small text-text-secondary">Zoom</span>
+          <span className="text-body-small text-text-secondary">{t("form.crop.zoomLabel")}</span>
           <input
             type="range"
             min={1}
@@ -204,7 +208,7 @@ export function CaptureCropDialog({
             disabled={confirming}
             onClick={cancel}
           >
-            Cancelar
+            {t("form.crop.cancel")}
           </Button>
           <Button
             type="button"
@@ -217,7 +221,7 @@ export function CaptureCropDialog({
               }
             }}
           >
-            {confirming ? "Recortando…" : "Usar recorte"}
+            {confirming ? t("form.images.cropping") : t("form.crop.confirm")}
           </Button>
         </div>
       </div>

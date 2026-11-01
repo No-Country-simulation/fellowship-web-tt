@@ -27,6 +27,8 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 
 `Field` y `FileField` son Client Components (`useId` / preview local).
 
+En `/enviar` requieren `FormLocaleProvider` para sufijos accesibles y textos propios de imagen. Labels, ayudas y errores siguen llegando por props; no se traducen valores del participante. Cambiar contexto no reemplaza sus instancias ni sus object URLs.
+
 ## Props — `Field`
 
 | Prop | Tipo | Default | Descripción |
@@ -108,7 +110,7 @@ habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provision
 | `accept` | `string` | — | p. ej. `"image/jpeg,image/png,image/webp"` |
 | `preview` | `"avatar" \| "capture"` | — | Avatar cuadrado; captura 16:9 |
 | `onFileChange` | `(file: File \| null) => void` | — | Archivo recortado confirmado o `null` al quitarlo explícitamente |
-| `onInvalid` | `(message?: string) => void` | — | Error de recorte o lectura |
+| `onInvalid` | `(issue?: FormIssue) => void` | — | Incidencia semántica de recorte; se traduce en el formulario |
 | `error` | `string` | — | Mensaje de error |
 | `optional` | `boolean` | `false` | Sufijo “Opcional” disponible para otros usos; `/enviar` no lo repite |
 | `required` | `boolean` | `false` | Marca accesible de obligatoriedad; no cambia las reglas de archivo |

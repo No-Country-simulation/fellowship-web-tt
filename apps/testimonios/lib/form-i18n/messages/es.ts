@@ -1,6 +1,6 @@
 import type { FormMessages } from "../types";
 
-/** Editorial draft; consent remains pending editorial/legal review. Not wired to the UI. */
+/** Form copy; consent remains pending editorial/legal review before release. */
 export const es = {
   form: {
     metadata: {
