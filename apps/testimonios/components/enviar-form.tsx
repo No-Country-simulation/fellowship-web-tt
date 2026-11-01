@@ -15,6 +15,8 @@ import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
+import { presentFormErrors } from "@/lib/form-i18n/issues";
+import type { FormIssue } from "@/lib/testimonials/issues";
 import { submitTestimonial } from "@/lib/testimonials/actions";
 import { initialSubmitState } from "@/lib/testimonials/submit-state";
 import { COUNTRY_OPTIONS, OTHER_COUNTRY_VALUE } from "@/lib/testimonials/countries";
@@ -160,8 +162,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     capture: captureFile,
     consent,
   };
-  const { fieldErrors, serverErrors, unknownErrors, message: serverMessage } =
-    resolveFormErrors(state, validation, type, pending);
+  const resolvedErrors = resolveFormErrors(state, validation, type, pending);
+  const { fieldErrors, serverErrors } = resolvedErrors;
+  // Stage 2: translate only the resolved errors in ES; the locale/provider comes in stage 3.
+  const { fieldErrors: fieldMessages, serverErrors: serverMessages, unknownErrors, message: serverMessage } =
+    presentFormErrors(resolvedErrors, "es");
   const correctionStep = Object.keys(serverErrors).length
     ? firstErrorStep(serverErrors)
     : undefined;
@@ -177,8 +182,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     setValidation((current) => updateFormErrors(current, state, updates));
   }
 
-  function setError(field: FormField, message: string | undefined) {
-    updateErrors({ [field]: message });
+  function setError(field: FormField, issue: FormIssue | undefined) {
+    updateErrors({ [field]: issue });
   }
 
   function revalidateField<K extends FormField>(field: K, value: FormValues[K]) {
@@ -374,7 +379,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         <div className="mt-1 min-h-6">
           {fieldErrors.type ? (
             <p id="type-error" className="text-body-small leading-relaxed text-destructive">
-              {fieldErrors.type}
+              {fieldMessages.type}
             </p>
           ) : null}
         </div>
@@ -392,7 +397,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             requirements="JPG, PNG o WebP · Máximo 5 MB."
             required
             className="max-w-36 md:max-w-48"
-            error={fieldErrors.avatar}
+            error={fieldMessages.avatar}
             accept={IMAGE_ACCEPT}
             preview="avatar"
             onFileChange={(file) => {
@@ -404,7 +409,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             }}
           />
           <div className="flex min-w-0 flex-col gap-xs">
-            <Field label="Nombre completo" required error={fieldErrors.full_name}>
+            <Field label="Nombre completo" required error={fieldMessages.full_name}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -423,7 +428,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 />
               )}
             </Field>
-            <Field label="País" required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldErrors.country}>
+            <Field label="País" required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldMessages.country}>
               {({ id, describedBy, invalid }) => (
                 <div className="relative">
                   <select
@@ -454,7 +459,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               )}
             </Field>
             {isOtherCountry ? (
-              <Field label="Especificá tu país" required error={fieldErrors.country}>
+              <Field label="Especificá tu país" required error={fieldMessages.country}>
                 {({ id, describedBy, invalid }) => (
                   <input
                     id={id}
@@ -473,7 +478,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 )}
               </Field>
             ) : null}
-            <Field label="Email" required error={fieldErrors.email}>
+            <Field label="Email" required error={fieldMessages.email}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -505,7 +510,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
           <Field
             label="Puesto principal"
             hint="El rol que tuviste en la simulación."
-            error={fieldErrors.primary_role}
+            error={fieldMessages.primary_role}
           >
             {({ id, describedBy, invalid }) => (
               <input
@@ -526,7 +531,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         ) : null}
         {type === "first_job" ? (
           <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
-            <Field label="Empresa" required error={fieldErrors.company}>
+            <Field label="Empresa" required error={fieldMessages.company}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -543,7 +548,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 />
               )}
             </Field>
-            <Field label="Puesto" required error={fieldErrors.role_achieved}>
+            <Field label="Puesto" required error={fieldMessages.role_achieved}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -567,7 +572,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             <Field
               label="Oficio anterior"
               required
-              error={fieldErrors.previous_profession}
+              error={fieldMessages.previous_profession}
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -585,7 +590,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 />
               )}
             </Field>
-            <Field label="Rol nuevo" required error={fieldErrors.new_role}>
+            <Field label="Rol nuevo" required error={fieldMessages.new_role}>
               {({ id, describedBy, invalid }) => (
                 <input
                   id={id}
@@ -616,7 +621,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             reserveErrorSpace
             className="gap-xs"
             hint={`${selected?.storyHint ?? "En tus palabras."} Entre ${STORY_MIN_CHARS} y ${STORY_MAX_CHARS} caracteres.`}
-            error={fieldErrors.story}
+            error={fieldMessages.story}
             trailingInfo={(
               <span className="text-xs text-text-secondary tabular-nums">
                 {story.trim().length}/{STORY_MAX_CHARS}
@@ -657,7 +662,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             label="Foto testimonial"
             hint="Una foto real de tu experiencia: trabajando, con tu equipo o en una reunión."
             requirements="JPG, PNG o WebP · Máximo 8 MB."
-            error={fieldErrors.capture}
+            error={fieldMessages.capture}
             accept={IMAGE_ACCEPT}
             preview="capture"
             onFileChange={(file) => {
@@ -672,7 +677,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             <Field
               label="Video de YouTube"
               hint="Solo un link de YouTube. No se sube un archivo."
-              error={fieldErrors.video_url}
+              error={fieldMessages.video_url}
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -695,7 +700,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             <Field
               label="Instagram"
               hint="Para mencionarte en el caption si publicamos."
-              error={fieldErrors.instagram}
+              error={fieldMessages.instagram}
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -718,7 +723,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             <Field
               label="LinkedIn"
               hint="Para mencionarte en el post de LinkedIn si publicamos."
-              error={fieldErrors.linkedin}
+              error={fieldMessages.linkedin}
             >
               {({ id, describedBy, invalid }) => (
                 <input
@@ -834,7 +839,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
           <div className="mt-1 min-h-6">
             {fieldErrors.consent ? (
               <p id="consent-error" className="text-body-small leading-relaxed text-destructive">
-                {fieldErrors.consent}
+                {fieldMessages.consent}
               </p>
             ) : null}
           </div>
@@ -844,7 +849,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             {serverMessage ? (
               <p className="text-body-small text-destructive">{serverMessage}</p>
             ) : null}
-            {Object.entries(serverErrors)
+            {Object.entries(serverMessages)
               .filter(([field]) => FIELD_STEP[field as FormField] !== STEPS)
               .map(([field, message]) => (
                 <p key={field} className="text-body-small text-destructive">

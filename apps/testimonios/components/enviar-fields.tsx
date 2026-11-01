@@ -4,6 +4,7 @@ import { ImagePlus, X } from "lucide-react";
 
 import { CaptureCropDialog } from "./capture-crop-dialog";
 import { cropAvatarFile, cropCaptureFile } from "@/lib/testimonials/prepare-image";
+import { formIssue, type FormIssue } from "@/lib/testimonials/issues";
 import { cn } from "@/lib/utils";
 
 export const fieldClassName = cn(
@@ -130,7 +131,7 @@ type FileFieldProps = {
   accept: string;
   preview: "avatar" | "capture";
   onFileChange: (file: File | null) => void;
-  onInvalid?: (message: string | undefined) => void;
+  onInvalid?: (issue: FormIssue | undefined) => void;
 };
 
 /** Imagen con preview y requisitos asociados; el reemplazo solo se aplica tras recortarlo. */
@@ -208,7 +209,7 @@ export function FileField({
       })
       .catch(() => {
         if (currentOperation !== operation.current) return;
-        onInvalid?.("No pudimos recortar la foto.");
+        onInvalid?.(formIssue("image.cropFailed"));
         closeCrop();
         if (inputRef.current) {
           inputRef.current.value = "";

@@ -1,3 +1,4 @@
+import { formIssue, type FormIssue } from "./issues";
 import { excerptQuote, buildIgCaption, buildLiCaption } from "./quote";
 import {
   isTestimonialType,
@@ -29,7 +30,7 @@ const YOUTUBE_HOSTS = new Set([
 const VIDEO_ID_PATTERN = /^[\w-]{11}$/;
 const INSTAGRAM_HANDLE_PATTERN = /^[A-Za-z0-9._]{1,30}$/;
 
-export type FieldErrors = Partial<Record<FormField, string>>;
+export type FieldErrors = Partial<Record<FormField, FormIssue>>;
 
 export type FormField =
   | "type"
@@ -88,21 +89,21 @@ export type ParsedTestimonial = {
 
 export type ParseResult =
   | { ok: true; data: ParsedTestimonial }
-  | { ok: false; fieldErrors: FieldErrors; message: string };
+  | { ok: false; fieldErrors: FieldErrors; issue: FormIssue };
 
 export function isValidEmail(value: string): boolean {
   return EMAIL_PATTERN.test(value.trim());
 }
 
 /** Valida nombres internacionales sin restringirlos al listado del selector. */
-export function validateCountry(raw: string): string | undefined {
+export function validateCountry(raw: string): FormIssue | undefined {
   const country = raw.trim();
-  if (!country) return "El país es obligatorio.";
+  if (!country) return formIssue("country.required");
   if (country.length > FIELD_MAX_CHARS) {
-    return `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+    return formIssue("text.maxLength", { max: FIELD_MAX_CHARS });
   }
   if (!/\p{L}/u.test(country) || !/^[\p{L}\p{M}\p{Zs}\p{Pd}'’‘.,()]+$/u.test(country)) {
-    return "Ingresá un nombre de país válido, sin números.";
+    return formIssue("country.invalid");
   }
 }
 
@@ -241,29 +242,27 @@ export function normalizeLinkedIn(raw: string): string | null {
     : null;
 }
 
-/** Valida presencia, formato y tamaño; permite personalizar el mensaje de obligatoriedad. */
+/** Mismas reglas de presencia/formato/tamaño; incidencias para los dos usos del formulario. */
 export function validateImageFile(
   file: File | null,
-  options: {
-    required: boolean;
-    requiredMessage?: string;
-    maxBytes: number;
-    label: string;
-  },
-): string | undefined {
+  options: (
+    | { required: true; kind: "avatar" }
+    | { required: false; kind: "capture" }
+  ) & { maxBytes: number },
+): FormIssue | undefined {
   if (!file) {
     return options.required
-      ? (options.requiredMessage ?? `${options.label} es obligatorio.`)
+      ? formIssue("avatar.required")
       : undefined;
   }
 
   if (!isAllowedImage(file)) {
-    return `${options.label}: usá jpg, png o webp.`;
+    return formIssue(`${options.kind}.format`);
   }
 
   if (file.size > options.maxBytes) {
     const maxMb = Math.round(options.maxBytes / (1024 * 1024));
-    return `${options.label}: máximo ${maxMb} MB.`;
+    return formIssue(`${options.kind}.maxSize`, { maxMb });
   }
 
   return undefined;
@@ -289,30 +288,30 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const capture = readFile(formData, "capture");
 
   if (!isTestimonialType(typeRaw)) {
-    fieldErrors.type = "Elegí qué querés contar.";
+    fieldErrors.type = formIssue("type.required");
   }
 
   if (!fullName) {
-    fieldErrors.full_name = "El nombre es obligatorio.";
+    fieldErrors.full_name = formIssue("full_name.required");
   } else if (fullName.length > NAME_MAX_CHARS) {
-    fieldErrors.full_name = `Máximo ${NAME_MAX_CHARS} caracteres.`;
+    fieldErrors.full_name = formIssue("text.maxLength", { max: NAME_MAX_CHARS });
   }
 
   const countryError = validateCountry(country);
   if (countryError) fieldErrors.country = countryError;
 
   if (!email) {
-    fieldErrors.email = "El email es obligatorio. No se muestra en público.";
+    fieldErrors.email = formIssue("email.required");
   } else if (!isValidEmail(email)) {
-    fieldErrors.email = "Ingresá un email válido.";
+    fieldErrors.email = formIssue("email.invalid");
   }
 
   if (!story) {
-    fieldErrors.story = "Contanos tu historia.";
+    fieldErrors.story = formIssue("story.required");
   } else if (story.length < STORY_MIN_CHARS) {
-    fieldErrors.story = `Escribí al menos ${STORY_MIN_CHARS} caracteres.`;
+    fieldErrors.story = formIssue("story.minLength", { min: STORY_MIN_CHARS });
   } else if (story.length > STORY_MAX_CHARS) {
-    fieldErrors.story = `Máximo ${STORY_MAX_CHARS} caracteres.`;
+    fieldErrors.story = formIssue("text.maxLength", { max: STORY_MAX_CHARS });
   }
 
   const type = isTestimonialType(typeRaw) ? typeRaw : null;
@@ -320,7 +319,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   if (type === "simulation" && primaryRole) {
     if (primaryRole.length > FIELD_MAX_CHARS) {
-      fieldErrors.primary_role = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+      fieldErrors.primary_role = formIssue("text.maxLength", { max: FIELD_MAX_CHARS });
     } else {
       payload = { primary_role: primaryRole };
     }
@@ -328,14 +327,14 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   if (type === "first_job") {
     if (!company) {
-      fieldErrors.company = "La empresa es obligatoria.";
+      fieldErrors.company = formIssue("company.required");
     } else if (company.length > FIELD_MAX_CHARS) {
-      fieldErrors.company = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+      fieldErrors.company = formIssue("text.maxLength", { max: FIELD_MAX_CHARS });
     }
     if (!roleAchieved) {
-      fieldErrors.role_achieved = "El puesto es obligatorio.";
+      fieldErrors.role_achieved = formIssue("role_achieved.required");
     } else if (roleAchieved.length > FIELD_MAX_CHARS) {
-      fieldErrors.role_achieved = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+      fieldErrors.role_achieved = formIssue("text.maxLength", { max: FIELD_MAX_CHARS });
     }
     if (company && roleAchieved) {
       payload = { company, role_achieved: roleAchieved };
@@ -344,14 +343,14 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   if (type === "career_change") {
     if (!previousProfession) {
-      fieldErrors.previous_profession = "El oficio anterior es obligatorio.";
+      fieldErrors.previous_profession = formIssue("previous_profession.required");
     } else if (previousProfession.length > FIELD_MAX_CHARS) {
-      fieldErrors.previous_profession = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+      fieldErrors.previous_profession = formIssue("text.maxLength", { max: FIELD_MAX_CHARS });
     }
     if (!newRole) {
-      fieldErrors.new_role = "El rol nuevo es obligatorio.";
+      fieldErrors.new_role = formIssue("new_role.required");
     } else if (newRole.length > FIELD_MAX_CHARS) {
-      fieldErrors.new_role = `Máximo ${FIELD_MAX_CHARS} caracteres.`;
+      fieldErrors.new_role = formIssue("text.maxLength", { max: FIELD_MAX_CHARS });
     }
     if (previousProfession && newRole) {
       payload = {
@@ -363,9 +362,8 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
 
   const avatarError = validateImageFile(avatar, {
     required: true,
-    requiredMessage: "Seleccioná una foto de perfil.",
     maxBytes: AVATAR_MAX_BYTES,
-    label: "La foto de perfil",
+    kind: "avatar",
   });
   if (avatarError) {
     fieldErrors.avatar = avatarError;
@@ -374,7 +372,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const captureError = validateImageFile(capture, {
     required: false,
     maxBytes: CAPTURE_MAX_BYTES,
-    label: "La foto testimonial",
+    kind: "capture",
   });
   if (captureError) {
     fieldErrors.capture = captureError;
@@ -384,7 +382,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   if (videoRaw) {
     videoUrl = normalizeYouTubeUrl(videoRaw);
     if (!videoUrl) {
-      fieldErrors.video_url = "Pegá un link de YouTube (youtube.com o youtu.be).";
+      fieldErrors.video_url = formIssue("video_url.invalid");
     }
   }
 
@@ -392,7 +390,7 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   if (instagramRaw) {
     instagram = normalizeInstagram(instagramRaw);
     if (!instagram) {
-      fieldErrors.instagram = "Usá tu usuario (@nombre) o el link de Instagram.";
+      fieldErrors.instagram = formIssue("instagram.invalid");
     }
   }
 
@@ -400,19 +398,19 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   if (linkedinRaw) {
     linkedin = normalizeLinkedIn(linkedinRaw);
     if (!linkedin) {
-      fieldErrors.linkedin = "Pegá tu perfil (linkedin.com/in/…) o tu usuario.";
+      fieldErrors.linkedin = formIssue("linkedin.invalid");
     }
   }
 
   if (!consent) {
-    fieldErrors.consent = "Tenés que aceptar para enviar.";
+    fieldErrors.consent = formIssue("consent.required");
   }
 
   if (Object.keys(fieldErrors).length > 0 || !type || !avatar) {
     return {
       ok: false,
       fieldErrors,
-      message: "Revisá los campos marcados.",
+      issue: formIssue("validation.summary"),
     };
   }
 

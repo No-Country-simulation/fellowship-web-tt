@@ -1,12 +1,12 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
-Auditoría original: 31 de octubre de 2026. Actualización de etapa 1: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
+Auditoría original: 31 de octubre de 2026. Etapas 1 y 2 actualizadas: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
 
-**Estado actual: infraestructura implementada, integración pendiente.** La propuesta general de diccionarios locales tipados ES/PT-BR sin dependencias adicionales fue aprobada. Los componentes, las rutas, las validaciones, el envío y la apariencia siguen intactos. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva sus textos históricos como referencia.
+**Estado actual: infraestructura y errores semánticos implementados; formulario bilingüe pendiente.** Se preservan reglas, datos, navegación y composición visual. Solo los errores visibles consumen por ahora el catálogo ES neutro aprobado, mediante una adaptación de presentación. Las rutas y el consentimiento no cambian. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva sus textos históricos como referencia.
 
-## 0. Etapa 1 implementada — infraestructura sin conexión a la UI
+## 0. Etapa 1 — estado al cerrar la infraestructura
 
-Los módulos siguientes son puros y compartibles entre Server Components y Client Components. No contienen providers, hooks de navegación, detección automática, cookies ni persistencia. Ninguna página ni componente existente los importa todavía: **visitar `?lang=pt-BR` aún no traduce el formulario**.
+Los módulos siguientes son puros y compartibles entre Server Components y Client Components. No contienen providers, hooks de navegación, detección automática, cookies ni persistencia. Al cerrar etapa 1 ninguna página ni componente los importaba; etapa 2 conecta exclusivamente la presentación de errores en ES, como se detalla abajo. **Visitar `?lang=pt-BR` aún no traduce el formulario**.
 
 | Archivo | Implementación |
 | --- | --- |
@@ -65,7 +65,7 @@ El catálogo copia el consentimiento ES vigente íntegro y la propuesta PT del i
 
 Las propuestas PT-BR requieren revisión brasileña; también siguen pendientes el matiz de la pregunta sobre empleo, el footer y el destino del logo. La lista de países sigue siendo provisional. Implementar sus claves no equivale a aprobación editorial/legal. Al integrar las categorías se debe conservar el orden existente de `TESTIMONIAL_TYPES`/`TYPE_OPTIONS`, consultando el catálogo por ID; el orden de propiedades del diccionario no define opciones ni lógica de negocio.
 
-Para etapa 2 quedan preparados los catálogos, el acceso puro, los tipos, el formateo, los límites y los enlaces. Siguen pendientes el provider, el selector, la lectura de query desde la página, metadata/lang, el header, las traducciones visibles y la migración de errores a códigos. No se cambió la representación actual de errores ni sus comparaciones literales.
+La etapa 1 preparó catálogos, acceso puro, tipos, formateo, límites y enlaces. La migración de errores se completó en etapa 2. Siguen pendientes el provider, el selector, la lectura de query desde la página, metadata/lang, el header y el resto de las traducciones visibles.
 
 ### Verificación de esta etapa
 
@@ -81,19 +81,107 @@ Resultados del 1 de noviembre de 2026:
 
 La suite cubre locales válidos/ausentes/inválidos/repetidos, enlaces y encoding, 163 claves y estructura idéntica, placeholders, interpolación, constantes reales, categorías, países, consentimiento y fallback. La cobertura de claves usa el inventario histórico; no congela las traducciones propuestas, que podrán corregirse tras revisión conservando la referencia histórica.
 
-No se inicia navegador, servidor Next ni batería funcional del formulario, y no se ejecutan envíos ni escrituras externas. El plan de QA funcional de la sección 10 sigue pendiente para la integración.
+En etapa 1 no se inició navegador, servidor Next ni batería funcional del formulario, y no se ejecutaron envíos ni escrituras externas. El plan de QA funcional de la sección 10 sigue pendiente para la integración.
+
+## 0.b. Etapa 2 — incidencias semánticas y validaciones localizables
+
+### Contrato y archivos
+
+| Archivo | Cambio implementado |
+| --- | --- |
+| [lib/testimonials/issues.ts](../lib/testimonials/issues.ts), nuevo | `FormIssue`, `FormIssueCode` y constructor `formIssue`. Códigos derivados de las claves `form.errors.*`; parámetros derivados del contrato existente de interpolación. Sin importaciones runtime de catálogos. |
+| [parse.ts](../lib/testimonials/parse.ts) | `FieldErrors` asocia campos a incidencias, `ParseResult` devuelve `issue`. Mismas condiciones, límites y normalizadores; `validateCountry` y `validateImageFile` devuelven códigos. |
+| [form-validation.ts](../lib/testimonials/form-validation.ts) | Validación local por incidencias y reconciliación independiente de textos; exporta `ResolvedFormErrors`. |
+| [submit-state.ts](../lib/testimonials/submit-state.ts) | Estado de error serializable con `issue`, `fieldErrors` y `step`; se preservan `idle/error/success`. |
+| [actions.ts](../lib/testimonials/actions.ts) | Códigos de validación, extracto y fallos de guardado; captura de excepciones inesperadas con respuesta pública controlada. No recibe locale. |
+| [store.ts](../lib/testimonials/store.ts) | `SaveTestimonialResult` diferencia disponibilidad, upload y persistencia con códigos públicos. Sin cambios de operaciones, queries, reintentos o rollback. |
+| [lib/form-i18n/issues.ts](../lib/form-i18n/issues.ts), nuevo | `formatFormIssue` y `presentFormErrors`: localización segura después de reconciliar errores activos. Usa los catálogos y parámetros existentes, sin duplicarlos. |
+| [enviar-form.tsx](../components/enviar-form.tsx) | Adaptación mínima: llama al resolvedor con la respuesta original y luego proyecta errores a texto ES. Los componentes de campo siguen recibiendo strings. |
+| [enviar-fields.tsx](../components/enviar-fields.tsx) | Solo el callback `onInvalid` pasa a incidencias y el catch de crop emite `image.cropFailed`; misma lógica de recorte, preview, limpieza y foco. |
+| [form-errors.test.ts](../lib/testimonials/form-errors.test.ts), [fixtures](../lib/testimonials/form-errors.fixtures.ts), [server-errors.test.ts](../lib/testimonials/server-errors.test.ts), nuevos | Regresiones de validación, reconciliación, localización, acción y repositorio con dobles. |
+| [test-form-i18n.mjs](../scripts/test-form-i18n.mjs) | Ejecuta infraestructura y regresiones; compila en un temporal con alias locales y lo elimina al terminar. |
+
+Ejemplo del nuevo contrato público:
+
+```ts
+{
+  status: "error",
+  issue: { code: "validation.summary" },
+  fieldErrors: {
+    story: { code: "story.minLength", params: { min: 20 } }
+  },
+  step: 3
+}
+```
+
+El ejemplo numérico corresponde a `STORY_MIN_CHARS`; los productores usan esa constante, no el literal. La asociación al campo está en la clave de `FieldErrors`, sin duplicar un campo potencialmente contradictorio dentro de cada incidencia. Los mensajes no viajan en `SubmitState` ni en el resultado del repositorio.
+
+### Reconciliación, navegación y cambio futuro de idioma
+
+Se mantiene el objeto original de `useActionState`. `updateFormErrors` y `resolveFormErrors` siguen comparando referencias con `===`: una respuesta nueva, aunque tenga los mismos valores, no hereda los overrides de la anterior. Una propiedad propia con `undefined` sigue descartando solo ese error; una propiedad ausente conserva el error de servidor. `retired` y `pending` mantienen su efecto previo, incluidos los overrides locales que corresponden a esa respuesta.
+
+Se eliminó `server.message.trim().replace(/\.$/, "") === "Revisá los campos marcados"`. El resumen se identifica con **`server.issue.code === "validation.summary"`** y solo se oculta cuando ya no quedan errores de servidor activos/desconocidos. Los campos profesionales inactivos siguen filtrándose sin destruir valores o respuestas. `firstErrorStep`, las claves de campos, el orden DOM y la navegación al error conservan su función.
+
+La secuencia de presentación es:
+
+```ts
+const resolved = resolveFormErrors(state, validation, type, pending);
+const text = presentFormErrors(resolved, "es"); // puente temporal de etapa 2
+```
+
+El objeto `state` no se clona ni transforma para traducir. Las incidencias resueltas siguen disponibles para decisiones; la proyección de strings solo se usa al renderizar errores. En etapa 3 se reemplazará el ES fijo por el locale vigente: el mismo error ya visible, o una respuesta recibida después de cambiar idioma, se formateará de nuevo sin revalidar, reenviar ni borrar contenido. No se añade provider ni selector en esta etapa.
+
+**Cambio visible acotado:** los mensajes de error usan el ES neutro del catálogo ya aprobado («Revisa», «Ingresa», etc.); no se conserva otro catálogo de errores en voseo. El resto de títulos, pasos, categorías, controles, ayudas y éxito permanece sin traducir. Consentimiento, ubicación y obligatoriedad intactos.
+
+### Fallos públicos y diagnósticos
+
+- Revalidación integral → `validation.summary` y mapa de incidencias por campo.
+- Extracto/caption ausente → `submit.excerptFailed`.
+- Configuración/disponibilidad conocida → `submit.unavailable`.
+- Subida fallida → `submit.uploadFailed`.
+- Inserción fallida después del mismo manejo de colisiones → `submit.saveFailed`.
+- Excepción inesperada en la acción → `submit.unexpected`.
+- Fallo local de recorte → `image.cropFailed`. Los errores internos de Canvas no se muestran ni serializan.
+
+El repositorio ya no devuelve `error.message` ni nombres de variables internas. Los diagnósticos nuevos son marcadores fijos de fase, únicamente en servidor: no imprimen objetos `Error`, detalles arbitrarios del backend, nombres/paths de archivos o datos personales. La comparación técnica de `error.code === "23505"` conserva el reintento existente y no depende del idioma.
+
+`formatFormIssue` admite entradas desconocidas en la frontera de presentación: código desconocido, forma antigua con texto o parámetros inválidos producen el genérico seguro del idioma seleccionado. No se hace matching de frases antiguas. Se reutiliza `interpolateFormMessage`, capturando errores de parámetros para que no aparezcan excepciones ni placeholders en la UI. Los fallbacks de traducción conocidos a ES siguen siendo los de etapa 1.
+
+### Pruebas, compatibilidad y límites
+
+Antes de migrar producción se añadieron y ejecutaron 12 caracterizaciones contra el comportamiento original: **45/45** junto con las 33 pruebas de infraestructura. Después se adaptaron las expectativas a incidencias y se ampliaron los casos.
+
+Verificación final de etapa 2:
+
+- **74/74 pruebas**, 12 grupos: 33 de infraestructura, 21 de validación/reconciliación/localización y 20 de acción/repositorio; ninguna omitida, incluida la corrección puntual de notificación.
+- TypeScript (`pnpm.cmd exec tsc --noEmit --incremental false`) y ESLint (`pnpm.cmd run lint`): correctos.
+- `git diff --check`, whitespace de archivos nuevos y referencias locales de la documentación: correctos. Manifests, lockfile, rutas, labels globales y archivos fuera de la app sin cambios.
+- Build de producción (`pnpm.cmd run build`): correcto. La primera ejecución no pudo descargar DM Sans por la restricción de red; el reintento con acceso de red completó compilación, tipos y generación estática. No se cambiaron fuentes ni configuración para eludir esa verificación.
+- Se contrastaron con HEAD los nueve handlers de foco, navegación, validación de paso, categoría y envío: idénticos tras normalizar finales de línea.
+- Las pruebas de acción/repositorio ejecutan su fuente en una VM con imports explícitamente reemplazados. El entorno no suministra servicios reales ni `fetch`. Verifican tres intentos por colisión, corte ante otro código, rollback y payload/timestamp conservados usando operaciones falsas.
+- Se conserva incluso la diferencia previa de archivo de cero bytes: el cliente admite formato/extensión válida, mientras `readFile` del parser lo trata como ausente. No se armonizó introduciendo otra regla.
+
+Esta etapa no cubre una prueba de interfaz en navegador ni errores de transporte que ocurran antes de entrar a la Server Action. La captura general tampoco revierte operaciones ya terminadas ni añade reintentos automáticos. Los resultados `posted/skipped/failed` y las excepciones de la notificación secundaria conservan el éxito de un guardado ya confirmado; los fallos de parseo, validación, extracto, subida y persistencia siguen siendo errores.
+
+**Corrección puntual antes del cierre:** se revisó `notifyInboxNewTestimonial` solo en lectura. Su contrato es `Promise<DiscordPostStatus>`; los fallos de red se convierten normalmente en `failed`, pero no existe una captura global que garantice que nunca rechace. Se reprodujo que el catch general devolvía `submit.unexpected` tras guardar si la notificación lanzaba una excepción. Ahora esa fase tiene un catch propio, con el marcador fijo de servidor `Testimonial inbox notification failed unexpectedly`, sin datos personales ni detalles de la excepción. Las pruebas verifican throw/rechazo, éxito en los tres estados, un único guardado seguido de una única notificación y datos/payload intactos. No se añadieron reintentos ni se modificó el servicio de notificación.
+
+Para esta corrección pasaron las 74 pruebas, TypeScript, ESLint y `git diff --check`. No se repitió el build: el contrato de la acción, las dependencias y la composición de Next permanecen sin cambios; el build de etapa 2 registrado arriba sigue siendo la referencia.
+
+Para etapa 3 quedan pendientes provider/selector, query en la página, metadata/lang y traducción de todo el formulario, incluido el recorte y éxito. La prueba de foco con navegador, el cambio real de idioma durante una petición y los lectores de pantalla se harán al integrar esa UI. Las traducciones PT y la revisión editorial/legal del consentimiento siguen abiertas. No se cambiaron tablas, servicios, payloads, `FormData`, timestamps, generación de publicaciones, otras aplicaciones o `packages/ui`. No hubo envíos reales, lectura de credenciales ni operaciones Git de escritura.
 
 ## 1. Arquitectura aprobada y propuesta de integración
 
 Usar **diccionarios locales tipados, un contexto exclusivo del formulario y el parámetro `lang`**, con `/enviar` en español por defecto y `/enviar?lang=pt-BR` para portugués brasileño. Evitar una biblioteca y prefijos de ruta en esta primera entrega.
 
-Separar los mensajes de sus reglas: las validaciones y las respuestas de servidor deberían identificar incidencias mediante **códigos y parámetros**, que el formulario presenta en su idioma actual. La selección de idioma no debe remontar `EnviarForm`, reiniciar sus estados ni traducir datos de participantes.
+La separación de mensajes y reglas ya está implementada mediante **códigos y parámetros**. La presentación usa ES fijo hasta etapa 3. La selección futura de idioma no debe remontar `EnviarForm`, reiniciar sus estados ni traducir datos de participantes.
 
 Para el header exclusivo, mantener **un único root layout** y trasladar el chrome institucional a un route group público. La página `/enviar` puede componer su propio header y provider, sin detectar su pathname desde un componente global ni ocultar el navbar por CSS. El footer queda como decisión abierta del equipo.
 
 Las etiquetas ES acordadas se aplican únicamente al catálogo del formulario, sin tocar `TYPE_LABELS`, badges, enums o payloads compartidos con otras vistas.
 
-## 2. Arquitectura actual — hechos verificados
+## 2. Arquitectura auditada — referencia del 31 de octubre
+
+Esta sección conserva el diagnóstico previo a la implementación. El estado vigente de los errores y sus contratos está en la sección 0.b; las reglas y flujos descritos aquí se mantienen.
 
 Fuentes principales:
 
@@ -241,18 +329,18 @@ El wizard no muestra fechas localizadas: el consentimiento produce un ISO UTC de
 
 ### Errores generados en cliente y servidor
 
-Propuesta para la implementación, no cambio realizado:
+La propuesta original de los puntos 1–5 se completó en etapa 2 (sección 0.b). El punto 6 está preparado y probado a nivel de representación; falta conectarlo a la UI de etapa 3:
 
 1. Definir una incidencia serializable con `code` y parámetros controlados, manteniendo los campos y estados actuales. Ejemplo conceptual: código `story.minLength`, parámetro `min: 20`.
 2. Mantener las reglas, orden y normalizadores de cliente/parser. Cambiar solo cómo representan un mensaje, sin eliminar la doble validación.
 3. Preservar el objeto original de respuesta y el mecanismo `response/overrides/retired`. Traducir después de resolver errores, no clonando `state` antes de `resolveFormErrors`.
 4. Sustituir la comparación con «Revisá los campos marcados» por un código semántico de resumen de validación.
-5. Convertir fallos de infraestructura a códigos públicos acotados. `store.ts` actualmente puede devolver `lastError` de Supabase y un mensaje con un nombre de variable de configuración; no crear traducciones de mensajes arbitrarios por matching de texto.
+5. Convertir fallos de infraestructura a códigos públicos acotados. El `lastError` de Supabase y el mensaje con un nombre de variable detectados en la auditoría ya no se devuelven al cliente; no crear traducciones de mensajes arbitrarios por matching de texto.
 6. Hacer que los errores ya visibles cambien al nuevo idioma sin reenviar, perder valores ni borrar errores pendientes. Si cambia el idioma mientras se envía, el resultado se presenta en el idioma vigente al recibirlo.
 
 Con códigos independientes del idioma, la Server Action no necesita recibir el locale para redactar UI. Si se eligiese en cambio enviar `locale` y devolver strings traducidos desde servidor, habría que validarlo, compartir los mensajes y resolver los errores antiguos/de una petición en curso al cambiar idioma. Se considera menos robusto para este formulario.
 
-Esto afecta al **contrato de presentación de Server Actions locales**, no a Supabase, tablas, Storage, migraciones, payloads persistidos o publicación. Debe revisarse y aprobarse en la futura implementación; la auditoría no modifica ningún archivo de servidor.
+La etapa 2 cambia el **contrato de presentación de Server Actions locales**, no las operaciones de Supabase/Storage, tablas, migraciones, payloads persistidos o publicación. Los archivos de servidor modificados se enumeran en la sección 0.b.
 
 ## 6. Encabezado exclusivo y layouts
 
@@ -370,7 +458,7 @@ No deberían cambiar `lib/testimonials/types.ts`/labels globales, valores del li
 ### Etapas propuestas
 
 1. **Revisión del diagnóstico**: aprobar copy ES/PT, etiquetas y alcance; resolver footer/destino del logo y revisar autorización con el equipo. No bloquear la auditoría esperando esa decisión.
-2. **Catálogo y errores semánticos**: contrato de locales/mensajes, catálogos y parámetros ya implementados en etapa 1. Discriminantes de errores pendientes. Mantener límites, normalizadores y payload. Caracterizar con pruebas los casos de validación y overrides que cambien de representación.
+2. **Catálogo y errores semánticos, completados**: catálogos/parámetros de etapa 1 y discriminantes/reconciliación/localización de etapa 2 verificados con pruebas. Límites, normalizadores y payload conservados. Falta integrar el locale vigente en etapa 3.
 3. **Idioma en el mismo wizard**: provider/query, traducción de intro/campos/pasos/resumen/éxito/recorte, `lang`, metadata e invitación. Probar no desmontaje antes de cambiar el chrome.
 4. **Header aislado por arquitectura**: root común y grupo público, nuevo header del formulario, contrato de altura/foco y decisión de footer aplicada solo cuando esté aprobada. Comprobar URLs, 404 y ausencia de regresiones públicas.
 5. **QA y revisión humana**: fixtures temporales, respuestas simuladas y entorno de pruebas autorizado. Entregar capturas ES/PT, resultados y diferencias. Detenerse antes de commit/PR si se mantiene la restricción.
@@ -402,13 +490,13 @@ Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integr
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Estado de las propuestas**: query `lang` y diccionarios locales tipados sin dependencias adicionales aprobados; utilidades y catálogos implementados en etapa 1, sin integración. Provider, errores por códigos y distribución de layouts todavía pendientes. El copy PT y el consentimiento siguen sujetos a revisión humana.
+**Estado de las propuestas**: utilidades/catálogos de etapa 1 y errores semánticos de etapa 2 implementados sin dependencias adicionales. La UI solo consume los errores ES. Provider, selector, traducción completa y distribución de layouts pendientes. El copy PT y el consentimiento siguen sujetos a revisión humana.
 
 **Decisiones pendientes**: revisión brasileña de traducciones, autorización equivalente, footer, destino del logo y matiz editorial de la categoría de empleo. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
 No se verificó paridad pregunta por pregunta con Tally porque no se adjuntó su definición/URL. Para confirmar la sustitución completa más adelante hará falta contrastar esa referencia; no se inventa ni se declara cubierta aquí.
 
-No se hicieron envíos, consultas de datos de participantes, cambios de backend o pruebas de UI/producción. No se abrieron archivos `.env*` ni credenciales. No se ejecutaron operaciones Git de escritura. La auditoría original creó solo documentos; etapa 1 añade exclusivamente los módulos y pruebas de infraestructura descritos en la sección 0 y actualiza estos documentos.
+No se hicieron envíos, consultas de datos de participantes, cambios en servicios o pruebas de UI/producción. Se modificó exclusivamente el contrato de errores del código local de servidor; sus operaciones de persistencia se conservan. No se abrieron archivos `.env*` ni credenciales. El build puede cargarlos automáticamente según las reglas del proyecto, sin inspeccionar sus valores. No se ejecutaron operaciones Git de escritura. El alcance por etapa queda registrado en las secciones 0 y 0.b.
 
 ## 12. Fuentes técnicas consultadas
 
