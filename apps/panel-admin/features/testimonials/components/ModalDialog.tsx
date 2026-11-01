@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@repo/ui/utils";
 
-/** Botones y textareas habilitados. El mismo conjunto se usa para el foco inicial y la trampa de Tab. */
-const MODAL_FOCUSABLE = "button:not([disabled]), textarea:not([disabled])";
+/** Botones, resúmenes de desplegable y textareas habilitados. El mismo conjunto se usa para el foco inicial y la trampa de Tab. */
+const MODAL_FOCUSABLE = "button:not([disabled]), summary, textarea:not([disabled])";
 
 /**
  * Diálogo del panel: portal, foco en el primer control habilitado, Escape y clic afuera
@@ -16,12 +17,15 @@ export function ModalDialog({
   onClose,
   titleId,
   descriptionId,
+  className,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   titleId: string;
   descriptionId?: string;
+  /** Clases extra del panel. El ancho por defecto sigue siendo `max-w-lg`. */
+  className?: string;
   children: ReactNode;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -93,7 +97,7 @@ export function ModalDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/25 p-4"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -107,7 +111,10 @@ export function ModalDialog({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="flex max-h-[80vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-lg border border-border bg-card p-4 shadow-lg"
+        className={cn(
+          "flex max-h-[80vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-lg border border-border bg-card p-4 shadow-lg",
+          className,
+        )}
       >
         {children}
       </div>
