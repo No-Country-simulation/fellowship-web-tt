@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { createServer } from "node:net";
 import { basename, dirname, join, resolve } from "node:path";
@@ -13,7 +13,7 @@ const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const chromePath = process.argv[2] ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-const output = join(appDir, "docs/ui/assets/form-i18n");
+const output = join(appDir, "docs/ui/assets/form-layouts");
 const profile = await mkdtemp(join(tmpdir(), "testimonios-i18n-browser-"));
 async function freePort() {
   const server = createServer();
@@ -32,7 +32,7 @@ async function until(predicate, label) {
 const appPort = await freePort();
 const debugPort = await freePort();
 const origin = `http://127.0.0.1:${appPort}`;
-const server = spawn(process.execPath, [require.resolve("next/dist/bin/next"), "start", "--hostname", "127.0.0.1", "--port", String(appPort)], { cwd: appDir, windowsHide: true, stdio: "ignore" });
+const server = spawn(process.execPath, ["--import", new URL("./qa-public-fixture.mjs", import.meta.url).href, require.resolve("next/dist/bin/next"), "start", "--hostname", "127.0.0.1", "--port", String(appPort)], { cwd: appDir, windowsHide: true, stdio: "ignore" });
 const chrome = spawn(chromePath, ["--headless=new", `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`, "--disable-background-networking", "--disable-sync", "--no-first-run", "--no-default-browser-check", "about:blank"], { windowsHide: true, stdio: "ignore" });
 const errors = [];
 const checks = [];
@@ -43,6 +43,7 @@ const pausedPosts = [];
 let interceptedPosts = 0;
 let cdp;
 try {
+  const avatar = await readFile(join(appDir, "public/brand/logo-no-country.png"));
   await mkdir(output, { recursive: true });
   await until(async () => { try { return (await fetch(`${origin}/enviar`)).ok; } catch { return false; } }, "production server");
   await until(async () => { try { return (await fetch(`http://127.0.0.1:${debugPort}/json/version`)).ok; } catch { return false; } }, "Chrome CDP");
@@ -79,6 +80,9 @@ try {
         if (!Object.keys(request.headers).some(key => key.toLowerCase() === "next-action")) errors.push("Unexpected POST blocked");
         if (response) void fulfill(requestId, response).catch(error => errors.push(error.message));
         else pausedPosts.push(requestId);
+      } else if (new URL(request.url).pathname === "/_next/image" && request.url.includes("qa-avatar")) {
+        // Keep public screenshots synthetic and avoid Storage/image-service requests.
+        void cdp("Fetch.fulfillRequest", { requestId, responseCode: 200, responseHeaders: [{ name: "content-type", value: "image/png" }], body: avatar.toString("base64") }).catch(error => errors.push(error.message));
       } else {
         void cdp("Fetch.continueRequest", { requestId }).catch(error => errors.push(error.message));
       }
@@ -109,11 +113,25 @@ try {
     return value.result?.value;
   }
   async function viewport(width) { await cdp("Emulation.setDeviceMetricsOverride", { width, height: 1000, deviceScaleFactor: 1, mobile: false }); }
-  async function navigate(path) {
+  async function navigate(path, selector = "main form") {
     await cdp("Page.navigate", { url: origin + path });
-    await until(() => evaluate(expected => location.href === expected && document.readyState === "complete" && !!document.querySelector("main form"), origin + path), path);
+    await until(() => evaluate((expected, selector) => location.href === expected && document.readyState === "complete" && !!document.querySelector(selector), origin + path, selector), path);
     await evaluate(() => document.fonts.ready.then(() => true));
     await pause(150);
+  }
+  async function clientLink(selector, path) {
+    await evaluate(selector => { window.__qaDocument = document.documentElement; document.querySelector(selector).click(); }, selector);
+    await until(() => evaluate(path => location.pathname === path && !!document.querySelector("main"), path), `client navigation ${path}`);
+    await pause(200);
+    assert.equal(await evaluate(() => window.__qaDocument === document.documentElement), true, "same root document on navigation");
+  }
+  async function chromeCheck(form) {
+    assert.deepEqual(await evaluate(() => ({ headers: document.querySelectorAll("body > header").length, footers: document.querySelectorAll("body > footer").length, formHeaders: document.querySelectorAll("[data-form-header]").length, selectors: document.querySelectorAll("[data-form-language-select]").length, mains: document.querySelectorAll("main").length })), { headers: 1, footers: form ? 0 : 1, formHeaders: form ? 1 : 0, selectors: form ? 1 : 0, mains: 1 });
+    assert.equal(await evaluate(() => Math.abs(parseFloat(document.documentElement.style.getPropertyValue("--site-header-height")) - document.querySelector("body > header").getBoundingClientRect().height) < 1), true, "current header offset");
+    if (form) {
+      assert.equal(await evaluate(() => document.querySelector("[data-form-header]").lang === document.querySelector("main").lang && !document.querySelector("[data-form-header] a") && !document.querySelector("[data-form-header] nav")), true);
+    }
+    assert.equal(await evaluate(() => document.documentElement.lang), "es");
   }
   async function input(selector, value) {
     await evaluate((selector, value) => {
@@ -140,19 +158,33 @@ try {
   }
   const locale = () => evaluate(() => document.querySelector("main").lang);
   const next = async () => button(await locale() === "es" ? "Siguiente" : "Próximo");
-  const back = async () => button(await locale() === "es" ? "Atrás" : "Voltar");
+  const back = async () => { await button(await locale() === "es" ? "Atrás" : "Voltar"); await focusCheck(); };
   const step = () => evaluate(() => Number(document.querySelector("form h2").textContent.match(/\d+/)[0]));
   async function layout() {
-    for (const width of [375, 1440]) {
+    for (const width of [320, 375, 768, 1024, 1440]) {
       await viewport(width);
+      await pause(35);
       assert.equal(await evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `overflow at ${width}`);
-      assert.equal(await evaluate(() => [...document.querySelectorAll('main input,main select,main textarea,main button')].filter(el => el.getClientRects().length).every(el => { const r = el.getBoundingClientRect(); return r.left >= -1 && r.right <= document.documentElement.clientWidth + 1; })), true, `control overflow at ${width}`);
+      assert.equal(await evaluate(() => [...document.querySelectorAll('main input,main select,main textarea,main button,[data-form-header] select')].filter(el => el.getClientRects().length).every(el => { const r = el.getBoundingClientRect(); return r.left >= -1 && r.right <= document.documentElement.clientWidth + 1; })), true, `control overflow at ${width}`);
     }
+    await viewport(320);
+    await evaluate(() => document.documentElement.style.fontSize = "200%"); await pause(60);
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth && [...document.querySelectorAll('[data-form-header] img,[data-form-header] select')].every(el => el.getBoundingClientRect().right <= document.documentElement.clientWidth + 1)), true, "320px/200% font");
+    await evaluate(() => document.documentElement.style.removeProperty("font-size"));
+  }
+  async function focusCheck() {
+    assert.equal(await evaluate(() => {
+      const active = document.activeElement;
+      if (!document.querySelector("main").contains(active)) return false;
+      const rect = (active.closest("[data-field], label") ?? active).getBoundingClientRect();
+      const header = document.querySelector("[data-form-header]").getBoundingClientRect();
+      return rect.top >= header.bottom + 14 && rect.top < innerHeight;
+    }), true, "focused heading/control revealed below sticky header");
   }
   async function screenshot(name, width, modal = false) {
     await viewport(width); await pause(100);
     if (!modal) await evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    const clip = modal ? undefined : await evaluate(() => { const r = document.querySelector("main").getBoundingClientRect(); return { x: 0, y: 0, width: innerWidth, height: Math.ceil(r.bottom + scrollY), scale: 1 }; });
+    const clip = modal ? undefined : await evaluate(() => ({ x: 0, y: 0, width: innerWidth, height: document.documentElement.scrollHeight, scale: 1 }));
     const capture = await cdp("Page.captureScreenshot", { format: "png", captureBeyondViewport: !modal, ...(clip ? { clip } : {}) });
     await writeFile(join(output, name), Buffer.from(capture.data, "base64"));
   }
@@ -177,11 +209,57 @@ try {
   }
 
   await viewport(1440);
+  await navigate("/", "main h1");
+  await chromeCheck(false);
+  const homeMetadata = await evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]').content }));
+  assert.equal(homeMetadata.description, "Comparte tu experiencia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales.");
+  assert.equal(await evaluate(() => !!document.querySelector('main a[href="/t/historia-qa"]')), true, "synthetic published home card");
+  const publicSignature = () => evaluate(() => ({ header: document.querySelector("body > header").textContent, footer: document.querySelector("body > footer").textContent, links: [...document.querySelectorAll("body > header a,body > footer a")].map(el => [el.getAttribute("href"), el.getAttribute("target"), el.textContent]) }));
+  const publicChrome = await publicSignature();
+  await screenshot("home-1440.png", 1440);
+  await clientLink('main a[href="/enviar"]', "/enviar");
+  await until(() => evaluate(() => !!document.querySelector("main form")), "home to form");
+  await chromeCheck(true); await language("pt-BR");
+  await clientLink('main a[href="/"]', "/");
+  await until(() => evaluate(() => !!document.querySelector('body > footer')), "public layout restored");
+  await chromeCheck(false);
+  assert.deepEqual(await evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]').content })), homeMetadata, "public metadata restored after client locale mutation");
+  assert.deepEqual(await publicSignature(), publicChrome);
+  await clientLink('main a[href="/t/historia-qa"]', "/t/historia-qa");
+  await until(() => evaluate(() => document.querySelector("main h1")?.textContent === "Persona QA"), "public detail");
+  await chromeCheck(false);
+  const detailMetadata = await evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]').content }));
+  assert.equal(detailMetadata.title, "Persona QA · Testimonios · No Country");
+  assert.equal(detailMetadata.description, "Trabajar en equipo me ayudó a desarrollar mis habilidades.");
+  await screenshot("detail-1440.png", 1440);
+  await clientLink('main a[href="/enviar"]', "/enviar");
+  await until(() => evaluate(() => !!document.querySelector("main form")), "detail to form");
+  await language("pt-BR");
+  // The form has no direct detail link: exercise the browser's existing back entry.
+  await evaluate(() => history.back());
+  await until(() => evaluate(() => location.pathname === "/t/historia-qa" && !document.querySelector("[data-form-header]")), "form back to detail");
+  await chromeCheck(false);
+  await until(() => evaluate(() => document.title === "Persona QA · Testimonios · No Country"), "detail metadata restored");
+  assert.deepEqual(await evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]').content })), detailMetadata);
+  for (const path of ["/ruta-inexistente-qa", "/enviar/ruta-inexistente-qa", "/t/no-existe-qa"]) {
+    const result = await fetch(origin + path);
+    const html = await result.text();
+    assert.ok([200, 404].includes(result.status), "Next streamed/non-streamed 404");
+    assert.ok(/name="robots" content="noindex"/.test(html), "404 noindex");
+    await navigate(path, "main h1"); await chromeCheck(false);
+    assert.equal(await evaluate(() => document.querySelector("main h1").textContent), "Página no encontrada");
+    assert.ok(!await evaluate(() => document.title.includes("Compartilhe")));
+    await clientLink('main a[href="/"]', "/");
+    await until(() => evaluate(() => !!document.querySelector('main a[href="/enviar"]')), "404 return home");
+    await chromeCheck(false);
+  }
+  checks.push("single shared root; home/detail unchanged chrome and metadata; client navigation across layouts; unmatched/nested/missing-slug 404 chrome and noindex");
   for (const [query, expected] of [["", "es"], ["?lang=es", "es"], ["?lang=pt-BR", "pt-BR"], ["?lang=pt", "es"], ["?lang=pt-BR&lang=pt-BR", "es"], ["?lang=es&lang=pt-BR", "es"]]) {
     const html = await (await fetch(origin + "/enviar" + query)).text();
     const title = expected === "es" ? "Comparte tu testimonio · No Country" : "Compartilhe seu depoimento · No Country";
     assert.ok(html.includes(`<title>${title}</title>`), "initial SSR title");
     await navigate("/enviar" + query);
+    await chromeCheck(true);
     assert.equal(await locale(), expected);
     assert.equal(await evaluate(() => document.title), title);
     assert.equal(await evaluate(() => document.querySelectorAll('meta[name="description"]').length), 1);
@@ -191,8 +269,16 @@ try {
 
   await navigate("/enviar?source=qa&tag=a&tag=b#formulario");
   await layout();
+  await screenshot("form-es-1440.png", 1440);
+  await screenshot("form-es-375.png", 375);
+  await language("pt-BR"); await screenshot("form-pt-375.png", 375); await language("es");
+  await evaluate(() => document.querySelector('main a[href="/"]').focus());
+  await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
+  await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
+  assert.equal(await evaluate(() => document.activeElement.hasAttribute("data-form-language-select") && getComputedStyle(document.activeElement).outlineStyle !== "none"), true, "keyboard select keeps visible focus");
   await evaluate(() => { window.__qaOriginalForm = document.querySelector("form"); window.__qaHistoryLength = history.length; });
   await next();
+  await focusCheck();
   assert.equal(await evaluate(() => document.getElementById("type-error").textContent.trim()), "Elige el tipo de experiencia que quieres compartir.");
   await language("pt-BR");
   assert.equal(await evaluate(() => document.getElementById("type-error").textContent.trim()), "Escolha o tipo de experiência que deseja compartilhar.");
@@ -200,7 +286,7 @@ try {
   assert.equal(await evaluate(() => history.length === window.__qaHistoryLength && document.querySelector("form") === window.__qaOriginalForm), true);
   assert.deepEqual(await evaluate(() => ({ source: new URLSearchParams(location.search).get("source"), tags: new URLSearchParams(location.search).getAll("tag"), hash: location.hash })), { source: "qa", tags: ["a", "b"], hash: "#formulario" });
   await evaluate(() => document.querySelector('input[name="type"][value="first_job"]').click());
-  await next(); assert.equal(await step(), 2);
+  await next(); assert.equal(await step(), 2); await focusCheck();
   await input('input[name="full_name"]', "Persona QA");
   await input('select[name="country"]', "España");
   await next();
@@ -209,7 +295,6 @@ try {
   await language("es");
   assert.equal(await evaluate(() => document.querySelector('input[name="email"]').getAttribute("aria-invalid")), "false");
   assert.equal(await evaluate(() => document.querySelector('input[name="avatar"]').getAttribute("aria-invalid")), "true");
-  await screenshot("form-es-375.png", 375);
   await input('select[name="country"]', "__other_country__");
   await input('input[name="country"]', "País libre QA");
   await language("pt-BR");
@@ -232,6 +317,7 @@ try {
   await viewport(375); await file("avatar");
   assert.equal(await evaluate(() => document.querySelectorAll("[data-form-language-select]").length), 1);
   assert.equal(await evaluate(() => !!document.querySelector("main dialog [data-form-language-select]")), true);
+  assert.equal(await evaluate(() => document.querySelector("[data-form-header] select") === null), true, "no inert duplicate outside dialog");
   assert.equal(await evaluate(() => document.activeElement === document.querySelector("main dialog h2")), true, JSON.stringify(await evaluate(() => ({ active: document.activeElement.outerHTML.slice(0, 220), title: document.querySelector("main dialog h2").outerHTML, open: document.querySelector("main dialog").open }))));
   const accessible = await cdp("Accessibility.getFullAXTree");
   assert.ok(accessible.nodes.some(node => !node.ignored && node.role?.value === "combobox" && node.name?.value === "Idioma do formulário"));
@@ -251,12 +337,13 @@ try {
   assert.equal(await evaluate(() => document.querySelector('main dialog input[type="range"]').value), "1.8");
   await language("pt-BR"); await screenshot("crop-pt-375.png", 375, true);
   await confirmCrop();
+  assert.equal(await evaluate(() => !!document.querySelector("[data-form-header] [data-form-language-select]")), true, "selector returns to header");
   assert.equal(await evaluate(() => document.activeElement.name), "avatar");
   await evaluate(() => { window.__qaAvatarPreview = document.querySelector('input[name="avatar"]').closest("[data-field]").querySelector("img").src; });
   await language("es");
   assert.equal(await evaluate(() => document.querySelector('input[name="avatar"]').closest("[data-field]").querySelector("img").src === window.__qaAvatarPreview), true);
   checks.push("single selector operable in modal, crop/zoom/object URL identity, confirm and focus return");
-  await next(); assert.equal(await step(), 3);
+  await next(); assert.equal(await step(), 3); await focusCheck();
   await input('input[name="company"]', "Empresa QA");
   await input('input[name="role_achieved"]', "Desarrollo QA");
   const story = "Relato QA sin traducir.\nAprendí a trabajar con un equipo y resolver desafíos de desarrollo.";
@@ -282,21 +369,20 @@ try {
     }
     if (category === "simulation") assert.equal(await evaluate(() => document.querySelector('input[name="primary_role"]').value), "Rol sim QA");
   }
-  await next(); assert.equal(await step(), 4);
+  await next(); assert.equal(await step(), 4); await focusCheck();
   await input('input[name="video_url"]', "https://youtu.be/abcdefghijk");
   await input('input[name="instagram"]', "@persona.qa");
   await input('input[name="linkedin"]', "https://www.linkedin.com/in/persona-qa");
   await file("capture"); await confirmCrop(); await language("pt-BR");
   await layout(); await language("es"); await layout(); await language("pt-BR");
-  await next(); assert.equal(await step(), 5); await layout();
+  await next(); assert.equal(await step(), 5); await focusCheck(); await layout();
   assert.ok(await evaluate(() => [...document.querySelectorAll("form dd")].some(el => el.textContent === "Espanha")));
   await evaluate(() => document.querySelector('input[name="consent"]').click());
-  await screenshot("form-pt-1440.png", 1440);
   await language("es");
   await layout();
   assert.equal(await evaluate(() => document.querySelector('input[name="consent"]').checked), true);
   assert.equal(await evaluate(() => document.querySelector('input[name="consent"]').parentElement.querySelector("span").firstChild.textContent.trim()), "Acepto que No Country publique mi testimonio (nombre, foto y texto) en la galería y en Discord. El email no se muestra en público. El equipo lo revisa antes de publicarlo.");
-  checks.push("all five steps/three categories, retained professional data/story/links, translated country label, exact ES consent, responsive 375/1440");
+  checks.push("all five steps/three categories, retained professional data/story/links, translated country label, exact ES consent, responsive 320/375/768/1024/1440 and 200% font");
 
   response = null; await button("Enviar testimonio");
   await until(() => pausedPosts.length === 1, "intercepted pending action");
@@ -307,6 +393,7 @@ try {
   await until(() => evaluate(() => !!document.querySelector('[role="alert"]')), "localized server response");
   assert.ok(await evaluate(() => document.querySelector('[role="alert"]').textContent.includes("Escreva pelo menos 20 caracteres.")));
   await button("Corrigir os dados"); assert.equal(await step(), 3);
+  await focusCheck();
   assert.equal(await evaluate(() => document.activeElement.name), "company");
   await input('input[name="company"]', "Empresa QA editada"); await language("es");
   assert.equal(await evaluate(() => document.querySelector('input[name="company"]').getAttribute("aria-invalid")), "false");
@@ -320,9 +407,18 @@ try {
   await until(() => evaluate(() => !document.querySelector("main form") && document.querySelector("main h1")?.textContent.trim() === "Gracias por tu testimonio"), "fixture success");
   assert.equal(await evaluate(() => document.querySelectorAll("main h1").length), 1);
   assert.equal(await evaluate(() => document.activeElement === document.querySelector("main h1")), true);
+  await focusCheck();
+  assert.equal(await evaluate(() => getComputedStyle(document.activeElement).outlineStyle), "none", "no oversized outline on static success heading");
   assert.equal(await evaluate(() => document.querySelectorAll("[data-form-language-select]").length), 1);
   await layout();
-  await screenshot("success-es-1440.png", 1440);
+  // Regression: copied feedback is tied to the current URL and resets even on ES → PT → ES.
+  await button("Copiar enlace");
+  assert.equal(await evaluate(() => navigator.clipboard.readText()), origin + "/enviar?lang=es");
+  assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Enlace copiado")));
+  await language("pt-BR");
+  assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar link")));
+  await language("es");
+  assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar enlace")));
   await language("pt-BR");
   await layout();
   const invite = await evaluate(() => document.querySelector('main a[href*="/enviar?lang="]').href);
@@ -330,6 +426,9 @@ try {
   await button("Copiar link");
   assert.equal(await evaluate(() => navigator.clipboard.readText()), invite);
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Link copiado")));
+  await language("es");
+  assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar enlace")));
+  checks.push("clipboard regression: ES copy → PT normal → ES normal; PT copy → ES normal; current URL copied only on explicit click");
   const payloads = await evaluate(() => window.__qaPayloads);
   assert.equal(payloads.length, 2); assert.equal(interceptedPosts, 2);
   for (const payload of payloads) {
@@ -345,7 +444,7 @@ try {
   assert.equal(await evaluate(() => localStorage.length), 0);
   assert.deepEqual(errors, []);
   checks.push("reload preserves only locale, no draft storage, no browser/hydration errors");
-  const report = { result: "PASS", checks, interceptedPosts, realSubmissions: 0, screenshots: ["form-es-375.png", "crop-pt-375.png", "form-pt-1440.png", "success-es-1440.png"], browserErrors: errors };
+  const report = { result: "PASS", checks, interceptedPosts, realSubmissions: 0, publicData: "synthetic fixture, external server fetch blocked", screenshots: ["form-es-1440.png", "form-es-375.png", "form-pt-375.png", "crop-pt-375.png", "home-1440.png", "detail-1440.png"], browserErrors: errors };
   await writeFile(join(output, "qa-results.json"), JSON.stringify(report, null, 2) + "\n");
   console.log(JSON.stringify(report));
 } finally {

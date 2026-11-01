@@ -149,7 +149,7 @@ export function CaptureCropDialog({
             ref={titleRef}
             id={titleId}
             tabIndex={-1}
-            className="text-heading-3 text-text-primary"
+            className="text-heading-3 text-text-primary focus:outline-none"
           >
             {copy.title}
           </h2>

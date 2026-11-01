@@ -1,8 +1,8 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
-Auditoría original: 31 de octubre de 2026. Etapas 1–3 actualizadas: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
+Auditoría original: 31 de octubre de 2026. Etapas 1–4 actualizadas: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
 
-**Estado actual: integración bilingüe ES/PT-BR implementada; pendiente de revisión visual y editorial humana antes del lanzamiento.** Se preservan reglas, datos, navegación de cinco pasos y composición visual. Navbar y footer institucionales permanecen. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva los textos históricos; los catálogos existentes alimentan ahora todo el árbol propio del formulario.
+**Estado actual: etapas 1–4 implementadas; pendiente de revisión visual humana y revisión editorial/legal antes del lanzamiento.** El formulario ES/PT-BR tiene header propio y conserva reglas, datos y navegación de cinco pasos. Home y fichas conservan su navbar/footer mediante un grupo público. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva los textos históricos; los catálogos existentes alimentan todo el árbol propio del formulario. Cada sección 0 registra el cierre de su etapa; las secciones 1–12 conservan el diagnóstico y propuestas originales salvo sus estados actualizados.
 
 ## 0. Etapa 1 — estado al cerrar la infraestructura
 
@@ -234,6 +234,75 @@ Evidencia reproducible: [qa-results.json](./ui/assets/form-i18n/qa-results.json)
 La integración está implementada y verificada técnicamente; **no equivale a revisión visual humana, revisión brasileña definitiva o aprobación legal del consentimiento**. Tampoco es certificación con lectores de pantalla reales. Los errores de transporte previos a la acción y la experiencia del picker nativo de cada sistema siguen fuera de los dobles empleados.
 
 La etapa 4 reutilizará el mismo selector en el header simplificado y resolverá la composición de layouts/route groups y el footer. Esta entrega conserva navbar/footer, no persiste borradores, no añade navegación por indicadores ni edición del resumen y no cambia backend, servicios, otras apps o `packages/ui`. No incorpora dependencias ni operaciones Git de escritura.
+
+## 0.d. Etapa 4 — header y layouts
+
+### Archivos y composición final
+
+| Archivo | Cambio |
+| --- | --- |
+| [app/layout.tsx](../app/layout.tsx) | Root único: HTML/body flex de altura mínima `100dvh`, DM Sans, estilos globales y metadata general; retira solamente imports y montaje del chrome institucional. |
+| [app/(public)/layout.tsx](../app/(public)/layout.tsx), nuevo | Compone `SiteHeader`, children y `SiteFooter` en un fragmento, sin wrapper adicional. |
+| `app/page.tsx` → `app/(public)/page.tsx`; `app/t/[slug]/page.tsx` → `app/(public)/t/[slug]/page.tsx` | Movidos íntegros: mismas consultas, metadata, `force-dynamic`, componentes y URLs. |
+| [app/not-found.tsx](../app/not-found.tsx), [app/(public)/not-found.tsx](../app/(public)/not-found.tsx), nuevos | El primero compone el layout público para URLs no resueltas; el segundo reutiliza `PageShell` y hereda ese layout para `notFound()` de una ficha. Un header/footer y un main en ambos casos. |
+| [app/enviar/page.tsx](../app/enviar/page.tsx) | Mismo Suspense y provider por query; agrega `FormHeader` antes de `EnviarExperience`. Metadata localizada intacta. |
+| [form-header.tsx](../components/form-header.tsx), [form-header.module.css](../components/form-header.module.css), nuevos | Logo oficial no navegable y selector existente; idioma local, tokens y altura responsive observada. |
+| [enviar-experience.tsx](../components/enviar-experience.tsx), [form-language-select.tsx](../components/form-language-select.tsx) | Retira selector del contenido y su margen provisional. No añade otra instancia ni cambia la API. |
+| [enviar-form.tsx](../components/enviar-form.tsx) | `focusAndReveal` mide `[data-form-header]`; elimina outline solo del encabezado estático de paso/éxito y asocia feedback de copia a la URL actual. No cambia handlers de pasos, validación o envío. |
+| [capture-crop-dialog.tsx](../components/capture-crop-dialog.tsx) | Solo elimina outline del título estático enfocado; portal, procesamiento y manejo de foco permanecen. |
+| [qa-form-i18n.mjs](../scripts/qa-form-i18n.mjs), [qa-public-fixture.mjs](../scripts/qa-public-fixture.mjs) nuevo | Amplía QA existente con rutas/layouts, responsive, foco y regresión de copia; fixture precargado solo en servidor QA, sin importación desde la aplicación. |
+| Documentación UI | Crea `ui/components/form-header.md`. Modifica `ui/README.md` y fichas `form-language-select.md`, `capture-crop-dialog.md`, `site-header.md`, `site-footer.md`, `gallery-hero.md`, `gallery-hero-carousel.md`, `testimonial-detail.md` y `testimonials-gallery.md`. Evidencias nuevas: seis PNG y `qa-results.json` en `ui/assets/form-layouts/`, enlazados abajo. |
+
+```text
+app/layout.tsx  (único HTML/body, fuente, estilos y metadata general)
+├── (public)/layout.tsx → SiteHeader + página + SiteFooter
+│   ├── page.tsx → /
+│   ├── t/[slug]/page.tsx → /t/[slug]
+│   └── not-found.tsx → PageShell 404, chrome heredado
+├── enviar/page.tsx → Suspense → FormLocaleProvider
+│   ├── FormHeader → logo + único FormLanguageSelect
+│   └── EnviarExperience → main → EnviarForm / éxito
+└── not-found.tsx → PublicLayout + PublicNotFound (URLs no resueltas)
+```
+
+### Header, portal, foco y copia
+
+`/enviar` no monta navbar/footer institucionales. No hay detección de pathname para elegir chrome, CSS para ocultarlo, segundo root layout o navegación por locale. El logo conserva alt, proporción y asset, sin enlace. «Volver al inicio» permanece en introducción y éxito. Header sticky con borde sutil, altura mínima de 4rem y contenedor alineado al formulario. La etiqueta del selector queda visualmente oculta en el header móvil conservando su nombre accesible; es visible en desktop y modal. Al ampliar texto puede envolver y crecer.
+
+El provider conserva responsabilidad y posición, sin DOM extra. Cambiar idioma conserva identidad del formulario, datos, errores, previews, archivos, paso y consentimiento. El único selector se porta al host existente del recorte y desaparece del header; vuelve al cerrar. Se comprobaron original object URL, zoom, posición, foco inicial, Tab/Shift+Tab y retorno al input.
+
+Un `ResizeObserver` publica `--site-header-height` y limpia la variable al desmontarse. La navegación pública conserva su observador y estilos sin cambios. `focusAndReveal` usa `[data-form-header]` en lugar de `body > header`; sigue descontando altura real más 16px. Paso, éxito y título del recorte mantienen foco, semántica y `tabIndex={-1}`, con `focus:outline-none` acotado a esos encabezados estáticos. Los controles interactivos mantienen sus indicadores de teclado.
+
+El estado de copia registra `{ url, copied }`. Cambiar la URL reinicia el feedback durante render, también ES → PT → ES antes del plazo; no se remonta `SuccessCard` ni `EnviarForm`. Se limpia el timeout al copiar de nuevo, cambiar de URL o desmontar. Una respuesta asíncrona solo marca como copiada la misma URL. Se conserva el plazo de dos segundos y el formato de invitación.
+
+### Rutas, metadata y 404
+
+Home y ficha mantienen los archivos originales movidos íntegros, sin segmentos nuevos en las URLs ni wrappers DOM. `/enviar` conserva SSR localizado y sincronización cliente. Los enlaces existentes formulario → home y home/ficha → formulario, y Atrás formulario → ficha, restauran metadata y chrome públicos; no permanece la descripción PT. HTML sigue en ES; header, main y modal del formulario declaran su idioma vigente.
+
+Se comprobaron `/ruta-inexistente-qa`, `/enviar/ruta-inexistente-qa` y `/t/no-existe-qa`: un header/footer institucional, un main, retorno al inicio y `noindex`. Diferencia deliberada: el 404 nativo inglés se reemplaza por «Página no encontrada» con `PageShell` y tokens existentes. Next conserva su semántica de 404 no transmitido/200 transmitido con `noindex`. El 404 raíz compone el chrome explícitamente porque una URL no resuelta no entra al route group.
+
+### Verificación y evidencias
+
+- Suite i18n/errores: **75/75**, 12 grupos, sin omitidas. TypeScript, ESLint, build de producción y `git diff --check` correctos; mismas URLs, con home, formulario y ficha dinámicos. Se verificaron whitespace de archivos nuevos y enlaces locales de docs. Se retiró un `validator.ts` generado de `.next/dev/types` que apuntaba a ubicaciones previas, sin cambiar `tsconfig`.
+- Chrome de producción: ambos idiomas, cinco pasos, tres categorías, **320/375/768/1024/1440px**, fuente al **200% en 320px**, sin overflow horizontal. Datos profesionales, enlaces, archivos JPEG y consentimiento conservados.
+- Foco: selector con nombre accesible e indicador de teclado; avance/retroceso, error y corrección de servidor revelados bajo sticky; recorte con selector único, ciclo de Tab y retorno; éxito con un H1 enfocado sin outline de bloque completo.
+- Regresión de copia sobre el componente real: copiar ES → PT normal → ES normal; copiar PT → ES normal. Portapapeles igual a la URL copiada, sin otro envío al cambiar idioma/copiar.
+- Dos POST interceptados **antes de Next**, error/éxito simulados con cambios durante pending; mismo FormData y un POST por intento. El servidor QA usa consulta pública sintética y bloquea otros fetch externos; la imagen de participante se sustituye por logo local. Sin datos reales, Server Actions, Storage, webhooks ni escrituras externas.
+- Sin errores de navegador/hidratación ni dependencias nuevas. Servidor/Chrome propios se cierran y perfil temporal se elimina. Evidencia reproducible: [qa-results.json](./ui/assets/form-layouts/qa-results.json). Capturas de etapa 3 conservadas como referencia histórica.
+
+| Captura | Evidencia |
+| --- | --- |
+| [Formulario ES, escritorio](./ui/assets/form-layouts/form-es-1440.png) | Header propio y selector, sin footer. |
+| [Formulario ES, móvil](./ui/assets/form-layouts/form-es-375.png) | Fila compacta y contenido original. |
+| [Formulario PT-BR, móvil](./ui/assets/form-layouts/form-pt-375.png) | Mismo header y wizard localizado. |
+| [Recorte PT-BR, móvil](./ui/assets/form-layouts/crop-pt-375.png) | Selector en diálogo y zoom conservado. |
+| [Home](./ui/assets/form-layouts/home-1440.png), [ficha](./ui/assets/form-layouts/detail-1440.png) | Dos vistas de comparación con chrome institucional completo; datos sintéticos. |
+
+### Pendientes antes del lanzamiento
+
+Etapa detenida para revisión visual humana. Falta validar con lectores de pantalla reales, Safari/Firefox y zoom real del navegador; texto al 200% no sustituye esas comprobaciones. Traducciones PT-BR y consentimiento siguen pendientes de revisión editorial/legal. **Cualquier información legal obligatoria adicional necesita definición del equipo antes del lanzamiento**; no se inventaron textos legales o enlaces de privacidad. El logo queda no navegable en esta versión. Una recarga o salida sigue perdiendo el borrador en memoria.
+
+No se modificaron backend, Supabase, Storage, migraciones, consentimiento, validaciones, payloads, publicaciones, panel, `packages/ui`, catálogos ni dependencias. No se inspeccionaron `.env*` o credenciales ni se hicieron commit, push, merge o PR.
 
 ## 1. Arquitectura aprobada e integración
 
@@ -526,7 +595,7 @@ No deberían cambiar `lib/testimonials/types.ts`/labels globales, valores del li
 1. **Revisión del diagnóstico**: aprobar copy ES/PT, etiquetas y alcance; resolver footer/destino del logo y revisar autorización con el equipo. No bloquear la auditoría esperando esa decisión.
 2. **Catálogo y errores semánticos, completados**: catálogos/parámetros de etapa 1 y discriminantes/reconciliación/localización de etapa 2 verificados con pruebas. Límites, normalizadores y payload conservados. Falta integrar el locale vigente en etapa 3.
 3. **Idioma en el mismo wizard, implementado**: provider/query, traducción de intro/campos/pasos/resumen/éxito/recorte, `lang`, metadata e invitación; verificación de no desmontaje en Chrome. Pendiente revisión visual y editorial humana.
-4. **Header aislado por arquitectura**: root común y grupo público, nuevo header del formulario, contrato de altura/foco y decisión de footer aplicada solo cuando esté aprobada. Comprobar URLs, 404 y ausencia de regresiones públicas.
+4. **Header aislado por arquitectura, implementado**: root común y grupo público, header exclusivo del formulario sin footer institucional, altura/foco, URLs, 404 y metadata comprobados. Ver sección 0.d; pendiente revisión visual humana.
 5. **QA y revisión humana**: fixtures temporales, respuestas simuladas y entorno de pruebas autorizado. Entregar capturas ES/PT, resultados y diferencias. Detenerse antes de commit/PR si se mantiene la restricción.
 
 ### Matriz futura de QA
@@ -556,9 +625,9 @@ Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integr
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Estado de las propuestas**: etapas 1–3 implementadas sin dependencias adicionales. La UI propia del formulario consume los catálogos ES/PT-BR, con selector, query, metadata e idioma accesible. La distribución de layouts, header simplificado y footer pertenecen a etapa 4. Revisión visual, copy PT y consentimiento siguen sujetos a revisión humana.
+**Estado de las propuestas**: etapas 1–4 implementadas sin dependencias adicionales. UI ES/PT-BR, selector, query, metadata, idioma accesible y header/layouts separados. Revisión visual, copy PT y consentimiento siguen sujetos a revisión humana.
 
-**Decisiones pendientes**: revisión brasileña de traducciones, autorización equivalente, footer, destino del logo y matiz editorial de la categoría de empleo. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
+**Decisiones pendientes**: revisión brasileña, autorización equivalente, información legal adicional y matiz editorial de empleo. En esta versión se aprobó retirar el footer institucional del formulario y dejar su logo sin enlace. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
 No se verificó paridad pregunta por pregunta con Tally porque no se adjuntó su definición/URL. Para confirmar la sustitución completa más adelante hará falta contrastar esa referencia; no se inventa ni se declara cubierta aquí.
 

@@ -70,7 +70,7 @@ const TYPE_ICONS = {
 function focusAndReveal(control: HTMLElement | null) {
   if (!control) return;
   control.focus({ preventScroll: true });
-  const header = document.querySelector<HTMLElement>("body > header");
+  const header = document.querySelector<HTMLElement>("[data-form-header]");
   const headerHeight = header?.getBoundingClientRect().height ?? 0;
   const anchor = control.closest<HTMLElement>("[data-field], label") ?? control;
   window.scrollTo({
@@ -924,7 +924,7 @@ function StepProgress({ step, headingRef }: {
   const steps = getFormMessages(locale).form.steps;
   return (
     <div>
-      <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary">
+      <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary focus:outline-none">
         {t("form.progress", { step, total: STEPS, title: steps[STEP_KEYS[step - 1]].title })}
       </h2>
       {/* El h2 enfocado comunica el progreso; los círculos son solo visuales, sin barra duplicada. */}
@@ -962,8 +962,16 @@ function StepProgress({ step, headingRef }: {
 function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
   const { locale, t } = useFormLocale();
   const inviteUrl = new URL(buildFormHref(locale), baseInviteUrl).toString();
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState({ url: inviteUrl, copied: false });
+  const copyTimer = useRef<number | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Reset on URL changes during render, including ES → PT → ES before the timeout.
+  if (copyState.url !== inviteUrl) setCopyState({ url: inviteUrl, copied: false });
+
+  useEffect(() => () => {
+    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+  }, [inviteUrl]);
 
   useEffect(() => {
     focusAndReveal(headingRef.current);
@@ -972,17 +980,20 @@ function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
   async function copyInviteLink() {
     try {
       await navigator.clipboard.writeText(inviteUrl);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      setCopyState(current => current.url === inviteUrl ? { url: inviteUrl, copied: true } : current);
+      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => {
+        setCopyState(current => current.url === inviteUrl ? { url: inviteUrl, copied: false } : current);
+      }, 2000);
     } catch {
-      setCopied(false);
+      setCopyState(current => current.url === inviteUrl ? { url: inviteUrl, copied: false } : current);
     }
   }
 
   return (
     <div className="mt-lg rounded-card border border-border bg-card p-md sm:p-lg">
       <p className="text-overline text-accent-cyan">{t("form.success.eyebrow")}</p>
-      <h1 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+      <h1 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary focus:outline-none sm:text-3xl">
         {t("form.success.title")}
       </h1>
       <p className="mt-sm text-body text-text-secondary">
@@ -1005,7 +1016,7 @@ function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
         </p>
         <div className="mt-md flex flex-col gap-sm sm:flex-row sm:flex-wrap">
           <Button type="button" variant="gradient" className="min-h-11 px-sm" onClick={copyInviteLink}>
-            {copied ? t("form.success.copied") : t("form.success.copy")}
+            {copyState.copied ? t("form.success.copied") : t("form.success.copy")}
           </Button>
           <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>
             {t("form.navigation.home")}

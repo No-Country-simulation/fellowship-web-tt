@@ -10,7 +10,7 @@ export function FormLanguageSelect() {
   const { locale, t, setLocale, selectorHost } = useFormLocale();
   const id = useId();
   const field = (
-    <div className="mb-sm flex min-w-0 justify-end" lang={locale}>
+    <div className="flex min-w-0 justify-end" lang={locale}>
       <label htmlFor={id} className="flex min-w-0 flex-wrap items-center justify-end gap-xs text-body-small text-text-secondary">
         <span>{t("form.language.label")}</span>
         <select

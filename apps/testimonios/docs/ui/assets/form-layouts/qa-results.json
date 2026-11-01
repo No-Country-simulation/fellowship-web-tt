@@ -1,0 +1,25 @@
+{
+  "result": "PASS",
+  "checks": [
+    "single shared root; home/detail unchanged chrome and metadata; client navigation across layouts; unmatched/nested/missing-slug 404 chrome and noindex",
+    "SSR/query/metadata: valid, absent, invalid and repeated locales; hydration",
+    "same form identity, local errors/partial corrections, country values/free text, URL/hash/history",
+    "single selector operable in modal, crop/zoom/object URL identity, confirm and focus return",
+    "all five steps/three categories, retained professional data/story/links, translated country label, exact ES consent, responsive 320/375/768/1024/1440 and 200% font",
+    "clipboard regression: ES copy → PT normal → ES normal; PT copy → ES normal; current URL copied only on explicit click",
+    "pending locale changes with intercepted error/success, partial server corrections and focus, unchanged actual FormData, one POST per attempt, localized success/invite/clipboard",
+    "reload preserves only locale, no draft storage, no browser/hydration errors"
+  ],
+  "interceptedPosts": 2,
+  "realSubmissions": 0,
+  "publicData": "synthetic fixture, external server fetch blocked",
+  "screenshots": [
+    "form-es-1440.png",
+    "form-es-375.png",
+    "form-pt-375.png",
+    "crop-pt-375.png",
+    "home-1440.png",
+    "detail-1440.png"
+  ],
+  "browserErrors": []
+}

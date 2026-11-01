@@ -1,0 +1,51 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-base);
+}
+
+.row {
+  display: flex;
+  min-width: 0;
+  min-height: 4rem;
+  max-width: 51rem;
+  margin-inline: auto;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.logo {
+  width: 6rem;
+  height: auto;
+  max-width: 100%;
+  flex: none;
+}
+
+.row > div { flex: 1 1 10rem; min-width: 0; max-width: 100%; margin-left: auto; }
+
+/* Keep the native select's accessible label without adding a second mobile row.
+ * The portal leaves this scope, so the crop dialog keeps its visible label. */
+@media (max-width: 767px) {
+  .row label > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .row { padding-inline: var(--spacing-md); }
+  .logo { width: 8.9375rem; }
+}
