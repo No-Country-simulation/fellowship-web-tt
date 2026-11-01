@@ -35,6 +35,8 @@ import { CaptureCropDialog } from "@/components/capture-crop-dialog";
 
 ## Notas
 
+- Confirmar conserva la variante compartida pero aplica `form-controls.module.css`: mezcla local de 55% marca y 45% base en los extremos del degradado, con foco cyan. Texto mínimo rasterizado 6,66:1 en QA ES/PT, incluyendo hover. Cancelar, slider y procesamiento conservan su comportamiento. Ver [método y evidencia](../../form-i18n-audit.md#0f-corrección-local-de-contraste).
+
 - Requiere `FormLocaleProvider`. Título, descripción, controles, alt, instrucciones y `lang` siguen el locale vigente. El diálogo registra un host para el único selector de idioma, que se mueve aquí por portal mientras el exterior es inerte. La guarda de Tab incluye `select`; cambiar idioma conserva instancia, zoom, posición, object URL y refs. Véase [FormLanguageSelect](./form-language-select.md).
 
 - `react-easy-crop` solo marca el recuadro (arrastrar y zoom) y devuelve los píxeles. El JPG lo recorta `lib/testimonials/prepare-image.ts` con canvas: 1080×608 (16:9) la testimonial, 720×720 el perfil.

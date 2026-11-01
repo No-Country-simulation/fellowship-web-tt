@@ -18,7 +18,7 @@ export function FormLanguageSelect() {
           data-form-language-select=""
           value={locale}
           onChange={event => setLocale(normalizeFormLocale(event.target.value))}
-          className="min-h-11 max-w-full rounded-md border border-border bg-bg-base px-sm text-body text-text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
+          className="min-h-11 max-w-full rounded-md border border-text-muted bg-bg-base px-sm text-body text-text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
         >
           <option value="es" lang="es">{t("form.language.es")}</option>
           <option value="pt-BR" lang="pt-BR">{t("form.language.ptBR")}</option>

@@ -10,6 +10,7 @@ import {
 } from "@/lib/testimonials/prepare-image";
 import { cn } from "@/lib/utils";
 import { useFormLocale } from "./form-locale-provider";
+import controls from "./form-controls.module.css";
 
 type CropKind = "capture" | "avatar";
 
@@ -213,6 +214,7 @@ export function CaptureCropDialog({
           <Button
             type="button"
             variant="gradient"
+            className={controls.primary}
             disabled={!area || confirming}
             onClick={() => {
               if (area && !confirming && !confirmingRef.current && !closingRef.current) {

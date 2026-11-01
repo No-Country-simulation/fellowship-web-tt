@@ -49,6 +49,7 @@ import {
   type TestimonialType,
 } from "@/lib/testimonials/types";
 import { cn } from "@/lib/utils";
+import controls from "./form-controls.module.css";
 
 import {
   Field,
@@ -368,7 +369,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                   aria-hidden="true"
                   className={cn(
                     "flex size-5 shrink-0 items-center justify-center rounded-full md:absolute md:top-md md:right-md",
-                    checked ? "bg-brand-gradient" : "border border-border",
+                    checked ? "bg-brand-gradient" : "border border-text-muted",
                   )}
                 />
               </label>
@@ -892,7 +893,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             type="button"
             variant="gradient"
             size="lg"
-            className={step === 1 ? "h-auto min-h-11 w-full max-w-full px-md whitespace-normal sm:w-auto" : "h-auto min-h-11 max-w-full px-md whitespace-normal"}
+            className={cn(controls.primary, step === 1 ? "h-auto min-h-11 w-full max-w-full px-md whitespace-normal sm:w-auto" : "h-auto min-h-11 max-w-full px-md whitespace-normal")}
             onClick={goNext}
           >
             {t("form.navigation.next")}
@@ -903,7 +904,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             type="submit"
             variant="gradient"
             size="lg"
-            className="h-auto min-h-11 max-w-full px-sm whitespace-normal sm:px-md"
+            className={cn(controls.primary, "h-auto min-h-11 max-w-full px-sm whitespace-normal sm:px-md")}
             disabled={pending}
           >
             {pending ? t("form.submit.pending") : t("form.submit.label")}
@@ -1015,7 +1016,7 @@ function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
           </a>
         </p>
         <div className="mt-md flex flex-col gap-sm sm:flex-row sm:flex-wrap">
-          <Button type="button" variant="gradient" className="min-h-11 px-sm" onClick={copyInviteLink}>
+          <Button type="button" variant="gradient" className={cn(controls.primary, "min-h-11 px-sm")} onClick={copyInviteLink}>
             {copyState.copied ? t("form.success.copied") : t("form.success.copy")}
           </Button>
           <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>

@@ -1,0 +1,18 @@
+/* Form-only CTA. Both brand stops are mixed with 45% of the existing base.
+ * Explicit sRGB interpolation keeps luminance bounded by the lighter stop;
+ * white text has >= 6.16:1 across the whole gradient before hover compositing.
+ * Global tokens and the shared gradient variant remain unchanged. */
+.primary {
+  background-color: var(--bg-surface-3);
+  background-image: linear-gradient(
+    135deg in srgb,
+    color-mix(in srgb, var(--brand-pink) 55%, var(--bg-base)),
+    color-mix(in srgb, var(--brand-cyan) 55%, var(--bg-base))
+  );
+}
+
+.primary:focus-visible,
+.field:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}

@@ -16,4 +16,6 @@ Un diálogo nativo vuelve inerte la UI exterior. Mientras `CaptureCropDialog` es
 
 No usar el locale como key. La URL conserva solo la preferencia de idioma: no existe borrador persistido. El consentimiento PT sigue pendiente de revisión editorial/legal antes del lanzamiento.
 
+El borde usa `text-muted` para delimitar el select con al menos 3:1 tanto en header como sobre card dentro del recorte. El foco conserva outline cyan. Es un ajuste local de contraste; no cambia tokens globales ni comportamiento del portal.
+
 QA reproducible y capturas: [auditoría de i18n](../../form-i18n-audit.md), secciones de etapas 3 y 4.

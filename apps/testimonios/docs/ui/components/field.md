@@ -29,6 +29,8 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 
 En `/enviar` requieren `FormLocaleProvider` para sufijos accesibles y textos propios de imagen. Labels, ayudas y errores siguen llegando por props; no se traducen valores del participante. Cambiar contexto no reemplaza sus instancias ni sus object URLs.
 
+Contraste local del formulario: input/textarea/select de país y picker usan borde `text-muted` (`#666666`); placeholder y sufijo opcional usan `text-secondary` (`#999999`). Sobre base, ratios 3,60:1 y 7,26:1; el borde sobre card mantiene 3,33:1. `form-controls.module.css` agrega contorno cyan de 2px con offset de 3px al foco de input/textarea/select, también si hay error rojo. Se conservan errores, anillos y validaciones. No cambia tokens globales o `@repo/ui`; no usar estos ajustes como cambio general del design system. Véase [corrección y evidencia](../../form-i18n-audit.md#0f-corrección-local-de-contraste).
+
 ## Props — `Field`
 
 | Prop | Tipo | Default | Descripción |

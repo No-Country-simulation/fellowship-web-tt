@@ -2,7 +2,7 @@
 
 Auditoría original: 31 de octubre de 2026. Cierre de QA de etapa 5: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`, destino propuesto: `dev`.
 
-**Estado actual: etapas 1–4 aprobadas técnica y visualmente por el equipo, según la solicitud de etapa 5. QA final técnico PASS; aceptación de accesibilidad FAIL por contraste preexistente; revisión editorial/legal y pruebas manuales externas PENDIENTES.** El formulario ES/PT-BR tiene header propio y conserva reglas, datos y cinco pasos. Home/fichas conservan su chrome institucional. La aprobación visual no equivale a aprobación de copy PT-BR o consentimiento. Ver [matriz final de aceptación](#0e-etapa-5--aceptación-final-y-preparación-del-pr). Cada sección 0 conserva el cierre histórico de su etapa; las secciones 1–12 mantienen el diagnóstico original salvo sus estados actualizados.
+**Estado actual: corrección local de contraste implementada y mediciones focalizadas PASS; pendiente de última revisión visual antes del commit.** Etapas 1–4 aprobadas técnica y visualmente por el equipo. Los fallos detectados en etapa 5 se conservan como antecedentes en 0.e y su corrección se documenta en [0.f](#0f-corrección-local-de-contraste). Safari/Firefox, lector real, zoom manual, revisión PT-BR y consentimiento permanecen PENDIENTES. Un PASS en los criterios medidos no certifica toda la accesibilidad ni equivale a aprobación editorial/legal. Home/fichas conservan su chrome institucional.
 
 ## 0. Etapa 1 — estado al cerrar la infraestructura
 
@@ -306,6 +306,8 @@ No se modificaron backend, Supabase, Storage, migraciones, consentimiento, valid
 
 ## 0.e. Etapa 5 — aceptación final y preparación del PR
 
+Estado histórico anterior a la corrección de contraste; la matriz vigente de esos hallazgos está en 0.f. Se conserva la evidencia original, incluidos FAIL y estimaciones geométricas de CTA.
+
 ### Resultado y alcance de este cierre
 
 La feature integra catálogos tipados ES/PT-BR, incidencias semánticas, localización del formulario completo y metadata, selección por query sin desmontaje, invitaciones localizadas y header exclusivo con separación de layouts públicos. El guardado exitoso sigue siendo éxito aunque falle la notificación secundaria. Se conservan reglas, payloads, consentimiento, archivos, recorte y datos de participantes sin traducirlos.
@@ -473,6 +475,75 @@ Rutas relativas a `apps/testimonios`: **64 archivos de `origin/dev...HEAD`** y d
 | A | `scripts/test-form-i18n.mjs` |
 | A, etapa 5 sin commit | `scripts/qa-form-acceptance.mjs` |
 | A, etapa 5 sin commit | `docs/ui/assets/form-acceptance/qa-results.json` |
+
+## 0.f. Corrección local de contraste
+
+### Cambios y límites
+
+Se corrigieron exclusivamente estilos propios de `/enviar` y su QA. Los tokens globales y `@repo/ui` no cambian. La geometría, textos, categorías, provider/query, handlers, estado, archivos, recorte, consentimiento, FormData, Server Actions, layouts, footer y logo se conservan. Los módulos de campo solo se consumen desde este formulario.
+
+| Archivo | Cambio |
+| --- | --- |
+| [enviar-fields.tsx](../components/enviar-fields.tsx) | Inputs, textarea y select de país usan borde `text-muted` y placeholder `text-secondary`; picker de archivos usa borde `text-muted`. Sufijo opcional, si se usa, pasa a `text-secondary`. Agrega clase local de foco sin alterar handlers. |
+| [form-language-select.tsx](../components/form-language-select.tsx) | Borde `text-muted`, tanto en header como al portarse al recorte. El selector sigue siendo único. |
+| [enviar-form.tsx](../components/enviar-form.tsx) | Solo clases: indicador de radio no seleccionado con borde `text-muted`; CTA de siguiente, enviar y copiar con la clase local `primary`. |
+| [capture-crop-dialog.tsx](../components/capture-crop-dialog.tsx) | Solo importa y aplica la clase `primary` al botón de confirmar; conserva procesamiento, estado y foco del diálogo. |
+| [form-controls.module.css](../components/form-controls.module.css), nuevo | Degradado local con tokens existentes y contorno cyan explícito para foco de CTA y campos. No redefine variables en root ni en otras rutas. |
+| [qa-form-acceptance.mjs](../scripts/qa-form-acceptance.mjs) | Reporta placeholder, delimitación, CTA y cobertura por separado; medición raster, estados normal/hover/foco/deshabilitado, 4 pares de capturas y POST simulados. |
+| Documentación | Este informe y fichas [Field](./ui/components/field.md), [FormLanguageSelect](./ui/components/form-language-select.md), [CaptureCropDialog](./ui/components/capture-crop-dialog.md). |
+| Evidencia nueva | `docs/ui/assets/form-contrast/`: ocho PNG (cuatro antes/cuatro después), `before-results.json` y `after-results.json`. No se sobrescriben `form-i18n`, `form-layouts` o `form-acceptance`. |
+
+Se distinguen los bordes funcionales de los decorativos: se aclaran límites de inputs/selects/textarea, pickers y el círculo del radio no seleccionado. Bordes de tarjetas, secciones, iconos decorativos, separadores y panel modal mantienen sus tokens. Los botones outline conservan texto identificable de alto contraste; su borde no es el único recurso para reconocerlos. Slider nativo y checkbox conservan apariencia, accent cyan y teclado; la presentación específica de otros motores continúa pendiente.
+
+### Colores anteriores y nuevos
+
+| Uso | Antes | Después | Resultado |
+| --- | --- | --- | --- |
+| Placeholder normal | `text-muted` = `#666666` | `text-secondary` = `#999999` | Sobre base `#000115`: **3,6027 → 7,2608:1**, PASS ≥ 4,5. |
+| Delimitación normal | `border` = `#2d2b40` | `text-muted` = `#666666` | Sobre base: **1,5083 → 3,6027:1**; mínimo relevante sobre card: **1,3923 → 3,3257:1**, PASS ≥ 3. |
+| Error | `destructive` = `#ef4444` | Igual | Mantiene borde/mensaje rojo e incidencias; no se sustituye por el borde normal. |
+| Foco de campo y CTA | Indicadores previos; error podía compartir anillo rojo | Contorno local 2px cyan, offset 3px, además de estilos previos | `#02beef` sobre base ≈ **9,47:1**. Un error enfocado conserva borde rojo y contorno cyan; no depende solo del caret. |
+| CTA con texto blanco | Degradado rosa `#ff0094` → cyan `#02beef` | Cada extremo mezcla **55% marca + 45% `bg-base`**, interpolación explícita sRGB | Extremos aproximados `#8c005b` y `#01698d`; blanco frente a ambos ≈ **9,24:1 / 6,17:1** antes de opacity. Fondo de respaldo `bg-surface-3`. |
+
+No se usó `text-shadow`. Se conserva el degradado y su dirección, pero se oscurece localmente. En sRGB, la luminancia de una interpolación entre estos extremos queda acotada por el más luminoso, por lo que el texto blanco opaco mantiene al menos 6,16:1 en el degradado completo, independientemente del ancho del botón. El hover heredado aplica opacity 0,9: se verificó su composición real contra el fondo; no se supone equivalente al estado normal. Deshabilitado conserva opacity 0,5 y `pointer-events: none`; no recibe una aprobación de contraste para un estado inactivo.
+
+### Método y resultados de aceptación
+
+La evidencia original de 0.e sigue mostrando fallos y **estimaciones** de 3,91:1 / 4,02:1 para «Siguiente»/«Próximo»; esas cifras no se convierten en mediciones raster. Las capturas `before-*` se obtuvieron del build de producción sin cambios. [before-results.json](./ui/assets/form-contrast/before-results.json) conserva mediciones originales de campos y referencias a esas estimaciones históricas; su cobertura de CTA se marca PENDIENTE. Se descartaron sondas raster preliminares durante la calibración de la herramienta, sin atribuirles ratios válidos.
+
+La medición nueva usa el botón real renderizado. Recorre los rectángulos de cada carácter, hace transparente únicamente la tinta y desactiva transiciones durante la captura, espera dos frames y captura el fondo con Chrome/CDP. Decodifica el PNG en canvas sRGB y calcula el contraste de **todos los píxeles dentro de esos rectángulos**, usando el color de texto definido y su opacity compuesta contra el fondo real. Así cubre un área mayor que los trazos de los glifos y evita medir antialiasing como color de texto. Restaura los estilos inline al terminar; no guarda las capturas instrumentales de tinta oculta. Incluye una comprobación numérica para evitar redondeos de canales `Uint8ClampedArray` al calcular luminancia.
+
+| Criterio medido | Estado | Evidencia nueva |
+| --- | --- | --- |
+| Placeholder | **PASS** | 100 muestras; mínimo activo **7,2608:1**. No se exige contraste de texto a la sonda deshabilitada. |
+| Delimitación necesaria | **PASS** | 272 muestras activas, incluyendo radios no seleccionados; mínimo **3,3257:1**, comparando colores adyacentes interiores/exteriores. Excluye inputs `hidden` de React y bordes decorativos. |
+| Texto de CTA | **PASS** | 30 combinaciones idioma/acción/ancho/estado, mínimo rasterizado **6,6571:1**. No es una estimación geométrica. |
+| Cobertura de controles | **PASS** | Cada idioma cubre 15 nombres de control; sin nombres o combinaciones de CTA requeridas ausentes. Si falta cobertura, hay valores no finitos o no hay muestras, el script marca PENDIENTE; si falla cualquier umbral requerido, marca FAIL global. |
+| Deshabilitados | **PASS de comportamiento visual** | 10 sondas de CTA: `disabled`, opacity 0,5 y sin eventos de puntero. Contraste EXEMPT_DISABLED, sin sumarlo como texto activo aprobado. |
+| Foco / errores | **PASS focalizado** | En modalidad de teclado, campo normal e inválido conservan contorno cyan; errores permanecen rojos y asociados. CTA con indicador visible. |
+| Regresión focalizada | **PASS** | Selector único en recorte, avatar confirmado, navegación hasta consentimiento y éxito simulado. Dos POST interceptados antes de Next, cero envíos reales; sin errores de navegador/hidratación. |
+| Responsive | **PASS focalizado** | ES/PT a 375 y 1440px, también texto al 200%; sin overflow de documento o controles visibles. No sustituye zoom manual real. |
+
+Mínimos de texto por acción, incluyendo normal, hover y foco en ambos idiomas: **siguiente 7,4697:1; confirmar recorte 6,6571:1; enviar 6,7519:1; copiar 7,9906:1**. Siguiente se mide a 375/1440px; recorte/envío/copia a 375px, con el mismo estilo local y cota de luminancia independiente de ancho. Datos completos: [after-results.json](./ui/assets/form-contrast/after-results.json).
+
+Reproducir desde la app tras build: `node scripts/qa-form-acceptance.mjs`. Para una base sin modificar, `--before` guarda resultados y capturas con ese prefijo; no significa reconstruir automáticamente estilos anteriores sobre el build actual. El reporte nuevo se guarda en `form-contrast`, separado del QA histórico. El exit code 0 significa ejecución completa: revisar siempre `contrast` y cada criterio. Un PASS global solo corresponde a los criterios requeridos y la matriz cubierta, no a toda WCAG.
+
+### Comparación visual
+
+Ocho imágenes nuevas, sin iterar nuevas variantes de diseño. Cada par muestra campo normal con placeholder, errores, selector y CTA. La versión corregida añade foco cyan de teclado al error; el resto de geometría y textos se conserva.
+
+| Caso | Antes | Después |
+| --- | --- | --- |
+| ES · 375px | [Antes](./ui/assets/form-contrast/before-es-375.png) | [Después](./ui/assets/form-contrast/after-es-375.png) |
+| PT-BR · 375px | [Antes](./ui/assets/form-contrast/before-pt-BR-375.png) | [Después](./ui/assets/form-contrast/after-pt-BR-375.png) |
+| ES · 1440px | [Antes](./ui/assets/form-contrast/before-es-1440.png) | [Después](./ui/assets/form-contrast/after-es-1440.png) |
+| PT-BR · 1440px | [Antes](./ui/assets/form-contrast/before-pt-BR-1440.png) | [Después](./ui/assets/form-contrast/after-pt-BR-1440.png) |
+
+### Validación, pendientes y entrega
+
+Suite i18n/errores **75/75**, TypeScript, ESLint y build de producción correctos; `git diff --check` y referencias locales correctos. Se verificó que los handlers y archivos fuera del alcance no cambian. No se instaló ninguna dependencia ni se inspeccionaron credenciales. Se cerraron servidor y Chrome propios y se retiró su perfil temporal. No se repitió la batería completa de etapas 3–4 ni se hicieron envíos reales, commit, push, merge o PR.
+
+Los tres hallazgos de contraste quedan resueltos para la matriz medida; la última aprobación visual de estos cambios sigue pendiente del equipo antes del commit. Se mantienen abiertos **Safari/Firefox, lector de pantalla real, zoom manual de navegador/dispositivo, revisión brasileña, pregunta de empleo y consentimiento editorial/legal en ambos idiomas**. No se garantizan contrastes sobre cualquier fotografía de participante ni apariencia nativa en motores no probados; no se modificó el cropper o el procesamiento de imágenes. La descripción de PR de 0.e es histórica: al prepararla de nuevo, sustituir sus reservas de contraste por esta corrección y conservar los pendientes externos.
 
 ## 1. Arquitectura aprobada e integración
 
@@ -795,7 +866,7 @@ Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integr
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Estado de las propuestas**: etapas 1–4 implementadas y aprobadas técnica/visualmente por el equipo; etapa 5 ejecutada con aceptación parcial: PASS técnico/funcional, FAIL de contraste preexistente y PENDIENTES de aprobación editorial/legal y QA manual externo. Ver matriz 0.e. No equivale a aceptación sin reservas ni a certificación de accesibilidad.
+**Estado de las propuestas**: etapas 1–4 implementadas y aprobadas técnica/visualmente por el equipo; etapa 5 detectó contraste insuficiente y la corrección local de 0.f lo resuelve en la matriz medida. Última revisión visual, aprobación editorial/legal y QA manual externo permanecen pendientes. No equivale a certificación de accesibilidad.
 
 **Decisiones pendientes**: revisión brasileña, autorización equivalente, información legal adicional y matiz editorial de empleo. En esta versión se aprobó retirar el footer institucional del formulario y dejar su logo sin enlace. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
