@@ -20,4 +20,3 @@ export function formDataFor(values: FormValues): FormData {
   if (values.consent) data.set("consent", "1");
   return data;
 }
-

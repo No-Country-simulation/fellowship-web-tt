@@ -1,8 +1,8 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
-Auditoría original: 31 de octubre de 2026. Etapas 1–4 actualizadas: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`.
+Auditoría original: 31 de octubre de 2026. Cierre de QA de etapa 5: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`, destino propuesto: `dev`.
 
-**Estado actual: etapas 1–4 implementadas; pendiente de revisión visual humana y revisión editorial/legal antes del lanzamiento.** El formulario ES/PT-BR tiene header propio y conserva reglas, datos y navegación de cinco pasos. Home y fichas conservan su navbar/footer mediante un grupo público. El [inventario editorial ES/PT-BR](./form-i18n-text-inventory.md) conserva los textos históricos; los catálogos existentes alimentan todo el árbol propio del formulario. Cada sección 0 registra el cierre de su etapa; las secciones 1–12 conservan el diagnóstico y propuestas originales salvo sus estados actualizados.
+**Estado actual: etapas 1–4 aprobadas técnica y visualmente por el equipo, según la solicitud de etapa 5. QA final técnico PASS; aceptación de accesibilidad FAIL por contraste preexistente; revisión editorial/legal y pruebas manuales externas PENDIENTES.** El formulario ES/PT-BR tiene header propio y conserva reglas, datos y cinco pasos. Home/fichas conservan su chrome institucional. La aprobación visual no equivale a aprobación de copy PT-BR o consentimiento. Ver [matriz final de aceptación](#0e-etapa-5--aceptación-final-y-preparación-del-pr). Cada sección 0 conserva el cierre histórico de su etapa; las secciones 1–12 mantienen el diagnóstico original salvo sus estados actualizados.
 
 ## 0. Etapa 1 — estado al cerrar la infraestructura
 
@@ -303,6 +303,176 @@ Se comprobaron `/ruta-inexistente-qa`, `/enviar/ruta-inexistente-qa` y `/t/no-ex
 Etapa detenida para revisión visual humana. Falta validar con lectores de pantalla reales, Safari/Firefox y zoom real del navegador; texto al 200% no sustituye esas comprobaciones. Traducciones PT-BR y consentimiento siguen pendientes de revisión editorial/legal. **Cualquier información legal obligatoria adicional necesita definición del equipo antes del lanzamiento**; no se inventaron textos legales o enlaces de privacidad. El logo queda no navegable en esta versión. Una recarga o salida sigue perdiendo el borrador en memoria.
 
 No se modificaron backend, Supabase, Storage, migraciones, consentimiento, validaciones, payloads, publicaciones, panel, `packages/ui`, catálogos ni dependencias. No se inspeccionaron `.env*` o credenciales ni se hicieron commit, push, merge o PR.
+
+## 0.e. Etapa 5 — aceptación final y preparación del PR
+
+### Resultado y alcance de este cierre
+
+La feature integra catálogos tipados ES/PT-BR, incidencias semánticas, localización del formulario completo y metadata, selección por query sin desmontaje, invitaciones localizadas y header exclusivo con separación de layouts públicos. El guardado exitoso sigue siendo éxito aunque falle la notificación secundaria. Se conservan reglas, payloads, consentimiento, archivos, recorte y datos de participantes sin traducirlos.
+
+En esta etapa se actualizan este informe y la introducción del inventario, se agrega [qa-form-acceptance.mjs](../scripts/qa-form-acceptance.mjs) y su [resultado focalizado](./ui/assets/form-acceptance/qa-results.json), y se retira únicamente una línea vacía extra al EOF de `lib/testimonials/form-errors.fixtures.ts` detectada por whitespace. **No se cambió código de aplicación para corregir hallazgos.** Los problemas de contraste se informaron durante la revisión, antes de cualquier posible cambio visual, y quedan registrados para decisión del equipo. No se ejecutó nuevamente la suite completa de navegador ni se generaron capturas: se reutilizaron las evidencias aprobadas de etapas 3 y 4.
+
+### Matriz de aceptación
+
+`PASS` identifica evidencia suficiente para el caso indicado; `FAIL`, un problema reproducible; `PENDIENTE`, una comprobación o aprobación no disponible. Un PASS funcional o visual no certifica accesibilidad ni habilita por sí mismo el lanzamiento.
+
+| Área | Estado | Evidencia / límite |
+| --- | --- | --- |
+| Cobertura propia de i18n | **PASS** | Revisión de JSX, atributos, composición de mensajes y metadata; 163 claves idénticas en ambos catálogos. No quedan frases propias hardcodeadas en los siete componentes del formulario. |
+| Cinco pasos y tres categorías | **PASS** | Suite actual y QA de etapas 3–4; ayudas, placeholders, botones, preguntas, resumen y éxito consumen catálogos por ID. |
+| Errores y validaciones | **PASS** | 75 pruebas actuales; códigos/parámetros, fallback seguro, respuesta original, overrides, límites y errores genuinos conservados. |
+| Estado, archivos, consentimiento y FormData | **PASS** | Evidencias existentes de mismo formulario, datos de tres categorías, JPEG/previews, recorte, país libre y canónico, valor `1`, claves originales y un POST por intento. |
+| Layouts, URLs, 404 y metadata | **PASS** | Etapa 4; home/ficha movidos R100, chrome sin cambios, un header/footer público y `noindex` en 404, metadata restaurada al salir del formulario. |
+| Selector, portal, idiomas y foco | **PASS** | Etapa 4; único selector, modal operativo, zoom/posición/original preservados y foco inicial/retorno/Tab. Header/main/diálogo declaran locale; HTML institucional sigue en ES. |
+| Labels, IDs, ayudas y errores asociados | **PASS** | Nuevo QA focalizado en ES/PT-BR: tres categorías, sin IDs duplicados ni referencias ARIA/for rotas en controles montados; cuatro errores del paso 2 tienen nombre y descripción. Se inspeccionó nombre del selector en AX. |
+| Texto secundario y errores: contraste | **PASS** | Tokens y estilos: `#999999` sobre base/card = 7,26:1 / 6,70:1; rojo de error sobre card = 5,07:1. No representa todos los estados posibles. |
+| Placeholders: contraste | **FAIL** | Estilo renderizado `#666666`, opacidad 1, sobre `#000115`: 3,6027:1; texto normal requiere 4,5:1. Preexistente, no corregido. |
+| Límites de campos: contraste | **FAIL** | Campo de texto sin error/foco: borde `#2d2b40` sobre base = 1,5083:1; interior y exterior del mismo fondo. Límite necesario para identificar el campo por debajo de 3:1. Preexistente, no corregido. |
+| Botones con degradado: revisión de contraste | **PENDIENTE** | Blanco 14px/500 sobre degradado existente: estimación en centros de caracteres de «Siguiente»/«Próximo» ≈ 3,91:1 / 4,02:1. Riesgo adicional que necesita corrección/revisión específica; no se presenta como medición raster exacta. |
+| Responsive y texto al 200% | **PASS** | Etapa 4: 320/375/768/1024/1440px, fuente al 200% en 320px y sin overflow. Son emulaciones de viewport/texto. |
+| Zoom real de navegador / dispositivo | **PENDIENTE** | Se intentó Ctrl+`+` en Chrome headless; innerWidth/DPR/visualViewport no cambiaron. No se atribuye ese intento a una prueba exitosa de zoom real. |
+| Chrome funcional e hidratación | **PASS** | QA aprobado de etapas 3–4 y revisión focalizada actual sin excepciones ni errores de consola. |
+| Firefox / Safari | **PENDIENTE** | No disponibles en PATH, ubicaciones habituales o registro App Paths de Firefox. Safari/VoiceOver requieren plataforma apropiada; no se instalaron herramientas. |
+| Lector de pantalla real | **PENDIENTE** | Sin NVDA/VoiceOver operables. Narrador existe en Windows, pero no hay sesión manual con audio/desktop controlable para probarlo; no se inició. AX no sustituye esta prueba. |
+| Revisión visual | **PASS** | Aprobación de etapas 1–4 comunicada por el equipo; se releyeron capturas existentes, sin generar ni sobrescribir otras. No implica resolver los hallazgos nuevos de contraste. |
+| Español y nombres de categorías | **PASS** | ES neutro implementado; únicamente los tres nombres indicados abajo tienen aprobación editorial explícita. |
+| Copy PT-BR y pregunta de empleo | **PENDIENTE** | Revisión por persona competente en PT-BR y confirmación del matiz de empleo. |
+| Consentimiento e información legal adicional | **PENDIENTE** | ES/PT siguen con `pending-editorial-legal-review`; texto y canales intactos. Equipo debe definir cualquier información obligatoria adicional. |
+| Validación técnica y alcance del diff | **PASS** | Suite, TypeScript, ESLint, build y whitespace correctos; diff de la feature limitado a esta app, sin dependencias ni migraciones. |
+
+### Cobertura y revisión editorial
+
+La comparación del inventario histórico con los catálogos comprende **165 filas y 163 claves únicas**, con coincidencia en ambos idiomas después de retirar únicamente el Markdown `**` de los tres nombres aprobados. No se reescribieron las tablas ni los catálogos. Se revisaron expresiones dinámicas además de literales JSX: países, preguntas por tipo, errores, límites, progreso y copy de recorte/éxito provienen de sus diccionarios. Los asteriscos decorativos y el alt de marca «No Country» son las únicas cadenas literales de presentación encontradas; no son frases pendientes de traducción. `form.header.logoLinkLabel` permanece reservado y sin consumo porque el logo no es navegable.
+
+| Decisión editorial | Estado real |
+| --- | --- |
+| Español neutro | Implementado; conservarlo separado de los textos históricos en voseo. |
+| Categorías ES | Aprobadas: «Tu experiencia en No Country», «Conseguiste Empleo» y «Reconversión Profesional». No cambian IDs ni labels globales. |
+| Portugués brasileño | Borrador implementado, pendiente de aprobación competente. La aprobación visual no equivale a validación lingüística. |
+| Pregunta de empleo | «Cuéntanos cómo te ayudó la experiencia en No Country» implementada; confirmar si el matiz amplio de empleo es el esperado. No cambia elegibilidad ni validación. |
+| Consentimiento ES/PT | Pendiente editorial/legal en ambos. ES coincide con el original; PT conserva propuesta; solo galería y Discord. |
+| Footer y logo | Etapa 4 ya resolvió esta versión: sin footer institucional en `/enviar`, logo no navegable. Información legal adicional sigue pendiente de definición. |
+
+Los textos nativos del navegador, nombres de archivos elegidos, relato, nombre, país libre, empresa, puestos, contactos, URLs y contenido del participante quedan fuera de traducción. No hay detección automática de idioma del relato ni localización del panel/publicaciones.
+
+### Hallazgos y criterio de accesibilidad
+
+Los contrastes anteriores usan luminancia relativa sRGB de los colores efectivos obtenidos del navegador; no se redondearon antes de comparar umbrales. Criterios consultados: [W3C: contraste de texto, incluidos placeholders](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) y [W3C: contraste de controles y límites necesarios](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html). La segunda regla no exige contrastar todos los bordes decorativos: el hallazgo se limita al campo cuyo interior y exterior comparten fondo y cuya delimitación depende de ese borde.
+
+Los tokens `--text-muted`, `--border-default`, clases de campos y variante gradient de `@repo/ui` ya existen en la base. `app/globals.css` y `packages/ui` no tienen diferencias de la feature. **Se recomienda una corrección local acotada de placeholders/límites en la app y una decisión explícita sobre los botones, antes de aceptar accesibilidad o lanzar.** Esta etapa no aplica esa corrección ni toca componentes compartidos. El informe no es una certificación WCAG; no se probó lector de pantalla real ni toda combinación de estado, contraste, navegador y dispositivo.
+
+### Ejecuciones de esta etapa y evidencias reutilizadas
+
+| Ejecución | Resultado |
+| --- | --- |
+| `node scripts/test-form-i18n.mjs` | **75/75**, 12 grupos, una ejecución final, sin omitidas ni servicios reales. |
+| `pnpm.cmd exec tsc --noEmit --incremental false` | **PASS**, una ejecución, sin errores. |
+| `pnpm.cmd run lint` | **PASS**, una ejecución global de la app, sin advertencias. El nuevo script focalizado recibió además ESLint específico después de crearlo. |
+| `pnpm.cmd run build` | **PASS**, una ejecución; `/`, `/enviar`, `/t/[slug]` dinámicos; 404/icono estáticos. |
+| `git diff --check <merge-base>` y revisión de whitespace nuevo | **PASS** final. La primera pasada detectó una línea vacía extra al EOF del fixture de pruebas; se retiró sin cambios de contenido y se repitió solo este check. |
+| `node scripts/qa-form-acceptance.mjs` | Comprobación focalizada terminada: asociaciones **PASS**, contraste **FAIL**, zoom real **PENDIENTE**. El exit code 0 indica que terminó la medición, no que toda accesibilidad pasó. Sin POST, capturas o errores de navegador. |
+
+El script focalizado utiliza Chrome instalado y el servidor de producción local con fixture público de etapa 4; bloquea cualquier POST antes de Next. Solo realiza selecciones y validación local. Servidor/Chrome/perfil propios se cierran y eliminan al terminar. No se ejecutaron acciones de servidor, webhooks, subidas o envíos reales. La suite de errores ejecuta la acción/repositorio reales en VM con imports allowlist y dobles; no importa clientes reales de servicios. Las variables pueden cargarse automáticamente por build/Next, sin leer ni exponer `.env*`.
+
+Evidencias históricas conservadas: [etapa 3](./ui/assets/form-i18n/qa-results.json), [etapa 4](./ui/assets/form-layouts/qa-results.json), [nuevo QA focalizado](./ui/assets/form-acceptance/qa-results.json). Las capturas enlazadas en 0.c y 0.d ya cubren ES/PT, errores, recorte, resumen, éxito, home y ficha. No se repitió ese recorrido ni se añadieron PNG.
+
+### Revisión manual reproducible pendiente
+
+1. **Firefox de escritorio y Safari macOS/iOS:** abrir `/enviar?lang=es` y `?lang=pt-BR`; recorrer los cinco pasos con datos sintéticos, cambiar idioma y abrir/cancelar/confirmar recorte. Verificar selector único, foco, zoom/posición de imagen, previews, texto y ausencia de overflow. Probar home/ficha/404 y metadata al volver. Mantener envíos interceptados o usar entorno de pruebas expresamente autorizado; nunca enviar a producción.
+2. **Zoom real:** en navegador de escritorio usar su menú al 200% y 400%, registrar porcentaje y viewport efectivo, recorrer botones/errores/modal con teclado. En Safari/Firefox móvil usar dispositivo real, ampliación de texto y pinch zoom, comprobar acceso al selector y a las acciones del recorte; distinguir zoom de página de zoom de imagen. Restablecer al terminar. No sustituir por `font-size` o emulación CDP.
+3. **Lector de pantalla:** NVDA + Firefox/Chrome, VoiceOver + Safari o Narrador operado manualmente. Verificar nombres y descripciones localizadas de campos/radios, cambios de idioma por región, error anunciado al enfocar, progreso, orden de Tab, entrada al diálogo, límites de Tab/Escape, retorno al input y H1 de éxito con respuesta simulada. Registrar herramienta, versión y resultado por caso.
+4. **Editorial/legal:** revisión brasileña del catálogo completo, pregunta de empleo y autorización en ambos idiomas por responsables correspondientes. Conservar cuerpo y canales hasta recibir decisión expresa. No confundir este checklist con aprobaciones ya obtenidas.
+
+### Diff para reviewers y riesgos de despliegue
+
+Referencia local disponible: `origin/dev` **85046ec**, HEAD revisado **c30645a**, merge-base **f973297**. No se hizo fetch: esto describe referencias locales, no el estado remoto actual. La rama tiene **5 commits propios y 1 commit de dev aún no incorporado**. El diff de PR correcto `origin/dev...HEAD` contiene **64 archivos**, todos en `apps/testimonios`, incluidos dos movimientos **R100**. Una comparación directa entre tips muestra cuatro componentes de panel distintos porque ese commit pertenece solo a dev; no son cambios introducidos por esta feature. No se hizo merge/rebase ni se cambió el estado de Git.
+
+El inventario completo de archivos de la feature se reproduce en 0.e al final de este bloque. Esta etapa modifica `docs/form-i18n-audit.md`, `docs/form-i18n-text-inventory.md`, el EOF de `lib/testimonials/form-errors.fixtures.ts`, y agrega `scripts/qa-form-acceptance.mjs`, `docs/ui/assets/form-acceptance/qa-results.json`. No se encontraron rutas temporales, archivos `.env*`/claves ni patrones habituales de secretos en el diff; esta comprobación limitada no lee credenciales ni equivale a un escáner de seguridad exhaustivo.
+
+Para revisar: comenzar por `locales.ts`/catálogos y contratos; seguir incidencias/parser/reconciliación; luego provider/metadata, formulario/cropper y layouts. En `actions.ts`/`store.ts` el PR incluye la migración de representación de errores ya aprobada en etapa 2 y la protección de notificación secundaria; no introduce cambios de esquema, consultas, orden de operaciones o payloads. En etapa 5 esos archivos no se tocaron. Los módulos Supabase, Storage, Discord, publicaciones, globals, labels globales y chrome institucional se conservan; panel, `packages/ui` y manifests/lockfile no pertenecen al diff de la feature.
+
+Riesgos a resolver antes de lanzamiento: contraste insuficiente, copy/legal sin aprobación, cobertura manual incompleta de navegador/lector/zoom y vigencia de la base `dev`. `/enviar` ahora es dinámico por `searchParams`, depende de History API y mantiene borrador solo en memoria; recargar o salir pierde datos como antes. No hay migraciones ni nuevas variables/dependencias. Verificar integración con el dev actualizado y smoke tests en el entorno acordado antes de publicar; no se autoriza con este informe un envío real a servicios.
+
+### Borrador de descripción del PR hacia `dev`
+
+**Título:** `feat(testimonios): formulario ES/PT-BR y header exclusivo de envío`
+
+El formulario `/enviar` permite completar sus cinco pasos en español o portugués brasileño y cambiar de idioma sin perder datos, archivos, errores o recorte. Centraliza copy/metadata en catálogos tipados, presenta incidencias semánticas en el idioma vigente y conserva éxito del guardado si falla una notificación secundaria. Un header con marca y selector sustituye el chrome institucional exclusivamente en esta ruta; home/fichas conservan sus URLs y apariencia mediante `(public)`.
+
+Validación: 75 pruebas, TypeScript, ESLint y build correctos; QA Chrome de etapas 3–4 y revisión focalizada de etapa 5 con respuestas sintéticas, sin envíos reales. **Aceptación con reservas abiertas:** placeholders/límites con contraste insuficiente; revisión PT-BR/legal, lector real, Safari/Firefox y zoom manual pendientes. Consultar esta matriz y resolver la aceptación de esos puntos antes de merge/despliegue. No se creó PR ni se hicieron commit, push o merge.
+
+### Inventario de archivos para reviewers
+
+Rutas relativas a `apps/testimonios`: **64 archivos de `origin/dev...HEAD`** y dos archivos nuevos de QA de etapa 5, **66 rutas de destino** en total. Los documentos editados y el EOF del fixture ya figuran entre los 64. A = agregado, M = modificado, R100 = movimiento completo; sin staging ni operaciones Git de escritura.
+
+| Estado del PR | Archivo / movimiento |
+| --- | --- |
+| A | `app/(public)/layout.tsx` |
+| A | `app/(public)/not-found.tsx` |
+| R100 | `app/page.tsx` → `app/(public)/page.tsx` |
+| R100 | `app/t/[slug]/page.tsx` → `app/(public)/t/[slug]/page.tsx` |
+| M | `app/enviar/page.tsx` |
+| M | `app/layout.tsx` |
+| A | `app/not-found.tsx` |
+| M | `components/capture-crop-dialog.tsx` |
+| A | `components/enviar-experience.tsx` |
+| M | `components/enviar-fields.tsx` |
+| M | `components/enviar-form.tsx` |
+| A | `components/enviar-intro.tsx` |
+| A | `components/form-header.module.css` |
+| A | `components/form-header.tsx` |
+| A | `components/form-language-select.tsx` |
+| A | `components/form-locale-provider.tsx` |
+| A | `docs/form-i18n-audit.md` |
+| A | `docs/form-i18n-text-inventory.md` |
+| M | `docs/ui/README.md` |
+| A | `docs/ui/assets/form-i18n/crop-pt-375.png` |
+| A | `docs/ui/assets/form-i18n/form-es-375.png` |
+| A | `docs/ui/assets/form-i18n/form-pt-1440.png` |
+| A | `docs/ui/assets/form-i18n/qa-results.json` |
+| A | `docs/ui/assets/form-i18n/success-es-1440.png` |
+| A | `docs/ui/assets/form-layouts/crop-pt-375.png` |
+| A | `docs/ui/assets/form-layouts/detail-1440.png` |
+| A | `docs/ui/assets/form-layouts/form-es-1440.png` |
+| A | `docs/ui/assets/form-layouts/form-es-375.png` |
+| A | `docs/ui/assets/form-layouts/form-pt-375.png` |
+| A | `docs/ui/assets/form-layouts/home-1440.png` |
+| A | `docs/ui/assets/form-layouts/qa-results.json` |
+| M | `docs/ui/components/capture-crop-dialog.md` |
+| M | `docs/ui/components/field.md` |
+| A | `docs/ui/components/form-header.md` |
+| A | `docs/ui/components/form-language-select.md` |
+| M | `docs/ui/components/gallery-hero-carousel.md` |
+| M | `docs/ui/components/gallery-hero.md` |
+| M | `docs/ui/components/site-footer.md` |
+| M | `docs/ui/components/site-header.md` |
+| M | `docs/ui/components/testimonial-detail.md` |
+| M | `docs/ui/components/testimonials-gallery.md` |
+| A | `lib/form-i18n/countries.ts` |
+| A | `lib/form-i18n/format.ts` |
+| A | `lib/form-i18n/infrastructure.test.ts` |
+| A | `lib/form-i18n/issues.ts` |
+| A | `lib/form-i18n/limits.ts` |
+| A | `lib/form-i18n/locales.ts` |
+| A | `lib/form-i18n/messages.ts` |
+| A | `lib/form-i18n/messages/es.ts` |
+| A | `lib/form-i18n/messages/pt-BR.ts` |
+| A | `lib/form-i18n/metadata.ts` |
+| A | `lib/form-i18n/types.ts` |
+| M | `lib/testimonials/actions.ts` |
+| A | `lib/testimonials/form-errors.fixtures.ts` |
+| A | `lib/testimonials/form-errors.test.ts` |
+| M | `lib/testimonials/form-validation.ts` |
+| A | `lib/testimonials/issues.ts` |
+| M | `lib/testimonials/parse.ts` |
+| A | `lib/testimonials/server-errors.test.ts` |
+| M | `lib/testimonials/store.ts` |
+| M | `lib/testimonials/submit-state.ts` |
+| A | `scripts/qa-form-i18n.mjs` |
+| A | `scripts/qa-public-fixture.mjs` |
+| A | `scripts/test-form-i18n.mjs` |
+| A, etapa 5 sin commit | `scripts/qa-form-acceptance.mjs` |
+| A, etapa 5 sin commit | `docs/ui/assets/form-acceptance/qa-results.json` |
 
 ## 1. Arquitectura aprobada e integración
 
@@ -625,13 +795,13 @@ Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integr
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Estado de las propuestas**: etapas 1–4 implementadas sin dependencias adicionales. UI ES/PT-BR, selector, query, metadata, idioma accesible y header/layouts separados. Revisión visual, copy PT y consentimiento siguen sujetos a revisión humana.
+**Estado de las propuestas**: etapas 1–4 implementadas y aprobadas técnica/visualmente por el equipo; etapa 5 ejecutada con aceptación parcial: PASS técnico/funcional, FAIL de contraste preexistente y PENDIENTES de aprobación editorial/legal y QA manual externo. Ver matriz 0.e. No equivale a aceptación sin reservas ni a certificación de accesibilidad.
 
 **Decisiones pendientes**: revisión brasileña, autorización equivalente, información legal adicional y matiz editorial de empleo. En esta versión se aprobó retirar el footer institucional del formulario y dejar su logo sin enlace. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
 No se verificó paridad pregunta por pregunta con Tally porque no se adjuntó su definición/URL. Para confirmar la sustitución completa más adelante hará falta contrastar esa referencia; no se inventa ni se declara cubierta aquí.
 
-No se hicieron envíos reales, consultas de datos de participantes o cambios en servicios. Las pruebas de UI se ejecutaron en un servidor de producción local con datos sintéticos y respuestas interceptadas. El contrato local de errores cambió en etapa 2 y se mantuvo en etapa 3; sus operaciones de persistencia se conservan. No se abrieron archivos `.env*` ni credenciales. Build y servidor pueden cargarlos automáticamente según las reglas del proyecto, sin inspeccionar sus valores. No se ejecutaron operaciones Git de escritura. El alcance por etapa queda registrado en las secciones 0, 0.b y 0.c.
+No se hicieron envíos reales, consultas de datos de participantes o cambios en servicios. Las pruebas de UI se ejecutaron en un servidor de producción local con datos sintéticos y respuestas interceptadas. El contrato local de errores cambió en etapa 2; sus operaciones de persistencia se conservan. No se abrieron archivos `.env*` ni credenciales. Build y servidor pueden cargarlos automáticamente según las reglas del proyecto, sin inspeccionar sus valores. No se ejecutaron operaciones Git de escritura. El alcance por etapa queda registrado en las secciones 0 a 0.e.
 
 ## 12. Fuentes técnicas consultadas
 
