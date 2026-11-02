@@ -30,7 +30,7 @@ El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, n
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
 | [Field](./components/field.md) | Label, hint, error y classes de input |
 | [CaptureCropDialog](./components/capture-crop-dialog.md) | Recorte de foto: 16:9 o cuadrado |
-| [FormLanguageSelect](./components/form-language-select.md) | Selector ES/PT-BR del formulario y portal al recorte activo |
+| [FormLanguageSelect](./components/form-language-select.md) | Selector ES/PT-BR exclusivo del header, inerte mientras hay recorte |
 | [FormHeader](./components/form-header.md) | Marca no navegable y selector único, exclusivo de `/enviar` |
 
 ## Convención al agregar un componente

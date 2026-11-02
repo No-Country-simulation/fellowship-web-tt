@@ -29,7 +29,7 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 
 En `/enviar` requieren `FormLocaleProvider` para sufijos accesibles y textos propios de imagen. Labels, ayudas y errores siguen llegando por props; no se traducen valores del participante. Cambiar contexto no reemplaza sus instancias ni sus object URLs.
 
-Contraste local del formulario: input/textarea/select de país y picker usan borde `text-muted` (`#666666`); placeholder y sufijo opcional usan `text-secondary` (`#999999`). Sobre base, ratios 3,60:1 y 7,26:1; el borde sobre card mantiene 3,33:1. `form-controls.module.css` agrega contorno cyan de 2px con offset de 3px al foco de input/textarea/select, también si hay error rojo. Se conservan errores, anillos y validaciones. No cambia tokens globales o `@repo/ui`; no usar estos ajustes como cambio general del design system. Véase [corrección y evidencia](../../form-i18n-audit.md#0f-corrección-local-de-contraste).
+Estado vigente: input/textarea/select de país y picker restauran `border`; placeholder y sufijo opcional restauran `text-muted`, como antes de `e434ddb`. Se retiran los cambios locales de color por decisión de fidelidad al Design System; sus contrastes insuficientes siguen registrados como FAIL. `form-controls.module.css` conserva únicamente el contorno funcional de foco de campos: cyan existente, 2px, offset de 3px, para distinguir un error enfocado de uno sin enfocar. No modifica bordes, placeholders, fondos o botones. Se mantienen los indicadores previos, errores y validaciones. Véase [decisión vigente y evidencia](../../form-i18n-audit.md#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system); 0.f conserva el ajuste de contraste histórico.
 
 ## Props — `Field`
 

@@ -11,16 +11,16 @@ import controls from "./form-controls.module.css";
 
 export const fieldClassName = cn(
   controls.field,
-  "h-11 min-w-0 w-full rounded-md border border-text-muted bg-bg-base px-md text-body text-text-primary outline-none",
-  "placeholder:text-text-secondary",
+  "h-11 min-w-0 w-full rounded-md border border-border bg-bg-base px-md text-body text-text-primary outline-none",
+  "placeholder:text-text-muted",
   "focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40",
   "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30",
 );
 
 export const textareaClassName = cn(
   controls.field,
-  "min-h-56 min-w-0 w-full resize-y rounded-md border border-text-muted bg-bg-base px-md py-sm text-body leading-relaxed text-text-primary outline-none sm:min-h-64",
-  "placeholder:text-text-secondary",
+  "min-h-56 min-w-0 w-full resize-y rounded-md border border-border bg-bg-base px-md py-sm text-body leading-relaxed text-text-primary outline-none sm:min-h-64",
+  "placeholder:text-text-muted",
   "focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40",
   "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30",
 );
@@ -86,7 +86,7 @@ export function Field({
         </>
       ) : null}
       {optional ? (
-        <span className="ml-1 font-normal text-text-secondary">{t("form.common.optional")}</span>
+        <span className="ml-1 font-normal text-text-muted">{t("form.common.optional")}</span>
       ) : null}
     </>
   );
@@ -261,7 +261,7 @@ export function FileField({
         <label
           htmlFor={id}
           className={cn(
-            "flex cursor-pointer rounded-md border border-dashed border-text-muted bg-bg-base [overflow-anchor:none]",
+            "flex cursor-pointer rounded-md border border-dashed border-border bg-bg-base [overflow-anchor:none]",
             "hover:border-accent-cyan/70 hover:bg-bg-white-a5",
             "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-accent-cyan",
             preview === "avatar"

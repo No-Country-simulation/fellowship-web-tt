@@ -29,8 +29,14 @@
 
 .row > div { flex: 1 1 10rem; min-width: 0; max-width: 100%; margin-left: auto; }
 
-/* Keep the native select's accessible label without adding a second mobile row.
- * The portal leaves this scope, so the crop dialog keeps its visible label. */
+/* Root scroll padding reserves this header for document controls. The sticky
+ * select is already visible inside that reserved area: cancel only its margin
+ * so native focus does not try to reveal it again. Main-content offsets stay. */
+.row select {
+  scroll-margin-block-start: calc(-1 * (var(--site-header-height, 0px) + 16px));
+}
+
+/* Keep the native select's accessible label without adding a second mobile row. */
 @media (max-width: 767px) {
   .row label > span {
     position: absolute;

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 // Focused contrast QA, after build. --before records the unmodified production build.
 // Reuses the Stage 4 public fixture; every browser POST is blocked before Next.
-const phase = process.argv.includes("--before") ? "before" : "after";
+const phase = process.argv.includes("--before") ? "before" : "current";
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -77,7 +77,7 @@ try {
   }
   await cdp("Page.enable"); await cdp("Runtime.enable");
   await cdp("Fetch.enable", { patterns: [{ urlPattern: "*", requestStage: "Request" }] });
-  const output = join(appDir, "docs/ui/assets/form-contrast");
+  const output = join(appDir, "docs/ui/assets/form-ds");
   await mkdir(output, { recursive: true });
   const screenshots = [];
   const ctaSamples = [];
@@ -251,7 +251,7 @@ try {
       await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowLeft',code:'ArrowLeft',windowsVirtualKeyCode:37});
       await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowLeft',code:'ArrowLeft',windowsVirtualKeyCode:37});
       await evaluate(()=>{const el=document.querySelector('input[name="email"]');el.blur();el.focus({preventScroll:true});});
-      if(phase==='after'){
+      if(phase!=='before'){
         await pause(50);
         const focus=await evaluate(()=>{const el=document.querySelector('input[name="email"]');const s=getComputedStyle(el);return{outline:s.outlineStyle,focusVisible:el.matches(':focus-visible'),className:el.className,active:document.activeElement.name};});
         assert.equal(focus.outline,'solid','error field retains distinct focus outline: '+JSON.stringify(focus));
@@ -288,7 +288,7 @@ try {
     });
     await until(()=>evaluate(()=>!!document.querySelector('dialog[open]')),'crop open');
     await pause(100);
-    assert.equal(await evaluate(()=>document.querySelectorAll('[data-form-language-select]').length===1&&!!document.querySelector('dialog select')),true);
+    assert.equal(await evaluate(()=>document.querySelectorAll('[data-form-language-select]').length===1&&!document.querySelector('dialog select')&&!!document.querySelector('header [data-form-language-select]')),true,'selector stays outside modal');
     samples.push({locale,width:375,fields:await evaluate(()=>window.qaFields('crop'))});
     await measureCTA('dialog button:last-child',{locale,width:375,action:'crop confirm'});
     await evaluate(()=>document.querySelector('dialog button:last-child').click());

@@ -35,9 +35,9 @@ import { CaptureCropDialog } from "@/components/capture-crop-dialog";
 
 ## Notas
 
-- Confirmar conserva la variante compartida pero aplica `form-controls.module.css`: mezcla local de 55% marca y 45% base en los extremos del degradado, con foco cyan. Texto mínimo rasterizado 6,66:1 en QA ES/PT, incluyendo hover. Cancelar, slider y procesamiento conservan su comportamiento. Ver [método y evidencia](../../form-i18n-audit.md#0f-corrección-local-de-contraste).
+- Confirmar usa la variante `gradient` oficial de `@repo/ui`, sin import de `form-controls.module.css`, mezcla oscura o variante paralela. Los ratios PASS de 0.f pertenecen al estilo anterior ya retirado. El contraste vigente y su FAIL se documentan en [0.g](../../form-i18n-audit.md#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system).
 
-- Requiere `FormLocaleProvider`. Título, descripción, controles, alt, instrucciones y `lang` siguen el locale vigente. El diálogo registra un host para el único selector de idioma, que se mueve aquí por portal mientras el exterior es inerte. La guarda de Tab incluye `select`; cambiar idioma conserva instancia, zoom, posición, object URL y refs. Véase [FormLanguageSelect](./form-language-select.md).
+- Requiere `FormLocaleProvider` para título, descripción, controles, alt, instrucciones y `lang`. No contiene selector ni host de portal. El selector permanece en el header inerte; se cancela o confirma el recorte antes de cambiar idioma. La guarda de Tab recorre recorte, Zoom y acciones, sin rama exclusiva del select. Zoom, posición, object URLs, procesamiento y refs permanecen. Véase [FormLanguageSelect](./form-language-select.md).
 
 - `react-easy-crop` solo marca el recuadro (arrastrar y zoom) y devuelve los píxeles. El JPG lo recorta `lib/testimonials/prepare-image.ts` con canvas: 1080×608 (16:9) la testimonial, 720×720 el perfil.
 - El recorte de perfil es un cuadrado chico (`18rem` / `40vh`) para que el modal no se estire.

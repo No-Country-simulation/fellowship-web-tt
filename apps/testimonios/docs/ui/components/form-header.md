@@ -14,9 +14,11 @@ No recibe props. Requiere `FormLocaleProvider`; el header declara su idioma vige
 
 `form-header.module.css` usa tokens existentes, borde inferior discreto, altura mínima de 4rem y ancho máximo de 51rem (contenido de 48rem más padding). Es sticky y permanece en el scroll del documento. Desde 320px, logo y select comparten fila; con fuentes ampliadas pueden envolver y aumentar la altura. El nombre accesible del selector se conserva en móvil con la etiqueta visualmente oculta; desde 768px también es visible. No se ocultan header/footer institucionales: esos componentes no se montan en esta ruta.
 
-El único selector se porta al diálogo de recorte activo y sale del alcance de los estilos del header, conservando allí la etiqueta visible. Al cerrar vuelve al header; no queda otra copia inerte fuera del modal. El header permanece montado durante los cinco pasos y éxito.
+El único selector permanece en este header durante los cinco pasos, éxito y recorte. No se porta al diálogo: la modalidad nativa lo vuelve inerte hasta cerrar el recorte. Para cambiar idioma se cancela o confirma la imagen y luego se usa el header.
 
 Un `ResizeObserver` publica la altura real en `--site-header-height`, también al envolver filas o cambiar de fuente. Limpia observador y variable al desmontarse. `focusAndReveal` mide explícitamente `[data-form-header]`; el CSS global conserva el offset de scroll y la navegación institucional sigue usando su propio observador sin cambios.
+
+Solo el select compensa el padding raíz reservado para este sticky con un `scroll-margin-block-start` negativo de altura real + 16px. Corrige el salto provocado al recibir foco nativo desde una página desplazada, tanto por puntero como por teclado. No restaura scroll después del salto ni cambia root, History API o los desplazamientos hacia campos/pasos/éxito. Ver [reproducción y límites](../../form-i18n-audit.md#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system).
 
 Los encabezados estáticos enfocados programáticamente (paso, éxito y recorte) conservan foco, semántica y `tabIndex={-1}`, sin el outline de bloque completo. Los controles interactivos mantienen sus indicadores de teclado.
 

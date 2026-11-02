@@ -10,7 +10,6 @@ import {
 } from "@/lib/testimonials/prepare-image";
 import { cn } from "@/lib/utils";
 import { useFormLocale } from "./form-locale-provider";
-import controls from "./form-controls.module.css";
 
 type CropKind = "capture" | "avatar";
 
@@ -46,7 +45,7 @@ export function CaptureCropDialog({
   confirming = false,
   returnFocusRef,
 }: CaptureCropDialogProps) {
-  const { locale, t, setSelectorHost } = useFormLocale();
+  const { locale, t } = useFormLocale();
   const copy = {
     ...COPY[kind],
     title: t("form.crop.title"),
@@ -101,7 +100,7 @@ export function CaptureCropDialog({
     if (event.key !== "Tab") return;
     const dialog = event.currentTarget;
     const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
-      "button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex='0']:not(:disabled)",
+      "button:not(:disabled), input:not(:disabled), [tabindex='0']:not(:disabled)",
     )).filter((control) => !control.closest("[inert]"));
     const first = controls[0];
     const last = controls.at(-1);
@@ -144,7 +143,6 @@ export function CaptureCropDialog({
       }}
     >
       <div className="flex flex-col gap-md">
-        <div ref={setSelectorHost} />
         <div>
           <h2
             ref={titleRef}
@@ -214,7 +212,6 @@ export function CaptureCropDialog({
           <Button
             type="button"
             variant="gradient"
-            className={controls.primary}
             disabled={!area || confirming}
             onClick={() => {
               if (area && !confirming && !confirmingRef.current && !closingRef.current) {

@@ -2,7 +2,7 @@
 
 Auditoría original: 31 de octubre de 2026. Cierre de QA de etapa 5: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`, destino propuesto: `dev`.
 
-**Estado actual: corrección local de contraste implementada y mediciones focalizadas PASS; pendiente de última revisión visual antes del commit.** Etapas 1–4 aprobadas técnica y visualmente por el equipo. Los fallos detectados en etapa 5 se conservan como antecedentes en 0.e y su corrección se documenta en [0.f](#0f-corrección-local-de-contraste). Safari/Firefox, lector real, zoom manual, revisión PT-BR y consentimiento permanecen PENDIENTES. Un PASS en los criterios medidos no certifica toda la accesibilidad ni equivale a aprobación editorial/legal. Home/fichas conservan su chrome institucional.
+**Estado actual: ajustes de UX implementados y colores oficiales restaurados por decisión de producto; contraste vigente FAIL y última revisión manual PENDIENTE.** El selector aparece solo en el header, sin portal; el foco nativo ya no provoca el salto reproducido en Chrome. Ver [0.g](#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system). Los PASS de contraste de 0.f son históricos y corresponden a overrides retirados. Permanecen pendientes popup nativo con puntero, Safari/Firefox, lector real, zoom manual, revisión brasileña, pregunta de empleo y consentimiento ES/PT. Fidelidad visual y accesibilidad son aprobaciones diferentes.
 
 ## 0. Etapa 1 — estado al cerrar la infraestructura
 
@@ -478,6 +478,8 @@ Rutas relativas a `apps/testimonios`: **64 archivos de `origin/dev...HEAD`** y d
 
 ## 0.f. Corrección local de contraste
 
+**Referencia histórica:** la corrección de colores de esta sección fue retirada posteriormente por decisión de producto, sin borrar sus mediciones ni capturas. Los resultados vigentes se encuentran en 0.g. Solo permanece el foco funcional de campos explicado allí.
+
 ### Cambios y límites
 
 Se corrigieron exclusivamente estilos propios de `/enviar` y su QA. Los tokens globales y `@repo/ui` no cambian. La geometría, textos, categorías, provider/query, handlers, estado, archivos, recorte, consentimiento, FormData, Server Actions, layouts, footer y logo se conservan. Los módulos de campo solo se consumen desde este formulario.
@@ -544,6 +546,96 @@ Ocho imágenes nuevas, sin iterar nuevas variantes de diseño. Cada par muestra 
 Suite i18n/errores **75/75**, TypeScript, ESLint y build de producción correctos; `git diff --check` y referencias locales correctos. Se verificó que los handlers y archivos fuera del alcance no cambian. No se instaló ninguna dependencia ni se inspeccionaron credenciales. Se cerraron servidor y Chrome propios y se retiró su perfil temporal. No se repitió la batería completa de etapas 3–4 ni se hicieron envíos reales, commit, push, merge o PR.
 
 Los tres hallazgos de contraste quedan resueltos para la matriz medida; la última aprobación visual de estos cambios sigue pendiente del equipo antes del commit. Se mantienen abiertos **Safari/Firefox, lector de pantalla real, zoom manual de navegador/dispositivo, revisión brasileña, pregunta de empleo y consentimiento editorial/legal en ambos idiomas**. No se garantizan contrastes sobre cualquier fotografía de participante ni apariencia nativa en motores no probados; no se modificó el cropper o el procesamiento de imágenes. La descripción de PR de 0.e es histórica: al prepararla de nuevo, sustituir sus reservas de contraste por esta corrección y conservar los pendientes externos.
+
+## 0.g. Ajustes finales de UX y fidelidad al Design System
+
+### Diagnóstico del salto, antes de implementar
+
+Se reprodujo sobre el build anterior con clicks reales de CDP, no mediante asignar un value al select. El salto ocurre **entre mousedown y focusin**, antes de la selección de idioma, de History API o del render traducido. El elemento sticky ya está visible, pero el padding de scroll raíz reserva `--site-header-height + 16px` para el contenido; el revelado automático del foco intenta sacarlo de esa zona reservada y desplaza el documento. El portal no interviene: en estos casos el recorte está cerrado.
+
+La prueba aislada de `select.focus()` reproduce el salto. `focus({ preventScroll: true })` lo evita, pero se utilizó solo para diagnosticar. Dos experimentos temporales en el navegador —padding raíz a cero o margen negativo solo del select— también lo evitan. Se eligió el segundo para no alterar el comportamiento del resto del documento.
+
+| Caso reproducido | Antes: scrollY al enfocar | Después: scrollY al enfocar |
+| --- | --- | --- |
+| Desktop 1440px · paso 3 | 276 → 0 | 276 → 276 |
+| Desktop 1440px · paso 5 | 839 → 451 | 839 → 839 |
+| Móvil 375px · paso 3 | 340 → 0 | 340 → 340 |
+| Móvil 375px · paso 5 | 1073 → 685 | 1073 → 1073 |
+
+Se ejecutaron 12 combinaciones de ancho/idioma inicial/paso (1, 3 y 5), además de inicio real con scroll cero. Los valores de la tabla son ejemplos del registro completo, no posiciones exigidas a cualquier traducción. Evidencias: [antes](./ui/assets/form-ux/before-scroll.json) y [después](./ui/assets/form-ux/after-scroll.json); incluyen eventos, posiciones, foco, llamadas a replaceState y frames posteriores. En cambios de idioma se permiten reajustes pequeños por altura traducida o límites del documento.
+
+### Solución mínima y selector exclusivo del header
+
+`form-header.module.css` añade únicamente a `.row select`:
+
+```css
+scroll-margin-block-start: calc(-1 * (var(--site-header-height, 0px) + 16px));
+```
+
+Compensa el padding reservado solo para el control que ya está visible en el sticky. No añade scrollTo correctivo, preventDefault, foco artificial, scroll bloqueado ni navegación. Conserva la altura observada del header y el padding global; país, pasos, errores y éxito no reciben este margen. `setLocale`, la integración nativa de History API y el effect de metadata no se modificaron.
+
+Se eliminan `createPortal` y la rama de portal de `FormLanguageSelect`; `selectorHost`, su setter y estado del provider; el contenedor ref de `CaptureCropDialog`; y `select` de su guarda de Tab. No se oculta un portal mediante CSS. Hay una instancia del selector, siempre en FormHeader; con modal abierto permanece detrás y nativamente inerte. Para cambiar idioma hay que cancelar o terminar el recorte y usar el header.
+
+El modal conserva locale, foco inicial, ciclo Tab/Shift+Tab, Escape, Cancelar, confirmación y retorno al input. Se comprobaron zoom, desplazamiento de imagen y original conservados durante navegación; una imagen confirmada permanece tras cancelar un reemplazo con Escape o botón. No se tocaron object URLs, aspectos, JPEG, carga, reemplazos o manejo asíncrono.
+
+### Estilos restaurados y decisión de foco
+
+Se inspeccionó `e434ddb` y su padre, sin revertir el commit completo. Se restauran los tokens anteriores de inputs, textarea, país, idioma, pickers, sufijo opcional e indicador de radio no seleccionado: borde `border`, placeholder/sufijo `text-muted`. Siguiente, enviar, confirmar recorte y copiar vuelven a la variante `gradient` original de `@repo/ui`. El degradado computado de las 30 muestras vuelve a ser rosa `rgb(255, 0, 148)` → cyan `rgb(2, 190, 239)`, 135 grados.
+
+Se retiran todas las referencias `controls.primary` y su CSS: no hay color-mix, proporciones nuevas, fondo oscuro o variante paralela. El foco de CTA vuelve al estilo compartido. Se conserva **solo** `.field:focus-visible` en `form-controls.module.css`: contorno cyan ya existente en la paleta, 2px/offset 3px, para distinguir error enfocado de error sin enfocar. Es una mejora funcional local de teclado sin cambiar colores de reposo ni competir con la variante compartida; el archivo conserva dos consumidores reales (input/select y textarea). No queda CSS huérfano. Los indicadores previos de selector, picker, radios y títulos permanecen.
+
+### QA vigente: funcionalidad y contraste separados
+
+| Área | Estado | Evidencia y límite |
+| --- | --- | --- |
+| Scroll por foco/puntero | **PASS en Chrome** | Clicks nativos, foco ordinario y cancelación solicitada con Escape; no salto en 12 escenarios ni en inicio a cero. |
+| Teclado e idioma | **PASS en Chrome** | Shift+Tab alcanza el selector sin salto; Space, flechas y Enter envían cambios nativos `isTrusted`; se mantienen form DOM, paso, datos, imagen, consentimiento, URL y metadata. |
+| Popup nativo y selección de opción con puntero | **PENDIENTE manual** | Headless/CDP no hace observable la apertura del popup (`:open` falso). Las fases del log llamadas «opened/cancelled» registran la solicitud, no certifican que el popup se haya mostrado. No se declara probado el click sobre una opción ni la UI del menú del sistema. |
+| Modal sin selector | **PASS focalizado** | Cuatro casos ES/PT y anchos 375/1440: header inerte, cero selects en modal, foco inicial/Tab contenido, zoom/posición y retorno. Cancelación de reemplazo conserva preview. |
+| Estilos compartidos | **PASS de implementación** | Colores y clases coinciden con el estado anterior a `e434ddb`, salvo el foco funcional de campos conservado. Última aprobación visual humana pendiente. |
+| Placeholders | **FAIL** | Mínimo activo **3,6027:1**, sin cambiar el umbral 4,5:1. |
+| Delimitaciones necesarias | **FAIL** | Mínimo **1,3923:1**; sobre base, borde oficial **1,5083:1**, por debajo de 3:1. |
+| Texto de CTA | **FAIL** | Mínimo rasterizado **2,6863:1**, por debajo de 4,5:1. No se sustituye por la estimación geométrica anterior. |
+| Cobertura de contraste | **PASS de cobertura, resultado global FAIL** | 100 muestras de placeholder, 272 delimitaciones, 30 combinaciones de CTA y 10 sondas deshabilitadas. Métodos y umbrales de 0.f conservados. |
+| Responsive y regresión técnica | **PASS focalizado** | ES/PT a 375/1440, texto al 200%, sin overflow; suite 75/75, TypeScript, ESLint y build correctos. No se repitió la batería visual completa de etapas 3–4. |
+
+Contraste mínimo rasterizado por acción, incluyendo normal/hover/foco: siguiente **3,2442:1**, confirmar recorte **2,6863:1**, enviar **2,7394:1**, copiar **3,6749:1**. Los deshabilitados se distinguen como inactivos, sin contabilizarlos como texto activo aprobado. El equipo responsable del Design System deberá definir una solución futura de accesibilidad; restaurar la apariencia oficial no significa aprobar estos contrastes ni rebajar los criterios WCAG.
+
+Resultados actuales: [current-results.json](./ui/assets/form-ds/current-results.json). Los directorios `form-i18n`, `form-layouts`, `form-acceptance` y `form-contrast`, incluidos los PASS obtenidos con el degradado oscuro, se conservan sin modificaciones y no describen la UI vigente.
+
+### Evidencia visual mínima
+
+| Caso | Antes de la corrección local, colores oficiales | Override oscuro histórico | Estado restaurado actual |
+| --- | --- | --- | --- |
+| ES · 375px | [Original](./ui/assets/form-contrast/before-es-375.png) | [Oscuro](./ui/assets/form-contrast/after-es-375.png) | [Actual](./ui/assets/form-ds/current-es-375.png) |
+| PT-BR · 375px | [Original](./ui/assets/form-contrast/before-pt-BR-375.png) | [Oscuro](./ui/assets/form-contrast/after-pt-BR-375.png) | [Actual](./ui/assets/form-ds/current-pt-BR-375.png) |
+| ES · 1440px | [Original](./ui/assets/form-contrast/before-es-1440.png) | [Oscuro](./ui/assets/form-contrast/after-es-1440.png) | [Actual](./ui/assets/form-ds/current-es-1440.png) |
+| PT-BR · 1440px | [Original](./ui/assets/form-contrast/before-pt-BR-1440.png) | [Oscuro](./ui/assets/form-contrast/after-pt-BR-1440.png) | [Actual](./ui/assets/form-ds/current-pt-BR-1440.png) |
+
+Una quinta captura nueva muestra el [modal ES sin selector a 375px](./ui/assets/form-ux/crop-es-375.png), con header detrás, foco dentro y recorte activo. El idioma de la captura corresponde al locale seleccionado antes de abrir el modal, no al idioma inicial de la navegación del caso.
+
+### Archivos modificados y validación
+
+Rutas relativas a `apps/testimonios`:
+
+| Archivos | Cambio |
+| --- | --- |
+| `components/form-header.module.css` | Compensación local de scroll; comentario del portal obsoleto retirado. `form-header.tsx` no necesita cambios. |
+| `components/form-language-select.tsx`, `components/form-locale-provider.tsx` | Portal/API/estado de host eliminados; select y URL conservados. Borde oficial restaurado. |
+| `components/capture-crop-dialog.tsx` | Host y rama de Tab del selector eliminados; CTA oficial restaurado. |
+| `components/enviar-fields.tsx`, `components/enviar-form.tsx`, `components/form-controls.module.css` | Colores y variantes oficiales; CSS local reducido al foco funcional. |
+| `scripts/qa-form-ux.mjs`, nuevo | Diagnóstico antes de cambios y regresión de scroll/teclado/modal con datos sintéticos. |
+| `scripts/qa-form-acceptance.mjs` | Espera modal sin selector y guarda mediciones/capturas actuales en `form-ds`; conserva detector de FAIL. |
+| `scripts/qa-form-i18n.mjs` | Actualiza expectativas del portal y guarda futuras ejecuciones en `form-regression-current`, sin sobrescribir la historia. No se ejecutó el escenario completo en esta etapa. |
+| `docs/form-i18n-audit.md`, `docs/ui/README.md`, `docs/ui/components/{form-language-select,capture-crop-dialog,field,form-header}.md` | Estado vigente, historia, límites y decisiones documentados. |
+| `docs/ui/assets/form-ds/` | Cuatro PNG `current-{es,pt-BR}-{375,1440}.png` y `current-results.json`, nuevos. |
+| `docs/ui/assets/form-ux/` | `before-scroll.json`, `after-scroll.json`, `crop-es-375.png`, nuevos. |
+
+Ejecutados: `node scripts/test-form-i18n.mjs` **75/75**; `pnpm.cmd exec tsc --noEmit --incremental false`; `pnpm.cmd run lint`; `pnpm.cmd run build`; `git diff --check`; QA focalizado `node scripts/qa-form-ux.mjs` y `node scripts/qa-form-acceptance.mjs`. El último termina normalmente pero su resultado de contraste es **FAIL**, como corresponde a los colores restaurados. Dos POST del QA de aceptación fueron interceptados con éxito simulado antes de Next; el QA de scroll no hizo POST. Sin Server Actions reales, Storage, notificaciones o servicios escritos. Servidores, Chrome y perfiles propios cerrados al terminar.
+
+Comprobación manual final: en Chrome visible y posteriormente Safari/Firefox, abrir el selector por puntero al inicio y desplazado en pasos 3/5, cerrar sin cambiar y elegir una opción con click; repetir con Tab/Enter/flechas/Escape. Registrar scroll antes de foco, menú y cambio; confirmar foco visible, datos y locale. Comparar el menú del sistema con los límites de headless documentados, sin confundir asignar value por JS con interacción del usuario. Revisar también el modal sin selector, Escape/Cancelar/confirmar y preview anterior conservado.
+
+Pendientes que siguen abiertos: revisión brasileña, pregunta de empleo, consentimiento ES/PT, Safari/Firefox, lector de pantalla real y zoom real. No se intervino en esos temas. No se modificaron backend, validaciones, payloads, catálogo, imágenes, layouts públicos, metadata, dependencias o tokens globales; no se leyeron `.env*` ni credenciales. Sin commit, push, merge o PR. Detenido para revisión manual final; no equivale a conformidad WCAG ni a autorización de despliegue.
 
 ## 1. Arquitectura aprobada e integración
 
@@ -866,7 +958,7 @@ Usar fixtures inequívocos y dobles para la acción/repositorio/inbox. La integr
 
 **Hechos verificados**: estructura y copy del checkout, reglas descritas, conservación en memoria, mensajes/labels compartidos, registro de consentimiento, uso de imágenes, header raíz y ausencia de i18n instalada.
 
-**Estado de las propuestas**: etapas 1–4 implementadas y aprobadas técnica/visualmente por el equipo; etapa 5 detectó contraste insuficiente y la corrección local de 0.f lo resuelve en la matriz medida. Última revisión visual, aprobación editorial/legal y QA manual externo permanecen pendientes. No equivale a certificación de accesibilidad.
+**Estado de las propuestas**: etapas 1–4 implementadas y aprobadas técnica/visualmente por el equipo; la corrección local de 0.f obtuvo PASS y luego se retiró para restaurar el Design System según 0.g. Contraste actual FAIL; scroll de foco y modal sin selector corregidos en Chrome. Última revisión manual, editorial/legal y QA externo pendientes. No equivale a certificación de accesibilidad.
 
 **Decisiones pendientes**: revisión brasileña, autorización equivalente, información legal adicional y matiz editorial de empleo. En esta versión se aprobó retirar el footer institucional del formulario y dejar su logo sin enlace. La ubicación del consentimiento y navegación/edición por pasos permanecen en sus propias issues.
 
