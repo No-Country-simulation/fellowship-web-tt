@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type FormEvent,
   type ReactNode,
 } from "react";
 import { Check, ChevronDown, Copy, RotateCcw } from "lucide-react";
@@ -74,7 +75,7 @@ import {
 } from "./PublishConfirmDialog";
 import { inputClassName, textareaClassName } from "./fields";
 
-type Intent = "save" | "publish" | "reject";
+type Intent = "save" | "publish";
 
 type CaptionSnapshot = {
   quote: string;
@@ -140,6 +141,10 @@ export function ReviewForm({
 }) {
   const action = reviewTestimonial.bind(null, testimonial.id);
   const [state, formAction, pending] = useActionState(action, initialReviewState);
+  const [rejectState, rejectFormAction, rejectPending] = useActionState(
+    reviewTestimonial.bind(null, testimonial.id),
+    initialReviewState,
+  );
   const [opened] = useState(() => openedSnapshot(testimonial));
   const [openedCards] = useState(() => readCardInputs(testimonial));
   const [quote, setQuote] = useState(opened.quote);
@@ -158,9 +163,8 @@ export function ReviewForm({
   const [cardAttempt, setCardAttempt] = useState<"publish" | "retry" | null>(null);
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [confirmReject, setConfirmReject] = useState(false);
-  const [rejecting, setRejecting] = useState(false);
+  // pending llega un render después: el ref corta el segundo envío y el cierre en ese hueco.
   const rejectLock = useRef(false);
-  const rejectSawPending = useRef(false);
   const formId = `admin-review-form-${testimonial.id}`;
   const [copied, setCopied] = useState(false);
   const [baseline, setBaseline] = useState<CaptionSnapshot>(opened);
@@ -294,6 +298,18 @@ export function ReviewForm({
   }, [state]);
 
   useEffect(() => {
+    if (rejectState.status === "error") {
+      allowUnload.current = false;
+    }
+  }, [rejectState]);
+
+  useEffect(() => {
+    if (!rejectPending) {
+      rejectLock.current = false;
+    }
+  }, [rejectPending]);
+
+  useEffect(() => {
     if (!copied) {
       return;
     }
@@ -369,33 +385,19 @@ export function ReviewForm({
     return () => window.clearTimeout(timeout);
   }, [applyNameToCaptions, fields.fullName]);
 
-  if (pending && intent === "reject") {
-    rejectSawPending.current = true;
-  } else if (!pending && rejectSawPending.current) {
-    rejectSawPending.current = false;
-    rejectLock.current = false;
-    if (rejecting) {
-      setRejecting(false);
-    }
-  }
-
-  function submitReject(form: HTMLFormElement) {
-    if (rejectLock.current || rejecting || pending || preparingCard) {
+  function onRejectSubmit(event: FormEvent<HTMLFormElement>) {
+    // El diálogo está en un portal, pero en el árbol de React sigue dentro del form de guardar.
+    event.stopPropagation();
+    if (rejectLock.current || rejectPending) {
+      event.preventDefault();
       return;
     }
     rejectLock.current = true;
     allowUnload.current = true;
-    setIntent("reject");
-    setRejecting(true);
-    const formData = new FormData(form);
-    formData.set("intent", "reject");
-    startTransition(() => {
-      formAction(formData);
-    });
   }
 
   function closeRejectDialog() {
-    if (rejectLock.current || rejecting || (pending && intent === "reject")) {
+    if (rejectLock.current || rejectPending) {
       return;
     }
     setConfirmReject(false);
@@ -488,11 +490,6 @@ export function ReviewForm({
       onSubmit={(event) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         const value = submitter instanceof HTMLButtonElement ? submitter.value : "";
-        if (value === "reject") {
-          event.preventDefault();
-          submitReject(event.currentTarget);
-          return;
-        }
         event.preventDefault();
         const captionsNow = applyNameToCaptions(fields.fullName);
         if (value !== "publish") {
@@ -774,13 +771,13 @@ export function ReviewForm({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <button
             type="button"
-            disabled={pending || preparingCard || rejecting}
+            disabled={pending || preparingCard || rejectPending}
             className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
             aria-haspopup="dialog"
             aria-expanded={confirmReject}
             onClick={() => setConfirmReject(true)}
           >
-            {rejecting || (pending && intent === "reject") ? "Rechazando…" : "Rechazar"}
+            {rejectPending ? "Rechazando…" : "Rechazar"}
           </button>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
@@ -789,7 +786,7 @@ export function ReviewForm({
                 Cambios guardados. Todavía no está publicado.
               </p>
             ) : null}
-            {state.status === "error" && !(confirmReject && intent === "reject") ? (
+            {state.status === "error" ? (
               <p className="text-admin-caption text-destructive" role="alert">
                 {state.message}
               </p>
@@ -812,7 +809,9 @@ export function ReviewForm({
             {cardError ? (
               <button
                 type="button"
-                disabled={pending || preparingCard || quoteInvalid || captionInvalid || cardInvalid}
+                disabled={
+                  pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+                }
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
                 onClick={() => {
                   void publishWithCard("retry");
@@ -825,7 +824,9 @@ export function ReviewForm({
               type="submit"
               name="intent"
               value="save"
-              disabled={pending || preparingCard || quoteInvalid || captionInvalid || cardInvalid}
+              disabled={
+                pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+              }
               className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
               onClick={() => setIntent("save")}
             >
@@ -833,7 +834,9 @@ export function ReviewForm({
             </button>
             <button
               type="button"
-              disabled={pending || preparingCard || quoteInvalid || captionInvalid || cardInvalid}
+              disabled={
+                pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+              }
               className={cn(buttonVariants({ variant: "default", size: "lg" }))}
               onClick={() => setConfirmPublish(true)}
             >
@@ -858,12 +861,12 @@ export function ReviewForm({
       />
       <RejectConfirmDialog
         open={confirmReject}
-        formId={formId}
-        pending={pending || preparingCard || rejecting}
-        submitting={rejecting || (pending && intent === "reject")}
-        error={intent === "reject" && state.status === "error" ? state.message : null}
+        action={rejectFormAction}
+        filtersField={filtersField}
+        pending={rejectPending}
+        error={rejectState.status === "error" ? rejectState.message : null}
         onCancel={closeRejectDialog}
-        onFallbackSubmit={submitReject}
+        onSubmit={onRejectSubmit}
       />
     </form>
   );
@@ -871,20 +874,20 @@ export function ReviewForm({
 
 function RejectConfirmDialog({
   open,
-  formId,
+  action,
+  filtersField,
   pending,
-  submitting,
   error,
   onCancel,
-  onFallbackSubmit,
+  onSubmit,
 }: {
   open: boolean;
-  formId: string;
+  action: (formData: FormData) => void;
+  filtersField: string;
   pending: boolean;
-  submitting: boolean;
   error: string | null;
   onCancel: () => void;
-  onFallbackSubmit: (form: HTMLFormElement) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const titleId = useId();
   const descriptionId = useId();
@@ -892,52 +895,40 @@ function RejectConfirmDialog({
 
   return (
     <ModalDialog open={open} onClose={onCancel} titleId={titleId} descriptionId={descriptionId}>
-      <div className="flex flex-col gap-2">
-        <h2 id={titleId} className="text-admin-heading font-semibold text-foreground">
-          ¿Rechazar este testimonio?
-        </h2>
-        <p id={descriptionId} className="text-admin-caption text-muted-foreground">
-          No sale en la galería ni en las redes.
-        </p>
-      </div>
-      {error ? (
-        <p id={errorId} className="text-admin-caption text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
-      <div className="flex flex-wrap justify-end gap-2">
-        <button
-          type="button"
-          disabled={pending}
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-          onClick={onCancel}
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          form={formId}
-          name="intent"
-          value="reject"
-          disabled={pending}
-          className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
-          onClick={(event) => {
-            if (pending) {
-              event.preventDefault();
-              return;
-            }
-            const form = document.getElementById(formId);
-            if (!(form instanceof HTMLFormElement) || event.currentTarget.form !== form) {
-              event.preventDefault();
-              if (form instanceof HTMLFormElement) {
-                onFallbackSubmit(form);
-              }
-            }
-          }}
-        >
-          {submitting ? "Rechazando…" : "Rechazar"}
-        </button>
-      </div>
+      <form action={action} className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <input type="hidden" name="intent" value="reject" readOnly />
+        <input type="hidden" name={INBOX_FILTERS_FIELD} value={filtersField} readOnly />
+        <div className="flex flex-col gap-2">
+          <h2 id={titleId} className="text-admin-heading font-semibold text-foreground">
+            ¿Rechazar este testimonio?
+          </h2>
+          <p id={descriptionId} className="text-admin-caption text-muted-foreground">
+            No sale en la galería ni en las redes.
+          </p>
+        </div>
+        {error ? (
+          <p id={errorId} className="text-admin-caption text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            disabled={pending}
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+            onClick={onCancel}
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={pending}
+            className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
+          >
+            {pending ? "Rechazando…" : "Rechazar"}
+          </button>
+        </div>
+      </form>
     </ModalDialog>
   );
 }
