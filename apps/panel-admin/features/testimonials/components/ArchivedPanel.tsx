@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useEffectEvent, useId, useRef, useState, type FormEvent } from "react";
 import { useFormStatus } from "react-dom";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
@@ -197,13 +197,12 @@ function ArchivedActionControls({
   onIdle: () => void;
 }) {
   const { pending } = useFormStatus();
-  const onIdleRef = useRef(onIdle);
+  const onIdleEvent = useEffectEvent(onIdle);
   const wasPending = useRef(false);
-  onIdleRef.current = onIdle;
 
   useEffect(() => {
     if (wasPending.current && !pending) {
-      onIdleRef.current();
+      onIdleEvent();
     }
     wasPending.current = pending;
   }, [pending]);
