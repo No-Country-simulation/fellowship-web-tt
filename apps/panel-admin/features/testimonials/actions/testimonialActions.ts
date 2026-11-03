@@ -15,6 +15,8 @@ import {
   prepareShareCard,
   publishTestimonial,
   deleteRejectedTestimonials,
+  isInboxCursorTimestamp,
+  loadInboxSlice,
   rejectArchivedTestimonial,
   rejectTestimonial,
   republishTestimonial,
@@ -30,7 +32,14 @@ import type {
   ReturnToReviewState,
   ReviewState,
 } from "../types/reviewState";
-import { ARCHIVE_REASON_MAX_CHARS, BULK_DELETE_MAX } from "../types/testimonial";
+import {
+  ARCHIVE_REASON_MAX_CHARS,
+  BULK_DELETE_MAX,
+  isTestimonialStatus,
+  type InboxPageCursor,
+  type InboxPageSlice,
+  type TestimonialStatus,
+} from "../types/testimonial";
 import {
   SHARE_CARD_TOO_LARGE_MESSAGE,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
@@ -150,7 +159,7 @@ export async function reviewTestimonial(
     };
   }
 
-  const latest = await getTestimonialById(id);
+  const latest = await getTestimonialById(id, { fresh: true });
   const share = latest.ok
     ? await sharePublished(latest.testimonial, null)
     : {
@@ -351,6 +360,33 @@ export async function deleteRejectedAction(formData: FormData): Promise<BulkDele
     failed: deleted.failedIds.length,
     skipped: deleted.skippedIds.length,
   };
+}
+
+const inboxMoreError = "No pudimos cargar más testimonios. Probá de nuevo.";
+
+/** Única lectura del inbox por action. La primera página la pide el slot. */
+export async function loadInboxPage(input: {
+  status: TestimonialStatus;
+  cursor: InboxPageCursor;
+}): Promise<{ ok: true; page: InboxPageSlice } | { ok: false; message: string }> {
+  if (!input || typeof input !== "object") {
+    return { ok: false, message: inboxMoreError };
+  }
+  const status = input.status;
+  const cursor = input.cursor;
+  if (!isTestimonialStatus(status)) {
+    return { ok: false, message: inboxMoreError };
+  }
+  if (
+    !cursor ||
+    typeof cursor.id !== "string" ||
+    typeof cursor.submittedAt !== "string" ||
+    !isTestimonialId(cursor.id) ||
+    !isInboxCursorTimestamp(cursor.submittedAt)
+  ) {
+    return { ok: false, message: inboxMoreError };
+  }
+  return loadInboxSlice(status, { id: cursor.id, submittedAt: cursor.submittedAt });
 }
 
 function revalidateTestimonials(id: string | readonly string[]) {
