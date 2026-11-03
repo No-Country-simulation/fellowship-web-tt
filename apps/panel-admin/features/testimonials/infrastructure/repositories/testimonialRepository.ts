@@ -1,14 +1,22 @@
+import { cache } from "react";
+
 import type { BufferPostStates, ShareChannels } from "../../types/share";
 import {
   BULK_DELETE_MAX,
-  type AdminInboxData,
+  INBOX_PAGE_SIZE,
+  TESTIMONIAL_STATUSES,
+  isTestimonialStatus,
+  type AdminInboxPage,
   type AdminTestimonial,
+  type InboxPageCursor,
+  type InboxPageSlice,
+  type InboxStatusCounts,
   type TestimonialStatus,
 } from "../../types/testimonial";
 import { getPost, hasInstagramChannel, hasLinkedInChannel } from "../buffer";
 import type { Database, Json, TestimonialDto } from "../dtos/testimonialDto";
 import { hasCommunityWebhook } from "../discord";
-import { TestimonialMapper } from "../mappers/testimonialMapper";
+import { TestimonialMapper, mapInboxRows, type InboxListRow } from "../mappers/testimonialMapper";
 import { hasSupabaseServiceRoleEnv } from "../supabase/env";
 import { createServiceRoleClient } from "../supabase/service-role";
 import {
@@ -20,6 +28,21 @@ import {
 
 const missingServiceRole =
   "Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY. El inbox no puede leer ni publicar todavía.";
+
+const inboxLoadError = "No pudimos cargar el inbox. Probá de nuevo.";
+
+const inboxMoreError = "No pudimos cargar más testimonios. Probá de nuevo.";
+
+/**
+ * ISO acotado, el texto crudo de `submitted_at`.
+ * No se reescribe con `Date`: eso pierde microsegundos.
+ */
+const INBOX_CURSOR_TIMESTAMP =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+export function isInboxCursorTimestamp(value: string) {
+  return value.length <= 32 && INBOX_CURSOR_TIMESTAMP.test(value);
+}
 
 const SHARE_CARD_NAME = "instagram.png";
 
@@ -46,18 +69,59 @@ export function isTestimonialId(id: string) {
 }
 
 // Back real: tabla `testimonials` con service_role. No hay mock.
-export async function loadAdminInbox(): Promise<AdminInboxData> {
-  const listed = await listTestimonials();
+/** Primera página del estado y los cuatro totales. Un conteo fallido queda en `null`. */
+export async function loadInboxFirstPage(status: TestimonialStatus): Promise<AdminInboxPage> {
+  const [listed, countPairs] = await Promise.all([
+    queryInboxPage(status, null),
+    Promise.all(
+      TESTIMONIAL_STATUSES.map(async (item) => [item, await countInboxStatus(item)] as const),
+    ),
+  ]);
+
+  const counts = emptyInboxCounts();
+  for (const [item, count] of countPairs) {
+    counts[item] = count;
+  }
+
+  if (!listed.ok) {
+    return {
+      status,
+      items: [],
+      rowIds: [],
+      omitted: 0,
+      cursor: null,
+      counts,
+      loadError: listed.message,
+    };
+  }
 
   return {
-    items: listed.ok
-      ? listed.testimonials.map((row) => TestimonialMapper.toInboxItem(row, mediaFor(row)))
-      : [],
-    loadError: listed.ok ? null : listed.message,
+    status,
+    ...listed.page,
+    counts,
+    loadError: null,
   };
 }
 
-export async function getTestimonialById(id: string): Promise<
+/** Página siguiente. El cursor ya tiene que ser uuid + ISO acotado: si no, no arma el filtro. */
+export async function loadInboxSlice(
+  status: TestimonialStatus,
+  cursor: InboxPageCursor,
+): Promise<{ ok: true; page: InboxPageSlice } | { ok: false; message: string }> {
+  if (!isTestimonialStatus(status) || !isInboxCursor(cursor)) {
+    return { ok: false, message: inboxMoreError };
+  }
+  const listed = await queryInboxPage(status, cursor);
+  if (!listed.ok) {
+    return { ok: false, message: listed.message };
+  }
+  return { ok: true, page: listed.page };
+}
+
+export async function getTestimonialById(
+  id: string,
+  options?: { fresh?: boolean },
+): Promise<
   | {
       ok: true;
       testimonial: AdminTestimonial;
@@ -65,12 +129,22 @@ export async function getTestimonialById(id: string): Promise<
     }
   | { ok: false; message: string; notFound?: boolean }
 > {
-  const row = await getTestimonialRow(id);
+  // `fresh` salta la cache del request. Publicar lee dos veces: la segunda
+  // tiene que ver la fila ya actualizada, no la de antes del update.
+  const row = options?.fresh ? await fetchTestimonialRow(id) : await getTestimonialRow(id);
   if (!row.ok) {
     return row;
   }
 
-  const testimonial = mapTestimonial(row.testimonial);
+  let testimonial: AdminTestimonial;
+  try {
+    testimonial = mapTestimonial(row.testimonial);
+  } catch {
+    return {
+      ok: false,
+      message: "No pudimos cargar el testimonio. Probá de nuevo.",
+    };
+  }
 
   return {
     ok: true,
@@ -446,31 +520,91 @@ export async function prepareShareCard(slug: string, file: File | null): Promise
   return publicStorageUrl(SHARE_CARDS_BUCKET, path);
 }
 
-async function listTestimonials(
-  status?: TestimonialStatus,
-): Promise<{ ok: true; testimonials: TestimonialDto[] } | { ok: false; message: string }> {
+function emptyInboxCounts(): InboxStatusCounts {
+  return {
+    in_review: null,
+    published: null,
+    archived: null,
+    rejected: null,
+  };
+}
+
+function isInboxCursor(cursor: InboxPageCursor) {
+  return isTestimonialId(cursor.id) && isInboxCursorTimestamp(cursor.submittedAt);
+}
+
+/** Keyset descendente. Timestamp e id van entre comillas para el filtro `or`. */
+function inboxKeysetFilter(cursor: InboxPageCursor) {
+  const ts = cursor.submittedAt;
+  const id = cursor.id;
+  return `submitted_at.lt."${ts}",and(submitted_at.eq."${ts}",id.lt."${id}")`;
+}
+
+async function countInboxStatus(status: TestimonialStatus): Promise<number | null> {
+  if (!hasSupabaseServiceRoleEnv()) return null;
+  try {
+    const supabase = createServiceRoleClient();
+    const { count, error } = await supabase
+      .from("testimonials")
+      .select("id", { count: "exact", head: true })
+      .eq("status", status);
+    if (error || count === null) return null;
+    return count;
+  } catch {
+    return null;
+  }
+}
+
+async function queryInboxPage(
+  status: TestimonialStatus,
+  cursor: InboxPageCursor | null,
+): Promise<{ ok: true; page: InboxPageSlice } | { ok: false; message: string }> {
   if (!hasSupabaseServiceRoleEnv()) {
     return { ok: false, message: missingServiceRole };
   }
-
-  const supabase = createServiceRoleClient();
-  let query = supabase.from("testimonials").select("*").order("submitted_at", { ascending: false });
-  if (status) {
-    query = query.eq("status", status);
+  if (cursor && !isInboxCursor(cursor)) {
+    return { ok: false, message: inboxMoreError };
   }
-  const { data, error } = await query;
 
-  if (error) {
+  try {
+    const supabase = createServiceRoleClient();
+    let query = supabase
+      .from("testimonials")
+      .select("id, type, status, full_name, quote, avatar_path, submitted_at")
+      .eq("status", status)
+      .order("submitted_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(INBOX_PAGE_SIZE);
+    if (cursor) {
+      query = query.or(inboxKeysetFilter(cursor));
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      return { ok: false, message: inboxLoadError };
+    }
+
+    const rows: InboxListRow[] = data ?? [];
+    const mapped = mapInboxRows(rows);
+    const last = rows[rows.length - 1];
     return {
-      ok: false,
-      message: "No pudimos cargar el inbox. Probá de nuevo.",
+      ok: true,
+      page: {
+        items: mapped.items,
+        rowIds: rows.map((row) => row.id),
+        omitted: mapped.omitted,
+        cursor:
+          last && typeof last.submitted_at === "string" && typeof last.id === "string"
+            ? { submittedAt: last.submitted_at, id: last.id }
+            : null,
+      },
     };
+  } catch {
+    return { ok: false, message: inboxLoadError };
   }
-
-  return { ok: true, testimonials: data };
 }
 
-async function getTestimonialRow(id: string): Promise<
+async function fetchTestimonialRow(id: string): Promise<
   | { ok: true; testimonial: TestimonialDto }
   | { ok: false; message: string; notFound?: boolean }
 > {
@@ -498,6 +632,9 @@ async function getTestimonialRow(id: string): Promise<
 
   return { ok: true, testimonial: data };
 }
+
+/** Misma fila que la ficha. En un request, las dos llamadas comparten el `select("*")`. */
+export const getTestimonialRow = cache(fetchTestimonialRow);
 
 type PostedAtColumn =
   | "discord_posted_at"

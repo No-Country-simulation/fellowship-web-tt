@@ -77,6 +77,11 @@ export function useInboxFilters() {
 }
 
 export function InboxBackLink({ children }: { children: ReactNode }) {
-  const { listHref } = useInboxFilters();
-  return <PageBackLink href={listHref}>{children}</PageBackLink>;
+  const { status, type, search, share } = useInboxFilters();
+  const href = inboxHref(
+    "/testimonials",
+    { status, type, search },
+    share ? { share } : undefined,
+  );
+  return <PageBackLink href={href}>{children}</PageBackLink>;
 }
