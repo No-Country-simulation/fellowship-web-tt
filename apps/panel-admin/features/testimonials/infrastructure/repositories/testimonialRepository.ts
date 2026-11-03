@@ -70,7 +70,15 @@ export async function getTestimonialById(id: string): Promise<
     return row;
   }
 
-  const testimonial = mapTestimonial(row.testimonial);
+  let testimonial: AdminTestimonial;
+  try {
+    testimonial = mapTestimonial(row.testimonial);
+  } catch {
+    return {
+      ok: false,
+      message: "No pudimos cargar el testimonio. Probá de nuevo.",
+    };
+  }
 
   return {
     ok: true,
