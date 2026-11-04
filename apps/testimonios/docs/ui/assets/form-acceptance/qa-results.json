@@ -1,0 +1,129 @@
+{
+  "associations": "PASS",
+  "contrast": "FAIL",
+  "screenReader": "PENDIENTE: no operable manual screen-reader session",
+  "browserZoom": {
+    "status": "PENDIENTE",
+    "shortcutChangedMetrics": false,
+    "before": {
+      "width": 320,
+      "dpr": 1,
+      "scale": 1
+    },
+    "after": {
+      "width": 320,
+      "dpr": 1,
+      "scale": 1
+    },
+    "note": "Headless/CDP shortcut does not certify real browser zoom; manual desktop/mobile QA required."
+  },
+  "samples": [
+    {
+      "locale": "es",
+      "width": 1440,
+      "associations": "PASS",
+      "errors": "PASS",
+      "placeholder": {
+        "color": "rgb(102, 102, 102)",
+        "opacity": "1",
+        "background": "rgb(0, 1, 21)",
+        "contrast": 3.6027123755794754
+      },
+      "border": {
+        "color": "rgb(45, 43, 64)",
+        "contrast": 1.5082805515126219
+      },
+      "secondary": {
+        "color": "rgb(153, 153, 153)"
+      },
+      "button": {
+        "color": "rgb(255, 255, 255)",
+        "gradient": "linear-gradient(135deg, rgb(255, 0, 148) 0%, rgb(2, 190, 239) 100%)",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "estimatedMinContrastAtCharacterCentres": 3.907560304254531
+      }
+    },
+    {
+      "locale": "es",
+      "width": 320,
+      "associations": "PASS",
+      "errors": "PASS",
+      "placeholder": {
+        "color": "rgb(102, 102, 102)",
+        "opacity": "1",
+        "background": "rgb(0, 1, 21)",
+        "contrast": 3.6027123755794754
+      },
+      "border": {
+        "color": "rgb(45, 43, 64)",
+        "contrast": 1.5082805515126219
+      },
+      "secondary": {
+        "color": "rgb(153, 153, 153)"
+      },
+      "button": {
+        "color": "rgb(255, 255, 255)",
+        "gradient": "linear-gradient(135deg, rgb(255, 0, 148) 0%, rgb(2, 190, 239) 100%)",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "estimatedMinContrastAtCharacterCentres": 3.907560304254531
+      }
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "associations": "PASS",
+      "errors": "PASS",
+      "placeholder": {
+        "color": "rgb(102, 102, 102)",
+        "opacity": "1",
+        "background": "rgb(0, 1, 21)",
+        "contrast": 3.6027123755794754
+      },
+      "border": {
+        "color": "rgb(45, 43, 64)",
+        "contrast": 1.5082805515126219
+      },
+      "secondary": {
+        "color": "rgb(153, 153, 153)"
+      },
+      "button": {
+        "color": "rgb(255, 255, 255)",
+        "gradient": "linear-gradient(135deg, rgb(255, 0, 148) 0%, rgb(2, 190, 239) 100%)",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "estimatedMinContrastAtCharacterCentres": 4.0226235082959105
+      }
+    },
+    {
+      "locale": "pt-BR",
+      "width": 320,
+      "associations": "PASS",
+      "errors": "PASS",
+      "placeholder": {
+        "color": "rgb(102, 102, 102)",
+        "opacity": "1",
+        "background": "rgb(0, 1, 21)",
+        "contrast": 3.6027123755794754
+      },
+      "border": {
+        "color": "rgb(45, 43, 64)",
+        "contrast": 1.5082805515126219
+      },
+      "secondary": {
+        "color": "rgb(153, 153, 153)"
+      },
+      "button": {
+        "color": "rgb(255, 255, 255)",
+        "gradient": "linear-gradient(135deg, rgb(255, 0, 148) 0%, rgb(2, 190, 239) 100%)",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "estimatedMinContrastAtCharacterCentres": 4.0226235082959105
+      }
+    }
+  ],
+  "blockedPosts": 0,
+  "realSubmissions": 0,
+  "browserErrors": []
+}

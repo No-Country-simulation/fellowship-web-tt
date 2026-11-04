@@ -1,0 +1,6 @@
+/* Functional field focus only: existing cyan token distinguishes focus from error.
+ * Colors, borders, placeholders and shared CTA variants use the official styles. */
+.field:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}

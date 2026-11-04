@@ -35,10 +35,15 @@ import { CaptureCropDialog } from "@/components/capture-crop-dialog";
 
 ## Notas
 
+- Confirmar usa la variante `gradient` oficial de `@repo/ui`, sin import de `form-controls.module.css`, mezcla oscura o variante paralela. Los ratios PASS de 0.f pertenecen al estilo anterior ya retirado. El contraste vigente y su FAIL se documentan en [0.g](../../form-i18n-audit.md#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system).
+
+- Requiere `FormLocaleProvider` para título, descripción, controles, alt, instrucciones y `lang`. No contiene selector ni host de portal. El selector permanece en el header inerte; se cancela o confirma el recorte antes de cambiar idioma. La guarda de Tab recorre recorte, Zoom y acciones, sin rama exclusiva del select. Zoom, posición, object URLs, procesamiento y refs permanecen. Véase [FormLanguageSelect](./form-language-select.md).
+
 - `react-easy-crop` solo marca el recuadro (arrastrar y zoom) y devuelve los píxeles. El JPG lo recorta `lib/testimonials/prepare-image.ts` con canvas: 1080×608 (16:9) la testimonial, 720×720 el perfil.
 - El recorte de perfil es un cuadrado chico (`18rem` / `40vh`) para que el modal no se estire.
 - Se abre con `showModal()`, sin animaciones de escala. El título recibe el foco
-  inicial; el diálogo tiene nombre y descripción asociados. La modalidad nativa
+  inicial, sin outline de bloque completo; los controles conservan su foco visible.
+  El diálogo tiene nombre y descripción asociados. La modalidad nativa
   deja el contenido exterior inerte. Una guarda local cierra el ciclo de Tab y
   Shift+Tab, evitando que el foco pase a la interfaz del navegador.
 - Escape, Cancelar o un clic que empieza y termina fuera del panel cancelan una

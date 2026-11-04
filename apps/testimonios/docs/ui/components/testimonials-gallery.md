@@ -93,4 +93,4 @@ La grilla muestra todos los resultados: una columna en mobile, dos desde `md` (7
 
 Cada historia utiliza `TestimonialCard variant="gallery"`, con avatar real, cita recortada a tres líneas y enlace a `/t/[slug]`. En mobile, las filas automáticas permiten una altura independiente según el contenido; desde `md`, la card conserva un mínimo de 17rem. Mantiene hover, foco y reducción de movimiento. El componente y la grilla no agregan nuevos contenedores de scroll.
 
-Los textos provisionales se agrupan en `GALLERY_COPY`. El componente declara `"use client"` para el estado de la búsqueda y del filtro; la carga de datos y el hero permanecen en el servidor. `app/page.tsx` conserva `force-dynamic` y el contrato público existente.
+Los textos provisionales se agrupan en `GALLERY_COPY`. El componente declara `"use client"` para el estado de la búsqueda y del filtro; la carga de datos y el hero permanecen en el servidor. `app/(public)/page.tsx` conserva `force-dynamic` y el contrato público existente.

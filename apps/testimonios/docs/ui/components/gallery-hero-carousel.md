@@ -14,7 +14,7 @@ Recibe `stories: readonly HeroStory[]`, preparado en servidor y serializado. `He
 
 Los campos profesionales proceden únicamente de los payloads ya analizados en `PublicTestimonial`, según su tipo real. Se omiten valores ausentes. No se envían historia completa, datos de contacto, captions ni información privada. Las referencias a tipos del servidor se borran al compilar.
 
-`app/page.tsx` hace una sola llamada a `listPublishedTestimonials()`, que lee `testimonials_public`. `selectHeroStories`, protegido con `server-only`, conserva hasta tres registros; con más, aplica Fisher–Yates parcial sobre una copia. No cambia el orden de los datos originales ni vuelve a consultar Supabase. La selección permanece estable durante la navegación y la hidratación; otra carga puede elegir otros publicados.
+`app/(public)/page.tsx` hace una sola llamada a `listPublishedTestimonials()`, que lee `testimonials_public`. `selectHeroStories`, protegido con `server-only`, conserva hasta tres registros; con más, aplica Fisher–Yates parcial sobre una copia. No cambia el orden de los datos originales ni vuelve a consultar Supabase. La selección permanece estable durante la navegación y la hidratación; otra carga puede elegir otros publicados.
 
 ## Cantidades y errores
 

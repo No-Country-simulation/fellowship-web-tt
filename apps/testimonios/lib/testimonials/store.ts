@@ -3,6 +3,7 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { AVATARS_BUCKET, CAPTURES_BUCKET } from "@/lib/supabase/storage";
 
 import type { ParsedTestimonial } from "./parse";
+import { formIssue, type FormIssue } from "./issues";
 
 export type StoredTestimonial = {
   id: string;
@@ -11,18 +12,16 @@ export type StoredTestimonial = {
 
 const SLUG_MAX_BASE = 40;
 
+export type SaveTestimonialResult =
+  | { ok: true; testimonial: StoredTestimonial }
+  | { ok: false; issue: FormIssue };
+
 export async function saveTestimonial(
   data: ParsedTestimonial,
-): Promise<
-  | { ok: true; testimonial: StoredTestimonial }
-  | { ok: false; message: string }
-> {
+): Promise<SaveTestimonialResult> {
   if (!hasSupabaseServiceRoleEnv()) {
-    return {
-      ok: false,
-      message:
-        "Falta SUPABASE_SERVICE_ROLE_KEY. El envío no se puede guardar todavía.",
-    };
+    console.error("Testimonial service unavailable");
+    return { ok: false, issue: formIssue("submit.unavailable") };
   }
 
   const supabase = createServiceRoleClient();
@@ -55,8 +54,6 @@ export async function saveTestimonial(
     }
   }
 
-  let lastError: string | null = null;
-
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const slug = buildSlug(data.fullName);
     const { error } = await supabase.from("testimonials").insert({
@@ -84,7 +81,6 @@ export async function saveTestimonial(
       return { ok: true, testimonial: { id, slug } };
     }
 
-    lastError = error.message;
     if (error.code !== "23505") {
       break;
     }
@@ -95,10 +91,8 @@ export async function saveTestimonial(
     await removeUploaded(supabase, CAPTURES_BUCKET, capturePath);
   }
 
-  return {
-    ok: false,
-    message: lastError ?? "No pudimos guardar el testimonio. Probá de nuevo.",
-  };
+  console.error("Testimonial persistence failed");
+  return { ok: false, issue: formIssue("submit.saveFailed") };
 }
 
 function buildSlug(fullName: string) {
@@ -136,17 +130,15 @@ async function uploadImage(
   bucket: string,
   path: string,
   file: File,
-): Promise<{ ok: true } | { ok: false; message: string }> {
+): Promise<{ ok: true } | { ok: false; issue: FormIssue }> {
   const { error } = await supabase.storage.from(bucket).upload(path, file, {
     contentType: file.type || "image/jpeg",
     upsert: false,
   });
 
   if (error) {
-    return {
-      ok: false,
-      message: "No pudimos subir la imagen. Probá con jpg, png o webp.",
-    };
+    console.error("Testimonial image upload failed");
+    return { ok: false, issue: formIssue("submit.uploadFailed") };
   }
 
   return { ok: true };
