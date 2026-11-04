@@ -296,38 +296,30 @@ export function InboxList({
           }}
         >
           {filters.share ? <input type="hidden" name="share" value={filters.share} /> : null}
-          <div
-            className={cn(
-              "grid items-start gap-1",
-              formHref ? "grid-cols-[minmax(0,4fr)_minmax(0,1fr)]" : "grid-cols-1",
-            )}
-          >
-            <div className="relative min-w-0">
-              <Search
-                aria-hidden
-                className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-              />
-              <input
-                type="search"
-                name="s"
-                defaultValue={query}
-                maxLength={INBOX_SEARCH_MAX}
-                placeholder="Buscar nombre o cita"
-                aria-label="Buscar testimonios"
-                className="h-8 w-full rounded-md border border-input bg-background pl-7 pr-7 text-admin-caption text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
-              />
-              {query ? (
-                <Link
-                  href={filters.href({ search: "" })}
-                  scroll={false}
-                  aria-label="Limpiar búsqueda"
-                  className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
-                >
-                  <X aria-hidden className="size-3.5" />
-                </Link>
-              ) : null}
-            </div>
-            <CopyFormLinkButton href={formHref} compact />
+          <div className="relative min-w-0">
+            <Search
+              aria-hidden
+              className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="search"
+              name="s"
+              defaultValue={query}
+              maxLength={INBOX_SEARCH_MAX}
+              placeholder="Buscar nombre o cita"
+              aria-label="Buscar testimonios"
+              className="h-8 w-full rounded-md border border-input bg-background pl-7 pr-7 text-admin-caption text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query ? (
+              <Link
+                href={filters.href({ search: "" })}
+                scroll={false}
+                aria-label="Limpiar búsqueda"
+                className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded text-muted-foreground hover:text-foreground"
+              >
+                <X aria-hidden className="size-3.5" />
+              </Link>
+            ) : null}
           </div>
           <div className="grid grid-cols-2 gap-1">
             <select
@@ -494,11 +486,6 @@ export function InboxList({
                     ? "No hay testimonios archivados."
                     : `No hay testimonios con estado ${STATUS_LABELS[status].toLowerCase()}.`}
               </p>
-              {status === "in_review" && formHref ? (
-                <div className="mt-2">
-                  <CopyFormLinkButton href={formHref} />
-                </div>
-              ) : null}
             </div>
           ) : null}
 
@@ -528,6 +515,12 @@ export function InboxList({
           ) : null}
         </>
       )}
+
+      {formHref ? (
+        <div className="sticky bottom-0 mt-auto shrink-0 border-t border-border bg-card py-2">
+          <CopyFormLinkButton href={formHref} />
+        </div>
+      ) : null}
     </>
   );
 }

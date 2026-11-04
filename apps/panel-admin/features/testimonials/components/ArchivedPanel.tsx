@@ -5,13 +5,13 @@ import { useFormStatus } from "react-dom";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { rejectArchivedAction, republishAction } from "../actions/testimonialActions";
+import { republishAction } from "../actions/testimonialActions";
 import { INBOX_FILTERS_FIELD } from "../infrastructure/inboxQuery";
 import type { AdminTestimonial } from "../types/testimonial";
 import { useInboxFilters } from "./InboxFilters";
 import { ModalDialog } from "./ModalDialog";
 
-type ArchivedActionKind = "republish" | "reject";
+type ArchivedActionKind = "republish";
 
 const ARCHIVED_ACTIONS = {
   republish: {
@@ -21,16 +21,9 @@ const ARCHIVED_ACTIONS = {
     description: "Vuelve a la galería. No se reenvían los posts.",
     variant: "default",
   },
-  reject: {
-    label: "Rechazar",
-    pendingLabel: "Rechazando…",
-    title: "¿Rechazar este testimonio?",
-    description: "No sale en la galería ni en las redes.",
-    variant: "destructive",
-  },
 } as const;
 
-/** Archivado: el motivo queda a la vista. Se puede volver a publicar o rechazar. */
+/** Archivado: el motivo queda a la vista. Se puede volver a publicar. */
 export function ArchivedPanel({ testimonial }: { testimonial: AdminTestimonial }) {
   const { filtersField } = useInboxFilters();
   const [open, setOpen] = useState<ArchivedActionKind | null>(null);
@@ -51,8 +44,8 @@ export function ArchivedPanel({ testimonial }: { testimonial: AdminTestimonial }
       </header>
       {testimonial.archiveReason ? (
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="text-admin-caption font-medium text-foreground">Motivo</h3>
-          <p className="whitespace-pre-wrap break-words text-admin-body text-foreground">
+          <h3 className="text-admin-body font-semibold text-foreground">Motivo</h3>
+          <p className="whitespace-pre-wrap break-words text-admin-caption text-muted-foreground">
             {testimonial.archiveReason}
           </p>
         </div>
@@ -63,12 +56,6 @@ export function ArchivedPanel({ testimonial }: { testimonial: AdminTestimonial }
           open={open === "republish"}
           disabled={busy !== null && busy !== "republish"}
           onOpen={() => setOpen("republish")}
-        />
-        <ArchivedActionButton
-          kind="reject"
-          open={open === "reject"}
-          disabled={busy !== null && busy !== "reject"}
-          onOpen={() => setOpen("reject")}
         />
       </div>
       {open ? (
@@ -127,8 +114,7 @@ function ArchivedActionDialog({
   onBusy: () => void;
   onSettled: () => void;
 }) {
-  const action =
-    kind === "republish" ? republishAction.bind(null, id) : rejectArchivedAction.bind(null, id);
+  const action = republishAction.bind(null, id);
   const copy = ARCHIVED_ACTIONS[kind];
   const titleId = useId();
   const descriptionId = useId();

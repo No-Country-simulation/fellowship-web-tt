@@ -20,8 +20,8 @@ Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código v
 `features/testimonials` (`components/`, `types/`, `infrastructure/` y `actions/`). Las páginas
 piden datos al repository. Publicar, guardar, rechazar, archivar, volver a publicar,
 reintentar y eliminar rechazados son Server Actions. Publicar y reintentar llaman al
-repository y después a Discord y Buffer. Archivar, volver a publicar, rechazar un archivado
-y eliminar rechazados no mandan posts. No hay mocks:
+repository y después a Discord y Buffer. Archivar, volver a publicar y eliminar rechazados
+no mandan posts. No hay mocks:
 el repository lee y escribe Supabase con `service_role`. El resto del panel sigue en mock.
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
@@ -98,8 +98,7 @@ El detalle queda con `?status=archived` y el inbox lo lista en Archivados. Sale 
 Archivar no borra los posts ya enviados a Discord, Instagram ni LinkedIn, ni los ids de Buffer,
 ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar lo devuelve a
 `published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
-de publicados vuelve a ofrecer Reintentar. Rechazar un archivado lo pasa a `rejected`, limpia el
-motivo y vuelve a `/testimonials` con los filtros del inbox.
+de publicados vuelve a ofrecer Reintentar. La ficha de un archivado solo ofrece «Volver a publicar».
 
 Desde el detalle de un rechazado se puede devolver el envío a revisión (`rejected` → `in_review`).
 Pide confirmación. El update solo gana si la fila sigue `rejected`: el estado pasa a `in_review`
