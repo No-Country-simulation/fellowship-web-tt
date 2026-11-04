@@ -517,7 +517,7 @@ export function InboxList({
       )}
 
       {formHref ? (
-        <div className="sticky bottom-0 mt-auto shrink-0 border-t border-border bg-card px-3 py-2">
+        <div className="sticky bottom-0 mt-auto shrink-0 border-t border-border bg-card py-2">
           <CopyFormLinkButton href={formHref} />
         </div>
       ) : null}

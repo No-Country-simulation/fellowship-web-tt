@@ -40,7 +40,7 @@ export function CopyFormLinkButton({ href }: { href: string | null }) {
   }
 
   return (
-    <div className="flex max-w-full shrink-0 flex-col items-start gap-1">
+    <div className="flex max-w-full shrink-0 flex-col items-center gap-1">
       <button
         type="button"
         onClick={() => {
@@ -50,9 +50,8 @@ export function CopyFormLinkButton({ href }: { href: string | null }) {
         aria-label="Copiar link del formulario"
         data-copied={copied ? "" : undefined}
         className={cn(
-          buttonVariants({ variant: "outline", size: "xs" }),
-          "max-w-full transition-[border-color,background-color,color] duration-200 active:border-primary",
-          copied && "border-primary bg-primary/10 text-primary",
+          buttonVariants({ variant: "ghost", size: "xs" }),
+          "max-w-full transition-all duration-200 border-none bg-transparent"
         )}
       >
         <span key={ack} className={cn("inline-flex", copied && "motion-safe:animate-copy-ack")}>
