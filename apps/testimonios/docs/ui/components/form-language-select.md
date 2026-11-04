@@ -1,23 +1,28 @@
-# FormLanguageSelect
+# FormLanguageSelect — ES / EN / PT
 
-Selector nativo exclusivo del formulario, montado en el [FormHeader](./form-header.md).
+Control de idioma **exclusivo de `FormHeader`** en `/enviar`. Sigue el patrón visual compacto observado en Talent: disparador con `ES`, `EN` o `PT` y menú oscuro con opciones en orden **EN, ES, PT**. No usa flags, la cookie de Talent (`NEXT_LOCALE`) ni dependencias adicionales. Se aproxima a su CSS: disparador sin borde, menú slate y opción activa azul.
 
 ```tsx
 import { FormLanguageSelect } from "@/components/form-language-select";
+
+<FormLanguageSelect />
 ```
 
-No recibe props: requiere `FormLocaleProvider` y consume su locale, traductor y función de cambio. Montar **una sola instancia**, en `FormHeader`, fuera de la rama de éxito de `EnviarForm`. El grupo público conserva su navbar y footer independientes.
+### Contrato de locale
 
-`FormLocaleProvider` recibe `initialLocale` y `children`, no genera un wrapper DOM y usa `useSearchParams` como fuente de verdad. El cambio llama a History API `replaceState`, conservando query ajeno y fragmento. No recarga ni crea otro wizard. El provider requiere el límite de Suspense que compone `app/enviar/page.tsx`; la página espera el query para render inicial y metadata.
+- Códigos canónicos de la app y de `?lang=`: `es`, `en`, `pt`.
+- `?lang=pt-BR` sigue siendo **alias de lectura** del portugués para no romper enlaces previos.
+- La variante del contenido portugués es de Brasil y su atributo HTML utiliza `lang="pt-BR"`.
+- Query `lang` inválida o duplicada: fallback `es`. Sin query: preferencia guardada en `testimonios_locale` o, en una primera visita, `es`.
+- Seleccionar un idioma **no modifica la URL**: guarda una cookie funcional `testimonios_locale` (ruta `/enviar`, `SameSite=Lax`, duración de un año). Los enlaces directos `?lang=...` tienen prioridad en una navegación nueva; al cambiar manualmente desde uno, la URL permanece igual y un *refresh* vuelve a aplicar el idioma explícito de esa URL.
+- No se escribe `NEXT_LOCALE`; Talent se tomó como referencia de códigos visibles y estilo, no como dependencia técnica.
 
-El label se traduce; los nombres «Español» y «Português (Brasil)» llevan sus propios atributos `lang`, sin banderas. En el header móvil el label queda visualmente oculto, conservando el nombre accesible; es visible en desktop. Header, `<main>` y diálogo declaran el idioma vigente; navbar y footer públicos conservan el idioma del sitio.
+El control utiliza un `button` con nombre accesible localizado que incluye el idioma activo, `aria-haspopup="listbox"`, `aria-expanded` y un popup `role="listbox"` cuyas opciones tienen `role="option"`, `aria-selected`, nombre completo y `lang` correspondiente. Teclado: Enter/Espacio para abrir o elegir, flechas para navegar, Inicio/Fin para primera/última opción, Escape para cerrar y devolver foco al disparador, Tab para continuar. Pulsar fuera cierra el menú. Se aplica `focus({preventScroll:true})` **solo** para colocar/retornar el foco dentro del menú, no para restaurar un scroll que ya saltó.
 
-El selector permanece **exclusivamente en FormHeader**, incluso con recorte abierto. No hay portal, host ni setter en el provider, y el diálogo no contiene otro select. La modalidad nativa deja el header inerte: para cambiar idioma, cancelar o terminar el recorte y usar el selector del header. El diálogo usa el locale vigente al abrirse; no se añade estado ni lógica de imagen.
+`FormLocaleProvider` mantiene `useSearchParams` únicamente para reaccionar a enlaces directos y navegación History, pero **no llama `history.replaceState` al seleccionar idioma**. La preferencia se guarda en cookie; `app/enviar/page.tsx` lee la cookie en servidor para el HTML y metadata inicial cuando no hay `?lang=`. Esto no remonta `EnviarForm`. Los datos, archivos, recorte confirmado, paso, validaciones y consentimiento siguen en sus estados originales. Metadata de página y atributo `html.lang` se sincronizan en cliente; este último se restablece a `es` al desmontar el formulario. **Limitación**: el root layout compartido emite `html lang="es"` en el HTML SSR inicial; el locale de EN/PT se aplica al hidratar. Se necesita otra decisión arquitectónica si se requiere `html.lang` localizado desde el primer byte del HTML. `main`, header y diálogo se sirven con su `lang` localizado.
 
-El padding de scroll raíz reserva la altura del sticky para el contenido. `form-header.module.css` aplica solo al select `scroll-margin-block-start: calc(-1 * (var(--site-header-height, 0px) + 16px))`, evitando que el foco nativo vuelva a revelar un control ya visible en esa zona reservada. Mantiene click, teclado, foco y select nativo; no añade scrollTo, preventDefault, recarga o navegación. Los offsets legítimos del contenido permanecen.
+El menú está posicionado sobre el documento, no en un portal ni dentro de `CaptureCropDialog`. El `dialog` nativo hace inerte al header; la persona debe cerrar o confirmar el recorte antes de cambiar idioma. La compensación específica del scroll en `form-header.module.css` ahora aplica al disparador y a las opciones enfocables, sin cambiar padding global ni foco legítimo hacia campos con error.
 
-No usar el locale como key. La URL conserva solo la preferencia de idioma: no existe borrador persistido. El consentimiento PT sigue pendiente de revisión editorial/legal antes del lanzamiento.
+La UI de este selector usa los colores slate de la referencia aportada por Talent (`#1e293b`, `#334155`, `#cbd5e1`, `#60a5fa`) sin cambiar los tokens globales ni otros componentes. El foco visible conserva `--accent-cyan`. Mantener documentados los contrastes insuficientes conocidos; no se declaran corregidos.
 
-El borde vuelve al token oficial `border`; el foco conserva outline cyan. El contraste insuficiente de ese borde queda registrado como FAIL por decisión de fidelidad al Design System, sin alterar tokens globales ni umbrales de QA.
-
-QA actual, registros antes/después y limitación del popup nativo en headless: [auditoría de i18n](../../form-i18n-audit.md#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system). Las etapas 3–4 conservan la decisión histórica del portal, ya retirada.
+QA manual necesario: menú con puntero y teclado a mitad del formulario, Escape y selección sin salto de scroll, 375/1440px, tres idiomas, diálogo de recorte abierto/cerrado, respuesta al zoom del navegador y lectores de pantalla reales. Ver auditoría `docs/form-i18n-audit.md` sección 0.h.

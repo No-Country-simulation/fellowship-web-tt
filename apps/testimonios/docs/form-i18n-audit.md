@@ -977,3 +977,26 @@ Además de los archivos del proyecto enlazados, se leyó la documentación distr
 - `.../02-guides/internationalization.md`: diccionarios y alternativa de rutas localizadas.
 
 La documentación oficial externa de `next-intl` se cita en la comparación de estrategias; no se usaron fuentes secundarias ni se instaló la biblioteca. Para una implementación futura se deberán comprobar otra vez las APIs y compatibilidad de cualquier dependencia que se decida incorporar.
+
+
+## 0.h. Extensión ES/EN/PT y selector compacto (2026-11-03)
+
+**Nueva decisión de equipo:** Talent expone ES, EN y PT y se observó `NEXT_LOCALE=es/en/pt` al seleccionar cada opción. En esta aplicación se adoptan esos identificadores como códigos canónicos y se mantienen URLs con `pt-BR` como alias legible para enlaces anteriores; el catálogo portugués **sigue siendo brasileño**. No se importa la cookie ni la arquitectura de Talent.
+
+**Implementación:** se añadió `messages/en.ts` con todos los mensajes del formulario (incluidas las categorías, validaciones, consentimientos, países, recorte, resumen, metadata y pantalla final); se agregó `form.language.en` a los catálogos y contrato. La comparación automática de estructura y parámetros cubre 164 claves × 3 idiomas; el consentimiento en EN es una traducción de alcance equivalente a ES/PT, sin agregar redes ni autorizaciones. La aprobación editorial/legal permanece pendiente.
+
+`FormLanguageSelect` muestra un botón con ES/EN/PT, menú oscuro con opciones EN, ES y PT, selección marcada, foco y teclado administrados sin dependencias nuevas. Continúa **solo en el header**. Mantiene `replaceState`, parámetros no relacionados, fragmentos y el wizard montado. El header y las opciones reciben compensación local de scroll para no volver al inicio al enfocarse. El recorte no incorpora selector y conserva modalidad/foco.
+
+**Idioma HTML:** `main`, `FormHeader` y `CaptureCropDialog` declaran `en`, `es` o `pt-BR` según el catálogo. El provider sincroniza `document.documentElement.lang` en cliente y lo restaura al desmontarse; el root layout compartido continúa emitiendo `lang=es` inicialmente por SSR, **limitación pendiente** si se exige idioma global correcto antes de hidratación. No cambiar el root de las páginas públicas sin una decisión de arquitectura separada.
+
+**QA ejecutado en este entorno:** verificación aislada por Node + TypeScript de sintaxis TS/TSX, paridad de 164 claves y marcadores, URL canónica, alias, fallback, interpolación y alcance del consentimiento: PASS. Sintaxis JS de los scripts de navegador: comprobada. **No se ejecutaron aquí el build de Next, ESLint, el typecheck completo ni el navegador**, porque el ZIP no incluye `node_modules` y la instalación de pnpm no está disponible sin conexión al registro. Los PASS históricos de 75/75 pruebas y QA de Chrome corresponden a la versión anterior; no atribuirlos automáticamente a esta ampliación.
+
+**Validaciones pendientes en la máquina del colaborador:** `node scripts/test-form-i18n.mjs`, `pnpm.cmd exec tsc --noEmit`, `pnpm.cmd lint`, `pnpm.cmd build`, QA Chrome focalizado, menú abierto con puntero/teclado, contraste/documento y comportamiento en móvil/zoom. Pruebas del selector nativo anteriores a esta implementación quedan como registros históricos; actualizar sus diagnósticos específicos antes de repetirlos contra el menú nuevo. No se modificó lógica de negocio ni se efectuaron envíos reales o operaciones Git.
+
+
+### 0.i — Ajuste Talent: estilos del selector y preferencia de idioma (2026-11-04)
+
+- Referencia aportada: trigger ES/EN/PT sin borde permanente, dropdown slate (`#1e293b`, `#334155`), opción activa azul (`#60a5fa`), foco visible cyan de No Country. No se alteraron los colores globales.
+- Elegir idioma cambia el estado local y guarda `testimonios_locale` (cookie de preferencia, `Path=/enviar`, un año, `SameSite=Lax`). **No cambia la URL** ni remonta el formulario. No se usa la cookie `NEXT_LOCALE` de Talent.
+- Se mantienen enlaces explícitos `/enviar?lang=es|en|pt` y alias `pt-BR`: al abrirlos prevalece la query; sin `lang`, el servidor lee la preferencia para metadata y render inicial. Al cambiar manualmente en un enlace con `?lang`, la URL queda intacta; recargar ese enlace vuelve a seleccionar el idioma indicado en la query.
+- Test de preferencia/query, verificación de selección sin modificar el URL y persistencia tras recarga **pendiente de ejecución en entorno con Next/browser**. Mantener las comprobaciones previas de scroll, portal eliminado, modal y estado del formulario.

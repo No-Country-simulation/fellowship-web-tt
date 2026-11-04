@@ -3,15 +3,17 @@ import type { FormLocale } from "./locales";
 import { interpolateFormMessage } from "./format";
 import type { FormTranslator } from "./format";
 import { es } from "./messages/es";
+import { en } from "./messages/en";
 import { ptBR } from "./messages/pt-BR";
 import type { FormMessageKey, FormMessages } from "./types";
 
-const catalogs: Readonly<Record<FormLocale, FormMessages>> = { es, "pt-BR": ptBR };
+const catalogs: Readonly<Record<FormLocale, FormMessages>> = { es, en, pt: ptBR };
 
 /** Status is metadata, never part of the authorization shown to a participant. */
 export const FORM_CONSENT_REVIEW_STATUS = {
   es: "pending-editorial-legal-review",
-  "pt-BR": "pending-editorial-legal-review",
+  en: "pending-editorial-legal-review",
+  pt: "pending-editorial-legal-review",
 } as const satisfies Readonly<Record<FormLocale, string>>;
 
 /** Serializable catalog with no React, Next, browser or server-only dependencies. */

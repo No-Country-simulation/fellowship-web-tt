@@ -1,5 +1,7 @@
 "use client";
 
+import { formHtmlLang } from "@/lib/form-i18n/locales";
+
 import { EnviarForm } from "./enviar-form";
 import { EnviarIntro } from "./enviar-intro";
 import { useFormLocale } from "./form-locale-provider";
@@ -8,7 +10,7 @@ import { useFormLocale } from "./form-locale-provider";
 export function EnviarExperience() {
   const { locale } = useFormLocale();
   return (
-    <main lang={locale} className="flex min-w-0 flex-1 flex-col wrap-anywhere px-md py-md md:py-lg">
+    <main lang={formHtmlLang(locale)} className="flex min-w-0 flex-1 flex-col wrap-anywhere px-md py-md md:py-lg">
       <div className="container-content max-w-3xl">
         <EnviarForm><EnviarIntro /></EnviarForm>
       </div>

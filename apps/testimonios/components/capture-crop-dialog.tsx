@@ -1,5 +1,7 @@
 "use client";
 
+import { formHtmlLang } from "@/lib/form-i18n/locales";
+
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { Button } from "@repo/ui/button";
@@ -121,7 +123,7 @@ export function CaptureCropDialog({
   return (
     <dialog
       ref={dialogRef}
-      lang={locale}
+      lang={formHtmlLang(locale)}
       closedby="none"
       aria-labelledby={titleId}
       aria-describedby={descriptionId}

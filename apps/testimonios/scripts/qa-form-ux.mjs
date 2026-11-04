@@ -7,9 +7,9 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Focused native-selector/scroll and modal QA. --diagnose records the old build.
+// Current compact-listbox/scroll and modal QA; historical native-select evidence is in docs.
 // Reuses the Stage 4 public fixture; every browser POST is blocked before Next.
-const phase = process.argv.includes("--diagnose") ? "before" : "after";
+const phase = 'compact';
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -82,13 +82,13 @@ try {
   await cdp('Page.addScriptToEvaluateOnNewDocument',{source:`
     window.__qaEvents=[];
     window.qaMark=phase=>{
-      const select=document.querySelector('[data-form-language-select]');
+      const select=document.querySelector('[data-form-language-trigger]');
       const r=select?.getBoundingClientRect();
-      const record={phase,y:scrollY,locale:document.querySelector('main')?.lang,active:document.activeElement?.tagName,selectTop:r?.top,selectBottom:r?.bottom,open:select?.matches(':open')??false};
+      const record={phase,y:scrollY,locale:document.querySelector('main')?.lang,active:document.activeElement?.tagName,selectTop:r?.top,selectBottom:r?.bottom,open:!!document.querySelector('[role=listbox]')};
       window.__qaEvents.push(record);return record;
     };
     for(const type of ['pointerdown','mousedown','focusin','mouseup','click','input','change'])document.addEventListener(type,event=>{
-      if(event.target.matches?.('[data-form-language-select]')){const record=window.qaMark(type);record.trusted=event.isTrusted;}
+      if(event.target.matches?.('[data-form-language-trigger], [role=option]')){const record=window.qaMark(type);record.trusted=event.isTrusted;}
     },true);
     addEventListener('scroll',()=>window.qaMark('scroll'),{passive:true});
     const original=history.replaceState;
@@ -116,8 +116,8 @@ try {
     await evaluate(text=>{const el=[...document.querySelectorAll('main button')].find(el=>el.getClientRects().length&&el.textContent.trim()===text);if(!el||el.disabled)throw new Error('Button unavailable');el.click();},text);
     await pause(70);
   }
-  const locale=()=>evaluate(()=>document.querySelector('main').lang);
-  const next=async()=>button(await locale()==='es'?'Siguiente':'Próximo');
+  const locale=()=>evaluate(()=>({ES:'es',EN:'en',PT:'pt'})[document.querySelector('[data-form-language-trigger]').textContent.trim()]);
+  const next=async()=>button(({es:'Siguiente',en:'Next',pt:'Próximo'})[await locale()]);
   async function avatar(){
     await evaluate(async()=>{const canvas=document.createElement('canvas');canvas.width=canvas.height=720;const ctx=canvas.getContext('2d');ctx.fillStyle='#19304b';ctx.fillRect(0,0,720,720);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const transfer=new DataTransfer();transfer.items.add(new File([blob],'qa-avatar.png',{type:'image/png'}));const el=document.querySelector('input[name="avatar"]');el.files=transfer.files;el.dispatchEvent(new Event('change',{bubbles:true}));});
     await until(()=>evaluate(()=>!!document.querySelector('dialog[open]')),'crop');
@@ -126,7 +126,7 @@ try {
   async function modalProbe(context){
     const start=await evaluate(()=>({dialogLocale:document.querySelector('dialog[open]').lang,locale:document.querySelector('main').lang,selectors:document.querySelectorAll('[data-form-language-select]').length,inside:!!document.querySelector('dialog [data-form-language-select]'),inHeader:!!document.querySelector('header [data-form-language-select]'),initialFocus:document.activeElement===document.querySelector('dialog h2')}));
     assert.equal(start.dialogLocale,start.locale);assert.equal(start.selectors,1);assert.equal(start.inside,false);assert.ok(start.inHeader&&start.initialFocus);
-    await evaluate(()=>document.querySelector('header select').focus({preventScroll:true}));
+    await evaluate(()=>document.querySelector('[data-form-language-trigger]').focus({preventScroll:true}));
     assert.equal(await evaluate(()=>!!document.activeElement.closest('dialog')),true,'native modality blocks header focus');
     for(const modifiers of [8,0,0,0,0,8,8]){
       await key('Tab','Tab',9,modifiers);
@@ -138,82 +138,78 @@ try {
     const crop=await evaluate(()=>({src:document.querySelector('dialog img').src,transform:document.querySelector('dialog img').style.transform,zoom:document.querySelector('dialog input[type="range"]').value}));
     await key('Tab','Tab',9);
     assert.deepEqual(await evaluate(()=>({src:document.querySelector('dialog img').src,transform:document.querySelector('dialog img').style.transform,zoom:document.querySelector('dialog input[type="range"]').value})),crop,'focus navigation preserves crop');
-    if(context.width===375&&context.initialLocale==='pt-BR'){
+    if(context.width===375&&context.initialLocale==='pt'){
       const shot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(join(output,`crop-${start.dialogLocale}-375.png`),Buffer.from(shot.data,'base64'));
     }
     modalChecks.push({...context,...start,headerInert:true,tabContained:true,cropPreserved:true});
   }
-  async function scrollProbe(context){
+  async function scrollProbe(context) {
+    context.initialUrl=await evaluate(()=>location.href);
     await key('Escape','Escape',27);
-    await evaluate(()=>{document.querySelector('[data-form-language-select]').blur();window.scrollTo({top:document.documentElement.scrollHeight-innerHeight,behavior:'instant'});});
+    await evaluate(() => {
+      document.querySelector('[data-form-language-trigger]').blur();
+      window.scrollTo({top:document.documentElement.scrollHeight-innerHeight,behavior:'instant'});
+      window.__qaEvents=[];
+      window.qaMark('before pointer');
+    });
     await pause(100);
-    await evaluate(()=>{window.__qaEvents=[];window.qaMark('before pointer');});
-    const point=await evaluate(()=>{const r=document.querySelector('[data-form-language-select]').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};});
+    const before=await evaluate(()=>scrollY);
+    const point=await evaluate(()=>{const r=document.querySelector('[data-form-language-trigger]').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};});
     await clickPoint(point.x,point.y);
-    await evaluate(()=>window.qaMark('native menu opened'));
+    await until(()=>evaluate(()=>!!document.querySelector('[role=listbox]')),'pointer opens listbox');
+    const pointerOpen=await evaluate(()=>({scroll:scrollY,count:document.querySelectorAll('[role=option]').length,expanded:document.querySelector('[data-form-language-trigger]').getAttribute('aria-expanded')}));
+    assert.equal(pointerOpen.count,3,'three EN/ES/PT options');
+    assert.equal(pointerOpen.expanded,'true','trigger expanded');
+    assert.ok(Math.abs(pointerOpen.scroll-before)<4,'pointer open keeps scroll');
     await key('Escape','Escape',27);
-    await evaluate(()=>window.qaMark('native menu cancelled'));
-    const pointer=await evaluate(()=>window.__qaEvents);
-    await evaluate(()=>{document.querySelector('[data-form-language-select]').blur();window.scrollTo({top:document.documentElement.scrollHeight-innerHeight,behavior:'instant'});window.__qaEvents=[];window.qaMark('before focus');document.querySelector('[data-form-language-select]').focus();window.qaMark('after focus');});
-    await pause(100);
-    const focus=await evaluate(()=>window.__qaEvents);
-    await evaluate(()=>{document.querySelector('[data-form-language-select]').blur();window.scrollTo({top:document.documentElement.scrollHeight-innerHeight,behavior:'instant'});window.__qaEvents=[];window.qaMark('before prevented focus');document.querySelector('[data-form-language-select]').focus({preventScroll:true});window.qaMark('after prevented focus');});
-    await pause(100);
-    const preventedFocus=await evaluate(()=>window.__qaEvents);
-    const cssExperiments=[];
-    if(phase==='before'&&context.step===5){
-      for(const variant of ['root padding zero','negative select margin']){
-        cssExperiments.push(await evaluate(variant=>{
-          const select=document.querySelector('[data-form-language-select]');const root=document.documentElement;
-          const oldRoot=root.style.scrollPaddingBlockStart,oldSelect=select.style.scrollMarginBlockStart;
-          if(variant==='root padding zero')root.style.scrollPaddingBlockStart='0px';else select.style.scrollMarginBlockStart='calc(-1 * (var(--site-header-height, 0px) + 16px))';
-          select.blur();window.scrollTo({top:document.documentElement.scrollHeight-innerHeight,behavior:'instant'});
-          const before=scrollY;select.focus();const after=scrollY;
-          root.style.scrollPaddingBlockStart=oldRoot;select.style.scrollMarginBlockStart=oldSelect;
-          return{variant,before,after};
-        },variant));
-      }
-      await evaluate(()=>{const select=document.querySelector('[data-form-language-select]');select.blur();window.scrollTo({top:document.documentElement.scrollHeight-innerHeight,behavior:'instant'});select.focus({preventScroll:true});});
-    }
-    await evaluate(()=>{document.querySelector('main a[href="/"]').focus({preventScroll:true});window.__qaEvents=[];window.qaMark('before ShiftTab');});
-    await key('Tab','Tab',9,8);
-    const tab=await evaluate(()=>{window.qaMark('after ShiftTab');return window.__qaEvents;});
-    if(phase==='after'){
-      assert.equal(await evaluate(()=>document.activeElement===document.querySelector('[data-form-language-select]')),true,'Tab reaches header selector');
-      assert.ok(tab.every(event=>Math.abs(event.y-tab[0].y)<3),'keyboard focus does not scroll sticky selector');
-    }
-    // Native keyboard selection after focus, not a programmatic value assignment.
-    await evaluate(()=>{window.__qaEvents=[];window.qaMark('before keyboard open');});
-    await key(' ','Space',32);
-    const open=await evaluate(()=>window.qaMark('keyboard menu opened'));
-    const expected=await locale()==='es'?'pt-BR':'es';
-    await key(expected==='pt-BR'?'ArrowDown':'ArrowUp',expected==='pt-BR'?'ArrowDown':'ArrowUp',expected==='pt-BR'?40:38);
+    assert.equal(await evaluate(()=>!!document.querySelector('[role=listbox]')),false,'Escape closes listbox');
+    assert.ok(Math.abs((await evaluate(()=>scrollY))-before)<4,'Escape keeps scroll');
+
+    await evaluate(()=>{const trigger=document.querySelector('[data-form-language-trigger]');trigger.blur();trigger.focus();});
+    assert.ok(Math.abs((await evaluate(()=>scrollY))-before)<4,'ordinary focus keeps scroll');
+    const previous=await locale();
     await key('Enter','Enter',13);
-    await pause(200);
-    const keyboard=await evaluate(()=>{window.qaMark('after keyboard locale render');return window.__qaEvents;});
-    const changed=await locale()===expected;
-    checks.push({...context,pointer,focus,preventedFocus,tab,keyboard,cssExperiments,keyboardNativeOpen:open.open,keyboardChanged:changed});
-    if(phase==='after'){
-      assert.ok(changed,'native keyboard changes language');
-      assert.ok(pointer.every(event=>Math.abs(event.y-pointer[0].y)<3),'pointer focus/open does not scroll');
-      assert.ok(focus.every(event=>Math.abs(event.y-focus[0].y)<3),'ordinary native focus does not scroll');
-      assert.ok(keyboard.every(event=>Math.abs(event.y-keyboard[0].y)<160),'native keyboard/locale has no large scroll jump');
-      assert.ok(keyboard.some(event=>event.phase==='change'&&event.trusted),'trusted native select change');
-      assert.ok(await evaluate(()=>document.querySelector('form')===window.__qaForm),'same form');
-      assert.equal(await evaluate(()=>new URLSearchParams(location.search).get('lang')===document.querySelector('main').lang&&document.querySelector('header').lang===document.querySelector('main').lang),true,'URL and regions stay synchronized');
-      assert.equal(await evaluate(()=>document.title.startsWith(document.querySelector('main').lang==='es'?'Comparte tu testimonio':'Compartilhe seu depoimento')),true,'localized metadata');
-    }
+    await until(()=>evaluate(()=>!!document.querySelector('[role=listbox]')),'keyboard opens listbox');
+    assert.equal(await evaluate(()=>document.activeElement.getAttribute('role')),'option');
+    await key('ArrowDown','ArrowDown',40);
+    await key('Enter','Enter',13);
+    // ArrowDown from the selected item follows the visible EN → ES → PT order.
+    const nextCode=({es:'pt',en:'es',pt:'en'})[previous];
+    await until(async()=>await locale()===nextCode,'keyboard selects language');
+    await pause(80);
+    assert.equal(await evaluate(()=>document.activeElement.hasAttribute('data-form-language-trigger')),true,'selection returns focus');
+    assert.ok(Math.abs((await evaluate(()=>scrollY))-before)<70,'keyboard locale switch has no large scroll jump');
+
+    // Pointer selection also works; select a different option with a real CDP click.
+    await clickPoint(point.x,point.y);
+    await until(()=>evaluate(()=>!!document.querySelector('[role=listbox]')),'second pointer opening');
+    const target=await evaluate(()=>{
+      const options=[...document.querySelectorAll('[role=option]')];
+      const active=options.findIndex(item=>item.getAttribute('aria-selected')==='true');
+      const el=options[(active+1)%options.length];const r=el.getBoundingClientRect();
+      return{x:r.left+r.width/2,y:r.top+r.height/2,short:el.textContent.trim()};
+    });
+    await clickPoint(target.x,target.y);
+    await until(()=>evaluate(short=>document.querySelector('[data-form-language-trigger]').textContent.trim()===short,target.short),'pointer selects option');
+    assert.equal(await evaluate(()=>!!document.querySelector('[role=listbox]')),false,'selection closes menu');
+    assert.ok(Math.abs((await evaluate(()=>scrollY))-before)<70,'pointer locale switch has no large scroll jump');
+    assert.ok(await evaluate(()=>document.querySelector('form')===window.__qaForm),'same form survives locale changes');
+    assert.equal(await evaluate(initial=>location.href===initial,context.initialUrl),true,'language selection leaves URL untouched');
+    assert.equal(await evaluate(()=>document.cookie.includes('testimonios_locale='+({ES:'es',EN:'en',PT:'pt'})[document.querySelector('[data-form-language-trigger]').textContent.trim()])),true,'language preference saved in cookie');
+    assert.equal(await evaluate(()=>document.querySelector('header').lang===document.querySelector('main').lang&&document.documentElement.lang===document.querySelector('main').lang),true,'all regions reflect active language');
+    const result={...context,before,pointerOpen,keyboardChanged:previous!==nextCode,pointerChanged:true,finalLocale:await locale(),events:await evaluate(()=>window.__qaEvents)};
+    checks.push(result);
   }
-  for(const width of [1440,375])for(const initialLocale of ['es','pt-BR']){
+  for(const width of [1440,375])for(const initialLocale of ['es','en','pt']){
     await cdp('Emulation.setDeviceMetricsOverride',{width,height:760,deviceScaleFactor:1,mobile:false});
     await cdp('Page.navigate',{url:origin+'/enviar?lang='+initialLocale});
-    await until(()=>evaluate(locale=>!!document.querySelector('main form')&&document.querySelector('main').lang===locale&&document.readyState==='complete',initialLocale),'form');
+    await until(()=>evaluate(locale=>!!document.querySelector('main form')&&document.querySelector('main').lang===(locale==='pt'?'pt-BR':locale)&&document.readyState==='complete',initialLocale),'form');
     await evaluate(()=>document.fonts.ready.then(()=>true));await pause(100);
     await evaluate(()=>{window.__qaForm=document.querySelector('form');});
-    if(phase==='after'){
+    if(phase==='compact'){
       await evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
-      const top=await evaluate(()=>{const r=document.querySelector('header select').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};});
+      const top=await evaluate(()=>{const r=document.querySelector('[data-form-language-trigger]').getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};});
       await clickPoint(top.x,top.y);await key('Escape','Escape',27);
       assert.equal(await evaluate(()=>scrollY),0,'selector at top stays at top');
       await next();assert.equal(await evaluate(()=>document.activeElement.name),'type','legitimate first-error focus');
@@ -222,10 +218,10 @@ try {
     await evaluate(()=>document.querySelector('input[value="simulation"]').click());await next();
     await input('input[name="full_name"]','Persona QA');await input('input[name="email"]','persona@example.com');await input('select[name="country"]','Argentina');
     await avatar();await until(()=>evaluate(()=>!document.querySelector('dialog button:last-child').disabled),'crop ready');
-    if(phase==='after')await modalProbe({width,initialLocale});
+    if(phase==='compact')await modalProbe({width,initialLocale});
     await evaluate(()=>document.querySelector('dialog button:last-child').click());await until(()=>evaluate(()=>!document.querySelector('dialog[open]')),'crop complete');
     assert.equal(await evaluate(()=>document.activeElement.name),'avatar','crop returns focus');
-    if(phase==='after'&&width===375&&initialLocale==='pt-BR'){
+    if(phase==='compact'&&width===375&&initialLocale==='pt'){
       const preview=await evaluate(()=>document.querySelector('input[name="avatar"]').closest('[data-field]').querySelector('img').src);
       for(const action of ['Escape','Cancel']){
         await avatar();
@@ -238,15 +234,15 @@ try {
     await next();await input('textarea[name="story"]','Historia sintética. Aprendí a colaborar con mi equipo y resolver problemas de desarrollo.');
     await scrollProbe({width,initialLocale,step:3});
     await next();await next();
-    if(phase==='after')await evaluate(()=>document.querySelector('input[name="consent"]').click());
+    if(phase==='compact')await evaluate(()=>document.querySelector('input[name="consent"]').click());
     await scrollProbe({width,initialLocale,step:5});
     assert.equal(await evaluate(()=>document.querySelector('input[name="full_name"]').value),'Persona QA');
-    if(phase==='after')assert.equal(await evaluate(()=>document.querySelector('input[name="consent"]').checked&&!document.querySelectorAll('fieldset')[4].hidden&&!!document.querySelector('input[name="avatar"]').closest('[data-field]').querySelector('img')),true,'step, consent and image preserved');
+    if(phase==='compact')assert.equal(await evaluate(()=>document.querySelector('input[name="consent"]').checked&&!document.querySelectorAll('fieldset')[4].hidden&&!!document.querySelector('input[name="avatar"]').closest('[data-field]').querySelector('img')),true,'step, consent and image preserved');
   }
   assert.equal(blockedPosts,0);assert.deepEqual(errors,[]);
-  const report={phase,checks,modalChecks,nativePopupVerification:'PENDIENTE: headless native popup not observable; verify pointer option selection and open/cancel manually',blockedPosts,realSubmissions:0,browserErrors:errors};
+  const report={phase,checks,modalChecks,popupVerification:'Native listbox opened, dismissed and selected with CDP pointer/keyboard',blockedPosts,realSubmissions:0,browserErrors:errors};
   await writeFile(join(output,phase+'-scroll.json'),JSON.stringify(report,null,2)+'\n');
-  console.log(JSON.stringify({phase,checks:checks.map(check=>({width:check.width,locale:check.initialLocale,step:check.step,pointer:check.pointer.map(e=>[e.phase,e.y]),cssExperiments:check.cssExperiments,keyboardChanged:check.keyboardChanged,keyboardNativeOpen:check.keyboardNativeOpen}))}));
+  console.log(JSON.stringify({phase,checks:checks.map(check=>({width:check.width,locale:check.initialLocale,step:check.step,pointerOpen:check.pointerOpen,keyboardChanged:check.keyboardChanged,finalLocale:check.finalLocale}))}));
 } finally {
   if (socket?.readyState === WebSocket.OPEN) { try { await cdp('Browser.close'); } catch { /* Browser can exit before acknowledgement. */ } socket.close(); }
   server.kill(); chrome.kill(); await pause(700);

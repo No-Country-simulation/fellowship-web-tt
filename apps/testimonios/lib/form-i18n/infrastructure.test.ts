@@ -20,9 +20,11 @@ import {
   DEFAULT_FORM_LOCALE,
   FORM_LOCALES,
   buildFormHref,
+  formHtmlLang,
   isFormLocale,
   normalizeFormLocale,
   resolveFormLocale,
+  resolvePreferredFormLocale,
 } from "./locales";
 import {
   FORM_CONSENT_REVIEW_STATUS,
@@ -31,6 +33,7 @@ import {
   getFormMessages,
 } from "./messages";
 import { es } from "./messages/es";
+import { en } from "./messages/en";
 import { ptBR } from "./messages/pt-BR";
 import type { FormMessageKey, FormMessages } from "./types";
 import { getFormMetadata } from "./metadata";
@@ -59,7 +62,7 @@ describe("strict locale protocol", () => {
     });
   }
 
-  for (const value of [undefined, null, "", "pt", "pt-br", "PT-BR", " es ", "en", 1, {}, ["pt-BR"]]) {
+  for (const value of [undefined, null, "", "pt-br", "PT-BR", " es ", "EN", 1, {}, ["pt-BR"]]) {
     it(`defaults to ES for invalid value ${JSON.stringify(value)}`, () => {
       assert.equal(normalizeFormLocale(value), DEFAULT_FORM_LOCALE);
     });
@@ -81,23 +84,52 @@ describe("strict locale protocol", () => {
   it("does not accept inherited query values", () => {
     assert.equal(resolveFormLocale(Object.create({ lang: "pt-BR" })), "es");
   });
+
+  it("accepts exact legacy pt-BR links without making them canonical", () => {
+    assert.equal(isFormLocale("pt-BR"), false);
+    assert.equal(normalizeFormLocale("pt-BR"), "pt");
+    assert.equal(resolveFormLocale({ lang: "pt-BR" }), "pt");
+    assert.equal(resolveFormLocale(new URLSearchParams("lang=pt-BR")), "pt");
+    assert.equal(formHtmlLang("pt"), "pt-BR");
+    assert.equal(formHtmlLang("en"), "en");
+    assert.equal(formHtmlLang("es"), "es");
+  });
+});
+
+describe("language preference precedence", () => {
+  it("uses cookie preference when no explicit link language is present", () => {
+    assert.equal(resolvePreferredFormLocale(), "es");
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams(), "pt"), "pt");
+    assert.equal(resolvePreferredFormLocale({}, "en"), "en");
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams("source=qa"), "pt-BR"), "pt");
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams(), "INVALID"), "es");
+  });
+
+  it("respects explicit links over cookie, including legacy and malformed query", () => {
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams("lang=en"), "pt"), "en");
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams("lang=pt-BR"), "en"), "pt");
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams("lang=nope"), "en"), "es");
+    assert.equal(resolvePreferredFormLocale(new URLSearchParams("lang=es&lang=pt"), "pt"), "es");
+    assert.equal(resolvePreferredFormLocale({ lang: "pt" }, "en"), "pt");
+  });
 });
 
 describe("link construction without navigation", () => {
   it("generates explicit canonical locale links", () => {
     assert.equal(buildFormHref("es"), "/enviar?lang=es");
-    assert.equal(buildFormHref("pt-BR"), "/enviar?lang=pt-BR");
+    assert.equal(buildFormHref("en"), "/enviar?lang=en");
+    assert.equal(buildFormHref("pt"), "/enviar?lang=pt");
   });
 
   it("preserves unrelated query/hash, replaces repeated lang and encodes values", () => {
-    const href = buildFormHref("pt-BR", {
+    const href = buildFormHref("pt", {
       search: "source=equipo+Brasil&lang=es&lang=es&tag=a&tag=b",
       hash: "#sección 3",
     });
     const url = new URL(href, "https://example.com");
     assert.equal(url.pathname, "/enviar");
-    assert.deepEqual(url.searchParams.getAll("lang"), ["pt-BR"]);
-    assert.equal(resolveFormLocale(url.searchParams), "pt-BR");
+    assert.deepEqual(url.searchParams.getAll("lang"), ["pt"]);
+    assert.equal(resolveFormLocale(url.searchParams), "pt");
     assert.equal(url.searchParams.get("source"), "equipo Brasil");
     assert.deepEqual(url.searchParams.getAll("tag"), ["a", "b"]);
     assert.equal(decodeURIComponent(url.hash), "#sección 3");
@@ -109,7 +141,7 @@ describe("link construction without navigation", () => {
 });
 
 describe("complete dictionaries and historical inventory", () => {
-  const catalogs = { es, "pt-BR": ptBR };
+  const catalogs = { es, en, pt: ptBR };
   const esKeys = Object.keys(flatten(es)).sort();
 
   it("has identical nonempty string leaves and no unexpected placeholders", () => {
@@ -134,6 +166,7 @@ describe("complete dictionaries and historical inventory", () => {
       if (!key) continue;
       expectedKeys.add(key);
     }
+    // The inventory retains the original proposals and records the new EN option.
     assert.deepEqual(esKeys, [...expectedKeys].sort());
   });
 
@@ -142,13 +175,15 @@ describe("complete dictionaries and historical inventory", () => {
       assert.deepEqual(JSON.parse(JSON.stringify(getFormMessages(locale))), catalogs[locale]);
     }
     assert.notEqual(ptBR.form.intro.title, es.form.intro.title);
+    assert.notEqual(en.form.intro.title, es.form.intro.title);
   });
 });
 
 describe("typed parameter interpolation", () => {
   it("uses complete progress messages in each language", () => {
     assert.equal(createFormTranslator("es")("form.progress", { step: 2, total: 5, title: "Datos" }), "Paso 2 de 5 · Datos");
-    assert.equal(createFormTranslator("pt-BR")("form.progress", { step: 2, total: 5, title: "Dados" }), "Etapa 2 de 5 · Dados");
+    assert.equal(createFormTranslator("pt")("form.progress", { step: 2, total: 5, title: "Dados" }), "Etapa 2 de 5 · Dados");
+    assert.equal(createFormTranslator("en")("form.progress", { step: 2, total: 5, title: "Details" }), "Step 2 of 5 · Details");
   });
 
   it("interpolates every parameterized message using the declared runtime types", () => {
@@ -188,9 +223,11 @@ describe("numeric limits come from existing rules", () => {
 
   it("formats limits and counters from the shared values in both languages", () => {
     const esT = createFormTranslator("es");
-    const ptT = createFormTranslator("pt-BR");
+    const ptT = createFormTranslator("pt");
+    const enT = createFormTranslator("en");
     assert.equal(esT("form.story.hintWithLimits", { hint: "Tu historia.", ...FORM_LIMITS.story }), `Tu historia. Entre ${STORY_MIN_CHARS} y ${STORY_MAX_CHARS} caracteres.`);
     assert.equal(ptT("form.story.hintWithLimits", { hint: "Sua história.", ...FORM_LIMITS.story }), `Sua história. Entre ${STORY_MIN_CHARS} e ${STORY_MAX_CHARS} caracteres.`);
+    assert.equal(enT("form.story.hintWithLimits", { hint: "Your story.", ...FORM_LIMITS.story }), `Your story. Between ${STORY_MIN_CHARS} and ${STORY_MAX_CHARS} characters.`);
     assert.equal(esT("form.story.counter", { current: 38, max: FORM_LIMITS.story.max }), `38/${STORY_MAX_CHARS}`);
     assert.equal(ptT("form.fields.avatar.requirements", FORM_LIMITS.avatar), `JPG, PNG ou WebP · Máximo de ${FORM_LIMITS.avatar.maxMb} MB.`);
     assert.equal(esT("form.errors.capture.maxSize", FORM_LIMITS.capture), `La foto de tu experiencia no puede superar ${FORM_LIMITS.capture.maxMb} MB.`);
@@ -219,7 +256,7 @@ describe("categories, countries and consent remain presentation-only", () => {
       assert.ok(options.every(option => option.label.trim()));
       assert.equal(new Set(Object.values(FORM_COUNTRY_KEYS)).size, Object.keys(getFormMessages(locale).form.countries).length);
     }
-    assert.deepEqual(getFormCountryOptions("pt-BR").find(option => option.value === "España"), { value: "España", label: "Espanha" });
+    assert.deepEqual(getFormCountryOptions("pt").find(option => option.value === "España"), { value: "España", label: "Espanha" });
     assert.equal(OTHER_COUNTRY_VALUE, "__other_country__");
   });
 
@@ -229,7 +266,9 @@ describe("categories, countries and consent remain presentation-only", () => {
     assert.equal(es.form.consent.body, row?.split("|")[2].trim());
     for (const locale of FORM_LOCALES) assert.equal(FORM_CONSENT_REVIEW_STATUS[locale], "pending-editorial-legal-review");
     assert.match(ptBR.form.consent.body, /galeria e no Discord/);
+    assert.match(en.form.consent.body, /gallery and on Discord/);
     assert.doesNotMatch(ptBR.form.consent.body, /Instagram|LinkedIn/);
+    assert.doesNotMatch(en.form.consent.body, /Instagram|LinkedIn/);
   });
 });
 
@@ -244,9 +283,11 @@ describe("fallback policy", () => {
     assert.deepEqual(getFormMetadata("invalid"), getFormMetadata("es"));
   });
   it("uses the complete ES catalog for unsupported locales", () => {
-    assert.equal(getFormMessages("en"), es);
+    assert.equal(getFormMessages("en"), en);
     assert.equal(getFormMessages(), es);
-    assert.equal(createFormTranslator("pt")("form.intro.title"), es.form.intro.title);
+    assert.equal(getFormMessages("pt"), ptBR);
+    assert.equal(getFormMessages("pt-BR"), ptBR);
+    assert.equal(createFormTranslator("invalid")("form.intro.title"), es.form.intro.title);
   });
 
   it("falls back to ES for blank or missing known keys", () => {
@@ -257,7 +298,7 @@ describe("fallback policy", () => {
   });
 
   it("uses the localized generic error for unknown or inherited keys", () => {
-    const t = createFormTranslator("pt-BR");
+    const t = createFormTranslator("pt");
     for (const key of ["form.unknown", "form.toString", "__proto__.title"]) {
       assert.equal(t(key as FormMessageKey), ptBR.form.errors.submit.unexpected);
     }
@@ -280,6 +321,6 @@ function verifyTypeContract(t: FormTranslator) {
   const incomplete: FormMessages = { form: {} };
   void incomplete;
   // @ts-expect-error Unsupported locale cannot be used to construct a link.
-  buildFormHref("pt");
+  buildFormHref("pt-BR");
 }
 void verifyTypeContract;

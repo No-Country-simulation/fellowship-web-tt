@@ -263,6 +263,7 @@ export type FormMessages = {
     };
     readonly language: {
       readonly label: string;
+      readonly en: string;
       readonly es: string;
       readonly ptBR: string;
     };

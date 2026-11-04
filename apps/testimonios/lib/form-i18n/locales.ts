@@ -1,18 +1,26 @@
-export const FORM_LOCALES = ["es", "pt-BR"] as const;
+export const FORM_LOCALES = ["es", "en", "pt"] as const;
 export type FormLocale = (typeof FORM_LOCALES)[number];
 export const DEFAULT_FORM_LOCALE: FormLocale = "es";
+/** Scoped to the submission form; never reuse Talent's NEXT_LOCALE cookie. */
+export const FORM_LOCALE_COOKIE = "testimonios_locale";
 
 type FormSearchParams =
   | Pick<URLSearchParams, "getAll">
   | Readonly<Record<string, string | readonly string[] | undefined>>;
 
 export function isFormLocale(value: unknown): value is FormLocale {
-  return value === "es" || value === "pt-BR";
+  return value === "es" || value === "en" || value === "pt";
 }
 
-/** Strict protocol: no aliases, case folding, trimming or participant-data inference. */
+/** Accept canonical ES/EN/PT codes, plus the exact legacy pt-BR link alias. */
 export function normalizeFormLocale(value: unknown): FormLocale {
+  if (value === "pt-BR") return "pt";
   return isFormLocale(value) ? value : DEFAULT_FORM_LOCALE;
+}
+
+/** HTML uses the regional subtags, while app links use Talent's short codes. */
+export function formHtmlLang(locale: FormLocale): string {
+  return locale === "pt" ? "pt-BR" : locale;
 }
 
 /** Accepts page searchParams or the read-only client searchParams interface. */
@@ -31,6 +39,21 @@ export function resolveFormLocale(params?: FormSearchParams | null): FormLocale 
       ? params.lang
       : undefined,
   );
+}
+
+/** Explicit ?lang= links win on navigation; otherwise a saved preference applies. */
+export function resolvePreferredFormLocale(
+  params?: FormSearchParams | null,
+  preference?: string | null,
+): FormLocale {
+  if (params) {
+    if ("getAll" in params && typeof params.getAll === "function") {
+      if (params.getAll("lang").length > 0) return resolveFormLocale(params);
+    } else if ("lang" in params && Object.prototype.hasOwnProperty.call(params, "lang") && params.lang !== undefined) {
+      return resolveFormLocale(params);
+    }
+  }
+  return preference ? normalizeFormLocale(preference) : DEFAULT_FORM_LOCALE;
 }
 
 /** Builds a relative link only; never reads or mutates browser navigation. */

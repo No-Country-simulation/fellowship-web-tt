@@ -130,7 +130,7 @@ try {
     await pause(40);
   }
   async function next() {
-    await evaluate(() => [...document.querySelectorAll('main button')].find(el=>el.getClientRects().length&&['Siguiente','Próximo'].includes(el.textContent.trim())).click());
+    await evaluate(() => [...document.querySelectorAll('main button')].find(el=>el.getClientRects().length&&['Siguiente','Next','Próximo'].includes(el.textContent.trim())).click());
     await pause(70);
   }
   async function measureCTA(selector, context) {
@@ -206,10 +206,10 @@ try {
     return result;
   }
   const samples = [];
-  for (const locale of ["es", "pt-BR"]) {
+  for (const locale of ["es", "en", "pt"]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
     await cdp("Page.navigate", { url: origin + "/enviar?lang=" + locale });
-    await until(() => evaluate(locale => !!document.querySelector("main form") && document.querySelector("main").lang === locale && document.readyState === "complete", locale), locale);
+    await until(() => evaluate(locale => !!document.querySelector("main form") && document.querySelector("main").lang === (locale === "pt" ? "pt-BR" : locale) && document.readyState === "complete", locale), locale);
     await evaluate(() => document.fonts.ready.then(() => true));
     assert.equal(await evaluate(()=>Math.abs(window.qaRatio(new Uint8ClampedArray([255,255,255]),new Uint8ClampedArray([102,102,102]))-5.74183648145415)<.00001),true,'raster luminance uses floating point, not clamped channels');
     await pause(100);
@@ -232,7 +232,7 @@ try {
     }
     await evaluate(() => [...document.querySelectorAll("main button")].find(el => el.getClientRects().length).click());
     await pause(60);
-    await evaluate(() => [...document.querySelectorAll("main button")].find(el => el.getClientRects().length && el.textContent.trim() === (document.querySelector("main").lang === "es" ? "Siguiente" : "Próximo")).click());
+    await evaluate(() => [...document.querySelectorAll("main button")].find(el => el.getClientRects().length && el.textContent.trim() === ({ es: "Siguiente", en: "Next", "pt-BR": "Próximo" })[document.querySelector("main").lang]).click());
     await pause(60);
     const validation = await evaluate(() => [...document.querySelectorAll('input[aria-invalid="true"],select[aria-invalid="true"]')].map(el => ({ name: el.name, labelled: !!(el.labels?.length || el.getAttribute("aria-labelledby")), described: (el.getAttribute("aria-describedby") ?? "").split(/\s+/).some(id => document.getElementById(id)?.textContent.trim()) })));
     assert.deepEqual(validation.map(el => el.name).sort(), ["avatar", "country", "email", "full_name"]);
@@ -241,8 +241,9 @@ try {
     await input('input[name="full_name"]','');
     await pause(60);
     const ax = await cdp("Accessibility.getFullAXTree");
-    const selectName = locale === "es" ? "Idioma del formulario" : "Idioma do formulário";
-    assert.ok(ax.nodes.some(node => !node.ignored && node.role?.value === "combobox" && node.name?.value === selectName));
+    const selectName = ({ es: "Idioma del formulario", en: "Form language", pt: "Idioma do formulário" })[locale];
+    assert.ok(ax.nodes.some(node => !node.ignored && node.role?.value === "button" && node.name?.value?.startsWith(selectName)));
+    assert.equal(await evaluate(() => document.querySelector('[data-form-language-trigger]')?.getAttribute('aria-haspopup')), 'listbox');
     assert.equal(await evaluate(() => document.querySelector("header").lang === document.querySelector("main").lang), true);
     for (const width of [1440, 375]) {
       await cdp("Emulation.setDeviceMetricsOverride", { width, height: 1000, deviceScaleFactor: 1, mobile: false });
@@ -270,7 +271,7 @@ try {
       samples.push({locale,width,fields:await evaluate(()=>window.qaFields('disabled probe'))});
       await evaluate(()=>document.querySelector('input[name="full_name"]').disabled=false);
       await evaluate(()=>document.documentElement.style.fontSize='200%');
-      assert.equal(await evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth&&[...document.querySelectorAll('main input,main textarea,main select,main button,header select')].filter(el=>el.getClientRects().length).every(el=>{const r=el.getBoundingClientRect();return r.left>=-1&&r.right<=document.documentElement.clientWidth+1;})),true,'no overflow at enlarged font');
+      assert.equal(await evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth&&[...document.querySelectorAll('main input,main textarea,main select,main button,header [data-form-language-trigger]')].filter(el=>el.getClientRects().length).every(el=>{const r=el.getBoundingClientRect();return r.left>=-1&&r.right<=document.documentElement.clientWidth+1;})),true,'no overflow at enlarged font');
       await evaluate(()=>document.documentElement.style.removeProperty('font-size'));
     }
     // Focused traversal to render the actual crop, submit and success CTAs. No server action runs.
@@ -311,11 +312,11 @@ try {
   await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "+", code: "Equal", modifiers: 2, windowsVirtualKeyCode: 187 });
   await pause(150);
   const after = await zoomMetrics();
-  assert.equal(blockedPosts, 2); assert.deepEqual(errors, []);
+  assert.equal(blockedPosts, 3); assert.deepEqual(errors, []);
   const fields=samples.flatMap(sample=>sample.fields);
-  const required=['language','avatar','full_name','country','email','primary_role','company','role_achieved','previous_profession','new_role','story','capture','video_url','instagram','linkedin'];
-  const missing=['es','pt-BR'].flatMap(locale=>required.filter(name=>!samples.filter(sample=>sample.locale===locale).some(sample=>sample.fields.some(field=>field.name===name))).map(name=>locale+':'+name));
-  const expectedCTA=['es','pt-BR'].flatMap(locale=>[['next',1440],['next',375],['crop confirm',375],['submit',375],['copy invite',375]].flatMap(([action,width])=>['normal','hover','focus'].map(state=>({locale,action,width,state}))));
+  const required=['avatar','full_name','country','email','primary_role','company','role_achieved','previous_profession','new_role','story','capture','video_url','instagram','linkedin'];
+  const missing=['es','en','pt'].flatMap(locale=>required.filter(name=>!samples.filter(sample=>sample.locale===locale).some(sample=>sample.fields.some(field=>field.name===name))).map(name=>locale+':'+name));
+  const expectedCTA=['es','en','pt'].flatMap(locale=>[['next',1440],['next',375],['crop confirm',375],['submit',375],['copy invite',375]].flatMap(([action,width])=>['normal','hover','focus'].map(state=>({locale,action,width,state}))));
   const missingCTA=expectedCTA.filter(expected=>!ctaSamples.some(sample=>Object.entries(expected).every(([key,value])=>sample[key]===value)));
   const summarize=items=>{
     const active=items.filter(item=>!item.disabled&&item.status!=='EXEMPT_DISABLED');
@@ -324,7 +325,7 @@ try {
   const placeholder=summarize(fields.flatMap(field=>field.placeholder?[field.placeholder]:[]));
   const boundary=summarize(fields.filter(field=>!field.disabled).map(field=>field.border));
   const cta=summarize(ctaSamples);
-  const coverage={status:missing.length===0&&missingCTA.length===0&&ctaSamples.length===30&&disabledSamples.length===10&&disabledSamples.every(sample=>sample.disabled&&sample.opacity===.5&&sample.pointerEvents==='none')?'PASS':'PENDIENTE',missing,missingCTA,ctaSamples:ctaSamples.length,disabledSamples:disabledSamples.length};
+  const coverage={status:missing.length===0&&missingCTA.length===0&&ctaSamples.length===45&&disabledSamples.length===15&&disabledSamples.every(sample=>sample.disabled&&sample.opacity===.5&&sample.pointerEvents==='none')?'PASS':'PENDIENTE',missing,missingCTA,ctaSamples:ctaSamples.length,disabledSamples:disabledSamples.length};
   const checks=[placeholder,boundary,cta,coverage];
   const contrast=checks.some(check=>check.status==='FAIL')?'FAIL':checks.some(check=>check.status!=='PASS')?'PENDIENTE':'PASS';
   const report={phase,associations:'PASS',contrast,criteria:{placeholder,boundary,cta,coverage},screenReader:'PENDIENTE',browserZoom:{status:'PENDIENTE',shortcutChangedMetrics:JSON.stringify(before)!==JSON.stringify(after)},samples,ctaSamples,disabledSamples,screenshots,blockedPosts,realSubmissions:0,browserErrors:errors};

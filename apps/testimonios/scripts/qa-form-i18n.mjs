@@ -131,7 +131,7 @@ try {
     if (form) {
       assert.equal(await evaluate(() => document.querySelector("[data-form-header]").lang === document.querySelector("main").lang && !document.querySelector("[data-form-header] a") && !document.querySelector("[data-form-header] nav")), true);
     }
-    assert.equal(await evaluate(() => document.documentElement.lang), "es");
+    assert.equal(await evaluate(form => document.documentElement.lang === (form ? document.querySelector("main").lang : "es"), form), true);
   }
   async function input(selector, value) {
     await evaluate((selector, value) => {
@@ -143,10 +143,22 @@ try {
     }, selector, value);
     await pause(35);
   }
+  const copy = {
+    es: ["Comparte tu testimonio · No Country", "Comparte tu experiencia con No Country. Completa cinco pasos para enviar tu testimonio a revisión."],
+    en: ["Share your testimonial · No Country", "Share your experience with No Country. Complete five steps to submit your testimonial for review."],
+    pt: ["Compartilhe seu depoimento · No Country", "Compartilhe sua experiência com a No Country. Preencha cinco etapas para enviar seu depoimento para análise."],
+  };
   async function language(locale) {
-    await input("[data-form-language-select]", locale);
-    await until(() => evaluate(locale => document.querySelector("main").lang === locale && document.querySelector("[data-form-language-select]").value === locale, locale), `language ${locale}`);
-    await until(() => evaluate(locale => document.title === (locale === "es" ? "Comparte tu testimonio · No Country" : "Compartilhe seu depoimento · No Country") && document.querySelector('meta[name="description"]').content === (locale === "es" ? "Comparte tu experiencia con No Country. Completa cinco pasos para enviar tu testimonio a revisión." : "Compartilhe sua experiência com a No Country. Preencha cinco etapas para enviar seu depoimento para análise."), locale), `reactive metadata ${locale}`);
+    await evaluate(() => document.querySelector("[data-form-language-trigger]").click());
+    await until(() => evaluate(() => !!document.querySelector('[role="listbox"]')), "open language menu");
+    await evaluate(locale => {
+      const label = ({ en: "EN", es: "ES", pt: "PT" })[locale];
+      const option = [...document.querySelectorAll('[role="listbox"] [role="option"]')].find(el => el.textContent.trim() === label);
+      if (!option) throw new Error(`Missing language option: ${locale}`);
+      option.click();
+    }, locale);
+    await until(() => evaluate(locale => document.querySelector("main").lang === (locale === "pt" ? "pt-BR" : locale) && document.querySelector("[data-form-language-trigger]").textContent.trim() === ({ en: "EN", es: "ES", pt: "PT" })[locale], locale), `language ${locale}`);
+    await until(() => evaluate(([title, description]) => document.title === title && document.querySelector('meta[name="description"]').content === description, copy[locale]), `reactive metadata ${locale}`);
   }
   async function button(text) {
     await evaluate(text => {
@@ -156,20 +168,20 @@ try {
     }, text);
     await pause(50);
   }
-  const locale = () => evaluate(() => document.querySelector("main").lang);
-  const next = async () => button(await locale() === "es" ? "Siguiente" : "Próximo");
-  const back = async () => { await button(await locale() === "es" ? "Atrás" : "Voltar"); await focusCheck(); };
+  const locale = () => evaluate(() => ({ ES: "es", EN: "en", PT: "pt" })[document.querySelector("[data-form-language-trigger]").textContent.trim()]);
+  const next = async () => button(({ es: "Siguiente", en: "Next", pt: "Próximo" })[await locale()]);
+  const back = async () => { await button(({ es: "Atrás", en: "Back", pt: "Voltar" })[await locale()]); await focusCheck(); };
   const step = () => evaluate(() => Number(document.querySelector("form h2").textContent.match(/\d+/)[0]));
   async function layout() {
     for (const width of [320, 375, 768, 1024, 1440]) {
       await viewport(width);
       await pause(35);
       assert.equal(await evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `overflow at ${width}`);
-      assert.equal(await evaluate(() => [...document.querySelectorAll('main input,main select,main textarea,main button,[data-form-header] select')].filter(el => el.getClientRects().length).every(el => { const r = el.getBoundingClientRect(); return r.left >= -1 && r.right <= document.documentElement.clientWidth + 1; })), true, `control overflow at ${width}`);
+      assert.equal(await evaluate(() => [...document.querySelectorAll('main input,main select,main textarea,main button,[data-form-header] [data-form-language-trigger]')].filter(el => el.getClientRects().length).every(el => { const r = el.getBoundingClientRect(); return r.left >= -1 && r.right <= document.documentElement.clientWidth + 1; })), true, `control overflow at ${width}`);
     }
     await viewport(320);
     await evaluate(() => document.documentElement.style.fontSize = "200%"); await pause(60);
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth && [...document.querySelectorAll('[data-form-header] img,[data-form-header] select')].every(el => el.getBoundingClientRect().right <= document.documentElement.clientWidth + 1)), true, "320px/200% font");
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth && [...document.querySelectorAll('[data-form-header] img,[data-form-header] [data-form-language-trigger]')].every(el => el.getBoundingClientRect().right <= document.documentElement.clientWidth + 1)), true, "320px/200% font");
     await evaluate(() => document.documentElement.style.removeProperty("font-size"));
   }
   async function focusCheck() {
@@ -219,7 +231,7 @@ try {
   await screenshot("home-1440.png", 1440);
   await clientLink('main a[href="/enviar"]', "/enviar");
   await until(() => evaluate(() => !!document.querySelector("main form")), "home to form");
-  await chromeCheck(true); await language("pt-BR");
+  await chromeCheck(true); await language("pt");
   await clientLink('main a[href="/"]', "/");
   await until(() => evaluate(() => !!document.querySelector('body > footer')), "public layout restored");
   await chromeCheck(false);
@@ -234,7 +246,7 @@ try {
   await screenshot("detail-1440.png", 1440);
   await clientLink('main a[href="/enviar"]', "/enviar");
   await until(() => evaluate(() => !!document.querySelector("main form")), "detail to form");
-  await language("pt-BR");
+  await language("pt");
   // The form has no direct detail link: exercise the browser's existing back entry.
   await evaluate(() => history.back());
   await until(() => evaluate(() => location.pathname === "/t/historia-qa" && !document.querySelector("[data-form-header]")), "form back to detail");
@@ -254,16 +266,18 @@ try {
     await chromeCheck(false);
   }
   checks.push("single shared root; home/detail unchanged chrome and metadata; client navigation across layouts; unmatched/nested/missing-slug 404 chrome and noindex");
-  for (const [query, expected] of [["", "es"], ["?lang=es", "es"], ["?lang=pt-BR", "pt-BR"], ["?lang=pt", "es"], ["?lang=pt-BR&lang=pt-BR", "es"], ["?lang=es&lang=pt-BR", "es"]]) {
+  for (const [query, expected] of [["", "es"], ["?lang=es", "es"], ["?lang=en", "en"], ["?lang=pt-BR", "pt"], ["?lang=pt", "pt"], ["?lang=pt-BR&lang=pt-BR", "es"], ["?lang=es&lang=pt-BR", "es"]]) {
     const html = await (await fetch(origin + "/enviar" + query)).text();
-    const title = expected === "es" ? "Comparte tu testimonio · No Country" : "Compartilhe seu depoimento · No Country";
+    const title = copy[expected][0];
     assert.ok(html.includes(`<title>${title}</title>`), "initial SSR title");
+    await evaluate(() => { document.cookie = "testimonios_locale=; Path=/enviar; Max-Age=0"; });
     await navigate("/enviar" + query);
     await chromeCheck(true);
     assert.equal(await locale(), expected);
+    assert.equal(await evaluate(() => document.documentElement.lang), expected === "pt" ? "pt-BR" : expected);
     assert.equal(await evaluate(() => document.title), title);
     assert.equal(await evaluate(() => document.querySelectorAll('meta[name="description"]').length), 1);
-    assert.equal(await evaluate(() => document.querySelector('meta[name="description"]').content), expected === "es" ? "Comparte tu experiencia con No Country. Completa cinco pasos para enviar tu testimonio a revisión." : "Compartilhe sua experiência com a No Country. Preencha cinco etapas para enviar seu depoimento para análise.");
+    assert.equal(await evaluate(() => document.querySelector('meta[name="description"]').content), copy[expected][1]);
   }
   checks.push("SSR/query/metadata: valid, absent, invalid and repeated locales; hydration");
 
@@ -271,16 +285,29 @@ try {
   await layout();
   await screenshot("form-es-1440.png", 1440);
   await screenshot("form-es-375.png", 375);
-  await language("pt-BR"); await screenshot("form-pt-375.png", 375); await language("es");
+  const originalUrl = await evaluate(() => location.href);
+  await language("pt");
+  assert.equal(await evaluate(() => location.href), originalUrl, "changing locale leaves URL unchanged");
+  assert.equal(await evaluate(() => document.cookie.includes("testimonios_locale=pt")), true, "locale preference saved");
+  await screenshot("form-pt-375.png", 375);
+  await navigate("/enviar?source=qa&tag=a&tag=b#formulario");
+  assert.equal(await locale(), "pt", "language persists after reload without explicit lang");
+  assert.equal(await evaluate(() => document.title), copy.pt[0], "cookie preference sets SSR metadata");
+  await language("en");
+  assert.equal(await evaluate(() => location.href), originalUrl);
+  await screenshot("form-en-375.png", 375);
+  await language("es");
+  assert.equal(await evaluate(() => location.href), originalUrl);
+  checks.push("selector updates state and cookie without URL changes; reload without lang preserves preference");
   await evaluate(() => document.querySelector('main a[href="/"]').focus());
   await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
   await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
-  assert.equal(await evaluate(() => document.activeElement.hasAttribute("data-form-language-select") && getComputedStyle(document.activeElement).outlineStyle !== "none"), true, "keyboard select keeps visible focus");
+  assert.equal(await evaluate(() => document.activeElement.hasAttribute("data-form-language-trigger") && getComputedStyle(document.activeElement).outlineStyle !== "none"), true, "keyboard select keeps visible focus");
   await evaluate(() => { window.__qaOriginalForm = document.querySelector("form"); window.__qaHistoryLength = history.length; });
   await next();
   await focusCheck();
   assert.equal(await evaluate(() => document.getElementById("type-error").textContent.trim()), "Elige el tipo de experiencia que quieres compartir.");
-  await language("pt-BR");
+  await language("pt");
   assert.equal(await evaluate(() => document.getElementById("type-error").textContent.trim()), "Escolha o tipo de experiência que deseja compartilhar.");
   await layout();
   assert.equal(await evaluate(() => history.length === window.__qaHistoryLength && document.querySelector("form") === window.__qaOriginalForm), true);
@@ -297,7 +324,7 @@ try {
   assert.equal(await evaluate(() => document.querySelector('input[name="avatar"]').getAttribute("aria-invalid")), "true");
   await input('select[name="country"]', "__other_country__");
   await input('input[name="country"]', "País libre QA");
-  await language("pt-BR");
+  await language("pt");
   assert.equal(await evaluate(() => document.querySelector('input[name="country"]').value), "País libre QA");
   await input('select[name="country_selection"]', "España");
   await input('select[name="country"]', "__other_country__");
@@ -306,9 +333,9 @@ try {
   await evaluate(() => history.pushState(null, "", "?lang=es&source=qa#formulario"));
   await until(async () => await locale() === "es", "history push ES");
   await evaluate(() => history.pushState(null, "", "?lang=pt-BR&source=qa#formulario"));
-  await until(async () => await locale() === "pt-BR", "history push PT");
+  await until(async () => await locale() === "pt", "history push PT");
   await evaluate(() => history.back()); await until(async () => await locale() === "es", "history back");
-  await evaluate(() => history.forward()); await until(async () => await locale() === "pt-BR", "history forward");
+  await evaluate(() => history.forward()); await until(async () => await locale() === "pt", "history forward");
   assert.equal(await evaluate(() => document.querySelector('input[name="full_name"]').value), "Persona QA");
   assert.equal(await evaluate(() => document.querySelector("form") === window.__qaOriginalForm), true);
   checks.push("same form identity, local errors/partial corrections, country values/free text, URL/hash/history");
@@ -317,16 +344,16 @@ try {
   await viewport(375); await file("avatar");
   assert.equal(await evaluate(() => document.querySelectorAll("[data-form-language-select]").length), 1);
   assert.equal(await evaluate(() => !!document.querySelector("main dialog [data-form-language-select]")), false);
-  assert.equal(await evaluate(() => !!document.querySelector("[data-form-header] select")), true, "unique selector stays in inert header");
+  assert.equal(await evaluate(() => !!document.querySelector("[data-form-header] [data-form-language-trigger]")), true, "unique selector stays in inert header");
   assert.equal(await evaluate(() => document.activeElement === document.querySelector("main dialog h2")), true, JSON.stringify(await evaluate(() => ({ active: document.activeElement.outerHTML.slice(0, 220), title: document.querySelector("main dialog h2").outerHTML, open: document.querySelector("main dialog").open }))));
   const accessible = await cdp("Accessibility.getFullAXTree");
-  assert.ok(!accessible.nodes.some(node => !node.ignored && node.role?.value === "combobox" && node.name?.value === "Idioma do formulário"), "header selector is inert in modal");
+  assert.ok(!accessible.nodes.some(node => !node.ignored && node.role?.value === "button" && node.name?.value?.startsWith("Idioma do formulário")), "header selector is inert in modal");
   await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
   await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
   assert.equal(await evaluate(() => document.activeElement.textContent.trim()), "Usar recorte");
   await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
   await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-  assert.equal(await evaluate(() => !!document.activeElement.closest("dialog") && !document.activeElement.hasAttribute("data-form-language-select")), true);
+  assert.equal(await evaluate(() => !!document.activeElement.closest("dialog") && !document.activeElement.hasAttribute("data-form-language-trigger")), true);
   await input('main dialog input[type="range"]', "1.8");
   await evaluate(() => document.querySelector('main dialog [tabindex="0"]').focus());
   await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
@@ -355,7 +382,7 @@ try {
     assert.equal(await evaluate(() => document.querySelector('textarea[name="story"]').value), story);
     if (category === "career_change") { await input('input[name="previous_profession"]', "Docencia QA"); await input('input[name="new_role"]', "Tecnología QA"); }
     if (category === "simulation") await input('input[name="primary_role"]', "Rol sim QA");
-    await language("pt-BR"); await layout(); await language("es"); await layout();
+    await language("pt"); await layout(); await language("es"); await layout();
   }
   assert.equal(await evaluate(() => document.querySelector('input[name="company"]').value), "Empresa QA");
   assert.equal(await evaluate(() => document.querySelector('input[name="role_achieved"]').value), "Desarrollo QA");
@@ -373,8 +400,8 @@ try {
   await input('input[name="video_url"]', "https://youtu.be/abcdefghijk");
   await input('input[name="instagram"]', "@persona.qa");
   await input('input[name="linkedin"]', "https://www.linkedin.com/in/persona-qa");
-  await file("capture"); await confirmCrop(); await language("pt-BR");
-  await layout(); await language("es"); await layout(); await language("pt-BR");
+  await file("capture"); await confirmCrop(); await language("pt");
+  await layout(); await language("es"); await layout(); await language("pt");
   await next(); assert.equal(await step(), 5); await focusCheck(); await layout();
   assert.ok(await evaluate(() => [...document.querySelectorAll("form dd")].some(el => el.textContent === "Espanha")));
   await evaluate(() => document.querySelector('input[name="consent"]').click());
@@ -387,7 +414,7 @@ try {
   response = null; await button("Enviar testimonio");
   await until(() => pausedPosts.length === 1, "intercepted pending action");
   assert.equal(await evaluate(() => document.querySelector('button[type="submit"]').disabled), true);
-  await language("pt-BR");
+  await language("pt");
   assert.equal(await evaluate(() => document.querySelector('button[type="submit"]').textContent.trim()), "Enviando…");
   await fulfill(pausedPosts.shift(), { status: "error", issue: { code: "validation.summary" }, fieldErrors: { company: { code: "company.required" }, story: { code: "story.minLength", params: { min: 20 } } }, step: 3 });
   await until(() => evaluate(() => !!document.querySelector('[role="alert"]')), "localized server response");
@@ -402,7 +429,7 @@ try {
   await next(); await next();
   response = null; await button("Enviar testimonio");
   await until(() => pausedPosts.length === 1, "second intercepted action");
-  await language("pt-BR"); await language("es");
+  await language("pt"); await language("es");
   await fulfill(pausedPosts.shift(), { status: "success" });
   await until(() => evaluate(() => !document.querySelector("main form") && document.querySelector("main h1")?.textContent.trim() === "Gracias por tu testimonio"), "fixture success");
   assert.equal(await evaluate(() => document.querySelectorAll("main h1").length), 1);
@@ -415,14 +442,14 @@ try {
   await button("Copiar enlace");
   assert.equal(await evaluate(() => navigator.clipboard.readText()), origin + "/enviar?lang=es");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Enlace copiado")));
-  await language("pt-BR");
+  await language("pt");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar link")));
   await language("es");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar enlace")));
-  await language("pt-BR");
+  await language("pt");
   await layout();
   const invite = await evaluate(() => document.querySelector('main a[href*="/enviar?lang="]').href);
-  assert.equal(invite, origin + "/enviar?lang=pt-BR");
+  assert.equal(invite, origin + "/enviar?lang=pt");
   await button("Copiar link");
   assert.equal(await evaluate(() => navigator.clipboard.readText()), invite);
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Link copiado")));
@@ -438,7 +465,7 @@ try {
   }
   assert.equal(payloads[0].story, story); assert.equal(payloads[1].story, story + " Corrección QA.");
   checks.push("pending locale changes with intercepted error/success, partial server corrections and focus, unchanged actual FormData, one POST per attempt, localized success/invite/clipboard");
-  await navigate("/enviar?lang=pt-BR");
+  await navigate("/enviar?lang=pt");
   assert.equal(await step(), 1);
   assert.equal(await evaluate(() => document.querySelector('input[name="full_name"]').value), "");
   assert.equal(await evaluate(() => localStorage.length), 0);

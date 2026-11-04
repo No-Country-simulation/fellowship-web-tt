@@ -1,5 +1,7 @@
 "use client";
 
+import { formHtmlLang } from "@/lib/form-i18n/locales";
+
 import Image from "next/image";
 import { useLayoutEffect, useRef } from "react";
 import { FormLanguageSelect } from "./form-language-select";
@@ -26,7 +28,7 @@ export function FormHeader() {
   }, []);
 
   return (
-    <header ref={headerRef} data-form-header="" lang={locale} className={styles.header}>
+    <header ref={headerRef} data-form-header="" lang={formHtmlLang(locale)} className={styles.header}>
       <div className={styles.row}>
         <Image src="/brand/logo-no-country.png" alt="No Country" width={1229} height={207}
           sizes="(min-width: 768px) 143px, 96px" loading="eager" className={styles.logo} />

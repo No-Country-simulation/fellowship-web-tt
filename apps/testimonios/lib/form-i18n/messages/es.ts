@@ -278,6 +278,7 @@ export const es = {
     },
     language: {
       label: "Idioma del formulario",
+      en: "English",
       es: "Español",
       ptBR: "Português (Brasil)"
     },
