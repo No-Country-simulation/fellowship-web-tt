@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { canvasToPng, drawIgCard } from "../infrastructure/ig-card-canvas";
+import { canvasToPng, drawIgCard, igCardImageDetail } from "../infrastructure/ig-card-canvas";
 import {
   CaptionNetworkTabs,
   useRememberedCaptionNetwork,
@@ -81,8 +81,10 @@ export function IgShare({
     network === "instagram" ? igCaption : network === "linkedin" ? liCaption : discordCaption;
   const [copied, setCopied] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadDetail, setDownloadDetail] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
+  const [previewDetail, setPreviewDetail] = useState<string | null>(null);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -118,6 +120,7 @@ export function IgShare({
 
     let cancelled = false;
     setPreviewFailed(false);
+    setPreviewDetail(null);
     void drawIgCard(canvas, {
       type: drawn.type,
       design: drawn.design,
@@ -133,11 +136,13 @@ export function IgShare({
       () => {
         if (!cancelled) {
           setPreviewFailed(false);
+          setPreviewDetail(null);
         }
       },
-      () => {
+      (error: unknown) => {
         if (!cancelled) {
           setPreviewFailed(true);
+          setPreviewDetail(igCardImageDetail(error));
         }
       },
     );
@@ -149,6 +154,7 @@ export function IgShare({
 
   async function downloadCard() {
     setDownloadError(null);
+    setDownloadDetail(null);
     setDownloading(true);
     try {
       const blob = imageUrl ? await fetchPng(imageUrl) : await drawCardPng();
@@ -158,8 +164,9 @@ export function IgShare({
       link.download = igCardFilename(slug);
       link.click();
       URL.revokeObjectURL(url);
-    } catch {
+    } catch (error) {
       setDownloadError("No pudimos generar la imagen.");
+      setDownloadDetail(igCardImageDetail(error));
     } finally {
       setDownloading(false);
     }
@@ -206,9 +213,10 @@ export function IgShare({
     <div className="w-full max-w-md">
       {previewFailed ? (
         <div className="grid aspect-4/5 w-full place-items-center rounded-lg border border-border bg-muted p-4 text-center">
-          <p className="text-admin-caption text-destructive">
-            No pudimos generar la card. Probá descargar de nuevo.
-          </p>
+          <div className="text-admin-caption text-destructive" role="alert">
+            <p>No pudimos generar la card. Probá descargar de nuevo.</p>
+            {previewDetail ? <p>{previewDetail}</p> : null}
+          </div>
         </div>
       ) : null}
       <canvas
@@ -251,9 +259,10 @@ export function IgShare({
           </button>
         </div>
         {downloadError ? (
-          <p className="text-admin-caption text-destructive" role="alert">
-            {downloadError}
-          </p>
+          <div className="text-admin-caption text-destructive" role="alert">
+            <p>{downloadError}</p>
+            {downloadDetail ? <p>{downloadDetail}</p> : null}
+          </div>
         ) : null}
         <CaptionNetworkTabs
           value={network}

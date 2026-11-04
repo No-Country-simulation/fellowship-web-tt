@@ -33,7 +33,7 @@ import {
   type CardInputs,
 } from "../infrastructure/cardFields";
 import { igCardContent } from "../infrastructure/ig-card";
-import { igCardPngBlob, igCardQuoteClipped } from "../infrastructure/ig-card-canvas";
+import { igCardImageDetail, igCardPngBlob, igCardQuoteClipped } from "../infrastructure/ig-card-canvas";
 import {
   buildDiscordCaption,
   buildIgCaption,
@@ -160,6 +160,7 @@ export function ReviewForm({
   const [cardDesign, setCardDesign] = useState<CardDesign>("photo");
   const [intent, setIntent] = useState<Intent | null>(null);
   const [cardError, setCardError] = useState<string | null>(null);
+  const [cardImageDetail, setCardImageDetail] = useState<string | null>(null);
   const [cardAttempt, setCardAttempt] = useState<"publish" | "retry" | null>(null);
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [confirmReject, setConfirmReject] = useState(false);
@@ -409,6 +410,28 @@ export function ReviewForm({
       return;
     }
     preparingCardRef.current = true;
+    setIntent("publish");
+    setCardAttempt(attempt);
+    let blob: Blob | null = null;
+    let imageDetail: string | null = null;
+    try {
+      blob = await igCardPngBlob(previewCard);
+    } catch (error) {
+      blob = null;
+      imageDetail = igCardImageDetail(error);
+    }
+    preparingCardRef.current = false;
+    setCardAttempt(null);
+    if (!blob || blob.size === 0) {
+      setCardError("No se pudo generar la imagen y el testimonio no se publicó.");
+      setCardImageDetail(imageDetail);
+      return;
+    }
+    if (blob.size > SHARE_CARD_MAX_BYTES) {
+      setCardError(SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE);
+      setCardImageDetail(null);
+      return;
+    }
     const captionsNow = applyNameToCaptions(fields.fullName);
     const formData = new FormData(form);
     formData.set("intent", "publish");
@@ -416,26 +439,9 @@ export function ReviewForm({
     formData.set("ig_caption", captionsNow.instagram);
     formData.set("li_caption", captionsNow.linkedin);
     formData.set("discord_caption", captionsNow.discord);
-    setIntent("publish");
-    setCardAttempt(attempt);
-    let blob: Blob | null = null;
-    try {
-      blob = await igCardPngBlob(previewCard);
-    } catch {
-      blob = null;
-    }
-    preparingCardRef.current = false;
-    setCardAttempt(null);
-    if (!blob || blob.size === 0) {
-      setCardError("No se pudo generar la imagen y el testimonio no se publicó.");
-      return;
-    }
-    if (blob.size > SHARE_CARD_MAX_BYTES) {
-      setCardError(SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE);
-      return;
-    }
     formData.set("share_card", new File([blob], "instagram.png", { type: "image/png" }));
     setCardError(null);
+    setCardImageDetail(null);
     allowUnload.current = true;
     startTransition(() => {
       formAction(formData);
@@ -802,9 +808,10 @@ export function ReviewForm({
               </p>
             ))}
             {cardError ? (
-              <p className="text-admin-caption text-destructive" role="alert">
-                {cardError}
-              </p>
+              <div className="text-admin-caption text-destructive" role="alert">
+                <p>{cardError}</p>
+                {cardImageDetail ? <p>{cardImageDetail}</p> : null}
+              </div>
             ) : null}
             {cardError ? (
               <button
