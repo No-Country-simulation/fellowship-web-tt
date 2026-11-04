@@ -1,9 +1,11 @@
+import type { FormIssue } from "./issues";
+
 export type SubmitState =
   | { status: "idle" }
   | {
       status: "error";
-      message: string;
-      fieldErrors?: Record<string, string>;
+      issue: FormIssue;
+      fieldErrors?: Record<string, FormIssue | undefined>;
       step?: number;
     }
   | { status: "success" };

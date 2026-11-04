@@ -1,11 +1,11 @@
 # SiteFooter
 
-Footer institucional de No Country para las rutas públicas de Testimonios y sus estados de error y éxito.
+Footer institucional de No Country para las rutas públicas de Testimonios y sus estados de error/404. No se monta en `/enviar`, tampoco en su éxito.
 
 ```tsx
 import { SiteFooter } from "@/components/site-footer";
 
-// app/layout.tsx, después del contenido de la ruta
+// app/(public)/layout.tsx, después del contenido de la ruta
 <SiteHeader />
 {children}
 <SiteFooter />

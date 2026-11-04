@@ -4,7 +4,7 @@ Navbar institucional de No Country: logo, navegación desktop por disclosures y 
 
 **Archivo:** `components/site-header.tsx`
 
-Se monta una sola vez en `app/layout.tsx`. No instanciarlo en páginas.
+Se monta una sola vez en `app/(public)/layout.tsx`. El 404 raíz reutiliza ese layout para URLs no resueltas. No instanciarlo en páginas ni en `/enviar`.
 
 ## Import
 
@@ -14,7 +14,7 @@ import { SiteHeader } from "@/components/site-header";
 
 ## Cuándo usarlo
 
-- Solo en el root layout. Cualquier página nueva hereda el header.
+- Solo en el layout público; sus páginas heredan el header. `/enviar` utiliza `FormHeader`.
 
 No copiar el markup del header en una página. El logo utiliza el PNG local con un enlace HTML al inicio oficial; `BrandLogo` compartido conserva su navegación a `/` y no se modifica.
 
@@ -25,7 +25,7 @@ Ninguna. Los textos, grupos y destinos salen del catálogo tipado de `lib/nav.ts
 ## Uso
 
 ```tsx
-// app/layout.tsx
+// app/(public)/layout.tsx
 <SiteHeader />
 {children}
 ```
@@ -55,7 +55,7 @@ Editar `lib/nav.ts`, sin duplicar destinos en los renderizados desktop y móvil:
 
 - `SiteHeader` y el layout permanecen en servidor. Solo `SiteNavigation` incorpora estado y eventos. El logo se recibe como contenido de servidor.
 - `site-header.module.css` aísla los neutros y dimensiones de la referencia: fila mínima de 64px, borde de 1px, fondo translúcido y blur de 12px. No remapea tokens globales. El logo mide 24px de alto y 32px desde 1024px; conserva su proporción.
-- El scroll sigue perteneciendo al documento. Un `ResizeObserver` publica la altura real en `--site-header-height`; `scroll-padding-block-start` deja esa altura más 16px para navegación y foco. `focusAndReveal()` del formulario sigue midiendo directamente el header.
+- El scroll sigue perteneciendo al documento. Un `ResizeObserver` publica la altura real en `--site-header-height`; `scroll-padding-block-start` deja esa altura más 16px para navegación y foco. En `/enviar`, `FormHeader` publica su propia altura y `focusAndReveal()` mide `[data-form-header]`.
 - Desde 1280px se evalúa desktop, midiendo logo, navegación, acciones y gaps. Si no caben, se mantiene la versión compacta. Se reevalúa al redimensionar, ampliar la fuente o terminar la carga de tipografía. No se reduce la fuente ni se recortan enlaces para forzar la fila.
 - El bloque desktop oculto conserva sus dimensiones para medirlas, pero está recortado, inerte y fuera del árbol accesible. No genera overflow ni enlaces de teclado duplicados.
 - Los destinos institucionales usan `<a>` en la misma pestaña. Los portales de Talento y Empresas conservan sus dominios originales y abren otra pestaña con `noopener noreferrer`, icono externo decorativo y aviso accesible. No se intercepta la navegación nativa. Los enlaces locales de las páginas continúan usando `next/link`. No hay `href="#"` ni rutas inventadas.

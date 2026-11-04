@@ -1,0 +1,6193 @@
+{
+  "phase": "before",
+  "associations": "PASS",
+  "contrast": "FAIL",
+  "criteria": {
+    "placeholder": {
+      "status": "FAIL",
+      "count": 100,
+      "min": 3.6027123755794754
+    },
+    "boundary": {
+      "status": "FAIL",
+      "count": 229,
+      "min": 1.392326932652225
+    },
+    "cta": {
+      "status": "PENDIENTE",
+      "count": 4,
+      "min": null,
+      "minEstimated": 3.907560304254531,
+      "source": "../form-acceptance/qa-results.json"
+    },
+    "coverage": {
+      "status": "PENDIENTE",
+      "note": "Baseline contains original field measurements and four historical CTA estimates; raster/state coverage belongs to after-results.json."
+    }
+  },
+  "screenReader": "PENDIENTE",
+  "browserZoom": {
+    "status": "PENDIENTE",
+    "shortcutChangedMetrics": false
+  },
+  "samples": [
+    {
+      "locale": "es",
+      "category": "simulation",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "category": "first_job",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "category": "career_change",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(2, 190, 239)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 9.470689742925257,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": true,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "EXEMPT_DISABLED"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "EXEMPT_DISABLED"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(2, 190, 239)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 9.470689742925257,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": true,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "EXEMPT_DISABLED"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "EXEMPT_DISABLED"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fields": [
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "crop",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              13,
+              14,
+              31
+            ],
+            "contrast": 1.392326932652225,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "primary_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "category": "simulation",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "primary_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "category": "first_job",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "company",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "role_achieved",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "category": "career_change",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(2, 190, 239)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 9.470689742925257,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": true,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "EXEMPT_DISABLED"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "EXEMPT_DISABLED"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 375,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "error/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "error/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 375,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(2, 190, 239)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 9.470689742925257,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "normal/focus",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "normal/focus",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 375,
+      "fields": [
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": true,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "EXEMPT_DISABLED"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "EXEMPT_DISABLED"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "disabled probe",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "previous_profession",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "new_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "disabled probe",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    },
+    {
+      "locale": "pt-BR",
+      "width": 375,
+      "fields": [
+        {
+          "name": "avatar",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "crop",
+          "invalid": true,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(239, 68, 68)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 5.497072411179583,
+            "status": "PASS"
+          }
+        },
+        {
+          "name": "language",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              13,
+              14,
+              31
+            ],
+            "contrast": 1.392326932652225,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "full_name",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "country",
+          "tag": "SELECT",
+          "type": "select-one",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "email",
+          "tag": "INPUT",
+          "type": "email",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "primary_role",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "story",
+          "tag": "TEXTAREA",
+          "type": "textarea",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "capture",
+          "tag": "INPUT",
+          "type": "file",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": null,
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "video_url",
+          "tag": "INPUT",
+          "type": "url",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "instagram",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        },
+        {
+          "name": "linkedin",
+          "tag": "INPUT",
+          "type": "text",
+          "state": "crop",
+          "invalid": false,
+          "disabled": false,
+          "placeholder": {
+            "color": "rgb(102, 102, 102)",
+            "contrast": 3.6027123755794754,
+            "status": "FAIL"
+          },
+          "border": {
+            "color": "rgb(45, 43, 64)",
+            "inner": [
+              0,
+              1,
+              21
+            ],
+            "outer": [
+              0,
+              1,
+              21
+            ],
+            "contrast": 1.5082805515126219,
+            "status": "FAIL"
+          }
+        }
+      ]
+    }
+  ],
+  "ctaSamples": [
+    {
+      "locale": "es",
+      "width": 1440,
+      "action": "next",
+      "method": "historical geometric estimate at character centres, not raster measurement",
+      "estimatedMinContrast": 3.907560304254531
+    },
+    {
+      "locale": "es",
+      "width": 320,
+      "action": "next",
+      "method": "historical geometric estimate at character centres, not raster measurement",
+      "estimatedMinContrast": 3.907560304254531
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "action": "next",
+      "method": "historical geometric estimate at character centres, not raster measurement",
+      "estimatedMinContrast": 4.0226235082959105
+    },
+    {
+      "locale": "pt-BR",
+      "width": 320,
+      "action": "next",
+      "method": "historical geometric estimate at character centres, not raster measurement",
+      "estimatedMinContrast": 4.0226235082959105
+    }
+  ],
+  "screenshots": [
+    "before-es-1440.png",
+    "before-es-375.png",
+    "before-pt-BR-1440.png",
+    "before-pt-BR-375.png"
+  ],
+  "blockedPosts": 2,
+  "realSubmissions": 0,
+  "browserErrors": [],
+  "note": "Before PNGs were captured against the unmodified production build. CTA baseline retains only historical geometric estimates; preliminary raster probes were discarded during QA-tool calibration."
+}

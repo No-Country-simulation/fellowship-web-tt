@@ -10,7 +10,7 @@ Landing de captación: invita al talento a compartir su experiencia en `/enviar`
 <GalleryHero stories={heroStories} />
 ```
 
-`stories: readonly HeroStory[] | null` procede de la única consulta pública de `app/page.tsx`. `[]` significa cero publicados; `null` significa error de carga. El hero no consulta datos ni transforma historias.
+`stories: readonly HeroStory[] | null` procede de la única consulta pública de `app/(public)/page.tsx`. `[]` significa cero publicados; `null` significa error de carga. El hero no consulta datos ni transforma historias.
 
 El copy usa español neutro latinoamericano:
 

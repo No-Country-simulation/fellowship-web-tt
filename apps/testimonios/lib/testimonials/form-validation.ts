@@ -1,3 +1,4 @@
+import { formIssue, type FormIssue } from "./issues";
 import {
   AVATAR_MAX_BYTES,
   CAPTURE_MAX_BYTES,
@@ -47,101 +48,100 @@ export function isFieldActive(field: FormField, type: FormValues["type"]) {
   return !category || category === type;
 }
 
-function validateText(value: string, max: number, required?: string) {
+function validateText(value: string, max: number, required?: FormIssue) {
   const trimmed = value.trim();
   if (!trimmed && required) return required;
-  if (trimmed.length > max) return `Máximo ${max} caracteres.`;
+  if (trimmed.length > max) return formIssue("text.maxLength", { max });
 }
 
 /** Valida un campo con el mismo trim, límites y normalizadores que el parser. */
 export function validateField(
   field: FormField,
   values: FormValues,
-): string | undefined {
+): FormIssue | undefined {
   if (!isFieldActive(field, values.type)) return undefined;
 
   switch (field) {
     case "type":
       return isTestimonialType(values.type)
         ? undefined
-        : "Elegí qué querés contar.";
+        : formIssue("type.required");
     case "full_name":
       return validateText(
         values.full_name,
         NAME_MAX_CHARS,
-        "El nombre es obligatorio.",
+        formIssue("full_name.required"),
       );
     case "country":
       return validateCountry(values.country);
     case "email":
       if (!values.email.trim()) {
-        return "El email es obligatorio. No se muestra en público.";
+        return formIssue("email.required");
       }
-      return isValidEmail(values.email) ? undefined : "Ingresá un email válido.";
+      return isValidEmail(values.email) ? undefined : formIssue("email.invalid");
     case "primary_role":
       return validateText(values.primary_role, FIELD_MAX_CHARS);
     case "company":
       return validateText(
         values.company,
         FIELD_MAX_CHARS,
-        "La empresa es obligatoria.",
+        formIssue("company.required"),
       );
     case "role_achieved":
       return validateText(
         values.role_achieved,
         FIELD_MAX_CHARS,
-        "El puesto es obligatorio.",
+        formIssue("role_achieved.required"),
       );
     case "previous_profession":
       return validateText(
         values.previous_profession,
         FIELD_MAX_CHARS,
-        "El oficio anterior es obligatorio.",
+        formIssue("previous_profession.required"),
       );
     case "new_role":
       return validateText(
         values.new_role,
         FIELD_MAX_CHARS,
-        "El rol nuevo es obligatorio.",
+        formIssue("new_role.required"),
       );
     case "story": {
       const story = values.story.trim();
-      if (!story) return "Contanos tu historia.";
+      if (!story) return formIssue("story.required");
       if (story.length < STORY_MIN_CHARS) {
-        return `Escribí al menos ${STORY_MIN_CHARS} caracteres.`;
+        return formIssue("story.minLength", { min: STORY_MIN_CHARS });
       }
       return validateText(story, STORY_MAX_CHARS);
     }
     case "avatar":
       return validateImageFile(values.avatar, {
         required: true,
-        requiredMessage: "Seleccioná una foto de perfil.",
         maxBytes: AVATAR_MAX_BYTES,
-        label: "La foto de perfil",
+        kind: "avatar",
       });
     case "capture":
       return validateImageFile(values.capture, {
         required: false,
         maxBytes: CAPTURE_MAX_BYTES,
-        label: "La foto testimonial",
+        kind: "capture",
       });
     case "video_url":
       if (values.video_url.trim() && !normalizeYouTubeUrl(values.video_url)) {
-        return "Pegá un link de YouTube (youtube.com o youtu.be).";
+        return formIssue("video_url.invalid");
       }
       return undefined;
     case "instagram":
       if (values.instagram.trim() && !normalizeInstagram(values.instagram)) {
-        return "Usá tu usuario (@nombre) o el link de Instagram.";
+        return formIssue("instagram.invalid");
       }
       return undefined;
     case "linkedin":
       if (values.linkedin.trim() && !normalizeLinkedIn(values.linkedin)) {
-        return "Pegá tu perfil (linkedin.com/in/…) o tu usuario.";
+        return formIssue("linkedin.invalid");
       }
       return undefined;
     case "consent":
-      return values.consent ? undefined : "Tenés que aceptar para enviar.";
+      return values.consent ? undefined : formIssue("consent.required");
   }
 }
 
@@ -194,28 +194,32 @@ export function resolveFormErrors(
       : undefined;
   const fieldErrors: FieldErrors = {};
   const serverErrors: FieldErrors = {};
-  const unknownErrors: [string, string][] = [];
+  const unknownErrors: [string, FormIssue][] = [];
 
   for (const field of FORM_FIELDS) {
     if (!isFieldActive(field, type)) continue;
-    const message = Object.prototype.hasOwnProperty.call(overrides, field)
+    const issue = Object.prototype.hasOwnProperty.call(overrides, field)
       ? overrides[field]
       : server?.fieldErrors?.[field];
-    if (message) {
-      fieldErrors[field] = message;
-      if (server?.fieldErrors?.[field]) serverErrors[field] = message;
+    if (issue) {
+      fieldErrors[field] = issue;
+      if (server?.fieldErrors?.[field]) serverErrors[field] = issue;
     }
   }
 
-  for (const [field, message] of Object.entries(server?.fieldErrors ?? {})) {
-    if (!isFormField(field)) unknownErrors.push([field, message]);
+  for (const [field, issue] of Object.entries(server?.fieldErrors ?? {})) {
+    if (!isFormField(field) && issue) unknownErrors.push([field, issue]);
   }
 
   const hasServerErrors =
     Object.keys(serverErrors).length > 0 || unknownErrors.length > 0;
   const isFieldSummary =
-    server?.message.trim().replace(/\.$/, "") === "Revisá los campos marcados";
-  const message = isFieldSummary && !hasServerErrors ? undefined : server?.message;
+    server?.issue?.code === "validation.summary";
+  const issue = isFieldSummary && !hasServerErrors
+    ? undefined
+    : server ? (server.issue ?? formIssue("submit.unexpected")) : undefined;
 
-  return { fieldErrors, serverErrors, unknownErrors, message };
+  return { fieldErrors, serverErrors, unknownErrors, issue };
 }
+
+export type ResolvedFormErrors = ReturnType<typeof resolveFormErrors>;

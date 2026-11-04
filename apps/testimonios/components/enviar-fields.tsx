@@ -4,9 +4,13 @@ import { ImagePlus, X } from "lucide-react";
 
 import { CaptureCropDialog } from "./capture-crop-dialog";
 import { cropAvatarFile, cropCaptureFile } from "@/lib/testimonials/prepare-image";
+import { formIssue, type FormIssue } from "@/lib/testimonials/issues";
 import { cn } from "@/lib/utils";
+import { useFormLocale } from "./form-locale-provider";
+import controls from "./form-controls.module.css";
 
 export const fieldClassName = cn(
+  controls.field,
   "h-11 min-w-0 w-full rounded-md border border-border bg-bg-base px-md text-body text-text-primary outline-none",
   "placeholder:text-text-muted",
   "focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40",
@@ -14,6 +18,7 @@ export const fieldClassName = cn(
 );
 
 export const textareaClassName = cn(
+  controls.field,
   "min-h-56 min-w-0 w-full resize-y rounded-md border border-border bg-bg-base px-md py-sm text-body leading-relaxed text-text-primary outline-none sm:min-h-64",
   "placeholder:text-text-muted",
   "focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40",
@@ -55,6 +60,7 @@ export function Field({
   className,
   children,
 }: FieldProps) {
+  const { t } = useFormLocale();
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const labelId = `${fieldId}-label`;
@@ -76,11 +82,11 @@ export function Field({
       {required ? (
         <>
           <span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
-          <span className="sr-only"> (obligatorio)</span>
+          <span className="sr-only"> {t("form.common.required")}</span>
         </>
       ) : null}
       {optional ? (
-        <span className="ml-1 font-normal text-text-muted">Opcional</span>
+        <span className="ml-1 font-normal text-text-muted">{t("form.common.optional")}</span>
       ) : null}
     </>
   );
@@ -130,7 +136,7 @@ type FileFieldProps = {
   accept: string;
   preview: "avatar" | "capture";
   onFileChange: (file: File | null) => void;
-  onInvalid?: (message: string | undefined) => void;
+  onInvalid?: (issue: FormIssue | undefined) => void;
 };
 
 /** Imagen con preview y requisitos asociados; el reemplazo solo se aplica tras recortarlo. */
@@ -149,6 +155,7 @@ export function FileField({
   onFileChange,
   onInvalid,
 }: FileFieldProps) {
+  const { t } = useFormLocale();
   const inputRef = useRef<HTMLInputElement>(null);
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [cropSource, setCropSource] = useState<{
@@ -208,7 +215,7 @@ export function FileField({
       })
       .catch(() => {
         if (currentOperation !== operation.current) return;
-        onInvalid?.("No pudimos recortar la foto.");
+        onInvalid?.(formIssue("image.cropFailed"));
         closeCrop();
         if (inputRef.current) {
           inputRef.current.value = "";
@@ -284,10 +291,10 @@ export function FileField({
             <span className="flex flex-col items-center gap-xs text-body-small text-text-secondary">
               {!cropSource ? <ImagePlus aria-hidden="true" className="size-6 text-accent-cyan" /> : null}
               {cropSource
-                ? "Recortando…"
+                ? t("form.images.cropping")
                 : preview === "avatar"
-                  ? "Agregar foto de perfil"
-                  : "Agregar fotografía"}
+                  ? t("form.images.addAvatar")
+                  : t("form.images.addCapture")}
             </span>
           )}
           <input
@@ -313,7 +320,7 @@ export function FileField({
         {objectUrl ? (
           <button
             type="button"
-            aria-label={preview === "avatar" ? "Quitar foto" : "Quitar foto testimonial"}
+            aria-label={preview === "avatar" ? t("form.images.removeAvatar") : t("form.images.removeCapture")}
             className="absolute top-1 right-1 grid size-11 cursor-pointer place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
             onClick={clearFile}
           >
