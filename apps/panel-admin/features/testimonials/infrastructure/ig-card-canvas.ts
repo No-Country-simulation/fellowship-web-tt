@@ -41,7 +41,30 @@ const COPY: Record<
   change: { badge: "RECONVERSIÓN PROFESIONAL", kicker: "MI RECONVERSIÓN" },
 };
 
-const imageCache = new Map<string, ImageBitmap | null>();
+const imageCache = new Map<string, ImageBitmap>();
+
+export type IgCardImageKind = "logo" | "avatar" | "capture" | "fallback";
+
+const IG_CARD_IMAGE_DETAIL: Record<IgCardImageKind, string> = {
+  logo: "No cargó el logo.",
+  avatar: "No cargó el avatar.",
+  capture: "No cargó la captura.",
+  fallback: "No cargó la imagen de respaldo.",
+};
+
+export class IgCardImageError extends Error {
+  readonly kind: IgCardImageKind;
+
+  constructor(kind: IgCardImageKind) {
+    super("No pudimos generar la imagen.");
+    this.name = "IgCardImageError";
+    this.kind = kind;
+  }
+}
+
+export function igCardImageDetail(error: unknown): string | null {
+  return error instanceof IgCardImageError ? IG_CARD_IMAGE_DETAIL[error.kind] : null;
+}
 
 export async function drawIgCard(
   canvas: HTMLCanvasElement,
@@ -59,8 +82,20 @@ export async function drawIgCard(
     loadImage(LOGO_SRC),
     input.avatarUrl ? loadImage(input.avatarUrl) : Promise.resolve(null),
     input.captureUrl ? loadImage(input.captureUrl) : Promise.resolve(null),
-    loadImage(FALLBACK_PHOTO_SRC),
+    input.captureUrl ? Promise.resolve(null) : loadImage(FALLBACK_PHOTO_SRC),
   ]);
+  if (!logo) {
+    throw new IgCardImageError("logo");
+  }
+  if (input.avatarUrl && !avatar) {
+    throw new IgCardImageError("avatar");
+  }
+  if (input.captureUrl && !capture) {
+    throw new IgCardImageError("capture");
+  }
+  if (!input.captureUrl && !fallbackPhoto) {
+    throw new IgCardImageError("fallback");
+  }
   const fontFamily =
     getComputedStyle(document.body).fontFamily || "sans-serif";
   const variant = variantOf(input.type);
@@ -1891,23 +1926,25 @@ function wrapText(
   return lines;
 }
 
-async function loadImage(src: string) {
+async function loadImage(src: string): Promise<ImageBitmap | null> {
   const cached = imageCache.get(src);
-  if (cached !== undefined) {
+  if (cached) {
     return cached;
   }
 
   try {
-    const response = await fetch(src, { mode: "cors", cache: "force-cache" });
+    let response = await fetch(src, { mode: "cors", cache: "force-cache" });
     if (!response.ok) {
-      imageCache.set(src, null);
-      return null;
+      // force-cache vuelve a entregar un no-OK sin request. El reload no deja retenido ese fallo.
+      response = await fetch(src, { mode: "cors", cache: "reload" });
+      if (!response.ok) {
+        return null;
+      }
     }
     const bitmap = await createImageBitmap(await response.blob());
     imageCache.set(src, bitmap);
     return bitmap;
   } catch {
-    imageCache.set(src, null);
     return null;
   }
 }

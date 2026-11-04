@@ -70,7 +70,11 @@ producción falta `GALLERY_URL`, no se muestra y ese texto vacío nombra la ruta
 Publicar arma la card en el browser. En el server, el update a `published` y `published_at`
 solo gana si la fila sigue `in_review`. El request que no cambia la fila no sube nada ni postea,
 y vuelve a la ficha. El que gana sube el PNG al bucket `share-cards` (`{slug}/instagram.png`).
-Si el PNG no se genera o pesa más de 5 MB, el testimonio sigue en revisión. Si no se puede
+Si el PNG no se genera o pesa más de 5 MB, el testimonio sigue en revisión. Si falta el objeto
+del avatar o de la captura en Storage, no se puede publicar ni previsualizar; la salida es
+reponer el objeto o rechazar el testimonio. Si no carga `/brand/logo-no-country.png`, o
+`/brand/ig-fallback.jpg` cuando esa es la foto de la card, tampoco se publica ni se
+previsualiza, y eso no es motivo para rechazar el testimonio. Si no se puede
 subir, la fila vuelve a `in_review` con `published_at` en null. Con la card guardada reserva cada
 red (la fecha solo si sigue en null) y manda la card al webhook de Discord comunidad y a Buffer.
 Cada red sale con su texto guardado. Discord tiene el suyo, sin mención ni hashtags; la cita queda
