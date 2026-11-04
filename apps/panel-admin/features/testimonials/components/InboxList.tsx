@@ -516,7 +516,7 @@ export function InboxList({
             </div>
           ) : null}
 
-          {hasMore ? (
+          {hasMore && !moreError ? (
             <button
               type="button"
               className={cn(buttonVariants({ variant: "outline" }), "mx-3 mb-4 w-[calc(100%-1.5rem)]")}
