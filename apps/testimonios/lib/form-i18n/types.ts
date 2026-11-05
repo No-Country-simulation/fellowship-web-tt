@@ -15,6 +15,8 @@ export type FormMessages = {
     readonly navigation: {
       readonly home: string;
       readonly back: string;
+      readonly backToStep: string;
+      readonly previousStepsHint: string;
       readonly next: string;
       readonly correct: string;
     };

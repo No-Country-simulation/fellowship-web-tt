@@ -10,6 +10,8 @@ export const en = {
     navigation: {
       home: "Back to home",
       back: "Back",
+      backToStep: "Back to step {step}: {title}",
+      previousStepsHint: "Tap an earlier step to go back",
       next: "Next",
       correct: "Correct the information"
     },

@@ -2,6 +2,7 @@ import type { FormMessageKey } from "./types";
 
 /** Single parameter contract for both TypeScript callers and runtime interpolation. */
 export const FORM_MESSAGE_PARAMETERS = {
+  "form.navigation.backToStep": { step: "number", title: "string" },
   "form.progress": { step: "number", total: "number", title: "string" },
   "form.fields.avatar.requirements": { maxMb: "number" },
   "form.fields.capture.requirements": { maxMb: "number" },

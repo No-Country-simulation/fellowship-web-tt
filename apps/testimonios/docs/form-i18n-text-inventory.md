@@ -278,4 +278,13 @@ Voseo localizado: «Contanos», «Compartí», «querés», «Elegí», «Selecc
 
 También se sustituyen anglicismos innecesarios: «Links» → «Enlaces», «caption» → «descripción de Instagram», «post» → «publicación» y «Email» → «Correo electrónico». Portugués utiliza sus usos naturales («links», «legenda», «e-mail», «depoimento», «cargo», «equipe»), no calcos palabra por palabra. «Revisa», «Comparte» o «Ingresa» ya son tuteo neutro; «Conseguiste Empleo» se conserva tal como fue confirmado.
 
-**Actualización (Issue 2, ES/EN/PT):** el nuevo catálogo inglés añade la clave `form.language.en` al conjunto original; los tres catálogos actuales tienen 164 hojas de texto, con iguales parámetros. Las etiquetas visibles del selector son EN, ES y PT. Se usa `pt` como identificador canónico y `pt-BR` se acepta como alias de entrada; la variante lingüística continúa siendo portugués brasileño. El inventario histórico ES/PT-BR no se reescribió para que conserve su trazabilidad.
+**Actualización (Issue 2, ES/EN/PT):** el nuevo catálogo inglés añade la clave `form.language.en` al conjunto original; esa etapa deja 164 hojas de texto, con iguales parámetros. Las etiquetas visibles del selector son EN, ES y PT. Se usa `pt` como identificador canónico y `pt-BR` se acepta como alias de entrada; la variante lingüística continúa siendo portugués brasileño. El inventario histórico ES/PT-BR no se reescribió para que conserve su trazabilidad.
+
+## Navegación hacia pasos anteriores — etapa 1
+
+Se añaden dos claves (166 en total): el nombre accesible del botón y la indicación móvil. EN: `Back to step {step}: {title}` y `Tap an earlier step to go back`. Los parámetros del botón son un número de paso y su etiqueta localizada; no incluyen datos del participante.
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| F — StepProgress | Nuevo control | Volver al paso {step}: {title} | Voltar à etapa {step}: {title} | `form.navigation.backToStep` |
+| F — StepProgress | Indicación móvil desde paso 2 | Toca un paso anterior para volver | Toque em uma etapa anterior para voltar | `form.navigation.previousStepsHint` |

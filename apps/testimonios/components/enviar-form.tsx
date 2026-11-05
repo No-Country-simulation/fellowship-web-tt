@@ -228,6 +228,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   }
 
   function navigateTo(nextStep: number, errors?: FieldErrors) {
+    if (pending || nextStep < 1 || nextStep > STEPS) return;
     if (nextStep === step) {
       if (errors) focusFirstError(errors);
       return;
@@ -236,7 +237,14 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     setStep(nextStep);
   }
 
+  function navigateBackTo(previousStep: number) {
+    if (previousStep >= 1 && previousStep < step) {
+      navigateTo(previousStep);
+    }
+  }
+
   function goNext() {
+    if (pending) return;
     if (validateStep(step) && step < STEPS) {
       navigateTo(step + 1);
     }
@@ -298,7 +306,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
       className="mt-lg flex flex-col gap-lg"
       noValidate
     >
-      <StepProgress step={step} headingRef={headingRef} />
+      <StepProgress step={step} pending={pending} onNavigateBack={navigateBackTo} headingRef={headingRef} />
 
       <fieldset
         hidden={step !== 1}
@@ -881,7 +889,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             size="lg"
             className="h-auto min-h-11 max-w-full px-sm whitespace-normal"
             disabled={step === 1 || pending}
-            onClick={() => navigateTo(Math.max(1, step - 1))}
+            onClick={() => navigateBackTo(step - 1)}
           >
             {t("form.navigation.back")}
           </Button>
@@ -892,6 +900,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             type="button"
             variant="gradient"
             size="lg"
+            disabled={pending}
             className={step === 1 ? "h-auto min-h-11 w-full max-w-full px-md whitespace-normal sm:w-auto" : "h-auto min-h-11 max-w-full px-md whitespace-normal"}
             onClick={goNext}
           >
@@ -916,8 +925,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   return <>{children}{form}</>;
 }
 
-function StepProgress({ step, headingRef }: {
+/** Backward-only navigation; relative position never represents validation status. */
+function StepProgress({ step, pending, onNavigateBack, headingRef }: {
   step: number;
+  pending: boolean;
+  onNavigateBack: (step: number) => void;
   headingRef: React.RefObject<HTMLHeadingElement | null>;
 }) {
   const { locale, t } = useFormLocale();
@@ -927,34 +939,62 @@ function StepProgress({ step, headingRef }: {
       <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary focus:outline-none">
         {t("form.progress", { step, total: STEPS, title: steps[STEP_KEYS[step - 1]].title })}
       </h2>
-      {/* El h2 enfocado comunica el progreso; los círculos son solo visuales, sin barra duplicada. */}
-      <ol aria-hidden="true" className="mt-md grid grid-cols-5">
+      <ol className="mt-md grid grid-cols-5">
         {STEP_KEYS.map((key, index) => {
           const label = steps[key].short;
-          const current = step === index + 1;
-          const completed = step > index + 1;
-          return (
-            <li key={key} className="relative flex min-w-0 flex-col items-center gap-xs text-center">
-              {index < STEPS - 1 ? (
-                <span className={cn("absolute top-5 left-1/2 h-px w-full", completed ? "bg-accent-cyan/60" : "bg-border")} />
-              ) : null}
-              <span className={cn(
-                "relative flex size-10 items-center justify-center rounded-full text-body-small font-semibold",
-                current
-                  ? "bg-brand-gradient text-white ring-4 ring-brand-pink/10"
-                  : completed
-                    ? "border border-accent-cyan bg-bg-surface-2 text-accent-cyan"
-                    : "border border-border bg-bg-base text-text-secondary",
-              )}>
-                {index + 1}
+          const targetStep = index + 1;
+          const current = step === targetStep;
+          const previous = targetStep < step;
+          const content = (
+            <>
+              <span aria-hidden="true" className="relative flex w-full justify-center">
+                {index < STEPS - 1 ? (
+                  <span className="pointer-events-none absolute top-1/2 left-1/2 h-px w-full bg-border" />
+                ) : null}
+                <span className={cn(
+                  "relative flex aspect-square w-10 max-w-[calc(100%-0.25rem)] shrink-0 items-center justify-center rounded-full text-body-small leading-none font-semibold",
+                  current
+                    ? "bg-brand-gradient text-white ring-4 ring-brand-pink/10"
+                    : previous
+                      ? "border border-accent-cyan/40 bg-bg-base text-text-secondary"
+                      : "border border-border bg-bg-base text-text-secondary",
+                  previous && "transition-colors duration-150 group-enabled/step:group-hover/step:border-accent-cyan motion-reduce:transition-none",
+                )}>
+                  {targetStep}
+                </span>
               </span>
-              <span className={cn("hidden text-body-small md:block", current ? "font-medium text-text-primary" : "text-text-secondary")}>
+              <span aria-hidden="true" className={cn("hidden text-body-small md:block", current ? "font-medium text-text-primary" : "text-text-secondary")}>
                 {label}
               </span>
+            </>
+          );
+          return (
+            <li key={key} aria-current={current ? "step" : undefined} className="relative flex min-w-0 flex-col items-center text-center">
+              {previous ? (
+                <button
+                  type="button"
+                  disabled={pending}
+                  aria-label={t("form.navigation.backToStep", { step: targetStep, title: label })}
+                  onClick={() => onNavigateBack(targetStep)}
+                  className="group/step relative flex w-full min-w-0 cursor-pointer flex-col items-center gap-xs rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan disabled:cursor-default"
+                >
+                  {content}
+                </button>
+              ) : (
+                <span className="relative flex w-full min-w-0 flex-col items-center gap-xs">
+                  {content}
+                  <span className="sr-only">{t("form.progress", { step: targetStep, total: STEPS, title: steps[key].title })}</span>
+                </span>
+              )}
             </li>
           );
         })}
       </ol>
+      {step > 1 ? (
+        <p className="mt-sm text-center text-body-small leading-relaxed text-text-secondary md:hidden">
+          {t("form.navigation.previousStepsHint")}
+        </p>
+      ) : null}
     </div>
   );
 }

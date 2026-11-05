@@ -180,6 +180,18 @@ describe("complete dictionaries and historical inventory", () => {
 });
 
 describe("typed parameter interpolation", () => {
+  it("names backward step controls in ES/EN/PT, including when visual labels are hidden", () => {
+    const expected = {
+      es: "Volver al paso 2: Datos",
+      en: "Back to step 2: Details",
+      pt: "Voltar à etapa 2: Dados",
+    };
+    for (const locale of FORM_LOCALES) {
+      const title = getFormMessages(locale).form.steps.identity.short;
+      assert.equal(createFormTranslator(locale)("form.navigation.backToStep", { step: 2, title }), expected[locale]);
+    }
+  });
+
   it("uses complete progress messages in each language", () => {
     assert.equal(createFormTranslator("es")("form.progress", { step: 2, total: 5, title: "Datos" }), "Paso 2 de 5 · Datos");
     assert.equal(createFormTranslator("pt")("form.progress", { step: 2, total: 5, title: "Dados" }), "Etapa 2 de 5 · Dados");

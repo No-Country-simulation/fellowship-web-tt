@@ -10,6 +10,8 @@ export const ptBR = {
     navigation: {
       home: "Voltar ao início",
       back: "Voltar",
+      backToStep: "Voltar à etapa {step}: {title}",
+      previousStepsHint: "Toque em uma etapa anterior para voltar",
       next: "Próximo",
       correct: "Corrigir os dados"
     },
