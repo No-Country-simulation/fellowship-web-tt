@@ -10,7 +10,7 @@ El design system de Landing es una referencia interna. Los tokens y utilities vi
 
 El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, no un primitivo.
 
-La [etapa 1 de navegación del formulario](../form-steps-summary.md) documenta el indicador accesible para volver a pasos anteriores, sus límites y QA. No modifica el resumen ni añade estados de validación completada.
+Las [etapas de navegación y validación del formulario](../form-steps-summary.md) documentan el indicador accesible para volver a pasos anteriores y la comprobación integral previa al envío, con sus límites y QA. No modifican el resumen ni añaden estados de validación completada.
 
 ## Índice
 

@@ -145,13 +145,30 @@ export function validateField(
   }
 }
 
-/** Incluye undefined para registrar también los campos que ya fueron corregidos. */
-export function validateFormStep(step: number, values: FormValues): FieldErrors {
+/** Conserva rechazos activos del servidor; undefined registra las correcciones. */
+export function validateFormStep(
+  step: number,
+  values: FormValues,
+  serverErrors: FieldErrors = {},
+): FieldErrors {
   const errors: FieldErrors = {};
   for (const field of FORM_FIELDS) {
     if (FIELD_STEP[field] === step && isFieldActive(field, values.type)) {
-      errors[field] = validateField(field, values);
+      const localIssue = validateField(field, values);
+      errors[field] = serverErrors[field] ?? localIssue;
     }
+  }
+  return errors;
+}
+
+/** Comprueba todos los pasos con las mismas reglas y sin validar campos inactivos. */
+export function validateForm(
+  values: FormValues,
+  serverErrors: FieldErrors = {},
+): FieldErrors {
+  const errors: FieldErrors = {};
+  for (const step of new Set(Object.values(FIELD_STEP))) {
+    Object.assign(errors, validateFormStep(step, values, serverErrors));
   }
   return errors;
 }

@@ -39,6 +39,7 @@ import {
   resolveFormErrors,
   updateFormErrors,
   validateField,
+  validateForm,
   validateFormStep,
   type FormValidation,
   type FormValues,
@@ -214,13 +215,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   }
 
   function validateStep(current: number): boolean {
-    const nextErrors = validateFormStep(current, values);
     // Revalidar el paso no equivale a editar los campos rechazados por el servidor.
-    for (const field of FORM_FIELDS) {
-      if (FIELD_STEP[field] === current && serverErrors[field]) {
-        nextErrors[field] = serverErrors[field];
-      }
-    }
+    const nextErrors = validateFormStep(current, values, serverErrors);
     updateErrors(nextErrors);
     const valid = !Object.values(nextErrors).some(Boolean);
     if (!valid) focusRequest.current = { errors: nextErrors };
@@ -252,12 +248,23 @@ export function EnviarForm({ children }: { children: ReactNode }) {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
     if (step !== STEPS) {
       goNext();
       return;
     }
 
-    if (!validateStep(STEPS)) {
+    const nextErrors = validateForm(values, serverErrors);
+    updateErrors(nextErrors);
+    // firstErrorStep recibe solo errores: las claves undefined también son overrides.
+    const invalidFields = Object.fromEntries(
+      Object.entries(nextErrors).filter(([, issue]) => Boolean(issue)),
+    );
+    if (Object.keys(invalidFields).length > 0) {
+      const correctionStep = firstErrorStep(invalidFields);
+      // En el paso actual esperar al render de los mensajes antes de enfocar.
+      focusRequest.current = { errors: invalidFields };
+      if (correctionStep !== step) navigateTo(correctionStep, invalidFields);
       return;
     }
 

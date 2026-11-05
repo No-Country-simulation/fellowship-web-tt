@@ -1,8 +1,10 @@
-# Navegación y resumen del formulario — etapa 1
+# Navegación y resumen del formulario — etapas 1 y 2
 
 Fecha: 5 de noviembre de 2026. Rama: `feat/testimonios-form-steps-summary`.
 
 La investigación de conservación queda cerrada: el desarrollador confirmó en localhost que retroceder sin «Siguiente» y alternar categorías conserva los valores. Esta etapa no implementa una corrección de pérdida de datos.
+
+Las etapas 1 (navegación interactiva) y 2 (validación integral antes del envío) quedaron aprobadas tras las pruebas automatizadas y la revisión manual del desarrollador en localhost. Las secciones siguientes conservan sus decisiones, resultados técnicos y limitaciones específicas de QA.
 
 ## Navegación implementada
 
@@ -47,7 +49,7 @@ Resultados: **79/79 pruebas unitarias PASS**, TypeScript (`--noEmit --incrementa
 
 Capturas revisables: [ES, 375 px](./ui/assets/form-steps/es-375-1x.png), [EN, 1440 px](./ui/assets/form-steps/en-1440-1x.png) y [PT, 320 px con fuente al 200%](./ui/assets/form-steps/pt-320-2x.png).
 
-La emulación de ancho y tamaño de fuente no sustituye dispositivos táctiles, zoom real del navegador ni pruebas con lectores de pantalla y Safari/Firefox. La revisión visual del desarrollador en localhost sigue pendiente. No se realiza una nueva certificación de contraste ni se alteran los fallos históricos del Design System.
+La emulación de ancho y tamaño de fuente no sustituye dispositivos táctiles, zoom real del navegador ni pruebas con lectores de pantalla y Safari/Firefox. La revisión manual del desarrollador en localhost de la etapa 1 está aprobada; esa aprobación no sustituye las comprobaciones específicas anteriores. No se realiza una nueva certificación de contraste ni se alteran los fallos históricos del Design System.
 
 ## Archivos de esta etapa
 
@@ -59,3 +61,49 @@ La emulación de ancho y tamaño de fuente no sustituye dispositivos táctiles, 
 | `scripts/qa-form-steps.mjs` | Regresión de navegador aislada para esta etapa. |
 | `docs/form-i18n-text-inventory.md`, `docs/ui/README.md`, este documento | Inventario, enlace y decisiones de alcance. |
 | `docs/ui/assets/form-steps/` | Reporte JSON y tres capturas sintéticas. |
+
+## Etapa 2 — validación integral antes del envío
+
+Estado: aprobada tras la revisión de los cambios y las pruebas manuales del desarrollador en localhost. Se conservan los resultados técnicos y las limitaciones de QA detallados a continuación.
+
+### Decisiones de implementación
+
+`validateForm()` en [form-validation.ts](../lib/testimonials/form-validation.ts) recorre los pasos definidos en `FIELD_STEP` y reutiliza `validateFormStep()`. No introduce reglas, historial, marcas de aprobación ni estados nuevos. Solo comprueba campos activos de la categoría vigente y devuelve también claves con `undefined`, necesarias para registrar correcciones en los overrides existentes.
+
+La regla que preserva rechazos activos del servidor se trasladó desde `EnviarForm.validateStep()` a un tercer argumento opcional de `validateFormStep()`. La misma combinación se utiliza al pulsar «Siguiente» y al intentar el envío final: un error activo del servidor prevalece sobre la comprobación local hasta que la edición del campo lo corrige mediante la reconciliación existente. No se clona ni se sustituye la identidad de la respuesta del servidor. Los errores de categorías inactivas se filtran y vuelven a considerarse al reactivar la categoría.
+
+En el paso 5, `onSubmit()` comprueba todos los pasos antes de construir `FormData` o retirar la respuesta anterior. Actualiza los errores y filtra las claves sin incidencia antes de llamar a `firstErrorStep()`: este helper calcula desde las claves, por lo que incluir overrides `undefined` enviaría incorrectamente al paso 1. No se modifica ese helper compartido ni el parser.
+
+Si hay errores, el intento termina localmente. Se solicita foco en el primer campo inválido del primer paso afectado. Cuando el error corresponde al propio paso 5, se espera al render de los mensajes antes de enfocar; para otros pasos se reutiliza `navigateTo()` y el scroll con offset del header. Durante `pending`, el handler rechaza intentos adicionales.
+
+Los valores, archivos, consentimiento, datos profesionales inactivos y construcción del payload se conservan. Solo se envían los campos profesionales activos. La acción y la validación integral del servidor permanecen intactas y siguen siendo la autoridad final. Los errores generales o de campos desconocidos conservan su ciclo previo de presentación y reintento; no se inventa un campo o paso corregible para ellos.
+
+Esta etapa no incorpora edición del resumen ni previews nuevos. El documento conserva arriba el alcance histórico de la etapa 1.
+
+### Pruebas y resultados
+
+- Pruebas unitarias en `form-errors.test.ts`: validación integral por categoría, búsqueda del primer paso inválido, claves `undefined`, campos activos/inactivos, conservación de archivos y datos, rechazo vigente del servidor, corrección parcial, reactivación de categoría y presentación ES/EN/PT.
+- [qa-form-submit-validation.mjs](../scripts/qa-form-submit-validation.mjs): nueve recorridos (tres categorías × ES/EN/PT), con ancho 375 px para ES/PT y 1440 px para EN. Inicia un servidor local del build actual y Chrome aislado; intercepta los POST antes de Next y bloquea servicios externos. Cuatro respuestas simuladas por recorrido prueban errores sucesivos y éxito, sin ejecutar la acción real.
+- Para aislar la defensa final, el script modifica algunos controles montados pero ocultos mediante setters nativos y eventos `input`, ejecutando sus `onChange` reales. No reemplaza validadores, hooks ni navegación: el recorrido normal ya impide alcanzar el resumen con esos errores. Estos casos comprueban deliberadamente el guard del envío, sin presentarlos como un fallo de conservación de datos.
+- Se verifica que los errores locales no construyan payload ni produzcan POST, que se enfoquen y describan los campos inválidos en pasos 2/3/4/5, que «Siguiente» conserve sus validaciones y que una respuesta nueva no herede correcciones de otra anterior. Se comprueba el cambio de categoría después del resumen, la exclusión de campos profesionales inactivos en `FormData`, la conservación de su valor y la reactivación de rechazos pendientes al volver.
+
+Resultados de etapa 2: **85/85 pruebas unitarias PASS**, TypeScript (`--noEmit --incremental false`), ESLint, build y `git diff --check`: PASS. QA Chrome 156: **9/9 recorridos PASS**, 36 POST interceptados, cero envíos reales, cero solicitudes externas y cero excepciones de navegador detectadas. Los procesos propios y perfiles temporales se cerraron y limpiaron.
+
+El reporte se guarda en [form-submit-validation/qa-results.json](./ui/assets/form-submit-validation/qa-results.json), separado de la evidencia aprobada de etapa 1. Quedan para revisión manual el lector de pantalla real y dispositivos móviles físicos; las verificaciones automáticas de foco y viewport no los sustituyen.
+
+### Archivos de la etapa 2
+
+| Archivo | Cambio |
+| --- | --- |
+| `components/enviar-form.tsx` | Comprobación integral, bloqueo local del envío y foco en el primer error. |
+| `lib/testimonials/form-validation.ts` | Composición de reglas existentes y preservación compartida de errores activos del servidor. |
+| `lib/testimonials/form-errors.test.ts` | Regresiones de validación integral y reconciliación. |
+| `scripts/qa-form-submit-validation.mjs` | Casos de navegador con respuestas interceptadas y payload verificado. |
+| `docs/ui/assets/form-submit-validation/qa-results.json` | Evidencia sintética de los nueve recorridos. |
+| Este documento y `docs/ui/README.md` | Alcance, decisiones y resultados de etapa 2. |
+
+## Trabajo futuro — ubicación del consentimiento
+
+Leandro y Geraldine recomendaron que el consentimiento deje de ser un paso del formulario. Todavía deben definirse su ubicación y el ajuste correspondiente al flujo; esta recomendación no se implementa en esta etapa.
+
+Cualquier rediseño debe conservar la obligatoriedad, las validaciones y el registro de consentimiento existentes.
