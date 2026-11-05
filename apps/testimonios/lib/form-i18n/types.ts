@@ -128,6 +128,8 @@ export type FormMessages = {
       readonly title: string;
       readonly description: string;
       readonly summaryTitle: string;
+      readonly personalTitle: string;
+      readonly experienceTitle: string;
       readonly testimonialTitle: string;
       readonly typeLabel: string;
       readonly nameLabel: string;

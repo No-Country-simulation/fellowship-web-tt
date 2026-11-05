@@ -1,0 +1,644 @@
+{
+  "result": "PASS",
+  "reports": [
+    {
+      "locale": "es",
+      "category": "simulation",
+      "width": 375,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "simulation",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "primary_role",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "simulation",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "primary_role",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "category": "first_job",
+      "width": 375,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "es",
+      "category": "career_change",
+      "width": 375,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "category": "simulation",
+      "width": 1440,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "simulation",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "primary_role",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "simulation",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "primary_role",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "category": "first_job",
+      "width": 1440,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "category": "career_change",
+      "width": 1440,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "pt",
+      "category": "simulation",
+      "width": 375,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "simulation",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "primary_role",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "simulation",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "primary_role",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "pt",
+      "category": "first_job",
+      "width": 375,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    },
+    {
+      "locale": "pt",
+      "category": "career_change",
+      "width": 375,
+      "result": "PASS",
+      "localStepsBlocked": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "noPayloadBeforeValidation": true,
+      "accessibleFocus": true,
+      "valuesRetained": true,
+      "serverErrorsRetained": true,
+      "newResponseIdentity": true,
+      "categoryRoundtrip": true,
+      "payloads": [
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "first_job",
+          "keys": [
+            "avatar",
+            "company",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "role_achieved",
+            "story",
+            "type",
+            "video_url"
+          ]
+        },
+        {
+          "type": "career_change",
+          "keys": [
+            "avatar",
+            "consent",
+            "country",
+            "email",
+            "full_name",
+            "instagram",
+            "linkedin",
+            "new_role",
+            "previous_profession",
+            "story",
+            "type",
+            "video_url"
+          ]
+        }
+      ]
+    }
+  ],
+  "blockedPosts": 36,
+  "realSubmissions": 0,
+  "blockedExternal": 0,
+  "browserExceptionCount": 0,
+  "scope": "Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.",
+  "manual": "Stage 2 validation regression against the Stage 3 visual summary. Real screen reader and mobile hardware remain manual."
+}

@@ -143,6 +143,8 @@ export const en = {
       title: "Review your testimonial",
       description: "Make sure the information is correct before submitting.",
       summaryTitle: "Summary",
+      personalTitle: "Personal details",
+      experienceTitle: "Your experience",
       testimonialTitle: "Your testimonial details",
       typeLabel: "Type of experience",
       nameLabel: "Name",
@@ -154,7 +156,7 @@ export const en = {
       avatarReady: "Ready",
       avatarMissing: "Missing (required)",
       captureAttached: "Attached",
-      captureMissing: "Not attached (optional)",
+      captureMissing: "No experience photo attached (optional)",
       moderationHint: "The No Country team will review your testimonial before publishing it."
     },
     consent: {

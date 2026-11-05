@@ -288,3 +288,12 @@ Se añaden dos claves (166 en total): el nombre accesible del botón y la indica
 | --- | --- | --- | --- | --- |
 | F — StepProgress | Nuevo control | Volver al paso {step}: {title} | Voltar à etapa {step}: {title} | `form.navigation.backToStep` |
 | F — StepProgress | Indicación móvil desde paso 2 | Toca un paso anterior para volver | Toque em uma etapa anterior para voltar | `form.navigation.previousStepsHint` |
+
+## Resumen visual — etapa 3
+
+Dos títulos nuevos (168 claves en total). EN: `Personal details` y `Your experience`. Se reutilizan las etiquetas localizadas de los campos como textos alternativos de las fotografías. El estado `form.review.captureMissing` ahora identifica explícitamente la fotografía de experiencia ausente: ES «Sin fotografía de experiencia (opcional)», EN «No experience photo attached (optional)» y PT «Sem foto da experiência (opcional)».
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| F — Resumen | Sección personal | Datos personales | Dados pessoais | `form.review.personalTitle` |
+| F — Resumen | Sección experiencia | Tu experiencia | Sua experiência | `form.review.experienceTitle` |

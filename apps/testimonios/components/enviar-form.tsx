@@ -772,57 +772,86 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             {t("form.review.description")}
           </p>
         </div>
-        <section aria-labelledby="testimonial-summary-title" className="rounded-card border border-border bg-card p-sm sm:p-md">
-          <h4 id="testimonial-summary-title" className="text-body font-semibold text-text-primary">{t("form.review.summaryTitle")}</h4>
-          <div className="mt-sm flex flex-col gap-md">
-            <section aria-labelledby="summary-testimonial-title">
-              <h5 id="summary-testimonial-title" className="text-body-small font-semibold text-text-primary">{t("form.review.testimonialTitle")}</h5>
-              <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
-                {[
-                  [t("form.review.typeLabel"), selected?.label ?? t("form.review.notSelected")],
-                  [t("form.review.nameLabel"), fullName.trim() || t("form.review.missing")],
-                  [t("form.fields.country.label"), (isOtherCountry ? country.trim() : countryOptions.find(option => option.value === country)?.label ?? country.trim()) || t("form.review.missing")],
-                  ...professionalSummary,
-                ].map(([label, value]) => (
-                  <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
-                    <dt className="text-body-small text-text-secondary">{label}</dt>
-                    <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
+        {/* Cap only mobile summary gutters at their 16px-root token sizes. Enlarged
+            text keeps room to reflow without changing other steps or desktop. */}
+        <section aria-labelledby="testimonial-summary-title" className="min-w-0 space-y-md max-sm:mx-[min(0px,calc(24px_-_var(--spacing-md)))]">
+          <h4 id="testimonial-summary-title" className="sr-only">{t("form.review.summaryTitle")}</h4>
+          <section aria-labelledby="summary-personal-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
+            <h5 id="summary-personal-title" className="text-lg font-semibold text-text-primary">{t("form.review.personalTitle")}</h5>
+            <div className="mt-md flex min-w-0 flex-col gap-md sm:flex-row sm:items-start">
+              {avatarFile ? (
+                step === 5 ? <SummaryImage file={avatarFile} alt={t("form.fields.avatar.label")} className="block h-auto w-24 max-w-full shrink-0 rounded-md border border-border" /> : null
+              ) : (
+                <p className="text-body-small text-text-secondary">{t("form.review.avatarMissing")}</p>
+              )}
+              <div className="min-w-0 flex-1">
+                <dl className="grid min-w-0 gap-x-md gap-y-sm sm:grid-cols-2">
+                  <div className="min-w-0 sm:col-span-2">
+                    <dt className="text-body-small text-text-secondary">{t("form.review.nameLabel")}</dt>
+                    <dd className="mt-1 text-lg font-semibold wrap-anywhere text-text-primary">{fullName.trim() || t("form.review.missing")}</dd>
                   </div>
-                ))}
-                <div className="min-w-0 border-t border-border-subtle py-xs sm:col-span-2 sm:py-sm">
-                  <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? t("form.steps.story.title")}</dt>
-                  <dd className="mt-1 text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : t("form.review.missing")}</dd>
+                  {[
+                    ["country", t("form.fields.country.label"), (isOtherCountry ? country.trim() : countryOptions.find(option => option.value === country)?.label ?? country.trim()) || t("form.review.missing")],
+                    ["email", t("form.fields.email.label"), email.trim() || t("form.review.missing")],
+                  ].map(([key, label, value]) => (
+                    <div key={key} className="min-w-0">
+                      <dt className="text-body-small text-text-secondary">{label}</dt>
+                      <dd className="mt-1 text-body wrap-anywhere text-text-primary">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-sm text-body-small leading-relaxed text-text-secondary">{t("form.review.emailPrivacy")}</p>
+              </div>
+            </div>
+          </section>
+          <section aria-labelledby="summary-experience-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
+            <h5 id="summary-experience-title" className="text-lg font-semibold text-text-primary">{t("form.review.experienceTitle")}</h5>
+            <div className="mt-sm">
+              <p className="text-body-small text-text-secondary">{t("form.review.typeLabel")}</p>
+              <p className="mt-xs inline-block max-w-full rounded-md border border-border bg-bg-surface-1 px-xs py-1 text-body-small font-medium wrap-anywhere text-text-primary">
+                {selected?.label ?? t("form.review.notSelected")}
+              </p>
+            </div>
+            <dl className="mt-md grid gap-x-md gap-y-md sm:grid-cols-2">
+              {professionalSummary.map(([label, value]) => (
+                <div key={label} className="min-w-0">
+                  <dt className="text-body-small text-text-secondary">{label}</dt>
+                  <dd className="mt-1 text-body wrap-anywhere text-text-primary">{value}</dd>
                 </div>
-              </dl>
-            </section>
-            <section aria-labelledby="summary-contact-title">
-              <h5 id="summary-contact-title" className="text-body-small font-semibold text-text-primary">{t("form.review.contactTitle")}</h5>
-              <dl className="mt-xs">
-                <div className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
-                  <dt className="text-body-small text-text-secondary">{t("form.fields.email.label")}</dt>
-                  <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{email.trim() || t("form.review.missing")}</dd>
-                </div>
-              </dl>
-              <p className="text-body-small leading-relaxed text-text-secondary">{t("form.review.emailPrivacy")}</p>
-            </section>
-            <section aria-labelledby="summary-media-title">
-              <h5 id="summary-media-title" className="text-body-small font-semibold text-text-primary">{t("form.review.mediaTitle")}</h5>
-              <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
-                {[
-                  [t("form.fields.avatar.label"), avatarFile ? t("form.review.avatarReady") : t("form.review.avatarMissing")],
-                  [t("form.fields.capture.label"), captureFile ? t("form.review.captureAttached") : t("form.review.captureMissing")],
-                  ...(videoUrl.trim() ? [[t("form.fields.video_url.summaryLabel"), videoUrl.trim()]] : []),
-                  ...(instagram.trim() ? [[t("form.fields.instagram.label"), instagram.trim()]] : []),
-                  ...(linkedin.trim() ? [[t("form.fields.linkedin.label"), linkedin.trim()]] : []),
-                ].map(([label, value]) => (
-                  <div key={label} className="min-w-0 border-t border-border-subtle py-xs sm:py-sm">
-                    <dt className="text-body-small text-text-secondary">{label}</dt>
-                    <dd className="mt-1 text-body font-medium wrap-anywhere text-text-primary">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          </div>
+              ))}
+              <div className="min-w-0 border-t border-border-subtle pt-sm sm:col-span-2">
+                <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? t("form.steps.story.title")}</dt>
+                <dd className="mt-xs text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : t("form.review.missing")}</dd>
+              </div>
+            </dl>
+          </section>
+          <section aria-labelledby="summary-media-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
+            <h5 id="summary-media-title" className="text-lg font-semibold text-text-primary">{t("form.review.mediaTitle")}</h5>
+            <div className="mt-md min-w-0">
+              {captureFile ? (
+                <figure className="min-w-0">
+                  <figcaption className="mb-xs text-body-small text-text-secondary">{t("form.fields.capture.label")}</figcaption>
+                  {step === 5 ? <SummaryImage file={captureFile} alt={t("form.fields.capture.label")} className="block h-auto w-full max-w-[36rem] rounded-md border border-border" /> : null}
+                </figure>
+              ) : (
+                <p className="text-body-small text-text-secondary">{t("form.review.captureMissing")}</p>
+              )}
+              {videoUrl.trim() || instagram.trim() || linkedin.trim() ? (
+                <dl className="mt-xs grid gap-x-md sm:grid-cols-2">
+                  {[
+                    ...(videoUrl.trim() ? [[t("form.fields.video_url.summaryLabel"), videoUrl.trim()]] : []),
+                    ...(instagram.trim() ? [[t("form.fields.instagram.label"), instagram.trim()]] : []),
+                    ...(linkedin.trim() ? [[t("form.fields.linkedin.label"), linkedin.trim()]] : []),
+                  ].map(([label, value]) => (
+                    <div key={label} className="min-w-0 border-t border-border-subtle py-sm">
+                      <dt className="text-body-small text-text-secondary">{label}</dt>
+                      <dd className="mt-1 text-body wrap-anywhere text-text-primary">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+            </div>
+          </section>
           <p className="mt-sm text-body-small leading-relaxed text-text-secondary">{t("form.review.moderationHint")}</p>
         </section>
         <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
@@ -930,6 +959,24 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   );
 
   return <>{children}{form}</>;
+}
+
+/** Owns one URL for the confirmed file, only while its summary image is mounted. */
+function SummaryImage({ file, alt, className }: { file: File; alt: string; className: string }) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  useLayoutEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    const url = URL.createObjectURL(file);
+    image.src = url;
+    return () => {
+      image.removeAttribute("src");
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+  // Local blob owned by this component; no remote loader or second visual crop.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img ref={imageRef} alt={alt} className={className} />;
 }
 
 /** Backward-only navigation; relative position never represents validation status. */

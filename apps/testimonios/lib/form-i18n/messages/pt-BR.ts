@@ -143,6 +143,8 @@ export const ptBR = {
       title: "Revise seu depoimento",
       description: "Confira se os dados estão corretos antes de enviar.",
       summaryTitle: "Resumo",
+      personalTitle: "Dados pessoais",
+      experienceTitle: "Sua experiência",
       testimonialTitle: "Dados do seu depoimento",
       typeLabel: "Tipo de experiência",
       nameLabel: "Nome",
@@ -154,7 +156,7 @@ export const ptBR = {
       avatarReady: "Pronta",
       avatarMissing: "Pendente (obrigatória)",
       captureAttached: "Anexada",
-      captureMissing: "Não anexada (opcional)",
+      captureMissing: "Sem foto da experiência (opcional)",
       moderationHint: "A equipe da No Country revisará seu depoimento antes da publicação."
     },
     consent: {
