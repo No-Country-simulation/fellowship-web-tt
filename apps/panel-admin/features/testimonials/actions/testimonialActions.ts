@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 import { INBOX_FILTERS_FIELD, inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
 import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
 import { hasCommunityWebhook } from "../infrastructure/discord";
-import { validateCardEdits } from "../infrastructure/cardFields";
-import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
+import { cardTextLength, validateCardEdits } from "../infrastructure/cardFields";
+import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS, QUOTE_TOO_LONG_MESSAGE } from "../infrastructure/quote";
 import {
   archiveTestimonial,
   getTestimonialById,
@@ -93,10 +93,10 @@ export async function reviewTestimonial(
   if (!quote) {
     return { status: "error", message: "La cita de la historia no puede estar vacía." };
   }
-  if (quote.length > QUOTE_EDIT_MAX_CHARS) {
+  if (cardTextLength(quote) > QUOTE_EDIT_MAX_CHARS) {
     return {
       status: "error",
-      message: `La cita de la historia puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
+      message: QUOTE_TOO_LONG_MESSAGE,
     };
   }
 

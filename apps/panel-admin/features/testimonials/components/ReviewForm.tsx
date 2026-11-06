@@ -22,15 +22,17 @@ import { COUNTRY_OPTIONS, isListedCountry, OTHER_COUNTRY_VALUE } from "../infras
 import { INBOX_FILTERS_FIELD } from "../infrastructure/inboxQuery";
 import { useInboxFilters } from "./InboxFilters";
 import {
-  CARD_FIELD_MAX_CHARS,
+  CARD_LIMITS,
   CARD_FIELDS_BY_TYPE,
-  CARD_NAME_MAX_CHARS,
-  cardNameHintLimit,
+  cardTextLength,
+  cardTextLevel,
   readCardInputs,
   sameCardInputs,
   validateCardEdits,
   type CardEdits,
   type CardInputs,
+  type CardTextLevel,
+  type CardTextLimit,
 } from "../infrastructure/cardFields";
 import { igCardContent } from "../infrastructure/ig-card";
 import { igCardImageDetail, igCardPngBlob, igCardQuoteClipped } from "../infrastructure/ig-card-canvas";
@@ -44,6 +46,8 @@ import {
   linkedInMention,
   omitVideoLine,
   QUOTE_EDIT_MAX_CHARS,
+  QUOTE_EDIT_WARN_CHARS,
+  QUOTE_TOO_LONG_MESSAGE,
   rebuildCaptionsForName,
   setCaptionVideo,
   videoCaptionLine,
@@ -179,7 +183,8 @@ export function ReviewForm({
   const preparingCardRef = useRef(false);
   const preparingCard = cardAttempt !== null;
   const quoteEmpty = quote.trim().length === 0;
-  const quoteTooLong = quote.length > QUOTE_EDIT_MAX_CHARS;
+  const quoteLevel = cardTextLevel(quote, { max: QUOTE_EDIT_MAX_CHARS, warn: QUOTE_EDIT_WARN_CHARS });
+  const quoteTooLong = quoteLevel === "over";
   const quoteInvalid = quoteEmpty || quoteTooLong;
   const canMeasureCard = useSyncExternalStore(
     () => () => {},
@@ -189,7 +194,11 @@ export function ReviewForm({
   const cardEdits = useMemo<CardEdits>(() => ({ ...fields, quote }), [fields, quote]);
   const cardValidation = validateCardEdits(testimonial.type, cardEdits);
   const cardInvalid = !cardValidation.ok;
-  const cardMessages = cardValidation.ok ? [] : cardValidation.messages;
+  // Los errores de los campos y de la cita se muestran junto a su campo: no se repiten abajo.
+  const shownBesideField = (message: string) =>
+    message === (cardValidation.ok ? "" : cardValidation.message) ||
+    (quoteTooLong && message === QUOTE_TOO_LONG_MESSAGE);
+  const nameLevel = cardTextLevel(fields.fullName, CARD_LIMITS.fullName);
   const previewCard = useMemo(
     () => igCardContent(testimonial, quote, cardDesign, cardEdits),
     [cardDesign, cardEdits, quote, testimonial],
@@ -578,7 +587,7 @@ export function ReviewForm({
                       {testimonial.typeLabel}
                     </p>
                   </div>
-                  {fields.fullName.trim().length > cardNameHintLimit(cardDesign) ? (
+                  {nameLevel === "warn" ? (
                     <p id="admin-name-long" className="text-admin-caption text-tone-warning" role="status">
                       Este nombre es un poco largo. En la card se lee mejor si usas iniciales.
                     </p>
@@ -588,13 +597,9 @@ export function ReviewForm({
                       label="Nombre"
                       name="full_name"
                       value={fields.fullName}
-                      maxLength={CARD_NAME_MAX_CHARS}
+                      limit={CARD_LIMITS.fullName}
                       error={cardValidation.ok ? undefined : cardValidation.errors.fullName}
-                      describedBy={
-                        fields.fullName.trim().length > cardNameHintLimit(cardDesign)
-                          ? "admin-name-long"
-                          : undefined
-                      }
+                      describedBy={nameLevel === "warn" ? "admin-name-long" : undefined}
                       autoComplete="name"
                       onChange={(value) => {
                         setFields((current) => ({ ...current, fullName: value }));
@@ -617,7 +622,7 @@ export function ReviewForm({
                         label={field.label}
                         name={field.key}
                         value={fields[field.key]}
-                        maxLength={CARD_FIELD_MAX_CHARS}
+                        limit={CARD_LIMITS[field.key]}
                         error={cardValidation.ok ? undefined : cardValidation.errors[field.key]}
                         onChange={(value) => {
                           setFields((current) => ({ ...current, [field.key]: value }));
@@ -639,18 +644,23 @@ export function ReviewForm({
                     </label>
                     <p
                       className={`${quoteEmpty ? "text-admin-caption" : "text-admin-micro"} shrink-0 ${
-                        quoteInvalid ? "text-destructive" : "text-muted-foreground"
+                        quoteEmpty ? "text-destructive" : LEVEL_TEXT_CLASS[quoteLevel]
                       }`}
                     >
                       {quoteEmpty
                         ? "No puede estar vacía"
-                        : `${quote.length}/${QUOTE_EDIT_MAX_CHARS}${quoteTooLong ? " · Acortala" : ""}`}
+                        : `${cardTextLength(quote)}/${QUOTE_EDIT_MAX_CHARS}`}
                     </p>
                   </div>
                   <p id="admin-quote-hint" className="text-admin-micro text-muted-foreground">
                     El fragmento de la historia que se lee en la imagen. Una o dos oraciones, cortas y
-                    con impacto.
+                    con impacto. Máximo {QUOTE_EDIT_MAX_CHARS} caracteres.
                   </p>
+                  {quoteTooLong ? (
+                    <p id="admin-quote-over" className="text-admin-caption text-destructive">
+                      {QUOTE_TOO_LONG_MESSAGE}
+                    </p>
+                  ) : null}
                   {quoteClipped ? (
                     <p id="admin-quote-clip" className="text-admin-caption text-tone-warning" role="status">
                       En este diseño la card no muestra toda la cita: la corta con “…”.
@@ -659,8 +669,13 @@ export function ReviewForm({
                   <textarea
                     id="admin-quote"
                     value={quote}
-                    maxLength={QUOTE_EDIT_MAX_CHARS}
-                    aria-describedby={quoteClipped ? "admin-quote-hint admin-quote-clip" : "admin-quote-hint"}
+                    aria-describedby={[
+                      "admin-quote-hint",
+                      quoteTooLong ? "admin-quote-over" : null,
+                      quoteClipped ? "admin-quote-clip" : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     aria-invalid={quoteInvalid || undefined}
                     className={textareaClassName}
                     onChange={(event) => onQuoteChange(event.target.value)}
@@ -793,16 +808,11 @@ export function ReviewForm({
                 Cambios guardados. Todavía no está publicado.
               </p>
             ) : null}
-            {state.status === "error" ? (
+            {state.status === "error" && !shownBesideField(state.message) ? (
               <p className="text-admin-caption text-destructive" role="alert">
                 {state.message}
               </p>
             ) : null}
-            {cardMessages.map((problem) => (
-              <p key={problem} className="text-admin-caption text-destructive" role="alert">
-                {problem}
-              </p>
-            ))}
             {otherCaptionProblems.map((problem) => (
               <p key={problem} className="text-admin-caption text-destructive" role="alert">
                 {problem}
@@ -1018,7 +1028,7 @@ function CountryField({
         <CardTextField
           label="Especificá el país"
           value={custom}
-          maxLength={CARD_FIELD_MAX_CHARS}
+          limit={CARD_LIMITS.country}
           error={error}
           autoComplete="country-name"
           onChange={(next) => {
@@ -1031,11 +1041,18 @@ function CountryField({
   );
 }
 
+/** Gris hasta el umbral, ámbar desde el umbral, rojo al pasar el tope. */
+const LEVEL_TEXT_CLASS: Record<CardTextLevel, string> = {
+  ok: "text-muted-foreground",
+  warn: "text-tone-warning",
+  over: "text-destructive",
+};
+
 function CardTextField({
   label,
   name,
   value,
-  maxLength,
+  limit,
   error,
   describedBy,
   autoComplete,
@@ -1045,7 +1062,7 @@ function CardTextField({
   label: string;
   name?: string;
   value: string;
-  maxLength: number;
+  limit: CardTextLimit;
   error?: string;
   describedBy?: string;
   autoComplete?: string;
@@ -1055,7 +1072,8 @@ function CardTextField({
   const id = useId();
   const errorId = `${id}-error`;
   const countId = `${id}-count`;
-  const invalid = Boolean(error);
+  const level = cardTextLevel(value, limit);
+  const invalid = Boolean(error) || level === "over";
   const describedByIds = [describedBy, countId, invalid ? errorId : null].filter(Boolean).join(" ");
   return (
     <div className="flex min-w-0 flex-col gap-2">
@@ -1065,11 +1083,9 @@ function CardTextField({
         </label>
         <p
           id={countId}
-          className={`shrink-0 text-admin-micro ${
-            invalid ? "text-destructive" : "text-muted-foreground"
-          }`}
+          className={`shrink-0 text-admin-micro ${LEVEL_TEXT_CLASS[level]}`}
         >
-          {value.length}/{maxLength}
+          {cardTextLength(value)}/{limit.max}
         </p>
       </div>
       <input
@@ -1077,7 +1093,6 @@ function CardTextField({
         name={name}
         type="text"
         value={value}
-        maxLength={maxLength}
         autoComplete={autoComplete}
         aria-invalid={invalid || undefined}
         aria-describedby={describedByIds}

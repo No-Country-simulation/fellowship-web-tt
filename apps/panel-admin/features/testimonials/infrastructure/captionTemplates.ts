@@ -1,7 +1,10 @@
 import type { TestimonialType } from "../types/testimonial";
 import { youtubeWatchUrl } from "./youtube";
 
-export const QUOTE_EDIT_MAX_CHARS = 400;
+/** Tope de la cita en la card y desde dónde avisa (80 %). Se cuenta con `cardTextLength`. */
+export const QUOTE_EDIT_MAX_CHARS = 300;
+export const QUOTE_EDIT_WARN_CHARS = Math.floor(QUOTE_EDIT_MAX_CHARS * 0.8);
+export const QUOTE_TOO_LONG_MESSAGE = "La cita es muy larga para la card.";
 
 /** Tope de la descripción en cada red. El de la cita es `QUOTE_EDIT_MAX_CHARS`. */
 export const CAPTION_MAX_CHARS = {
