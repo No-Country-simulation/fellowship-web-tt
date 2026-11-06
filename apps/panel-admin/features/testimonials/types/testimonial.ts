@@ -93,6 +93,7 @@ export const STATUS_LABELS: Record<TestimonialStatus, string> = {
 
 /** Tope del motivo de archivo. Lo comparten el formulario y la action. */
 export const ARCHIVE_REASON_MAX_CHARS = 500;
+export const REJECT_REASON_MAX_CHARS = 500;
 
 /** Tope de un borrado de rechazados. Lo comparten la lista, la action y el repositorio. */
 export const BULK_DELETE_MAX = 100;
@@ -227,6 +228,7 @@ export type AdminTestimonial = {
   status: TestimonialStatus;
   /** Motivo guardado al archivar. Null en cualquier otro estado. */
   archiveReason: string | null;
+  rejectReason: string | null;
   fullName: string;
   country: string | null;
   email: string;

@@ -340,9 +340,15 @@ export async function saveBufferPostId(
 
 export async function rejectTestimonial(
   id: string,
+  reason: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const updated = await updateReviewRow(id, { status: "rejected" });
-  return updated.ok ? { ok: true } : updated;
+  return transitionStatus(
+    id,
+    "in_review",
+    { status: "rejected", archive_reason: null, reject_reason: reason },
+    "Este envío ya no está en revisión.",
+    "No pudimos rechazar el testimonio. Probá de nuevo.",
+  );
 }
 
 const notPublishedAnymore = "Este testimonio ya no está publicado.";
@@ -360,7 +366,7 @@ export async function archiveTestimonial(
   return transitionStatus(
     id,
     "published",
-    { status: "archived", archive_reason: reason },
+    { status: "archived", archive_reason: reason, reject_reason: null },
     notPublishedAnymore,
     "No pudimos archivar el testimonio. Probá de nuevo.",
   );
@@ -373,7 +379,7 @@ export async function republishTestimonial(
   return transitionStatus(
     id,
     "archived",
-    { status: "published", archive_reason: null },
+    { status: "published", archive_reason: null, reject_reason: null },
     notArchivedAnymore,
     "No pudimos volver a publicar el testimonio. Probá de nuevo.",
   );
@@ -381,7 +387,7 @@ export async function republishTestimonial(
 
 /**
  * Rechazado → en revisión. No publica y no toca archivos ni otras columnas
- * además de `status` y `archive_reason` null.
+ * además de `status`, `archive_reason` y `reject_reason` null.
  */
 export async function returnRejectedToReview(
   id: string,
@@ -389,7 +395,7 @@ export async function returnRejectedToReview(
   return transitionStatus(
     id,
     "rejected",
-    { status: "in_review", archive_reason: null },
+    { status: "in_review", archive_reason: null, reject_reason: null },
     notRejectedAnymore,
     "No pudimos devolver el testimonio a revisión. Probá de nuevo.",
   );
@@ -717,6 +723,7 @@ function reviewRowValues(edits: ReviewEdits): ReviewRowValues {
 type StatusTransition = {
   status: TestimonialStatus;
   archive_reason: string | null;
+  reject_reason: string | null;
 };
 
 /** Update atómico: gana solo la fila que sigue en `from`. No manda otras columnas. */
