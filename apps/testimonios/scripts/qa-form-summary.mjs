@@ -14,9 +14,10 @@ const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const diagnosis = process.argv.includes('--diagnose');
 const editSummary = process.argv.includes('--edit-summary');
-const representativeOnly = process.argv.includes('--representative-only');
+const heroConsent = process.argv.includes('--hero-consent');
+const representativeOnly = heroConsent || process.argv.includes('--representative-only');
 assert.ok(!representativeOnly || editSummary, '--representative-only requires --edit-summary');
-const output = join(appDir, editSummary ? "docs/ui/assets/form-summary-inline" : "docs/ui/assets/form-summary", ...(diagnosis ? ['investigation'] : []));
+const output = join(appDir, heroConsent ? "docs/ui/assets/hero-consent/summary-regression" : editSummary ? "docs/ui/assets/form-summary-inline" : "docs/ui/assets/form-summary", ...(diagnosis ? ['investigation'] : []));
 const captures=[];
 const versionedCaptures = [
  'en-1440-100-present.png', 'en-1440-100-present-editing.png',
@@ -24,7 +25,7 @@ const versionedCaptures = [
  'pt-320-200-present-editing.png', 'pt-320-200-editing-footer.png',
 ];
 // Run every capture assertion, but only rewrite the affected editing evidence.
-const affectedCaptures = new Set(versionedCaptures.filter(name=>name.includes('editing')));
+const affectedCaptures = new Set(heroConsent ? [] : versionedCaptures.filter(name=>name.includes('editing')));
 const captureBuffers = new Map(), writtenCaptures = [];
 async function saveCapture(name,png){
  if(representativeOnly)captureBuffers.set(name,png);
@@ -217,7 +218,7 @@ try{
   for(const width of [320,375])for(const scale of [1,2]){await cdp('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});await ev(scale=>document.documentElement.style.fontSize=16*scale+'px',scale);assert.ok(await ev(()=>{const w=document.documentElement.clientWidth;return [...document.querySelectorAll('[data-summary-editor] [data-field]')].every(e=>e.getBoundingClientRect().left>=0&&e.getBoundingClientRect().right<=w+1&&e.scrollWidth<=e.clientWidth+1); }),'invalid editors fit with enlarged errors');}
   await ev(()=>document.documentElement.style.removeProperty('font-size'));await cdp('Emulation.setDeviceMetricsOverride',{width:375,height:1000,deviceScaleFactor:1,mobile:false});
   await replace('full_name',initialName+' QA');await done(false);assert.equal(await ev(()=>document.activeElement.name),'country','Other country uses its visible editor');await replace('country','Portugal');await replace('email','persona.inline@example.com');
-  for(const name of roleNames(category))await replace(name,professionalValues[name]+' QA');await replace('story',story+'\n\nEdicion inline de prueba.');await replace('video_url','https://youtu.be/abcdefghijk');await replace('instagram','@qa_inline');await replace('linkedin','https://www.linkedin.com/in/qa-inline');await done(false);assert.equal(await ev(()=>document.activeElement.name),'consent','Done preserves mandatory consent validation');await click('[name="consent"]');
+  for(const name of roleNames(category))await replace(name,professionalValues[name]+' QA');await replace('story',story+'\n\nEdicion inline de prueba.');await replace('video_url','https://youtu.be/abcdefghijk');await replace('instagram','@qa_inline');await replace('linkedin','https://www.linkedin.com/in/qa-inline');await done();await edit();
   await choose('avatar',3);await cancel();assert.ok(await filesMatch(),'cancelled inline avatar crop preserves the previous confirmed file');await choose('avatar',3);await confirm();
   await ev(()=>document.querySelector('[name="avatar"]').closest('[data-field]').querySelector('button').setAttribute('data-qa-remove-avatar',''));await click('[data-qa-remove-avatar]');await done(false);assert.equal(await ev(()=>document.activeElement.name),'avatar','required avatar error focuses the visible picker');await choose('avatar',4);await confirm();
   await choose('capture',3);await cancel();assert.ok(await ev(()=>window.__qaUrls.get(document.querySelector('[name="capture"]').closest('[data-field]').querySelector('img').src).file===window.__qaOriginalFiles.capture),'cancelled inline capture crop preserves the previous file');await choose('capture',3);await confirm();
@@ -234,7 +235,7 @@ try{
   await edit('Space');await earlier(1);const otherCategory=category==='first_job'?'career_change':'first_job';await click('[name="type"][value="'+otherCategory+'"]');await next();await next();
   assert.ok(await ev(()=>!!document.querySelector('#story-review-notice')),'category changes retain story review notice');for(const name of roleNames(otherCategory))await replace(name,'Dato temporal QA');await next();await next();
   await earlier(1);await click('[name="type"][value="'+category+'"]');await next();await next();for(const name of roleNames(category))assert.equal(await ev(name=>document.querySelector('[name="'+name+'"]').value,name),professionalValues[name],'original professional values survive category roundtrip');await next();await next();
-  await edit('Space');await replace('story',story+' QA');await replace('story',story);await click('[name="linkedin"]');await done(true,true);await click('[name="consent"]');assert.deepEqual(await draft(),initial,'the test restores ordinary field values after demonstrating edits');assert.equal(blockedPosts,posts);saveButtonResults.push({locale,category,...buttonAppearance});return [...present,...absent];
+  await edit('Space');await replace('story',story+' QA');await replace('story',story);await click('[name="linkedin"]');await done(true,true);assert.deepEqual(await draft(),initial,'the test restores ordinary field values after demonstrating edits');assert.equal(blockedPosts,posts);saveButtonResults.push({locale,category,...buttonAppearance});return [...present,...absent];
  }
  async function choose(name,variant){
   await ev(async(name,variant)=>{
@@ -349,7 +350,7 @@ try{
    });
    assert.deepEqual(reading.splitTitleWords,[],'ordinary heading words remain whole');
    assert.ok(reading.storyEms>=(inline?6:7),'usable story width: '+JSON.stringify({locale,category,width,scale,inline,reading,story:layout.elements.story}));
-   const placement=await ev(()=>{const heading=document.querySelector('[data-summary-heading]'),root=document.querySelector('#testimonial-summary'),actions=document.querySelectorAll('[aria-controls="testimonial-summary"]'),action=actions[0],b=action.getBoundingClientRect(),h=heading.querySelector('h3').getBoundingClientRect(),isEditing=action.getAttribute('aria-pressed')==='true',last=[...root.querySelectorAll(':scope > section')].at(-1).getBoundingClientRect(),consent=document.querySelector('[aria-labelledby="testimonial-consent-title"]').getBoundingClientRect();return{single:actions.length===1,touch:b.width>=44&&b.height>=44,fits:b.left>=0&&b.right<=document.documentElement.clientWidth,noOverlap:!(h.left<b.right-1&&h.right>b.left+1&&h.top<b.bottom-1&&h.bottom>b.top+1),headerButtons:heading.querySelectorAll('button').length,atFooter:isEditing?!!action.closest('#testimonial-summary')&&action.hasAttribute('data-summary-done')&&b.top>=last.bottom&&b.bottom<=consent.top:!root.querySelector('[data-summary-done]'),mode:isEditing?'editing':'reading'};});
+   const placement=await ev(()=>{const heading=document.querySelector('[data-summary-heading]'),root=document.querySelector('#testimonial-summary'),actions=document.querySelectorAll('[aria-controls="testimonial-summary"]'),action=actions[0],b=action.getBoundingClientRect(),h=heading.querySelector('h3').getBoundingClientRect(),isEditing=action.getAttribute('aria-pressed')==='true',last=[...root.querySelectorAll(':scope > section')].at(-1).getBoundingClientRect(),submit=document.querySelector('button[type="submit"]').getBoundingClientRect();return{single:actions.length===1,touch:b.width>=44&&b.height>=44,fits:b.left>=0&&b.right<=document.documentElement.clientWidth,noOverlap:!(h.left<b.right-1&&h.right>b.left+1&&h.top<b.bottom-1&&h.bottom>b.top+1),headerButtons:heading.querySelectorAll('button').length,atFooter:isEditing?!!action.closest('#testimonial-summary')&&action.hasAttribute('data-summary-done')&&b.top>=last.bottom&&b.bottom<=submit.top:!root.querySelector('[data-summary-done]'),mode:isEditing?'editing':'reading'};});
    assert.ok(placement.single&&placement.touch&&placement.fits&&placement.noOverlap&&placement.atFooter,'one action, with accessible geometry and correct footer placement');assert.equal(placement.headerButtons,inline?0:1,'no Done control remains in the header');
    checks.push({width,fontPercent:scale*100,hasCapture,mode:inline?'editing':'reading',reading,placement,layout});
    if(hasCapture&&scale===1&&locale==='es'&&width===1440&&category!=='first_job')await screenshot('es-'+category+'-1440'+(inline?'-editing':'')+'.png');
@@ -379,8 +380,8 @@ try{
   }
   assert.ok(await ev(hasCapture=>{const payload=window.__qaPayloads.at(-1),avatar=document.querySelector('[aria-labelledby="summary-personal-title"] img'),capture=document.querySelector('[aria-labelledby="summary-media-title"] img');return payload.avatar===window.__qaUrls.get(avatar.src).file&&(hasCapture?payload.capture===window.__qaUrls.get(capture.src).file:!('capture'in payload));},hasCapture),'payload contains exactly the files displayed');
   const payload=await ev(()=>{const p=window.__qaPayloads.at(-1);return{keys:Object.keys(p).sort(),type:p.type,story:p.story,consent:p.consent};});
-  assert.deepEqual(payload.keys,['type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar','consent',...(hasCapture?['capture']:[])].sort());
-  assert.equal(payload.type,category);assert.equal(payload.story,story);assert.equal(payload.consent,'1');
+  assert.deepEqual(payload.keys,['type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar',...(hasCapture?['capture']:[])].sort());
+  assert.equal(payload.type,category);assert.equal(payload.story,story);assert.equal(payload.consent,undefined);
   await cdp('Fetch.fulfillRequest',{requestId:pendingAction,responseCode:200,responseHeaders:[{name:'content-type',value:'text/x-component'}],body:Buffer.from('0:'+JSON.stringify({a:response,f:''})+'\n').toString('base64')});
   pendingAction=null;expectAction=false;await until(()=>ev(()=>!document.querySelector('form')||!document.querySelector('button[type="submit"]').disabled),'mock completed');
  }
@@ -421,7 +422,7 @@ try{
   await back();await ev(()=>{document.querySelector('[name="capture"]').closest('[data-field]').querySelector('button').setAttribute('data-qa-remove','');});await click('[data-qa-remove]');await liveCount(1);await next();await summaryProbe(locale,category,false);
   const hasCapture=category!=='simulation';
   if(hasCapture){await earlier(4);await choose('capture',2);await confirm();await next();await summaryProbe(locale,category,true);}
-  await click('[name="consent"]');const stable=await ev(()=>[...document.querySelectorAll('[aria-labelledby="testimonial-summary-title"] img')].map(e=>e.src));
+  const stable=await ev(()=>[...document.querySelectorAll('[aria-labelledby="testimonial-summary-title"] img')].map(e=>e.src));
   await mock({status:'error',issue:{code:'submit.saveFailed'}},category,hasCapture);
   assert.ok(await ev(()=>!!document.querySelector('form [role="alert"]')),'server errors still visible outside the summary');
   assert.deepEqual(await ev(()=>[...document.querySelectorAll('[aria-labelledby="testimonial-summary-title"] img')].map(e=>e.src)),stable,'server response never remounts unchanged previews');
@@ -443,7 +444,7 @@ try{
  if(diagnosis){assert.equal(blockedPosts,0);assert.equal(blockedExternal,0);assert.equal(errors.length,0);}
  else {
  assert.equal(blockedPosts,editSummary?27:18);assert.equal(blockedExternal,0);assert.equal(errors.length,0);
- const report={result:'PASS',reports,captures,versionedCaptures:editSummary?versionedCaptures:undefined,writtenCaptures,capturePolicy:editSummary?(representativeOnly?'All capture checks run in memory; only the four affected editing PNGs are rewritten. The two selected read-mode PNGs are retained unchanged.':'Full image checks and generation are retained; assets/.gitignore allows only the six review PNGs. Other captures are local, ignored artifacts.'):undefined,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,manual:'Screen reader, physical devices and native browser zoom remain manual. Root font scaling also scales rem spacing; it is not text-only zoom or native page zoom. Viewport-wide CDP clips at scale 1 retain gutters; PNG dimensions and DOM geometry are verified. All photographs are synthetic canvas fixtures.'};
+ const report={result:'PASS',reports,captures,versionedCaptures:heroConsent?[]:editSummary?versionedCaptures:undefined,writtenCaptures,capturePolicy:heroConsent?'Stage 5: all capture checks run in memory; no PNG is written and Stage 4 evidence is preserved.':editSummary?(representativeOnly?'All capture checks run in memory; only the four affected editing PNGs are rewritten. The two selected read-mode PNGs are retained unchanged.':'Full image checks and generation are retained; assets/.gitignore allows only the six review PNGs. Other captures are local, ignored artifacts.'):undefined,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,manual:'Screen reader, physical devices and native browser zoom remain manual. Root font scaling also scales rem spacing; it is not text-only zoom or native page zoom. Viewport-wide CDP clips at scale 1 retain gutters; PNG dimensions and DOM geometry are verified. All photographs are synthetic canvas fixtures.'};
  if(editSummary)report.saveButtonAppearance=saveButtonResults;
  await writeFile(join(output,'qa-results.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({...report,reports:reports.map(r=>({locale:r.locale,category:r.category,responsive:r.responsive.length})),captures:captures.length}));
  }

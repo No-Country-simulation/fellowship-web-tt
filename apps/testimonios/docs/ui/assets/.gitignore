@@ -15,3 +15,16 @@
 !/form-summary-inline/es-375-100-present-editing.png
 !/form-summary-inline/pt-320-200-present-editing.png
 !/form-summary-inline/pt-320-200-editing-footer.png
+
+# Stage 5: four selected images and three reports; keep generated extras local.
+/hero-consent/**
+!/hero-consent/README.md
+!/hero-consent/qa-results.json
+!/hero-consent/hero-es-320.png
+!/hero-consent/hero-en-1440.png
+!/hero-consent/hero-pt-375-200.png
+!/hero-consent/es-375-review-submit.png
+!/hero-consent/summary-regression/
+!/hero-consent/summary-regression/qa-results.json
+!/hero-consent/submit-regression/
+!/hero-consent/submit-regression/qa-results.json

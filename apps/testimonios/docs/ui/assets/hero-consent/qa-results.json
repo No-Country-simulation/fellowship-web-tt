@@ -1,0 +1,652 @@
+{
+  "result": "PASS",
+  "reports": [
+    {
+      "locale": "es",
+      "category": "simulation",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "es",
+      "category": "first_job",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "es",
+      "category": "career_change",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "en",
+      "category": "simulation",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "en",
+      "category": "first_job",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "en",
+      "category": "career_change",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "pt",
+      "category": "simulation",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "pt",
+      "category": "first_job",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    },
+    {
+      "locale": "pt",
+      "category": "career_change",
+      "result": "PASS",
+      "directAccessWithoutCookies": true,
+      "noConsentWarnings": true,
+      "authorizationOnlyOnReview": true,
+      "globalEditing": true,
+      "invalidFieldFocus": true,
+      "integralValidation": true,
+      "noPayloadFromSaveChanges": true
+    }
+  ],
+  "heroChecks": [
+    {
+      "locale": "es",
+      "width": 320,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 320,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 320,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 320,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 375,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 375,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 320,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 320,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 375,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 375,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "fontPercent": 100,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "fontPercent": 200,
+      "fits": true,
+      "area": true,
+      "spacing": true,
+      "disabled": true
+    }
+  ],
+  "authorizationChecks": [
+    {
+      "locale": "es",
+      "width": 320,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 320,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 375,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 320,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 320,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 375,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 375,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 320,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 320,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 375,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 375,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "fontPercent": 100,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "fontPercent": 200,
+      "documentFits": true,
+      "afterSummary": true,
+      "beforeSubmit": true,
+      "allTextFits": true,
+      "secondary": true,
+      "result": "PASS"
+    }
+  ],
+  "captures": [
+    {
+      "name": "es-375-review-submit.png",
+      "clip": {
+        "x": 0,
+        "y": 1918.765625,
+        "width": 375,
+        "height": 312.53125,
+        "scale": 1
+      }
+    },
+    {
+      "name": "hero-es-320.png",
+      "clip": {
+        "x": 0,
+        "y": 435.671875,
+        "width": 320,
+        "height": 185,
+        "scale": 1
+      }
+    },
+    {
+      "name": "hero-en-1440.png",
+      "clip": {
+        "x": 0,
+        "y": 65,
+        "width": 1440,
+        "height": 582,
+        "scale": 1
+      }
+    },
+    {
+      "name": "hero-pt-375-200.png",
+      "clip": {
+        "x": 0,
+        "y": 1302.578125,
+        "width": 375,
+        "height": 640,
+        "scale": 1
+      }
+    }
+  ],
+  "writtenCaptures": [
+    "es-375-review-submit.png",
+    "hero-es-320.png",
+    "hero-en-1440.png",
+    "hero-pt-375-200.png"
+  ],
+  "registrationRequests": 0,
+  "realTestimonialSubmissions": 0,
+  "blockedPosts": 0,
+  "blockedExternal": 0,
+  "browserExceptionCount": 0,
+  "coverage": "Client-only hero checkbox and GET navigation; nine direct-access forms with no cookies or consent warnings. Final localized authorization appears only on review, describes submit, and is associated with the submit button. All testimonial submissions are blocked; no external services. Public avatar receives synthetic PNG bytes.",
+  "manual": "Physical devices, screen readers and native zoom remain manual; 200% uses root font scaling. Authorization sufficiency remains pending team/editorial/legal review."
+}

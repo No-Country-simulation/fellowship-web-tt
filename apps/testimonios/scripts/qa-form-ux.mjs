@@ -234,10 +234,10 @@ try {
     await next();await input('textarea[name="story"]','Historia sintética. Aprendí a colaborar con mi equipo y resolver problemas de desarrollo.');
     await scrollProbe({width,initialLocale,step:3});
     await next();await next();
-    if(phase==='compact')await evaluate(()=>document.querySelector('input[name="consent"]').click());
+
     await scrollProbe({width,initialLocale,step:5});
     assert.equal(await evaluate(()=>document.querySelector('input[name="full_name"]').value),'Persona QA');
-    if(phase==='compact')assert.equal(await evaluate(()=>document.querySelector('input[name="consent"]').checked&&!document.querySelectorAll('fieldset')[4].hidden&&!!document.querySelector('input[name="avatar"]').closest('[data-field]').querySelector('img')),true,'step, consent and image preserved');
+    if(phase==='compact')assert.equal(await evaluate(()=>!document.querySelector('input[name="consent"]')&&!document.querySelectorAll('fieldset')[4].hidden&&!!document.querySelector('input[name="avatar"]').closest('[data-field]').querySelector('img')),true,'step and image preserved');
   }
   assert.equal(blockedPosts,0);assert.deepEqual(errors,[]);
   const report={phase,checks,modalChecks,popupVerification:'Native listbox opened, dismissed and selected with CDP pointer/keyboard',blockedPosts,realSubmissions:0,browserErrors:errors};
@@ -249,4 +249,3 @@ try {
   if (dirname(resolve(profile)) !== resolve(tmpdir()) || !basename(profile).startsWith('testimonios-acceptance-')) throw new Error('Unexpected profile; cleanup refused');
   await rm(profile,{recursive:true,force:true,maxRetries:5,retryDelay:250});
 }
-

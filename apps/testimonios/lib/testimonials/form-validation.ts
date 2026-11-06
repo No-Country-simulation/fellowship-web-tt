@@ -20,13 +20,12 @@ import type { SubmitState } from "./submit-state";
 import { isTestimonialType, type TestimonialType } from "./types";
 
 export type FormValues = Record<
-  Exclude<FormField, "type" | "avatar" | "capture" | "consent">,
+  Exclude<FormField, "type" | "avatar" | "capture">,
   string
 > & {
   type: TestimonialType | "";
   avatar: File | null;
   capture: File | null;
-  consent: boolean;
 };
 
 export const FORM_FIELDS = Object.keys(FIELD_STEP) as FormField[];
@@ -140,8 +139,6 @@ export function validateField(
         return formIssue("linkedin.invalid");
       }
       return undefined;
-    case "consent":
-      return values.consent ? undefined : formIssue("consent.required");
   }
 }
 

@@ -43,8 +43,8 @@ export const ptBR = {
         short: "Links"
       },
       consent: {
-        title: "Consentimento",
-        short: "Consentimento"
+        title: "Revisão e envio",
+        short: "Revisão e envio"
       }
     },
     progress: "Etapa {step} de {total} · {title}",
@@ -164,8 +164,9 @@ export const ptBR = {
       moderationHint: "A equipe da No Country revisará seu depoimento antes da publicação."
     },
     consent: {
-      title: "Consentimento",
-      body: "Concordo que a No Country publique meu depoimento (nome, foto e texto) na galeria e no Discord. O e-mail não é exibido publicamente. A equipe revisa o depoimento antes da publicação."
+      body: "Concordo que a No Country publique meu depoimento (nome, foto e texto) na galeria e no Discord. O e-mail não é exibido publicamente. A equipe revisa o depoimento antes da publicação.",
+      action: "Compartilhar meu depoimento",
+      submission: "Ao enviar seu depoimento, você autoriza a No Country a publicar seu nome, fotografias e relato na galeria de depoimentos e no Discord. Seu e-mail não será publicado. A equipe revisará o conteúdo antes da publicação."
     },
     images: {
       addAvatar: "Adicionar foto de perfil",
@@ -228,9 +229,6 @@ export const ptBR = {
       },
       linkedin: {
         invalid: "Informe seu perfil (linkedin.com/in/…) ou seu nome de usuário."
-      },
-      consent: {
-        required: "Você precisa aceitar a autorização para enviar seu depoimento."
       },
       validation: {
         summary: "Revise os campos indicados."

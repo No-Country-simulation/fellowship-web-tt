@@ -47,8 +47,7 @@ export type FormField =
   | "capture"
   | "video_url"
   | "instagram"
-  | "linkedin"
-  | "consent";
+  | "linkedin";
 
 export const FIELD_STEP: Record<FormField, number> = {
   type: 1,
@@ -66,7 +65,6 @@ export const FIELD_STEP: Record<FormField, number> = {
   video_url: 4,
   instagram: 4,
   linkedin: 4,
-  consent: 5,
 };
 
 export type ParsedTestimonial = {
@@ -268,6 +266,7 @@ export function validateImageFile(
   return undefined;
 }
 
+/** Valid submission records server time; it does not verify a prior hero checkbox. */
 export function parseTestimonialForm(formData: FormData): ParseResult {
   const fieldErrors: FieldErrors = {};
   const typeRaw = readString(formData, "type");
@@ -283,7 +282,6 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
   const roleAchieved = readString(formData, "role_achieved");
   const previousProfession = readString(formData, "previous_profession");
   const newRole = readString(formData, "new_role");
-  const consent = formData.get("consent") === "1";
   const avatar = readFile(formData, "avatar");
   const capture = readFile(formData, "capture");
 
@@ -402,9 +400,6 @@ export function parseTestimonialForm(formData: FormData): ParseResult {
     }
   }
 
-  if (!consent) {
-    fieldErrors.consent = formIssue("consent.required");
-  }
 
   if (Object.keys(fieldErrors).length > 0 || !type || !avatar) {
     return {

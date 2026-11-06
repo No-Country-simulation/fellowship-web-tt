@@ -13,7 +13,8 @@ import { fileURLToPath } from "node:url";
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const summaryEdit = process.argv.includes('--summary-edit');
-const output = join(appDir, summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
+const heroConsent = process.argv.includes('--hero-consent');
+const output = join(appDir, heroConsent ? "docs/ui/assets/hero-consent/submit-regression" : summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let expectAction = false, pendingAction = null;
 async function port(){const s=createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}
@@ -113,13 +114,13 @@ try{
   await click('button[type="submit"]');await until(async()=>await step()===expectedStep,'local correction step');await focusedError(field);
   assert.equal(blockedPosts,posts,'invalid submit never reaches the action');
   assert.equal(await ev(()=>window.__qaPayloads.length),payloads,'invalid submit never builds a payload');
-  assert.deepEqual(await draft(),before,'validation changes no fields, consent, files or form instance');
+  assert.deepEqual(await draft(),before,'validation changes no fields, files or form instance');
  }
  async function checkPayload(category){
   const payload=await ev(()=>window.__qaPayloads.at(-1));
-  const expected=['type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','consent','avatar'];
+  const expected=['type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar'];
   assert.deepEqual(Object.keys(payload).sort(),expected.sort(),'only active professional fields are sent');
-  assert.equal(payload.type,category);assert.equal(payload.country,'Argentina');assert.equal(payload.consent,'1');assert.equal(payload.avatar.type,'image/jpeg');
+  assert.equal(payload.type,category);assert.equal(payload.country,'Argentina');assert.equal(payload.consent,undefined);assert.equal(payload.avatar.type,'image/jpeg');
   return {type:payload.type,keys:Object.keys(payload).sort()};
  }
  async function mockAction(response,category){
@@ -143,7 +144,7 @@ try{
   for(const name of roleNames(category))await type(name,'Original '+name);
   await type('story',story);await next();await next();
   assert.equal(await ev(()=>document.querySelector('main').lang),locale==='pt'?'pt-BR':locale);
-  assert.equal(await ev(()=>document.querySelector('[name="consent"]').checked),false);
+  assert.equal(await ev(()=>!!document.querySelector('[name="consent"]')),false);
   // Multiple invalid steps, with a valid type: filtering undefined must pick step 2, not 1.
   await mutateFields({full_name:'',email:'invalid',story:'x',video_url:'invalid'});
   await localBlock(2,'full_name');
@@ -155,8 +156,8 @@ try{
   // Individually exercise the earliest invalid step, including the current step 5.
   await mutateFields({story:'x'});await localBlock(3,'story');await replace('story',story);await next();await next();
   await mutateFields({video_url:'invalid'});await localBlock(4,'video_url');await replace('video_url','');await next();
-  await localBlock(5,'consent');await localBlock(5,'consent');
-  await click('[name="consent"]');
+  // Review contains authorization text, with no checkbox or prior-cookie requirement.
+
   const professional=roleNames(category)[0],rejection=profileIssue(professional);
   const firstPayload=await mockAction(responseWith({email:{code:'email.invalid'},[professional]:rejection}),category);
   // Server rejection of locally valid values must survive resubmission and Next.
@@ -182,11 +183,12 @@ try{
   const finalPayload=await mockAction({status:'success'},category);
   await until(()=>ev(()=>!!document.querySelector('main h1')&&!document.querySelector('form')),'mock success');
   assert.ok(await ev(()=>document.activeElement===document.querySelector('main h1')),'success focus retained');
-  reports.push({locale,category,width,result:'PASS',localStepsBlocked:[2,3,4,5],noPayloadBeforeValidation:true,accessibleFocus:true,valuesRetained:true,serverErrorsRetained:true,newResponseIdentity:true,categoryRoundtrip:true,payloads:[firstPayload,switchedPayload,finalPayload]});
+  assert.ok(await ev((origin,locale)=>[...document.querySelectorAll('main a')].some(a=>a.href===origin+'/?lang='+locale+'#hero-consent'),origin,locale),'invitation starts at the hero in the current language');
+  reports.push({locale,category,width,result:'PASS',localStepsBlocked:[2,3,4],noPayloadBeforeValidation:true,accessibleFocus:true,valuesRetained:true,serverErrorsRetained:true,newResponseIdentity:true,categoryRoundtrip:true,payloads:[firstPayload,switchedPayload,finalPayload]});
   console.log(JSON.stringify({progress:reports.length,locale,category,result:'PASS'}));
  }
  assert.equal(blockedPosts,36);assert.equal(blockedExternal,0);assert.equal(errors.length,0);
- const report={result:'PASS',reports,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,scope:'Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.',manual:summaryEdit?'Stage 2 validation regression against Stage 4 global inline summary editing. Real screen reader and mobile hardware remain manual.':'Real screen reader and mobile hardware remain manual. No visual summary changes.'};
+ const report={result:'PASS',reports,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,scope:'Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.',manual:heroConsent?'Stage 5 direct-access submission and inline editing regression. Physical devices, native zoom and screen readers remain manual.':summaryEdit?'Stage 2 validation regression against Stage 4 global inline summary editing. Real screen reader and mobile hardware remain manual.':'Real screen reader and mobile hardware remain manual. No visual summary changes.'};
  await writeFile(join(output,'qa-results.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 } catch(e){console.log(JSON.stringify({result:'FAILED',error:e.message,reports,blockedPosts,blockedExternal,browserExceptionCount:errors.length}));process.exitCode=1;}
 finally{

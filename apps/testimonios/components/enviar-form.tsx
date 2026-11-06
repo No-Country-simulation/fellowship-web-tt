@@ -18,7 +18,7 @@ import { getSiteUrl } from "@/lib/site";
 import { useFormLocale } from "./form-locale-provider";
 import { getFormMessages } from "@/lib/form-i18n/messages";
 import { getFormCountryOptions } from "@/lib/form-i18n/countries";
-import { buildFormHref } from "@/lib/form-i18n/locales";
+import { buildHeroHref } from "@/lib/form-i18n/locales";
 import { FORM_LIMITS } from "@/lib/form-i18n/limits";
 import { presentFormErrors } from "@/lib/form-i18n/issues";
 import type { FormIssue } from "@/lib/testimonials/issues";
@@ -81,7 +81,9 @@ function focusAndReveal(control: HTMLElement | null) {
   });
 }
 
-/** Recibe la introducción traducible como children y la retira al mostrar el éxito. */
+/**
+ * Recibe la introducción traducible y la retira al mostrar el éxito.
+ */
 export function EnviarForm({ children }: { children: ReactNode }) {
   const { locale, t } = useFormLocale();
   const formMessages = getFormMessages(locale).form;
@@ -110,8 +112,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   const [linkedin, setLinkedin] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [captureFile, setCaptureFile] = useState<File | null>(null);
-  const [consent, setConsent] = useState(false);
-  const [inviteUrl, setInviteUrl] = useState(() => `${getSiteUrl()}/enviar`);
+  const [inviteUrl, setInviteUrl] = useState(() => `${getSiteUrl()}/`);
   const [validation, setValidation] = useState<FormValidation>({
     response: initialSubmitState,
     overrides: {},
@@ -166,7 +167,6 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     linkedin,
     avatar: avatarFile,
     capture: captureFile,
-    consent,
   };
   const resolvedErrors = resolveFormErrors(state, validation, type, pending);
   const { fieldErrors, serverErrors } = resolvedErrors;
@@ -295,16 +295,13 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     formData.set("video_url", videoUrl);
     formData.set("instagram", instagram);
     formData.set("linkedin", linkedin);
-    if (consent) {
-      formData.set("consent", "1");
-    }
     if (avatarFile) {
       formData.set("avatar", avatarFile);
     }
     if (captureFile) {
       formData.set("capture", captureFile);
     }
-    setInviteUrl(`${window.location.origin}/enviar`);
+    setInviteUrl(`${window.location.origin}/`);
     // Retirar la respuesta anterior antes de iniciar el siguiente envío.
     setValidation({ response: state, overrides: {}, retired: true });
     startTransition(() => {
@@ -953,37 +950,6 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             </div>
           ) : null}
         </section>
-        <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
-          <h4 id="testimonial-consent-title" className="mb-sm text-body font-semibold text-text-primary">
-            {t("form.consent.title")}<span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
-          </h4>
-          <label className="relative flex min-h-11 cursor-pointer items-start gap-sm text-body-small leading-relaxed text-text-secondary">
-            <input
-              type="checkbox"
-              name="consent"
-              value="1"
-              checked={consent}
-              aria-invalid={Boolean(fieldErrors.consent)}
-              aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
-              className="mt-1 size-5 shrink-0 rounded-sm border-border accent-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
-              onChange={(event) => {
-                setConsent(event.target.checked);
-                revalidateField("consent", event.target.checked);
-              }}
-            />
-            <span>
-              {t("form.consent.body")}
-              <span className="sr-only"> {t("form.common.required")}</span>
-            </span>
-          </label>
-          <div className="mt-1 min-h-6">
-            {fieldErrors.consent ? (
-              <p id="consent-error" className="text-body-small leading-relaxed text-destructive">
-                {fieldMessages.consent}
-              </p>
-            ) : null}
-          </div>
-        </section>
         {serverMessage || correctionStep || unknownErrors.length > 0 ? (
           <div className="flex flex-col gap-xs rounded-card border border-destructive/30 bg-destructive/5 p-sm" role="alert">
             {serverMessage ? (
@@ -1017,6 +983,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
       </fieldset>
 
       <div className={cn("flex flex-wrap items-center gap-sm", step === 1 ? "justify-end" : "justify-between border-t border-border pt-md")}>
+        {step === STEPS ? (
+          <p id="submission-authorization" className="w-full min-w-0 text-body-small leading-relaxed text-text-secondary">
+            {t("form.consent.submission")}
+          </p>
+        ) : null}
         {step > 1 ? (
           <Button
             type="button"
@@ -1045,6 +1016,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
           <Button
             key="submit"
             type="submit"
+            aria-describedby="submission-authorization"
             variant="gradient"
             size="lg"
             className="h-auto min-h-11 max-w-full px-sm whitespace-normal sm:px-md"
@@ -1154,7 +1126,7 @@ function StepProgress({ step, pending, onNavigateBack, headingRef }: {
 
 function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
   const { locale, t } = useFormLocale();
-  const inviteUrl = new URL(buildFormHref(locale), baseInviteUrl).toString();
+  const inviteUrl = new URL(buildHeroHref(locale), baseInviteUrl).toString();
   const [copyState, setCopyState] = useState({ url: inviteUrl, copied: false });
   const copyTimer = useRef<number | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -1211,7 +1183,7 @@ function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
           <Button type="button" variant="gradient" className="min-h-11 px-sm" onClick={copyInviteLink}>
             {copyState.copied ? t("form.success.copied") : t("form.success.copy")}
           </Button>
-          <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>
+          <Link href={buildHeroHref(locale)} className={cn(buttonVariants({ variant: "outline" }), "min-h-11 px-sm")}>
             {t("form.navigation.home")}
           </Link>
         </div>

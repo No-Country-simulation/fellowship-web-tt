@@ -43,8 +43,8 @@ export const en = {
         short: "Links"
       },
       consent: {
-        title: "Consent",
-        short: "Consent"
+        title: "Review and submit",
+        short: "Review and submit"
       }
     },
     progress: "Step {step} of {total} · {title}",
@@ -164,8 +164,9 @@ export const en = {
       moderationHint: "The No Country team will review your testimonial before publishing it."
     },
     consent: {
-      title: "Consent",
-      body: "I agree that No Country may publish my testimonial (name, photo, and text) in the gallery and on Discord. My email address will not be displayed publicly. The team will review it before publishing."
+      body: "I agree that No Country may publish my testimonial (name, photo, and text) in the gallery and on Discord. My email address will not be displayed publicly. The team will review it before publishing.",
+      action: "Share my testimonial",
+      submission: "By submitting your testimonial, you authorize No Country to publish your name, photos, and story in the testimonials gallery and on Discord. Your email address will not be published. The team will review the content before publishing it."
     },
     images: {
       addAvatar: "Add profile photo",
@@ -228,9 +229,6 @@ export const en = {
       },
       linkedin: {
         invalid: "Enter your profile (linkedin.com/in/…) or username."
-      },
-      consent: {
-        required: "You must accept the authorization to submit your testimonial."
       },
       validation: {
         summary: "Review the highlighted fields."

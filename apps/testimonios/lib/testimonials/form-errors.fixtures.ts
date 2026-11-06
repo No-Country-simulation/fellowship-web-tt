@@ -7,7 +7,7 @@ export function validValues(updates: Partial<FormValues> = {}): FormValues {
     company: "Empresa de prueba", primary_role: "Desarrollo", role_achieved: "Desarrollo web",
     previous_profession: "Docencia", new_role: "Desarrollo", video_url: "", instagram: "", linkedin: "",
     avatar: new File(["image fixture"], "avatar.png", { type: "image/png" }), capture: null,
-    consent: true, ...updates,
+    ...updates,
   };
 }
 
@@ -17,6 +17,5 @@ export function formDataFor(values: FormValues): FormData {
     if (value instanceof File) data.set(key, value);
     else if (typeof value === "string") data.set(key, value);
   }
-  if (values.consent) data.set("consent", "1");
   return data;
 }

@@ -198,7 +198,7 @@ Los únicos archivos de trabajo adicionales de esta investigación fueron `compo
 
 ## Etapa 4 — edición global dentro del resumen
 
-Estado: implementación vigente para revisión en localhost. Las etapas 1, 2 y 3 conservan su aprobación y commits. Se descartó sin aprobar la propuesta de tres botones por tarjeta porque duplicaba el indicador. La evidencia anterior de `form-summary-edit/` es histórica y no verifica la solución vigente.
+Estado: aprobada visual y funcionalmente en localhost y commiteada en `1490a3d`. Las etapas 1, 2 y 3 conservan su aprobación y commits. Esta sección describe el estado histórico al cierre de la etapa 4; la etapa 5 documentada abajo sustituye únicamente el flujo de consentimiento. Se descartó sin aprobar la propuesta de tres botones por tarjeta porque duplicaba el indicador. La evidencia anterior de `form-summary-edit/` es histórica y no verifica la solución vigente.
 
 ### Arquitectura y controles únicos
 
@@ -216,7 +216,7 @@ La categoría permanece de lectura. El indicador permite volver a pasos anterior
 - Si hay errores, mantiene la edición y enfoca el primer control inválido visible. `focusFirstError` excluye cualquier ancestro `hidden` o `inert`. Si el error no tiene control editable visible, por ejemplo categoría, vuelve al control global y conserva la alerta/corrección existente.
 - Con datos válidos vuelve a lectura y enfoca el «Editar» visible del encabezado, con el scroll existente. Si un error no tiene campo visible, el fallback utiliza el control visible del modo actual, incluido «Guardar cambios» al pie. Las validaciones y la autoridad del servidor permanecen intactas.
 
-**Limitación temporal del consentimiento, pendiente de resolver:** actualmente «Guardar cambios» llama a `validateForm()` y también exige la casilla debajo del resumen; si falta, mantiene la edición y la enfoca. Se conserva por instrucción del desarrollador y **no se considera una decisión de UX definitivamente aprobada**. La mejora pendiente es validar los datos editables al finalizar la edición y comprobar también el consentimiento al enviar, coordinada con la tarea de reubicación. Este ajuste no cambia validación, ubicación, texto, obligatoriedad, registro ni payload. Los errores generales/desconocidos conservan su ciclo anterior.
+**Limitación histórica de la etapa 4, resuelta en la etapa 5:** «Guardar cambios» llamaba a `validateForm()` y también exigía la casilla debajo del resumen; si faltaba, mantenía la edición y la enfocaba. Se conservó temporalmente y nunca se consideró una decisión de UX definitivamente aprobada. La etapa 5 separa la validación de datos editables de la aceptación exigida al enviar, sin ampliar su alcance. Las capturas y resultados de la etapa 4 se mantienen como evidencia histórica.
 
 ### Fotografías y ciclo de recursos
 
@@ -275,12 +275,86 @@ Selección para el repositorio: **seis PNG y dos JSON** (matriz y regresión). L
 - Scripts del resumen y validación; evidencia separada, `docs/ui/assets/.gitignore` y README de la selección vigente.
 - Este documento, README de UI y ficha de Field/FileField.
 
-La edición global y la ubicación al pie fueron revisadas manualmente en localhost. Queda pendiente la aprobación final de este ajuste visual y de copy. La emulación no sustituye dispositivos físicos, zoom nativo, Safari/Firefox ni lectores de pantalla reales. No se hace commit, push, merge ni PR.
+La edición global, la ubicación al pie y el ajuste final de copy fueron aprobados manualmente y commiteados por el desarrollador. La emulación no sustituye dispositivos físicos, zoom nativo, Safari/Firefox ni lectores de pantalla reales.
 
-## Trabajo futuro — ubicación del consentimiento
+## Antecedente — ubicación del consentimiento
 
-Leandro y Geraldine recomendaron que el consentimiento deje de ser un paso del formulario. Todavía deben definirse su ubicación y el ajuste correspondiente al flujo; esta recomendación no se implementa en esta etapa.
+Leandro y Geraldine recomendaron que el consentimiento deje de ser un paso del formulario. La decisión acordada posteriormente con Geraldine se implementa en la etapa 5: autorización en el hero y quinto paso de revisión y envío. La revisión del equipo en Demo Day sigue pendiente.
 
-En esa tarea también debe separarse el alcance de «Guardar cambios» (datos editables) del de «Enviar testimonio» (incluye consentimiento). La exigencia actual de consentimiento al finalizar edición se mantiene temporalmente y no supone aprobación conceptual de ese comportamiento.
+También se separa «Guardar cambios» (datos editables) de «Enviar testimonio» (incluye comprobación de aceptación). La integración futura con la web oficial continúa fuera del alcance y pendiente de coordinación con Matías.
 
-Cualquier rediseño debe conservar la obligatoriedad, las validaciones y el registro de consentimiento existentes.
+## Etapa 5 — autorización simplificada en hero y envío
+
+Estado: implementación para revisión final en localhost, sin commit. Las etapas 1–4 están aprobadas y commiteadas; la etapa 4 corresponde a `1490a3d`. Esta decisión de producto se acordó con Geraldine y se revisará con Geraldine/Leandro y el equipo en Demo Day.
+
+### Comportamiento vigente
+
+- El checkbox vive únicamente en el hero/banner. Empieza desmarcado y habilita o deshabilita su CTA al alternarlo. Su texto completo de autorización conserva literalmente el alcance anterior: galería y Discord, correo privado y revisión previa a publicar.
+- `GalleryHero` permanece en servidor. La pequeña isla cliente `HeroConsent` usa estado local y un botón nativo del Design System; al activarlo navega a `/enviar?lang=...`. Tab, Espacio y Enter mantienen semántica y foco visible. El `gap-sm` separa autorización y CTA; no se recupera la ayuda redundante eliminada.
+- El checkbox controla **solo esa navegación**. No emite constancias, cookies o tokens, no registra aceptación ni hace peticiones adicionales de registro. La navegación normal de Next utiliza GET.
+- `/enviar` acepta enlaces directos, sin comprobar aceptación previa, redirigir, mostrar avisos para volver a autorizar ni añadir otra casilla. Se conservan cinco pasos y el quinto sigue siendo «Revisión y envío» / «Review and submit» / «Revisão e envio».
+- ES/EN/PT y la preferencia de idioma existente se mantienen. La cookie preexistente de idioma sigue cumpliendo exclusivamente esa función; no representa consentimiento. El resto del hero conserva su copy institucional anterior en español.
+
+### Información final y edición
+
+El mensaje localizado `form.consent.submission` aparece **solo en el paso 5**, después del resumen y sus tres tarjetas, en el cierre de acciones, inmediatamente antes del envío. Es texto secundario normal, sin checkbox, alerta llamativa ni interacción adicional. El botón «Enviar testimonio» lo referencia mediante `aria-describedby` y conserva separación y contraste.
+
+ES: «Al enviar tu testimonio, autorizas a No Country a publicar tu nombre, fotografías y relato en la galería de testimonios y en Discord. Tu correo electrónico no se publicará. El equipo revisará el contenido antes de publicarlo.»
+
+Los equivalentes EN/PT conservan exactamente esos destinos y usos, sin embeds ni canales adicionales. La suficiencia del mecanismo de autorización informada **mediante el texto y la acción de enviar** permanece pendiente de revisión editorial/legal y de Geraldine/Leandro y el equipo en Demo Day; este documento no equivale a aprobación legal.
+
+El resumen mantiene sus tres tarjetas, fotografías confirmadas y modo global Editar/Guardar cambios. «Guardar cambios» reutiliza `validateForm()` para los datos activos, conserva errores editables del servidor, no construye FormData y no envía. El quinto paso no contiene campos a validar. «Enviar testimonio» continúa validando integralmente categoría, datos, relato, archivos, enlaces y profesionales activos; los datos inactivos se conservan en memoria y no se incluyen en el payload.
+
+### Registro de fecha y límites de evidencia
+
+`submitTestimonial()` llama al parser normal, sin lectura de cookies ni contexto de aceptación. Cuando la petición es válida, `parseTestimonialForm()` genera `consentAt: new Date().toISOString()` **en el servidor al procesar el envío válido**. El store conserva su contrato y persiste ese valor en la columna existente `consent_at`.
+
+No se registra una fecha anterior de checkbox ni se aceptan fechas enviadas por el cliente. Una petición inválida no se guarda ni produce una fila con fecha. `consent_at` identifica el momento del envío/autorización informado en esta versión; **no prueba que la persona pasó por el hero, marcó el checkbox, leyó el aviso o pulsó físicamente el botón**. El endpoint puede ser invocado directamente; no se agrega evidencia explícita separada, identidad ni firma. Esta limitación es parte de la decisión provisional y debe revisarse con el equipo.
+
+No se requiere migración: Supabase, Storage, esquema, consultas públicas, rollback y notificaciones permanecen intactos. El campo técnico `consentAt` y la columna `consent_at` mantienen sus nombres por compatibilidad; no implican validación de una aceptación previa.
+
+### Infraestructura retirada e historial
+
+La propuesta anterior de esta etapa, nunca commiteada, exigía una constancia firmada emitida por el hero y rechazaba accesos/envíos sin ella. Se descartó por la decisión de producto actual. Se retiraron el codec de firma, el adaptador de cookies, la acción de emisión, sus pruebas/fixture, la variable de configuración asociada, las props de aceptación y los avisos/bloqueos del formulario. No hay configuración nueva de secretos para este flujo. No se inspeccionan ni modifican archivos `.env*`.
+
+Se retiró también la validación de checkbox como campo del testimonio y las traducciones sin consumidores: título independiente de consentimiento, estados de registro, avisos de acceso y error de aceptación obligatoria. El namespace vigente contiene `body`, `action` y `submission`; los catálogos completos tienen **172 claves**. El inventario tipado y sus pruebas reflejan la estructura actual. Las secciones de etapas 1–4 y sus evidencias describen el historial, no el flujo de consentimiento actual.
+
+### Invitación y futura integración
+
+La pantalla de éxito y su portapapeles invitan al hero de esta aplicación mediante `/?lang=es|en|pt#hero-consent`, usando el idioma actual incluso si cambia después del envío. `/enviar` continúa siendo válido para acceso directo. No hay redirecciones forzadas.
+
+La integración futura del hero con `nocountry.tech` se coordinará con **Matías**, aunque el flujo nuevo no necesita transmitir el estado del checkbox. No se implementa integración entre dominios o despliegues en esta etapa.
+
+### Archivos y QA
+
+Implementación: `components/hero-consent.tsx`, `gallery-hero.tsx`, páginas públicas y de envío, `enviar-experience.tsx`, `enviar-form.tsx`, `lib/testimonials/parse.ts`, `form-validation.ts` y `lib/form-i18n/locales.ts`, contrato y tres catálogos. La acción vuelve a su flujo normal sin dependencia de cookies. Store, controles de imágenes y su CSS permanecen sin cambios.
+
+Después del build, ejecutar desde `apps/testimonios`, de forma secuencial para los scripts de navegador:
+
+```sh
+node scripts/test-form-i18n.mjs
+pnpm exec tsc --noEmit --incremental false
+pnpm exec eslint . --max-warnings 0
+pnpm run build
+node scripts/qa-hero-consent.mjs
+node scripts/qa-form-submit-validation.mjs --hero-consent
+node scripts/qa-form-summary.mjs --edit-summary --hero-consent
+git diff --check
+```
+
+El nombre de la opción `--hero-consent` se conserva como selector de carpeta de evidencia; no habilita autenticación ni cookies. Todos los scripts bloquean o interceptan los POST de testimonios y bloquean servicios externos. Los datos, fotografías y respuestas son sintéticos. El QA del hero también bloquea cualquier POST inesperado; ya no ejecuta acciones reales de aceptación.
+
+Se conservan **cuatro PNG y tres reportes JSON** seleccionados en [evidencias de la etapa](./ui/assets/hero-consent/README.md). La cuarta captura documenta ahora el texto final y CTA, sustituyendo al aviso retirado. La imagen local de ese aviso queda ignorada y sin enlaces. Las seis capturas versionadas de etapa 4 se mantienen intactas. El resumen conserva la matriz y sus comprobaciones de PNG en memoria sin escribir nuevas imágenes. Las reglas específicas de `.gitignore` mantienen la selección acotada.
+
+Resultados finales de esta simplificación: **91/91 pruebas unitarias en 14 suites, PASS**. TypeScript (`--noEmit --incremental false`), ESLint sin advertencias (`--max-warnings 0`), build de producción y `git diff --check`: **PASS**. Se retiraron las pruebas de firma obsoletas; las suites actuales conservan las reglas de datos y comprueban fecha del servidor, acceso sin infraestructura de cookies, fechas de cliente ignoradas y ausencia de persistencia ante datos inválidos.
+
+- Hero y acceso directo: **9/9 recorridos**, **24 combinaciones responsive del hero y 24 del texto final**, con 320/375/768/1440 px y fuente al 100/200% en ES/EN/PT. Casilla, CTA, teclado, foco, toque, ausencia de cookies/POST de registro, acceso directo sin avisos, texto solo en revisión, edición y validación integral: PASS.
+- Validación y envío: **9/9 recorridos**, **36 POST interceptados**. Categorías, campos activos/inactivos, errores sucesivos del servidor, foco, pending, conservación de valores y destino localizado de invitación al hero: PASS.
+- Resumen e imágenes: **9/9 recorridos**, **288 combinaciones responsive**, 36 distribuciones con errores y 42 capturas/detalles comprobados en memoria; **27 POST interceptados y cero PNG escritos**. Identidad de archivos/payload, proporciones, cancelación, reemplazo, navegación, modo edición y limpieza de URLs: PASS.
+- En los tres reportes: **cero envíos reales de testimonios, cero solicitudes externas y cero excepciones de navegador**. Servidores, navegadores y perfiles propios cerrados y limpiados. Las 145 evidencias históricas bajo seguimiento no quedan afectadas por las reglas de exclusión. No se modifican panel, `packages/ui`, store, consultas públicas ni controles/CSS de imágenes.
+
+Resumen de `git status --short` al cierre: **27 archivos modificados y tres entradas sin seguimiento** (`components/hero-consent.tsx`, `scripts/qa-hero-consent.mjs`, `docs/ui/assets/hero-consent/`). Nada en staging. Los cinco módulos/fixtures retirados de la propuesta nunca estuvieron bajo seguimiento, por lo que no aparecen como eliminaciones en Git; las páginas y acción restauradas al flujo previo tampoco producen diferencias netas contra `HEAD`.
+
+Los scripts históricos de i18n, steps, contraste y UX se adaptan al flujo actual sin reescribir sus reportes antiguos ni afirmar que se repitieron todos esos recorridos. Fuente raíz al 200% no sustituye zoom nativo ni certifica accesibilidad general. Dispositivos físicos, lectores de pantalla, Safari/Firefox y revisión editorial/legal siguen pendientes.
+
+Sin commit, push, merge ni PR. Detenido al completar la etapa para revisión manual y preparación del commit.

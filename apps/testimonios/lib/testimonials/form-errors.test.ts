@@ -41,8 +41,8 @@ describe("validation rules characterized before migration", () => {
   });
 
   it("keeps required errors, active professional fields and minimum correction step", () => {
-    const values = validValues({ type: "", full_name: "", country: "", email: "", avatar: null, story: "", consent: false });
-    const expected = [["type"], ["full_name", "country", "email", "avatar"], ["story"], [], ["consent"]];
+    const values = validValues({ type: "", full_name: "", country: "", email: "", avatar: null, story: "" });
+    const expected = [["type"], ["full_name", "country", "email", "avatar"], ["story"], [], []];
     for (let step = 1; step <= 5; step++) {
       assert.deepEqual(Object.keys(activeErrors(validateFormStep(step, values))), expected[step - 1]);
     }
@@ -109,7 +109,7 @@ describe("validation rules characterized before migration", () => {
     if (!result.ok) assert.deepEqual(result.fieldErrors.avatar, formIssue("avatar.required"));
   });
 
-  it("keeps parsed data, active payload, normalization and server consent timestamp", () => {
+  it("keeps parsed data, active payload, normalization and server submission timestamp", () => {
     const before = Date.now();
     for (const type of TESTIMONIAL_TYPES) {
       const result = parseTestimonialForm(formDataFor(validValues({ type, country: " Brasil ", full_name: " Persona ", instagram: "persona", linkedin: "persona" })));
@@ -126,6 +126,15 @@ describe("validation rules characterized before migration", () => {
 });
 
 describe("integral client validation before submission", () => {
+  it("keeps review step free of fields while validating active data and preserving server rejections", () => {
+    for (const type of TESTIMONIAL_TYPES) {
+      const values = validValues({ type }), previous = { ...values };
+      assert.deepEqual(validateFormStep(5, values), {});
+      assert.deepEqual(activeErrors(validateForm(values)), {});
+      assert.equal(validateForm(values, { email: formIssue("email.invalid") }).email?.code, "email.invalid");
+      assert.deepEqual(values, previous);
+    }
+  });
   it("checks all active fields in every category without mutating values or files", () => {
     for (const type of TESTIMONIAL_TYPES) {
       const values = validValues({ type });
@@ -141,11 +150,10 @@ describe("integral client validation before submission", () => {
 
   it("finds the earliest invalid step without treating undefined overrides as errors", () => {
     const cases: [Partial<FormValues>, number][] = [
-      [{ type: "", email: "invalid", story: "x", consent: false }, 1],
-      [{ full_name: "", email: "invalid", story: "x", consent: false }, 2],
-      [{ story: "x", video_url: "invalid", consent: false }, 3],
-      [{ video_url: "invalid", consent: false }, 4],
-      [{ consent: false }, 5],
+      [{ type: "", email: "invalid", story: "x" }, 1],
+      [{ full_name: "", email: "invalid", story: "x" }, 2],
+      [{ story: "x", video_url: "invalid" }, 3],
+      [{ video_url: "invalid" }, 4],
     ];
     for (const type of TESTIMONIAL_TYPES) {
       for (const [updates, expectedStep] of cases) {
@@ -206,16 +214,14 @@ describe("integral client validation before submission", () => {
 
   it("presents integral failures in ES/EN/PT without changing semantic errors", () => {
     for (const type of TESTIMONIAL_TYPES) {
-      const values = validValues({ type, email: "invalid", story: "x", consent: false });
+      const values = validValues({ type, email: "invalid", story: "x" });
       const errors = validateForm(values);
       const validation = updateFormErrors({ response: initialSubmitState, overrides: {} }, initialSubmitState, errors);
       const resolved = resolveFormErrors(initialSubmitState, validation, type, false);
       for (const locale of FORM_LOCALES) {
         const presented = presentFormErrors(resolved, locale);
         assert.equal(presented.fieldErrors.email, getFormMessages(locale).form.errors.email.invalid);
-        assert.ok(presented.fieldErrors.story);
-        assert.equal(presented.fieldErrors.consent, getFormMessages(locale).form.errors.consent.required);
-      }
+        assert.ok(presented.fieldErrors.story);      }
       assert.deepEqual(activeErrors(errors), activeErrors(validateForm(values)));
     }
   });
@@ -306,7 +312,7 @@ describe("semantic issues and locale-independent presentation", () => {
     { avatar: new File([new Uint8Array(AVATAR_MAX_BYTES + 1)], "avatar.png", { type: "image/png" }) },
     { capture: new File([new Uint8Array(CAPTURE_MAX_BYTES + 1)], "capture.png", { type: "image/png" }) },
     { video_url: "https://example.com/not-youtube" }, { instagram: "https://example.com/no/user" },
-    { linkedin: "https://example.com/no/profile" }, { consent: false },
+    { linkedin: "https://example.com/no/profile" },
   ];
 
   it("produces identical client/server incidences across all failure cases and steps", () => {
@@ -419,10 +425,8 @@ describe("semantic issues and locale-independent presentation", () => {
       assert.equal(parseTestimonialForm(formDataFor(values)).ok, true);
     }
     const data = formDataFor(validValues());
-    data.set("consent", "true");
     const parsed = parseTestimonialForm(data);
-    if (parsed.ok) assert.fail();
-    assert.equal(parsed.fieldErrors.consent?.code, "consent.required");
+    assert.equal(parsed.ok, true);
   });
 });
 

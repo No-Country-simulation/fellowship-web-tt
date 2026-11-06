@@ -78,9 +78,9 @@ try{
  const snap=()=>ev(()=>({fields:Object.fromEntries([...document.querySelectorAll('fieldset:nth-of-type(3) input,fieldset:nth-of-type(3) textarea')].map(e=>[e.name,e.value]))}));
 
  const labels={
-  es:['Experiencia','Datos','Historia','Enlaces','Consentimiento'],
-  en:['Experience','Details','Story','Links','Consent'],
-  pt:['Experi\u00eancia','Dados','Hist\u00f3ria','Links','Consentimento'],
+  es:['Experiencia','Datos','Historia','Enlaces','Revisi\u00f3n y env\u00edo'],
+  en:['Experience','Details','Story','Links','Review and submit'],
+  pt:['Experi\u00eancia','Dados','Hist\u00f3ria','Links','Revis\u00e3o e envio'],
  };
  const backName=(locale,n)=>({es:'Volver al paso ',en:'Back to step ',pt:'Voltar \u00e0 etapa '})[locale]+n+': '+labels[locale][n-1];
  const hints={es:'Toca un paso anterior para volver',en:'Tap an earlier step to go back',pt:'Toque em uma etapa anterior para voltar'};
@@ -131,12 +131,12 @@ try{
   await next();await progressProbe(4,locale);
   await type('video_url','https://youtu.be/abcdefghijk');
   await type('instagram','@persona_qa');await type('linkedin','persona-qa');
-  await capture();await next();await click('[name="consent"]');
+  await capture();await next();
   await progressProbe(5,locale);
   const before=await draft();assert.equal(before.images.length,2);
   const ax=await cdp('Accessibility.getFullAXTree');
   for(let n=1;n<5;n++)assert.ok(ax.nodes.some(e=>!e.ignored&&e.role?.value==='button'&&e.name?.value===backName(locale,n)),'localized AX button '+n);
-  await earlier(2);assert.deepEqual(await draft(),before,'direct back preserves all fields/images/consent');
+  await earlier(2);assert.deepEqual(await draft(),before,'direct back preserves all fields/images');
   await progressProbe(2,locale);await click('form ol li:last-child > span');assert.equal(await step(),2,'previously visited future remains non-navigable');
   await next();await back();assert.deepEqual(await draft(),before,'existing Back also preserves the draft');await next();await progressProbe(3,locale);
   await replace('story','x');const edited=await draft(),errorsBefore=await invalid();

@@ -151,8 +151,9 @@ export type FormMessages = {
       readonly moderationHint: string;
     };
     readonly consent: {
-      readonly title: string;
       readonly body: string;
+      readonly action: string;
+      readonly submission: string;
     };
     readonly images: {
       readonly addAvatar: string;
@@ -215,9 +216,6 @@ export type FormMessages = {
       };
       readonly linkedin: {
         readonly invalid: string;
-      };
-      readonly consent: {
-        readonly required: string;
       };
       readonly validation: {
         readonly summary: string;
