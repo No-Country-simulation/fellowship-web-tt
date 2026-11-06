@@ -29,6 +29,12 @@ export function RejectedPanel({ testimonial }: { testimonial: AdminTestimonial }
           podés devolverlo a revisión para guardarlo, publicarlo o rechazarlo de nuevo.
         </p>
       </header>
+      <div className="flex min-w-0 flex-col gap-1">
+        <h3 className="text-admin-body font-semibold text-foreground">Motivo</h3>
+        <p className="whitespace-pre-wrap break-words text-admin-caption text-muted-foreground">
+          {testimonial.rejectReason ?? "Sin motivo registrado"}
+        </p>
+      </div>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"

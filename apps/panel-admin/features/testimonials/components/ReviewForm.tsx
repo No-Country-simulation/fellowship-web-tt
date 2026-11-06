@@ -56,7 +56,7 @@ import {
   SHARE_NETWORK_LABELS,
   type ShareChannels,
 } from "../types/share";
-import type { AdminTestimonial, CardDesign } from "../types/testimonial";
+import { REJECT_REASON_MAX_CHARS, type AdminTestimonial, type CardDesign } from "../types/testimonial";
 import { CaptionField } from "./CaptionField";
 import {
   CAPTION_NETWORKS,
@@ -69,6 +69,7 @@ import { CardDesignField } from "./CardDesignField";
 import { DetailHeader } from "./DetailHeader";
 import { IgShare } from "./IgShare";
 import { ModalDialog } from "./ModalDialog";
+import { ReasonField } from "./ReasonField";
 import {
   PublishConfirmDialog,
   type PublishConfirmNetwork,
@@ -898,7 +899,8 @@ function RejectConfirmDialog({
 }) {
   const titleId = useId();
   const descriptionId = useId();
-  const errorId = useId();
+  const [reason, setReason] = useState("");
+  const reasonReady = reason.trim().length > 0 && reason.length <= REJECT_REASON_MAX_CHARS;
 
   return (
     <ModalDialog open={open} onClose={onCancel} titleId={titleId} descriptionId={descriptionId}>
@@ -913,11 +915,12 @@ function RejectConfirmDialog({
             No sale en la galería ni en las redes.
           </p>
         </div>
-        {error ? (
-          <p id={errorId} className="text-admin-caption text-destructive" role="alert">
-            {error}
-          </p>
-        ) : null}
+        <ReasonField
+          value={reason}
+          maxChars={REJECT_REASON_MAX_CHARS}
+          error={error}
+          onChange={setReason}
+        />
         <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
@@ -929,7 +932,7 @@ function RejectConfirmDialog({
           </button>
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || !reasonReady}
             className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
           >
             {pending ? "Rechazando…" : "Rechazar"}

@@ -100,9 +100,13 @@ ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar
 `published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
 de publicados vuelve a ofrecer Reintentar. La ficha de un archivado solo ofrece «Volver a publicar».
 
+Rechazar pide un motivo obligatorio (hasta 500 caracteres) que se guarda en `reject_reason` y se muestra
+en el detalle del rechazado; los rechazados anteriores muestran «Sin motivo registrado». El motivo es solo
+para admin: no va a la vista pública ni a las redes.
+
 Desde el detalle de un rechazado se puede devolver el envío a revisión (`rejected` → `in_review`).
 Pide confirmación. El update solo gana si la fila sigue `rejected`: el estado pasa a `in_review`
-y `archive_reason` sigue null. No modifica `published_at`, la cita, los captions, `payload`, los
+y `archive_reason` y `reject_reason` quedan null (volver a revisión limpia el motivo). No modifica `published_at`, la cita, los captions, `payload`, los
 ids ni las fechas de los posts, ni los archivos de Storage, y no manda nada a Discord, Instagram
 ni LinkedIn. Al confirmar, el detalle abre el formulario de revisión (guardar, publicar o rechazar
 de nuevo) y queda con `?status=in_review`. Si la fila ya no está `rejected`, el diálogo muestra
@@ -123,7 +127,7 @@ y muestra un resultado. No requiere migración: usa `service_role`.
 Antes de desplegar el panel hay que aplicar la migración
 `20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan
 para todos los envíos. Archivar además necesita `20261028190000_archived_status.sql` y
-`20261028190001_archive_reason.sql` (el estado `archived` y el motivo).
+`20261028190001_archive_reason.sql` (el estado `archived` y el motivo). Rechazar necesita `20261029120000_reject_reason.sql`.
 
 Un reintento de LinkedIn de un testimonio publicado antes de este cambio ya no agrega el link del
 video al final: se manda el texto guardado.

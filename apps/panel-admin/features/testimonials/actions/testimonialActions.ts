@@ -33,6 +33,7 @@ import type {
 } from "../types/reviewState";
 import {
   ARCHIVE_REASON_MAX_CHARS,
+  REJECT_REASON_MAX_CHARS,
   BULK_DELETE_MAX,
   isTestimonialStatus,
   type InboxPageCursor,
@@ -65,7 +66,17 @@ export async function reviewTestimonial(
   }
 
   if (intent === "reject") {
-    const rejected = await rejectTestimonial(id);
+    const reason = readString(formData, "reason");
+    if (!reason) {
+      return { status: "error", message: "El motivo no puede estar vacío." };
+    }
+    if (reason.length > REJECT_REASON_MAX_CHARS) {
+      return {
+        status: "error",
+        message: `El motivo puede tener hasta ${REJECT_REASON_MAX_CHARS} caracteres.`,
+      };
+    }
+    const rejected = await rejectTestimonial(id, reason);
     if (!rejected.ok) {
       return { status: "error", message: rejected.message };
     }
