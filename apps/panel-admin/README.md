@@ -26,6 +26,25 @@ el repository lee y escribe Supabase con `service_role`. El resto del panel sigu
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
 
+**Límites de «Datos de la card».** Salen del espacio de la card, no del formulario público (que
+sigue aceptando hasta 120). Viven en `CARD_LIMITS` (`infrastructure/cardFields.ts`) y
+`QUOTE_EDIT_MAX_CHARS` (`captionTemplates.ts`); la UI y `validateCardEdits` leen las mismas constantes.
+
+| Campo | Tope | Avisa desde |
+| --- | --- | --- |
+| Nombre | 40 | 35 |
+| Empresa | 40 | 32 |
+| Puesto del primer empleo, puesto principal, oficio anterior, rol nuevo | 50 | 40 |
+| País | 60 | 48 |
+| Cita de la historia | 300 | 240 (80 %) |
+
+Los inputs no cortan la escritura ni el pegado. El contador es gris hasta el umbral, ámbar desde
+el umbral y rojo al pasar el tope (ej. `43/40`, con borde rojo y mensaje). Mientras haya un campo
+excedido, «Guardar» y «Publicar» quedan deshabilitados. El servidor valida los mismos topes al
+guardar y al publicar. El largo se cuenta sin espacios en los extremos y por caracteres (un emoji
+simple cuenta 1). Los testimonios que llegaron con valores entre el tope nuevo y 120 se abren
+igual, con el campo en rojo, hasta que se acorten.
+
 | Ruta | Qué es |
 | --- | --- |
 | `/testimonials` | Inbox: lista de envíos y, al elegir uno, la ficha al lado |
