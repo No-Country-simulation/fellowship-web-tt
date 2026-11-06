@@ -395,19 +395,6 @@ export async function returnRejectedToReview(
   );
 }
 
-/** Archivado → rechazado. Limpia el motivo para cumplir el check de la columna. */
-export async function rejectArchivedTestimonial(
-  id: string,
-): Promise<{ ok: true } | { ok: false; message: string }> {
-  return transitionStatus(
-    id,
-    "archived",
-    { status: "rejected", archive_reason: null },
-    notArchivedAnymore,
-    "No pudimos rechazar el testimonio. Probá de nuevo.",
-  );
-}
-
 export type DeleteRejectedTestimonialsResult =
   | {
       ok: true;

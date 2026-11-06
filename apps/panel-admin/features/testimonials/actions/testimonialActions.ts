@@ -17,7 +17,6 @@ import {
   deleteRejectedTestimonials,
   isInboxCursorTimestamp,
   loadInboxSlice,
-  rejectArchivedTestimonial,
   rejectTestimonial,
   republishTestimonial,
   returnRejectedToReview,
@@ -304,30 +303,6 @@ export async function returnRejectedToReviewAction(
 
   revalidateTestimonials(id);
   redirectWithFilters(`/testimonials/${id}`, formData, { status: "in_review" });
-}
-
-/** Archivado → rechazado. Igual que el rechazo de revisión: inbox con los filtros del form. */
-export async function rejectArchivedAction(id: string, formData: FormData): Promise<void> {
-  if (!isTestimonialId(id)) {
-    redirectWithFilters("/testimonials", formData);
-  }
-
-  const current = await getTestimonialById(id);
-  if (!current.ok) {
-    redirectWithFilters("/testimonials", formData);
-  }
-
-  if (current.testimonial.status !== "archived") {
-    redirectWithFilters(`/testimonials/${id}`, formData);
-  }
-
-  const rejected = await rejectArchivedTestimonial(id);
-  if (!rejected.ok) {
-    redirectWithFilters(`/testimonials/${id}`, formData);
-  }
-
-  revalidateTestimonials(id);
-  redirectWithFilters("/testimonials", formData);
 }
 
 /**
