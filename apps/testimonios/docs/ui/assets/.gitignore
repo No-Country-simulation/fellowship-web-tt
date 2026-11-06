@@ -1,0 +1,17 @@
+# Unapproved navigation-button proposal: keep local artifacts out of commits.
+/form-summary-edit/
+
+# Inline summary QA still generates and checks the complete image matrix.
+# Keep only the current report, validation regression and six review images.
+/form-summary-inline/*
+!/form-summary-inline/README.md
+!/form-summary-inline/qa-results.json
+!/form-summary-inline/submit-regression/
+/form-summary-inline/submit-regression/*
+!/form-summary-inline/submit-regression/qa-results.json
+!/form-summary-inline/en-1440-100-present.png
+!/form-summary-inline/en-1440-100-present-editing.png
+!/form-summary-inline/es-375-100-present.png
+!/form-summary-inline/es-375-100-present-editing.png
+!/form-summary-inline/pt-320-200-present-editing.png
+!/form-summary-inline/pt-320-200-editing-footer.png

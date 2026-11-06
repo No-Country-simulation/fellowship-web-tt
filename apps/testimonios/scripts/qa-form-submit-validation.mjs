@@ -12,7 +12,8 @@ import { fileURLToPath } from "node:url";
 // No real action, uploads, persistence or notifications run.
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
-const output = join(appDir, "docs/ui/assets/form-submit-validation");
+const summaryEdit = process.argv.includes('--summary-edit');
+const output = join(appDir, summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let expectAction = false, pendingAction = null;
 async function port(){const s=createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}
@@ -185,7 +186,7 @@ try{
   console.log(JSON.stringify({progress:reports.length,locale,category,result:'PASS'}));
  }
  assert.equal(blockedPosts,36);assert.equal(blockedExternal,0);assert.equal(errors.length,0);
- const report={result:'PASS',reports,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,scope:'Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.',manual:'Real screen reader and mobile hardware remain manual. No visual summary changes.'};
+ const report={result:'PASS',reports,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,scope:'Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.',manual:summaryEdit?'Stage 2 validation regression against Stage 4 global inline summary editing. Real screen reader and mobile hardware remain manual.':'Real screen reader and mobile hardware remain manual. No visual summary changes.'};
  await writeFile(join(output,'qa-results.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 } catch(e){console.log(JSON.stringify({result:'FAILED',error:e.message,reports,blockedPosts,blockedExternal,browserExceptionCount:errors.length}));process.exitCode=1;}
 finally{

@@ -140,6 +140,10 @@ export const es = {
       optionalStep: "Todo este paso es opcional."
     },
     review: {
+      edit: "Editar",
+      done: "Guardar cambios",
+      editSummary: "Editar resumen",
+      doneSummary: "Guardar cambios del resumen",
       title: "Revisa tu testimonio",
       description: "Comprueba que los datos sean correctos antes de enviarlo.",
       summaryTitle: "Resumen",

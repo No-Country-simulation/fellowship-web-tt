@@ -140,6 +140,10 @@ export const ptBR = {
       optionalStep: "Esta etapa é inteiramente opcional."
     },
     review: {
+      edit: "Editar",
+      done: "Salvar alterações",
+      editSummary: "Editar resumo",
+      doneSummary: "Salvar alterações do resumo",
       title: "Revise seu depoimento",
       description: "Confira se os dados estão corretos antes de enviar.",
       summaryTitle: "Resumo",

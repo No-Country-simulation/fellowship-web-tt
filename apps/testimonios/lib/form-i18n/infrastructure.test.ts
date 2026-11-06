@@ -180,6 +180,17 @@ describe("complete dictionaries and historical inventory", () => {
 });
 
 describe("typed parameter interpolation", () => {
+  it("names the global summary editing toggle in every locale", () => {
+    const expected = {
+      es: ["Editar", "Guardar cambios", "Editar resumen", "Guardar cambios del resumen"],
+      en: ["Edit", "Save changes", "Edit summary", "Save changes to the summary"],
+      pt: ["Editar", "Salvar alterações", "Editar resumo", "Salvar alterações do resumo"],
+    };
+    for (const locale of FORM_LOCALES) {
+      const t = createFormTranslator(locale);
+      assert.deepEqual([t("form.review.edit"), t("form.review.done"), t("form.review.editSummary"), t("form.review.doneSummary")], expected[locale]);
+    }
+  });
   it("names backward step controls in ES/EN/PT, including when visual labels are hidden", () => {
     const expected = {
       es: "Volver al paso 2: Datos",

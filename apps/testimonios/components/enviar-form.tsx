@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { BriefcaseBusiness, ChevronDown, Laptop, TrendingUp } from "lucide-react";
+import { BriefcaseBusiness, ChevronDown, Laptop, Pencil, TrendingUp } from "lucide-react";
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
@@ -50,6 +50,7 @@ import {
   type TestimonialType,
 } from "@/lib/testimonials/types";
 import { cn } from "@/lib/utils";
+import controls from "./form-controls.module.css";
 
 import {
   Field,
@@ -90,6 +91,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     initialSubmitState,
   );
   const [step, setStep] = useState(1);
+  const [summaryEditing, setSummaryEditing] = useState(false);
+  const summaryEditRef = useRef<HTMLButtonElement>(null);
   const [type, setType] = useState<TestimonialType | "">("");
   const [fullName, setFullName] = useState("");
   const [countrySelection, setCountrySelection] = useState("");
@@ -115,7 +118,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   });
   const formRef = useRef<HTMLFormElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const focusRequest = useRef<{ errors?: FieldErrors } | null>(null);
+  const focusRequest = useRef<{ errors?: FieldErrors; summary?: "edit" | "read" } | null>(null);
 
   function focusFirstError(errors: FieldErrors) {
     const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
@@ -123,9 +126,10 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     );
     const first = Array.from(controls ?? []).find((control) =>
       errors[control.name as FormField] && !control.disabled &&
-      !control.closest("fieldset")?.hidden,
+      !control.closest("[hidden], [inert]"),
     );
-    focusAndReveal(first ?? null);
+    focusAndReveal(first ?? (formRef.current?.querySelector("[data-summary-editor]")
+      ? formRef.current.querySelector<HTMLButtonElement>('[aria-controls="testimonial-summary"]') : null));
   }
 
   // El DOM ya muestra el paso y sus mensajes; no hay foco automático al cargar.
@@ -134,8 +138,10 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     if (!request) return;
     focusRequest.current = null;
     if (request.errors) focusFirstError(request.errors);
+    else if (request.summary === "edit") focusAndReveal(formRef.current?.querySelector('[data-summary-editor] [name="full_name"]') ?? null);
+    else if (request.summary === "read") focusAndReveal(summaryEditRef.current);
     else focusAndReveal(headingRef.current);
-  }, [step, validation]);
+  }, [step, validation, summaryEditing]);
 
   if (state.status === "success") {
     return <SuccessCard inviteUrl={inviteUrl} />;
@@ -230,6 +236,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
       return;
     }
     focusRequest.current = { errors };
+    setSummaryEditing(false);
     setStep(nextStep);
   }
 
@@ -248,7 +255,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
+    if (pending || summaryEditing) return;
     if (step !== STEPS) {
       goNext();
       return;
@@ -304,6 +311,384 @@ export function EnviarForm({ children }: { children: ReactNode }) {
       formAction(formData);
     });
   }
+
+  function toggleSummaryEditing() {
+    if (pending) return;
+    if (!summaryEditing) {
+      focusRequest.current = { summary: "edit" };
+      setSummaryEditing(true);
+      return;
+    }
+    const errors = validateForm(values, serverErrors);
+    updateErrors(errors);
+    if (Object.values(errors).some(Boolean)) {
+      focusRequest.current = { errors };
+      return;
+    }
+    focusRequest.current = { summary: "read" };
+    setSummaryEditing(false);
+  }
+
+  // One mounted set of controls: the normal step OR its summary card.
+  const identityFields = (
+    <>
+      <div className={cn("grid items-start gap-md", summaryEditing ? "lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-lg" : "md:grid-cols-[12rem_minmax(0,1fr)] md:gap-lg")}>
+        <FileField
+          name="avatar"
+          file={avatarFile}
+          compact={summaryEditing}
+          label={t("form.fields.avatar.label")}
+          requirements={t("form.fields.avatar.requirements", FORM_LIMITS.avatar)}
+          required
+          className="max-w-36 md:max-w-48"
+          error={fieldMessages.avatar}
+          accept={IMAGE_ACCEPT}
+          preview="avatar"
+          onFileChange={(file) => {
+            setAvatarFile(file);
+            revalidateField("avatar", file);
+          }}
+          onInvalid={(message) => {
+            if (message) setError("avatar", message);
+          }}
+        />
+        <div className="flex min-w-0 flex-col gap-xs">
+          <Field label={t("form.fields.full_name.label")} required error={fieldMessages.full_name}>
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="full_name"
+                type="text"
+                autoComplete="name"
+                placeholder={t("form.fields.full_name.placeholder")}
+                value={fullName}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setFullName(event.target.value);
+                  revalidateField("full_name", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+          <Field label={t("form.fields.country.label")} required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldMessages.country}>
+            {({ id, describedBy, invalid }) => (
+              <div className="relative">
+                <select
+                  id={id}
+                  name={isOtherCountry ? "country_selection" : "country"}
+                  autoComplete="country-name"
+                  value={countrySelection}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={cn(fieldClassName, "appearance-none pr-12")}
+                  onChange={(event) => {
+                    const selection = event.target.value;
+                    setCountrySelection(selection);
+                    revalidateField("country", selection === OTHER_COUNTRY_VALUE ? customCountry : selection);
+                  }}
+                >
+                  <option value="">{t("form.fields.country.placeholder")}</option>
+                  {countryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                  <option value={OTHER_COUNTRY_VALUE}>{t("form.fields.country.other")}</option>
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn("pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-text-primary", summaryEditing ? "right-[min(var(--spacing-sm),16px)]" : "right-sm")}
+                />
+              </div>
+            )}
+          </Field>
+          {isOtherCountry ? (
+            <Field label={t("form.fields.country.customLabel")} required error={fieldMessages.country}>
+              {({ id, describedBy, invalid }) => (
+                <input
+                  id={id}
+                  name="country"
+                  type="text"
+                  autoComplete="country-name"
+                  value={customCountry}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  className={fieldClassName}
+                  onChange={(event) => {
+                    setCustomCountry(event.target.value);
+                    revalidateField("country", event.target.value);
+                  }}
+                />
+              )}
+            </Field>
+          ) : null}
+          <Field label={t("form.fields.email.label")} required error={fieldMessages.email}>
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder={t("form.fields.email.placeholder")}
+                value={email}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  revalidateField("email", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+        </div>
+      </div>
+    </>
+  );
+
+  // One mounted set of controls: the normal step OR its summary card.
+  const storyFields = (
+    <>
+      {type === "simulation" ? (
+        <Field
+          label={t("form.fields.primary_role.label")}
+          hint={t("form.fields.primary_role.hint")}
+          error={fieldMessages.primary_role}
+        >
+          {({ id, describedBy, invalid }) => (
+            <input
+              id={id}
+              name="primary_role"
+              type="text"
+              value={primaryRole}
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
+              className={fieldClassName}
+              onChange={(event) => {
+                setPrimaryRole(event.target.value);
+                revalidateField("primary_role", event.target.value);
+              }}
+            />
+          )}
+        </Field>
+      ) : null}
+      {type === "first_job" ? (
+        <div className={cn("grid grid-cols-1 gap-sm sm:gap-md", summaryEditing ? "lg:grid-cols-2" : "sm:grid-cols-2")}>
+          <Field label={t("form.fields.company.label")} required error={fieldMessages.company}>
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="company"
+                type="text"
+                value={company}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setCompany(event.target.value);
+                  revalidateField("company", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+          <Field label={t("form.fields.role_achieved.label")} required error={fieldMessages.role_achieved}>
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="role_achieved"
+                type="text"
+                value={roleAchieved}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setRoleAchieved(event.target.value);
+                  revalidateField("role_achieved", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+        </div>
+      ) : null}
+      {type === "career_change" ? (
+        <div className={cn("grid grid-cols-1 gap-sm sm:gap-md", summaryEditing ? "lg:grid-cols-2" : "sm:grid-cols-2")}>
+          <Field
+            label={t("form.fields.previous_profession.label")}
+            required
+            error={fieldMessages.previous_profession}
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="previous_profession"
+                type="text"
+                value={previousProfession}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setPreviousProfession(event.target.value);
+                  revalidateField("previous_profession", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+          <Field label={t("form.fields.new_role.label")} required error={fieldMessages.new_role}>
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="new_role"
+                type="text"
+                value={newRole}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setNewRole(event.target.value);
+                  revalidateField("new_role", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+        </div>
+      ) : null}
+      <div className="flex min-w-0 flex-col gap-xs">
+        {storyNeedsReview ? (
+          <p id="story-review-notice" className="text-body-small leading-relaxed text-accent-cyan">
+            {t("form.story.reviewNotice")}
+          </p>
+        ) : null}
+        <Field
+          label={selected?.storyLabel ?? t("form.steps.story.title")}
+          required
+          reserveErrorSpace
+          className="gap-xs"
+          hint={t("form.story.hintWithLimits", { hint: selected?.storyHint ?? t("form.story.defaultHint"), min: STORY_MIN_CHARS, max: STORY_MAX_CHARS })}
+          error={fieldMessages.story}
+          stackTrailingInfo={summaryEditing}
+          trailingInfo={(
+            <span className="text-xs text-text-secondary tabular-nums">
+              {t("form.story.counter", { current: story.trim().length, max: STORY_MAX_CHARS })}
+            </span>
+          )}
+        >
+          {({ id, describedBy, invalid }) => (
+            <textarea
+              id={id}
+              name="story"
+              value={story}
+              maxLength={STORY_MAX_CHARS}
+              aria-invalid={invalid}
+              aria-describedby={[describedBy, storyNeedsReview ? "story-review-notice" : undefined].filter(Boolean).join(" ")}
+              className={cn(textareaClassName, "min-h-40 sm:min-h-44")}
+              onChange={(event) => {
+                setStory(event.target.value);
+                setStoryNeedsReview(false);
+                revalidateField("story", event.target.value);
+              }}
+            />
+          )}
+        </Field>
+      </div>
+    </>
+  );
+
+  // One mounted set of controls: the normal step OR its summary card.
+  const mediaFields = (
+    <>
+      <div className={cn("grid items-start gap-md", summaryEditing ? "lg:grid-cols-2 lg:gap-lg" : "md:grid-cols-2 md:gap-lg")}>
+        <FileField
+          name="capture"
+          file={captureFile}
+          compact={summaryEditing}
+          label={t("form.fields.capture.label")}
+          hint={t("form.fields.capture.hint")}
+          requirements={t("form.fields.capture.requirements", FORM_LIMITS.capture)}
+          error={fieldMessages.capture}
+          accept={IMAGE_ACCEPT}
+          preview="capture"
+          onFileChange={(file) => {
+            setCaptureFile(file);
+            revalidateField("capture", file);
+          }}
+          onInvalid={(message) => {
+            if (message) setError("capture", message);
+          }}
+        />
+        <div className="flex min-w-0 flex-col gap-md">
+          <Field
+            label={t("form.fields.video_url.label")}
+            hint={t("form.fields.video_url.hint")}
+            error={fieldMessages.video_url}
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="video_url"
+                type="url"
+                inputMode="url"
+                placeholder={t("form.fields.video_url.placeholder")}
+                value={videoUrl}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setVideoUrl(event.target.value);
+                  revalidateField("video_url", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+          <Field
+            label={t("form.fields.instagram.label")}
+            hint={t("form.fields.instagram.hint")}
+            error={fieldMessages.instagram}
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="instagram"
+                type="text"
+                autoComplete="off"
+                placeholder={t("form.fields.instagram.placeholder")}
+                value={instagram}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setInstagram(event.target.value);
+                  revalidateField("instagram", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+          <Field
+            label={t("form.fields.linkedin.label")}
+            hint={t("form.fields.linkedin.hint")}
+            error={fieldMessages.linkedin}
+          >
+            {({ id, describedBy, invalid }) => (
+              <input
+                id={id}
+                name="linkedin"
+                type="text"
+                autoComplete="off"
+                placeholder={t("form.fields.linkedin.placeholder")}
+                value={linkedin}
+                aria-invalid={invalid}
+                aria-describedby={describedBy}
+                className={fieldClassName}
+                onChange={(event) => {
+                  setLinkedin(event.target.value);
+                  revalidateField("linkedin", event.target.value);
+                }}
+              />
+            )}
+          </Field>
+        </div>
+      </div>
+    </>
+  );
 
   const form = (
     <form
@@ -404,115 +789,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         className={cn(step === 2 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">{t("form.steps.identity.title")}</legend>
-        <div className="grid items-start gap-md md:grid-cols-[12rem_minmax(0,1fr)] md:gap-lg">
-          <FileField
-            name="avatar"
-            label={t("form.fields.avatar.label")}
-            requirements={t("form.fields.avatar.requirements", FORM_LIMITS.avatar)}
-            required
-            className="max-w-36 md:max-w-48"
-            error={fieldMessages.avatar}
-            accept={IMAGE_ACCEPT}
-            preview="avatar"
-            onFileChange={(file) => {
-              setAvatarFile(file);
-              revalidateField("avatar", file);
-            }}
-            onInvalid={(message) => {
-              if (message) setError("avatar", message);
-            }}
-          />
-          <div className="flex min-w-0 flex-col gap-xs">
-            <Field label={t("form.fields.full_name.label")} required error={fieldMessages.full_name}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="full_name"
-                  type="text"
-                  autoComplete="name"
-                  placeholder={t("form.fields.full_name.placeholder")}
-                  value={fullName}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setFullName(event.target.value);
-                    revalidateField("full_name", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-            <Field label={t("form.fields.country.label")} required reserveErrorSpace={!isOtherCountry} error={isOtherCountry ? undefined : fieldMessages.country}>
-              {({ id, describedBy, invalid }) => (
-                <div className="relative">
-                  <select
-                    id={id}
-                    name={isOtherCountry ? "country_selection" : "country"}
-                    autoComplete="country-name"
-                    value={countrySelection}
-                    aria-invalid={invalid}
-                    aria-describedby={describedBy}
-                    className={cn(fieldClassName, "appearance-none pr-12")}
-                    onChange={(event) => {
-                      const selection = event.target.value;
-                      setCountrySelection(selection);
-                      revalidateField("country", selection === OTHER_COUNTRY_VALUE ? customCountry : selection);
-                    }}
-                  >
-                    <option value="">{t("form.fields.country.placeholder")}</option>
-                    {countryOptions.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                    <option value={OTHER_COUNTRY_VALUE}>{t("form.fields.country.other")}</option>
-                  </select>
-                  <ChevronDown
-                    aria-hidden="true"
-                    className="pointer-events-none absolute right-sm top-1/2 size-4 -translate-y-1/2 text-text-primary"
-                  />
-                </div>
-              )}
-            </Field>
-            {isOtherCountry ? (
-              <Field label={t("form.fields.country.customLabel")} required error={fieldMessages.country}>
-                {({ id, describedBy, invalid }) => (
-                  <input
-                    id={id}
-                    name="country"
-                    type="text"
-                    autoComplete="country-name"
-                    value={customCountry}
-                    aria-invalid={invalid}
-                    aria-describedby={describedBy}
-                    className={fieldClassName}
-                    onChange={(event) => {
-                      setCustomCountry(event.target.value);
-                      revalidateField("country", event.target.value);
-                    }}
-                  />
-                )}
-              </Field>
-            ) : null}
-            <Field label={t("form.fields.email.label")} required error={fieldMessages.email}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder={t("form.fields.email.placeholder")}
-                  value={email}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setEmail(event.target.value);
-                    revalidateField("email", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-          </div>
-        </div>
+        {!summaryEditing ? identityFields : null}
       </fieldset>
 
       <fieldset
@@ -520,146 +797,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         className={cn(step === 3 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">{t("form.steps.story.title")}</legend>
-        {type === "simulation" ? (
-          <Field
-            label={t("form.fields.primary_role.label")}
-            hint={t("form.fields.primary_role.hint")}
-            error={fieldMessages.primary_role}
-          >
-            {({ id, describedBy, invalid }) => (
-              <input
-                id={id}
-                name="primary_role"
-                type="text"
-                value={primaryRole}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={fieldClassName}
-                onChange={(event) => {
-                  setPrimaryRole(event.target.value);
-                  revalidateField("primary_role", event.target.value);
-                }}
-              />
-            )}
-          </Field>
-        ) : null}
-        {type === "first_job" ? (
-          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
-            <Field label={t("form.fields.company.label")} required error={fieldMessages.company}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="company"
-                  type="text"
-                  value={company}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setCompany(event.target.value);
-                    revalidateField("company", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-            <Field label={t("form.fields.role_achieved.label")} required error={fieldMessages.role_achieved}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="role_achieved"
-                  type="text"
-                  value={roleAchieved}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setRoleAchieved(event.target.value);
-                    revalidateField("role_achieved", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-          </div>
-        ) : null}
-        {type === "career_change" ? (
-          <div className="grid grid-cols-1 gap-sm sm:grid-cols-2 sm:gap-md">
-            <Field
-              label={t("form.fields.previous_profession.label")}
-              required
-              error={fieldMessages.previous_profession}
-            >
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="previous_profession"
-                  type="text"
-                  value={previousProfession}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setPreviousProfession(event.target.value);
-                    revalidateField("previous_profession", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-            <Field label={t("form.fields.new_role.label")} required error={fieldMessages.new_role}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="new_role"
-                  type="text"
-                  value={newRole}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setNewRole(event.target.value);
-                    revalidateField("new_role", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-          </div>
-        ) : null}
-        <div className="flex min-w-0 flex-col gap-xs">
-          {storyNeedsReview ? (
-            <p id="story-review-notice" className="text-body-small leading-relaxed text-accent-cyan">
-              {t("form.story.reviewNotice")}
-            </p>
-          ) : null}
-          <Field
-            label={selected?.storyLabel ?? t("form.steps.story.title")}
-            required
-            reserveErrorSpace
-            className="gap-xs"
-            hint={t("form.story.hintWithLimits", { hint: selected?.storyHint ?? t("form.story.defaultHint"), min: STORY_MIN_CHARS, max: STORY_MAX_CHARS })}
-            error={fieldMessages.story}
-            trailingInfo={(
-              <span className="text-xs text-text-secondary tabular-nums">
-                {t("form.story.counter", { current: story.trim().length, max: STORY_MAX_CHARS })}
-              </span>
-            )}
-          >
-            {({ id, describedBy, invalid }) => (
-              <textarea
-                id={id}
-                name="story"
-                value={story}
-                maxLength={STORY_MAX_CHARS}
-                aria-invalid={invalid}
-                aria-describedby={[describedBy, storyNeedsReview ? "story-review-notice" : undefined].filter(Boolean).join(" ")}
-                className={cn(textareaClassName, "min-h-40 sm:min-h-44")}
-                onChange={(event) => {
-                  setStory(event.target.value);
-                  setStoryNeedsReview(false);
-                  revalidateField("story", event.target.value);
-                }}
-              />
-            )}
-          </Field>
-        </div>
+        {!summaryEditing ? storyFields : null}
       </fieldset>
 
       <fieldset
@@ -667,98 +805,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         className={cn(step === 4 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">{t("form.steps.media.title")}</legend>
-        <p className="text-body-small text-text-secondary">
-          {t("form.media.optionalStep")}
-        </p>
-        <div className="grid items-start gap-md md:grid-cols-2 md:gap-lg">
-          <FileField
-            name="capture"
-            label={t("form.fields.capture.label")}
-            hint={t("form.fields.capture.hint")}
-            requirements={t("form.fields.capture.requirements", FORM_LIMITS.capture)}
-            error={fieldMessages.capture}
-            accept={IMAGE_ACCEPT}
-            preview="capture"
-            onFileChange={(file) => {
-              setCaptureFile(file);
-              revalidateField("capture", file);
-            }}
-            onInvalid={(message) => {
-              if (message) setError("capture", message);
-            }}
-          />
-          <div className="flex min-w-0 flex-col gap-md">
-            <Field
-              label={t("form.fields.video_url.label")}
-              hint={t("form.fields.video_url.hint")}
-              error={fieldMessages.video_url}
-            >
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="video_url"
-                  type="url"
-                  inputMode="url"
-                  placeholder={t("form.fields.video_url.placeholder")}
-                  value={videoUrl}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setVideoUrl(event.target.value);
-                    revalidateField("video_url", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-            <Field
-              label={t("form.fields.instagram.label")}
-              hint={t("form.fields.instagram.hint")}
-              error={fieldMessages.instagram}
-            >
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="instagram"
-                  type="text"
-                  autoComplete="off"
-                  placeholder={t("form.fields.instagram.placeholder")}
-                  value={instagram}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setInstagram(event.target.value);
-                    revalidateField("instagram", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-            <Field
-              label={t("form.fields.linkedin.label")}
-              hint={t("form.fields.linkedin.hint")}
-              error={fieldMessages.linkedin}
-            >
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name="linkedin"
-                  type="text"
-                  autoComplete="off"
-                  placeholder={t("form.fields.linkedin.placeholder")}
-                  value={linkedin}
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  className={fieldClassName}
-                  onChange={(event) => {
-                    setLinkedin(event.target.value);
-                    revalidateField("linkedin", event.target.value);
-                  }}
-                />
-              )}
-            </Field>
-          </div>
-        </div>
+        {!summaryEditing ? mediaFields : null}
       </fieldset>
 
       <fieldset
@@ -766,18 +813,42 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         className={cn(step === 5 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">{t("form.steps.consent.title")}</legend>
-        <div>
-          <h3 className="text-heading-3 text-text-primary">{t("form.review.title")}</h3>
+        <div data-summary-heading="" className={cn("min-w-0", controls.summaryHeading)}>
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-sm gap-y-xs">
+            <h3 className="min-w-0 max-w-full flex-initial text-heading-3 text-text-primary">{t("form.review.title")}</h3>
+            {!summaryEditing ? <Button
+              ref={summaryEditRef}
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={pending}
+              aria-pressed={false}
+              aria-controls="testimonial-summary"
+              aria-label={t("form.review.editSummary")}
+              onClick={toggleSummaryEditing}
+              className="ml-auto h-auto min-h-11 max-w-full px-xs py-xs text-body-small whitespace-normal"
+            >
+              <Pencil aria-hidden="true" className="size-3.5" />
+              {t("form.review.edit")}
+            </Button> : null}
+          </div>
           <p className="mt-xs text-body-small leading-relaxed text-text-secondary">
             {t("form.review.description")}
           </p>
         </div>
         {/* Cap only mobile summary gutters at their 16px-root token sizes. Enlarged
             text keeps room to reflow without changing other steps or desktop. */}
-        <section aria-labelledby="testimonial-summary-title" className="min-w-0 space-y-md max-sm:mx-[min(0px,calc(24px_-_var(--spacing-md)))]">
+        <section id="testimonial-summary" aria-labelledby="testimonial-summary-title" className="min-w-0 space-y-md max-sm:mx-[min(0px,calc(24px_-_var(--spacing-md)))]">
           <h4 id="testimonial-summary-title" className="sr-only">{t("form.review.summaryTitle")}</h4>
           <section aria-labelledby="summary-personal-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
             <h5 id="summary-personal-title" className="text-lg font-semibold text-text-primary">{t("form.review.personalTitle")}</h5>
+            {summaryEditing ? (
+              <div data-summary-editor="" className={cn("mt-md flex min-w-0 flex-col gap-md", controls.summaryEditor)}>
+                {identityFields}
+                <p className="text-body-small leading-relaxed text-text-secondary">{t("form.review.emailPrivacy")}</p>
+              </div>
+            ) : (
+
             <div className="mt-md flex min-w-0 flex-col gap-md sm:flex-row sm:items-start">
               {avatarFile ? (
                 step === 5 ? <SummaryImage file={avatarFile} alt={t("form.fields.avatar.label")} className="block h-auto w-24 max-w-full shrink-0 rounded-md border border-border" /> : null
@@ -803,6 +874,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 <p className="mt-sm text-body-small leading-relaxed text-text-secondary">{t("form.review.emailPrivacy")}</p>
               </div>
             </div>
+            )}
           </section>
           <section aria-labelledby="summary-experience-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
             <h5 id="summary-experience-title" className="text-lg font-semibold text-text-primary">{t("form.review.experienceTitle")}</h5>
@@ -812,6 +884,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 {selected?.label ?? t("form.review.notSelected")}
               </p>
             </div>
+            {summaryEditing ? <div data-summary-editor="" className={cn("mt-md flex min-w-0 flex-col gap-md", controls.summaryEditor)}>{storyFields}</div> : (
             <dl className="mt-md grid gap-x-md gap-y-md sm:grid-cols-2">
               {professionalSummary.map(([label, value]) => (
                 <div key={label} className="min-w-0">
@@ -824,9 +897,16 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 <dd className="mt-xs text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : t("form.review.missing")}</dd>
               </div>
             </dl>
+            )}
           </section>
           <section aria-labelledby="summary-media-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
             <h5 id="summary-media-title" className="text-lg font-semibold text-text-primary">{t("form.review.mediaTitle")}</h5>
+            {summaryEditing ? (
+              <div data-summary-editor="" className={cn("mt-md flex min-w-0 flex-col gap-md", controls.summaryEditor)}>
+                {mediaFields}
+              </div>
+            ) : (
+
             <div className="mt-md min-w-0">
               {captureFile ? (
                 <figure className="min-w-0">
@@ -851,8 +931,27 @@ export function EnviarForm({ children }: { children: ReactNode }) {
                 </dl>
               ) : null}
             </div>
+            )}
           </section>
           <p className="mt-sm text-body-small leading-relaxed text-text-secondary">{t("form.review.moderationHint")}</p>
+          {summaryEditing ? (
+            <div className="flex min-w-0 justify-end">
+              <Button
+                data-summary-done=""
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pending}
+                aria-pressed={true}
+                aria-controls="testimonial-summary"
+                aria-label={t("form.review.doneSummary")}
+                onClick={toggleSummaryEditing}
+                className="h-auto min-h-11 max-w-full border-accent-indigo-light px-sm py-xs text-body-small whitespace-normal enabled:hover:border-accent-cyan dark:border-accent-indigo-light"
+              >
+                {t("form.review.done")}
+              </Button>
+            </div>
+          ) : null}
         </section>
         <section aria-labelledby="testimonial-consent-title" className="rounded-card border border-border bg-bg-surface-1 p-sm sm:p-md">
           <h4 id="testimonial-consent-title" className="mb-sm text-body font-semibold text-text-primary">
@@ -949,7 +1048,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             variant="gradient"
             size="lg"
             className="h-auto min-h-11 max-w-full px-sm whitespace-normal sm:px-md"
-            disabled={pending}
+            disabled={pending || summaryEditing}
           >
             {pending ? t("form.submit.pending") : t("form.submit.label")}
           </Button>

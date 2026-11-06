@@ -1,10 +1,10 @@
-# Navegación y resumen del formulario — etapas 1, 2 y 3
+# Navegación y resumen del formulario — etapas 1 a 4
 
 Fecha: 5 de noviembre de 2026. Rama: `feat/testimonios-form-steps-summary`.
 
 La investigación de conservación queda cerrada: el desarrollador confirmó en localhost que retroceder sin «Siguiente» y alternar categorías conserva los valores. Esta etapa no implementa una corrección de pérdida de datos.
 
-Las etapas 1 (navegación interactiva) y 2 (validación integral antes del envío) quedaron aprobadas tras las pruebas automatizadas y la revisión manual del desarrollador en localhost. Las secciones siguientes conservan sus decisiones, resultados técnicos y limitaciones específicas de QA.
+Las etapas 1 (navegación interactiva), 2 (validación integral antes del envío) y 3 (resumen visual y ajuste de legibilidad) quedaron aprobadas manualmente, documentadas y commiteadas por el desarrollador. Las secciones siguientes conservan sus decisiones, resultados técnicos y limitaciones específicas de QA. La etapa 4 queda pendiente de revisión en localhost.
 
 ## Navegación implementada
 
@@ -104,7 +104,7 @@ El reporte se guarda en [form-submit-validation/qa-results.json](./ui/assets/for
 
 ## Etapa 3 — resumen visual con fotografías confirmadas
 
-Estado: implementada para revisión visual del desarrollador en localhost. Las aprobaciones de etapas 1 y 2 se mantienen; esta etapa no incluye accesos «Editar» ni modifica el consentimiento.
+Estado: aprobada manualmente en localhost, documentada y commiteada por el desarrollador. Su alcance histórico no incluía accesos «Editar» ni cambios al consentimiento; la edición se incorpora exclusivamente en la etapa 4.
 
 ### Composición acordada: opción A
 
@@ -141,7 +141,7 @@ Capturas sintéticas para revisión visual:
 - [PT, 320 px](./ui/assets/form-summary/pt-320-100-present.png) y [fuente al 200%](./ui/assets/form-summary/pt-320-200-present.png).
 - Categorías adicionales en escritorio: [experiencia en No Country](./ui/assets/form-summary/es-simulation-1440.png) y [reconversión profesional](./ui/assets/form-summary/es-career_change-1440.png).
 
-Lector de pantalla real, dispositivos físicos, zoom nativo y revisión visual humana siguen fuera de la emulación automática. La etapa 3 queda pendiente de aprobación del desarrollador en localhost.
+Lector de pantalla real, dispositivos físicos y zoom nativo siguen fuera de la emulación automática. La revisión visual manual de la etapa 3 en localhost está aprobada; esa aprobación no sustituye las comprobaciones específicas anteriores.
 
 ### Investigación de legibilidad con texto ampliado — 5 de noviembre de 2026
 
@@ -184,7 +184,7 @@ Comparación visual conservada:
 - Después: [PT 320/200%, detalle con nombre distinto para revisión](./ui/assets/form-summary/investigation/after-pt-320-200-detail.png), [parte superior generada por el script](./ui/assets/form-summary/pt-320-200-present-top.png) y [resumen completo](./ui/assets/form-summary/pt-320-200-present.png); [sin foto opcional](./ui/assets/form-summary/pt-320-200-absent.png).
 - Referencias: [PT 375/200%](./ui/assets/form-summary/pt-375-200-present.png), [PT 768/200%](./ui/assets/form-summary/pt-768-200-present.png), [ES 375/100%](./ui/assets/form-summary/es-375-100-present.png) y [EN 1440/100%](./ui/assets/form-summary/en-1440-100-present.png).
 
-Los únicos archivos de trabajo adicionales de esta investigación son `components/enviar-form.tsx` (espaciado local), `scripts/qa-form-summary.mjs` (medición, cobertura y captura), este documento y la evidencia bajo `docs/ui/assets/form-summary/`. No se alteran las etapas aprobadas ni se incorpora edición del resumen. La revisión manual final en localhost, dispositivos físicos, zoom nativo y lectores de pantalla permanece pendiente.
+Los únicos archivos de trabajo adicionales de esta investigación fueron `components/enviar-form.tsx` (espaciado local), `scripts/qa-form-summary.mjs` (medición, cobertura y captura), este documento y la evidencia bajo `docs/ui/assets/form-summary/`. La investigación no incorporó edición del resumen. La revisión manual final de la etapa 3 en localhost está aprobada; se mantienen las limitaciones de dispositivos físicos, zoom nativo y lectores de pantalla.
 
 ### Archivos de la etapa 3
 
@@ -196,8 +196,91 @@ Los únicos archivos de trabajo adicionales de esta investigación son `componen
 | `docs/ui/assets/form-summary/` | Reportes y capturas de esta etapa. |
 | `docs/form-i18n-text-inventory.md`, `docs/ui/README.md`, este documento | Inventario y decisiones de la etapa. |
 
+## Etapa 4 — edición global dentro del resumen
+
+Estado: implementación vigente para revisión en localhost. Las etapas 1, 2 y 3 conservan su aprobación y commits. Se descartó sin aprobar la propuesta de tres botones por tarjeta porque duplicaba el indicador. La evidencia anterior de `form-summary-edit/` es histórica y no verifica la solución vigente.
+
+### Arquitectura y controles únicos
+
+En lectura, el único «Editar» está junto a «Revisa tu testimonio». En edición se retira ese control del encabezado y aparece un único «Guardar cambios» al final de las tres tarjetas, antes del consentimiento (EN «Save changes»; PT-BR «Salvar alterações»). El encabezado conserva `Button` ghost; el pie usa `Button` outline del Design System con borde `accent-indigo-light`, hover `accent-cyan`, padding cómodo, altura mínima de 44 px, ancho acotado y texto envolvente. Conservan `type="button"`, nombre accesible localizado, `aria-pressed`, `aria-controls`, foco visible y bloqueo durante `pending`. No hay botones de navegación dentro de las tarjetas ni dos botones «Guardar cambios» simultáneos.
+
+El único estado nuevo es `summaryEditing`. Los datos siguen en los estados originales de `EnviarForm`: no hay otro borrador, guardado externo ni cancelación global. Los JSX existentes se reutilizan como `identityFields`, `storyFields` y `mediaFields`, con sus mismos valores, handlers y ayudas. Cada grupo se monta en un solo lugar: su paso original o su tarjeta durante la edición. Los fieldsets anteriores permanecen, pero sin controles equivalentes montados mientras se edita el resumen. Así no hay nombres/IDs duplicados ni dos fuentes de verdad.
+
+La categoría permanece de lectura. El indicador permite volver a pasos anteriores; salir del paso 5 desactiva la edición y conserva los cambios. Se vuelve secuencialmente con «Siguiente» y sus validaciones, sin habilitar saltos futuros. Los valores profesionales inactivos siguen en React y se excluyen del payload.
+
+### Editar, Guardar cambios, validación y foco
+
+- «Editar» mantiene el paso 5, no valida y enfoca el nombre visible. Cambiar idioma mantiene modo, valores y archivos; no traduce contenido del participante.
+- Durante la edición el CTA de envío está deshabilitado. `onSubmit` también retorna antes de validar o construir `FormData`, para proteger Enter y submit programático.
+- «Guardar cambios» usa `validateForm(values, serverErrors)` y actualiza los overrides sin retirar la respuesta del servidor. No construye payload ni llama a la acción.
+- Si hay errores, mantiene la edición y enfoca el primer control inválido visible. `focusFirstError` excluye cualquier ancestro `hidden` o `inert`. Si el error no tiene control editable visible, por ejemplo categoría, vuelve al control global y conserva la alerta/corrección existente.
+- Con datos válidos vuelve a lectura y enfoca el «Editar» visible del encabezado, con el scroll existente. Si un error no tiene campo visible, el fallback utiliza el control visible del modo actual, incluido «Guardar cambios» al pie. Las validaciones y la autoridad del servidor permanecen intactas.
+
+**Limitación temporal del consentimiento, pendiente de resolver:** actualmente «Guardar cambios» llama a `validateForm()` y también exige la casilla debajo del resumen; si falta, mantiene la edición y la enfoca. Se conserva por instrucción del desarrollador y **no se considera una decisión de UX definitivamente aprobada**. La mejora pendiente es validar los datos editables al finalizar la edición y comprobar también el consentimiento al enviar, coordinada con la tarea de reubicación. Este ajuste no cambia validación, ubicación, texto, obligatoriedad, registro ni payload. Los errores generales/desconocidos conservan su ciclo anterior.
+
+### Fotografías y ciclo de recursos
+
+`FileField` recibe ahora `file: File | null` del padre. El selector mantiene localmente solo el recorte pendiente; el confirmado no tiene un segundo estado. Una ref y un efecto de layout crean la URL del preview a partir del archivo, y la revocan al cambiarlo o desmontarse. Las URLs del original de recorte se limpian por separado. Cancelar conserva el confirmado, y una operación de una instancia desmontada no modifica al padre.
+
+Cambiar entre pasos, lectura y edición puede remontar el selector, pero utiliza el mismo objeto `File`. No se reencodea ni recorta por cambiar de modo. `SummaryImage` permanece intacto y muestra los archivos confirmados en lectura. Confirmar comunica el nuevo archivo; quitar la captura comunica `null`. El diálogo y las funciones de recorte JPEG 720×720 / 1080×608 no cambian. `FormData` sigue usando esos mismos objetos finales.
+
+### Diseño y responsive
+
+Se conservan las tres tarjetas, títulos, relato completo, privacidad, enlaces sin embeds y estado opcional ausente. El encabezado de lectura permite envolver «Editar» sin estrechar el título; en edición, «Guardar cambios» queda al pie con su área táctil y foco visible, junto al final del contenido que se está editando. Los grupos pasan a dos columnas desde `lg` para evitar columnas estrechas a 768 px con fuente ampliada.
+
+La comprobación incluye el título principal, además de los títulos de tarjetas. En PT a 320/200%, «depoimento» necesita 282,66 px a 48 px de fuente. El encabezado usa una compensación local de los gutters en `rem`, con un mínimo de 8 px por lado: dispone de 294 px en ese caso, conservando márgenes normales al 100% y la disposición de escritorio. El diagnóstico previo permanece local e ignorado; el reporte vigente conserva las mediciones de la implementación actual.
+
+El módulo CSS limita el padding solo dentro de `summaryEditor`: inputs/selector hasta 16 px y textarea hasta 8 px, dejando espacio para su scrollbar. Son tamaños base de los tokens existentes, sin reducir fuentes ni ocultar contenido. La primera medición detectó una colisión de utilidades: `cn()` conservaba `px-md` junto al ajuste arbitrario y dejaba solo 120 px útiles a 320/200%. Se resolvió con selectores locales, sin cambiar Tailwind Merge, el Design System ni CSS global.
+
+`Field.stackTrailingInfo` apila error y contador solo en el resumen. `FileField.compact` deja espacio para el estado sin foto y utiliza `object-contain` para la captura confirmada. Los pasos normales conservan sus variantes originales.
+
+### Internacionalización y documentación
+
+Las claves vigentes son `form.review.edit`, `done`, `editSummary` y `doneSummary`: 172 en total. Se mantienen `done` y `doneSummary` con el nuevo copy de finalización local, documentado en el contrato. No se agrega persistencia ni estado. Se elimina `editSection` y su parámetro de la propuesta descartada, sin cambiar otras traducciones. La prueba unitaria comprueba los dos estados globales en ES/EN/PT; la suite conserva paridad de catálogos, inventario y parámetros.
+
+### QA de la implementación vigente
+
+Después de build:
+
+- `node scripts/qa-form-summary.mjs --edit-summary --representative-only`
+- `node scripts/qa-form-submit-validation.mjs --summary-edit`
+
+La evidencia vigente va a `docs/ui/assets/form-summary-inline/` y `submit-regression/`. Los scripts usan servidores y perfiles Chrome propios, bloquean servicios externos e interceptan POST antes de Next. No ejecutan acciones, uploads, persistencia ni notificaciones reales. Se conserva la evidencia aprobada anterior.
+
+La matriz cubre tres categorías × ES/EN/PT, lectura/edición, foto presente/ausente, 320/375/768/1440 px y raíz de 16/32 px. Comprueba ancho útil, palabras completas en títulos, distribución, labels/ARIA, IDs y nombres únicos, controles antiguos desmontados y previews confirmados. Verifica que el único «Guardar cambios» esté después de las tarjetas y antes del consentimiento, que no quede en el encabezado y que Tab/Enter permitan finalizar desde el último campo. También comprueba los nombres del botón en el árbol accesible, borde visible, contraste del borde y texto sobre el fondo oscuro, hover cyan y ausencia de degradado. El estado disabled se comprueba con un sondeo DOM solo de estilo, separado de los guards de pending reales: no es posible enviar mientras se edita. Los PNG se contrastan con el DOM y los detalles son recortes sin redimensionar. Los errores se comprueban también a 320/375 con ambas fuentes.
+
+Las mediciones distinguen el ancho exterior del textarea de su ancho útil. Chrome puede ocultar su scrollbar de 10 px en la superficie de captura: se registran ambos estados y se exige estabilidad del borde, padding y fuente; solo se admite esa variación del ancho interior. El texto del textarea se desplaza al inicio únicamente al preparar las capturas, sin modificar su valor. Las comprobaciones de pintura incluyen los colores vigentes y excluyen signos aislados, sin presentarse como OCR o certificación de accesibilidad.
+
+Los recorridos cubren Tab/Enter/Espacio, toque emulado, edición de las tres tarjetas, «Otro país», contador, validación y foco de nombre/email/país/avatar/consentimiento, cambio de idioma, bloqueo de submit implícito/programático, navegación antes de terminar y alternancia de categorías. Se prueban reemplazo, cancelación y eliminación de fotos dentro del resumen y en los pasos normales, identidad entre preview y payload y revocación de cada URL exactamente una vez.
+
+Un rechazo activo del servidor sobre email válido localmente bloquea «Guardar cambios» hasta editarlo y enfoca el control de la tarjeta. Los errores generales siguen visibles después de Editar/Guardar cambios. Pending deshabilita el control global e impide duplicados. La regresión independiente conserva sus casos de validación final, errores sucesivos, categorías y payload.
+
+Resultados del ajuste final de copy y botón: **86/86 pruebas unitarias PASS**, TypeScript (`--noEmit --incremental false`), ESLint sin advertencias, build de producción y `git diff --check`: PASS. [QA de edición global](./ui/assets/form-summary-inline/qa-results.json): **9/9 recorridos y 288 combinaciones PASS** (144 lectura + 144 edición), más **36 comprobaciones de distribución con errores**, y 42 capturas/detalles comprobados en memoria (solo se regeneran los cuatro PNG de edición afectados; los dos de lectura permanecen intactos). Hubo 27 POST interceptados. El botón mide 44 px de alto con fuente normal; el contraste medido del borde es 5,81:1 y el del texto 19,12:1 sobre su fondo oscuro. Hover, foco visible, disabled y nombres accesibles localizados: PASS. La ejecución anterior de [regresión de validación](./ui/assets/form-summary-inline/submit-regression/qa-results.json): **9/9 recorridos PASS**, 36 POST interceptados; se conserva sin repetirla para este ajuste visual. En ambos: cero envíos reales, cero solicitudes externas y cero excepciones de navegador detectadas; procesos propios cerrados y perfiles limpiados. Todos los recursos creados se revocaron una vez al terminar cada recorrido.
+
+La comparación de la etapa contra `HEAD` confirma 11 funciones/bloques y 19 handlers de campo sin cambios, incluido el constructor del payload, consentimiento, `SummaryImage`, indicador y reglas de avance. Los cambios de foco, reset del modo al salir y guard del envío se limitan a la nueva interacción. Para este último ajuste de copy y estilos, se compararon además 16 funciones con el estado de trabajo previo: todas permanecen idénticas, incluidas edición, foco y envío. Tampoco cambian `enviar-fields.tsx`, el CSS de controles, el `.gitignore` específico ni los dos PNG de lectura seleccionados. Backend, parser, validadores, recorte, servicios y contratos permanecen intactos.
+
+Capturas sintéticas para revisión:
+
+- Escritorio EN 1440: [lectura](./ui/assets/form-summary-inline/en-1440-100-present.png) y [edición global con «Save changes» al pie](./ui/assets/form-summary-inline/en-1440-100-present-editing.png).
+- Móvil ES 375: [lectura](./ui/assets/form-summary-inline/es-375-100-present.png) y [edición global con «Guardar cambios» al pie](./ui/assets/form-summary-inline/es-375-100-present-editing.png).
+- PT 320/200%: [editor completo](./ui/assets/form-summary-inline/pt-320-200-present-editing.png) y [detalle final con «Salvar alterações»](./ui/assets/form-summary-inline/pt-320-200-editing-footer.png).
+
+Selección para el repositorio: **seis PNG y dos JSON** (matriz y regresión). La auditoría previa encontró **cero archivos versionados** en `form-summary-inline/` y `form-summary-edit/`; había 47 PNG y cuatro JSON locales en la primera, y 21 PNG y dos JSON en la propuesta descartada. No se elimina ninguna captura histórica versionada ni se borran los archivos locales. `docs/ui/assets/.gitignore` limita únicamente estas carpetas: permite los seis PNG enlazados, ambos reportes y el README vigente; ignora duplicados, aliases, diagnósticos y la propuesta descartada. El script mantiene todas las comprobaciones y declara la selección en `versionedCaptures`. En este ajuste, `--representative-only` verifica la matriz y los PNG en memoria y escribe solo las cuatro capturas de edición afectadas, registradas en `writtenCaptures`; no reescribe las dos de lectura ni aumenta las seis seleccionadas. El detalle final se extrae sin redimensionar el PNG completo. Véase la [política de evidencias](./ui/assets/form-summary-inline/README.md).
+
+### Archivos de esta etapa
+
+- `components/enviar-form.tsx`: modo visual, controles reutilizados, foco y guard del envío.
+- `components/enviar-fields.tsx`, `form-controls.module.css`: archivo controlado y variantes locales.
+- Contrato, catálogos y prueba de `lib/form-i18n`; inventario de textos.
+- Scripts del resumen y validación; evidencia separada, `docs/ui/assets/.gitignore` y README de la selección vigente.
+- Este documento, README de UI y ficha de Field/FileField.
+
+La edición global y la ubicación al pie fueron revisadas manualmente en localhost. Queda pendiente la aprobación final de este ajuste visual y de copy. La emulación no sustituye dispositivos físicos, zoom nativo, Safari/Firefox ni lectores de pantalla reales. No se hace commit, push, merge ni PR.
+
 ## Trabajo futuro — ubicación del consentimiento
 
 Leandro y Geraldine recomendaron que el consentimiento deje de ser un paso del formulario. Todavía deben definirse su ubicación y el ajuste correspondiente al flujo; esta recomendación no se implementa en esta etapa.
+
+En esa tarea también debe separarse el alcance de «Guardar cambios» (datos editables) del de «Enviar testimonio» (incluye consentimiento). La exigencia actual de consentimiento al finalizar edición se mantiene temporalmente y no supone aprobación conceptual de ese comportamiento.
 
 Cualquier rediseño debe conservar la obligatoriedad, las validaciones y el registro de consentimiento existentes.

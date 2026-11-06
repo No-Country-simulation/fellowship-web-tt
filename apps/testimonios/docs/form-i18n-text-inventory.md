@@ -297,3 +297,14 @@ Dos títulos nuevos (168 claves en total). EN: `Personal details` y `Your experi
 | --- | --- | --- | --- | --- |
 | F — Resumen | Sección personal | Datos personales | Dados pessoais | `form.review.personalTitle` |
 | F — Resumen | Sección experiencia | Tu experiencia | Sua experiência | `form.review.experienceTitle` |
+
+## Edición desde el resumen — etapa 4
+
+Cuatro claves nuevas respecto de la etapa 3 (172 en total). EN: `Edit`, `Save changes`, `Edit summary` y `Save changes to the summary`. Sustituyen la propuesta sin aprobar de tres botones por sección y su parámetro `{section}`. Los nombres accesibles incluyen el texto visible del único control global, sin datos del participante. Se conservan las claves internas `done` y `doneSummary`: guardar cambios finaliza la edición local, sin persistencia adicional.
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| F — Resumen | Activar edición global | Editar | Editar | `form.review.edit` |
+| F — Resumen | Finalizar edición local | Guardar cambios | Salvar alterações | `form.review.done` |
+| F — Resumen | Nombre accesible de edición | Editar resumen | Editar resumo | `form.review.editSummary` |
+| F — Resumen | Nombre accesible de finalización | Guardar cambios del resumen | Salvar alterações do resumo | `form.review.doneSummary` |

@@ -34,6 +34,7 @@ type FieldProps = {
   required?: boolean;
   reserveErrorSpace?: boolean;
   trailingInfo?: ReactNode;
+  stackTrailingInfo?: boolean;
   labelAs?: "label" | "span";
   hideLabel?: boolean;
   className?: string;
@@ -55,6 +56,7 @@ export function Field({
   required,
   reserveErrorSpace = !hint,
   trailingInfo,
+  stackTrailingInfo = false,
   labelAs = "label",
   hideLabel,
   className,
@@ -109,7 +111,7 @@ export function Field({
       {error || reserveErrorSpace || trailingInfo ? (
         <div className={cn(
           reserveErrorSpace && "min-h-6",
-          trailingInfo && "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-xs",
+          trailingInfo && (stackTrailingInfo ? "flex flex-col gap-xs" : "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-xs"),
         )}>
           {trailingInfo ? (
             <>
@@ -124,6 +126,8 @@ export function Field({
 }
 
 type FileFieldProps = {
+  file: File | null;
+  compact?: boolean;
   name: string;
   label: string;
   hint?: string;
@@ -139,8 +143,10 @@ type FileFieldProps = {
   onInvalid?: (issue: FormIssue | undefined) => void;
 };
 
-/** Imagen con preview y requisitos asociados; el reemplazo solo se aplica tras recortarlo. */
+/** Controlled confirmed file; only the pending crop is local. Each preview owns its URL. */
 export function FileField({
+  file,
+  compact = false,
   name,
   label,
   hint,
@@ -157,7 +163,7 @@ export function FileField({
 }: FileFieldProps) {
   const { t } = useFormLocale();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const previewRef = useRef<HTMLImageElement>(null);
   const [cropSource, setCropSource] = useState<{
     file: File;
     url: string;
@@ -174,7 +180,6 @@ export function FileField({
   }
 
   function clearFile() {
-    setObjectUrl(null);
     closeCrop();
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -209,7 +214,6 @@ export function FileField({
     void cropFile(cropSource.file, area)
       .then((prepared) => {
         if (currentOperation !== operation.current) return;
-        setObjectUrl(createObjectUrl(prepared));
         onFileChange(prepared);
         closeCrop();
       })
@@ -223,15 +227,26 @@ export function FileField({
       });
   }
 
-  // Liberar solo URLs que el DOM ya dejó de usar; nunca desde un updater.
+  useLayoutEffect(() => {
+    const image = previewRef.current;
+    if (!file || !image) return;
+    const url = URL.createObjectURL(file);
+    image.src = url;
+    return () => {
+      image.removeAttribute("src");
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  // Original URLs belong only to the pending crop, never to the confirmed file.
   useEffect(() => {
     for (const url of objectUrls.current) {
-      if (url !== objectUrl && url !== cropSource?.url) {
+      if (url !== cropSource?.url) {
         URL.revokeObjectURL(url);
         objectUrls.current.delete(url);
       }
     }
-  }, [objectUrl, cropSource]);
+  }, [cropSource]);
 
   useLayoutEffect(() => {
     const urls = objectUrls.current;
@@ -270,20 +285,22 @@ export function FileField({
                 ? "relative aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-md p-md text-center"
                 : "items-center gap-md p-md",
             invalid && "border-destructive",
+            compact && controls.compactPicker,
+            compact && !file && preview === "capture" && "min-h-40",
           )}
         >
-          {objectUrl ? (
+          {file ? (
             // Preview of the file the user just picked (not a remote asset).
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={objectUrl}
+              ref={previewRef}
               alt=""
               className={cn(
                 "shrink-0",
                 preview === "avatar"
                   ? "absolute inset-0 size-full object-cover"
                   : preview === "capture"
-                    ? "absolute inset-0 size-full object-cover"
+                    ? cn("absolute inset-0 size-full", compact ? "object-contain" : "object-cover")
                     : "h-16 w-24 rounded-sm object-cover",
               )}
             />
@@ -317,7 +334,7 @@ export function FileField({
             }}
           />
         </label>
-        {objectUrl ? (
+        {file ? (
           <button
             type="button"
             aria-label={preview === "avatar" ? t("form.images.removeAvatar") : t("form.images.removeCapture")}

@@ -125,6 +125,12 @@ export type FormMessages = {
       readonly optionalStep: string;
     };
     readonly review: {
+      readonly edit: string;
+      /** Visible save-changes action; finishes local editing without persistence. */
+      readonly done: string;
+      readonly editSummary: string;
+      /** Accessible name for the same local save-changes action. */
+      readonly doneSummary: string;
       readonly title: string;
       readonly description: string;
       readonly summaryTitle: string;
