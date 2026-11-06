@@ -10,6 +10,8 @@ El design system de Landing es una referencia interna. Los tokens y utilities vi
 
 El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, no un primitivo.
 
+Las [etapas de navegación, validación y resumen del formulario](../form-steps-summary.md) documentan el indicador accesible, la comprobación integral y el resumen en tres secciones con fotografías confirmadas. «Editar» permanece en el encabezado y «Guardar cambios» al pie de las tarjetas durante la edición. El checkbox del hero solo habilita su CTA; `/enviar` admite acceso directo sin aceptación previa. El paso 5 «Revisión y envío» muestra la autorización informada inmediatamente antes de enviar, sin otro checkbox. El servidor valida los datos y registra la fecha del envío válido en `consent_at`, sin afirmar que verificó un checkbox. Las evidencias y límites de revisión editorial/legal y de Demo Day están documentados; la integración futura con la web oficial se coordinará con Matías.
+
 ## Índice
 
 | Recurso | Descripción |

@@ -70,3 +70,8 @@ export function buildFormHref(
   url.hash = options.hash ?? "";
   return `${url.pathname}${url.search}${url.hash}`;
 }
+
+/** Invitation starts at the local hero; direct form links remain supported. */
+export function buildHeroHref(locale: FormLocale): string {
+  return `/?lang=${normalizeFormLocale(locale)}#hero-consent`;
+}

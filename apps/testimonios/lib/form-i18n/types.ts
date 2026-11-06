@@ -15,6 +15,8 @@ export type FormMessages = {
     readonly navigation: {
       readonly home: string;
       readonly back: string;
+      readonly backToStep: string;
+      readonly previousStepsHint: string;
       readonly next: string;
       readonly correct: string;
     };
@@ -123,9 +125,17 @@ export type FormMessages = {
       readonly optionalStep: string;
     };
     readonly review: {
+      readonly edit: string;
+      /** Visible save-changes action; finishes local editing without persistence. */
+      readonly done: string;
+      readonly editSummary: string;
+      /** Accessible name for the same local save-changes action. */
+      readonly doneSummary: string;
       readonly title: string;
       readonly description: string;
       readonly summaryTitle: string;
+      readonly personalTitle: string;
+      readonly experienceTitle: string;
       readonly testimonialTitle: string;
       readonly typeLabel: string;
       readonly nameLabel: string;
@@ -141,8 +151,9 @@ export type FormMessages = {
       readonly moderationHint: string;
     };
     readonly consent: {
-      readonly title: string;
       readonly body: string;
+      readonly action: string;
+      readonly submission: string;
     };
     readonly images: {
       readonly addAvatar: string;
@@ -205,9 +216,6 @@ export type FormMessages = {
       };
       readonly linkedin: {
         readonly invalid: string;
-      };
-      readonly consent: {
-        readonly required: string;
       };
       readonly validation: {
         readonly summary: string;

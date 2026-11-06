@@ -1,6 +1,35 @@
-/* Functional field focus only: existing cyan token distinguishes focus from error.
- * Colors, borders, placeholders and shared CTA variants use the official styles. */
+/* Field focus and scoped summary spacing. Colors, borders, placeholders and
+ * shared CTA variants keep the existing Design System styles. */
 .field:focus-visible {
   outline: 2px solid var(--accent-cyan);
   outline-offset: 3px;
+}
+
+/* Only the summary editor: rem spacing must not consume enlarged text's width.
+ * Scoped selectors also avoid competing with custom px-md utilities in cn(). */
+.summaryEditor :is(input[type="text"], input[type="email"], input[type="url"], select) {
+  padding-inline: min(var(--spacing-sm), 16px);
+}
+
+.summaryEditor select {
+  padding-inline-end: min(3rem, 48px);
+}
+
+.summaryEditor textarea {
+  padding-inline: min(var(--spacing-xs), 8px);
+}
+
+.compactPicker {
+  padding: min(var(--spacing-sm), 16px);
+}
+
+@media (width < 40rem) {
+  /* At 200%, the PT heading's longest word needs 283px. Keep normal spacing
+   * and recover excess rem gutters, retaining at least 8px at either edge. */
+  .summaryHeading {
+    margin-inline: max(
+      calc(min(var(--spacing-xs), 8px) - var(--spacing-md)),
+      min(0px, calc(48px - var(--spacing-xl)))
+    );
+  }
 }

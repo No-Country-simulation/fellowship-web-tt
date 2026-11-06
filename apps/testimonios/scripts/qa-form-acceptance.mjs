@@ -297,9 +297,9 @@ try {
     await next();
     await input('textarea[name="story"]','Historia sintética para medir los controles del formulario.');
     await next();await next();
-    assert.equal(await evaluate(()=>!document.querySelectorAll('fieldset')[4].hidden),true,'consent step');
+    assert.equal(await evaluate(()=>!document.querySelectorAll('fieldset')[4].hidden),true,'review step');
     await measureCTA('button[type="submit"]',{locale,width:375,action:'submit'});
-    await evaluate(()=>document.querySelector('input[name="consent"]').click());
+    assert.equal(await evaluate(()=>!!document.querySelector('input[name="consent"]')),false);
     expectSuccess=true;
     await evaluate(()=>document.querySelector('button[type="submit"]').click());
     await until(()=>evaluate(()=>!document.querySelector('main form')&&!!document.querySelector('main h1')),'mock success');

@@ -20,6 +20,7 @@ import {
   DEFAULT_FORM_LOCALE,
   FORM_LOCALES,
   buildFormHref,
+  buildHeroHref,
   formHtmlLang,
   isFormLocale,
   normalizeFormLocale,
@@ -115,6 +116,13 @@ describe("language preference precedence", () => {
 });
 
 describe("link construction without navigation", () => {
+  it("invites to the hero in each language without changing direct form URLs", () => {
+    for (const locale of FORM_LOCALES) {
+      assert.equal(buildHeroHref(locale), `/?lang=${locale}#hero-consent`);
+      assert.equal(buildFormHref(locale), `/enviar?lang=${locale}`);
+    }
+    assert.equal(buildHeroHref("invalid" as "es"), "/?lang=es#hero-consent");
+  });
   it("generates explicit canonical locale links", () => {
     assert.equal(buildFormHref("es"), "/enviar?lang=es");
     assert.equal(buildFormHref("en"), "/enviar?lang=en");
@@ -180,6 +188,40 @@ describe("complete dictionaries and historical inventory", () => {
 });
 
 describe("typed parameter interpolation", () => {
+  it("names the fifth step as review and submission while preserving five localized steps", () => {
+    const expected = { es: "Revisión y envío", en: "Review and submit", pt: "Revisão e envio" };
+    for (const locale of FORM_LOCALES) {
+      const copy = getFormMessages(locale).form;
+      assert.equal(Object.keys(copy.steps).length, 5);
+      assert.equal(copy.steps.consent.title, expected[locale]);
+      assert.equal(copy.steps.consent.short, expected[locale]);
+      assert.ok(copy.consent.action && copy.consent.submission);
+      assert.equal("hint" in copy.consent, false);
+    }
+  });
+  it("names the global summary editing toggle in every locale", () => {
+    const expected = {
+      es: ["Editar", "Guardar cambios", "Editar resumen", "Guardar cambios del resumen"],
+      en: ["Edit", "Save changes", "Edit summary", "Save changes to the summary"],
+      pt: ["Editar", "Salvar alterações", "Editar resumo", "Salvar alterações do resumo"],
+    };
+    for (const locale of FORM_LOCALES) {
+      const t = createFormTranslator(locale);
+      assert.deepEqual([t("form.review.edit"), t("form.review.done"), t("form.review.editSummary"), t("form.review.doneSummary")], expected[locale]);
+    }
+  });
+  it("names backward step controls in ES/EN/PT, including when visual labels are hidden", () => {
+    const expected = {
+      es: "Volver al paso 2: Datos",
+      en: "Back to step 2: Details",
+      pt: "Voltar à etapa 2: Dados",
+    };
+    for (const locale of FORM_LOCALES) {
+      const title = getFormMessages(locale).form.steps.identity.short;
+      assert.equal(createFormTranslator(locale)("form.navigation.backToStep", { step: 2, title }), expected[locale]);
+    }
+  });
+
   it("uses complete progress messages in each language", () => {
     assert.equal(createFormTranslator("es")("form.progress", { step: 2, total: 5, title: "Datos" }), "Paso 2 de 5 · Datos");
     assert.equal(createFormTranslator("pt")("form.progress", { step: 2, total: 5, title: "Dados" }), "Etapa 2 de 5 · Dados");
@@ -269,6 +311,13 @@ describe("categories, countries and consent remain presentation-only", () => {
     assert.match(en.form.consent.body, /gallery and on Discord/);
     assert.doesNotMatch(ptBR.form.consent.body, /Instagram|LinkedIn/);
     assert.doesNotMatch(en.form.consent.body, /Instagram|LinkedIn/);
+    for (const locale of FORM_LOCALES) {
+      const copy = getFormMessages(locale).form.consent;
+      assert.deepEqual(Object.keys(copy).sort(), ["action", "body", "submission"]);
+      assert.match(copy.submission, /Discord/);
+      assert.doesNotMatch(copy.submission, /Instagram|LinkedIn|Talent/);
+      assert.ok(copy.submission.length > 100);
+    }
   });
 });
 

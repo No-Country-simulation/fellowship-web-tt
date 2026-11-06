@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { buttonVariants } from "@repo/ui/button";
+import { HeroConsent } from "@/components/hero-consent";
+import type { FormLocale } from "@/lib/form-i18n/locales";
 
 import { GalleryHeroCarousel } from "@/components/gallery-hero-carousel";
 import type { HeroStory } from "@/components/gallery-hero-data";
@@ -14,15 +14,15 @@ const HERO_COPY = {
   highlight: "ser compartida.",
   description:
     "Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales.",
-  action: "Compartir mi testimonio",
 } as const;
 
 type GalleryHeroProps = {
   stories: readonly HeroStory[] | null;
+  locale?: FormLocale;
 };
 
 /** Landing de captación de servidor, con publicados seleccionados y estados vacío/error. */
-export function GalleryHero({ stories }: GalleryHeroProps) {
+export function GalleryHero({ stories, locale = "es" }: GalleryHeroProps) {
   return (
     <section
       aria-labelledby="gallery-title"
@@ -150,14 +150,7 @@ export function GalleryHero({ stories }: GalleryHeroProps) {
           <p className="mt-md max-w-[36rem] text-base leading-relaxed text-text-secondary sm:text-lg">
             {HERO_COPY.description}
           </p>
-          <Link
-            href="/enviar"
-            className={cn(
-              buttonVariants({ variant: "gradient", size: "lg" }),
-              "mt-md h-auto min-h-12 max-w-full px-[min(var(--spacing-md),24px)] py-xs text-base whitespace-normal focus-visible:border-transparent motion-reduce:transition-none",
-            )}>
-            {HERO_COPY.action}
-          </Link>
+          <HeroConsent locale={locale} />
         </div>
         {stories === null ? (
           <p role="status" className="text-sm leading-relaxed text-text-secondary">

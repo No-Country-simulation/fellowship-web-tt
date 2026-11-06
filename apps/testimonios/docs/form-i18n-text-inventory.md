@@ -134,7 +134,6 @@ Los valores `5`, `8`, `20`, `4000` y `120` se obtendrían de las constantes exis
 | F / foto presente | Adjunta | Adjunta | Anexada | `form.review.captureAttached` |
 | F / foto ausente | No agregada (opcional) | Sin adjuntar (opcional) | Não anexada (opcional) | `form.review.captureMissing` |
 | F / moderación | El equipo de No Country revisará tu testimonio antes de publicarlo. | El equipo de No Country revisará tu testimonio antes de publicarlo. | A equipe da No Country revisará seu depoimento antes da publicação. | `form.review.moderationHint` |
-| F / título de autorización | Consentimiento | Consentimiento | Consentimento | `form.consent.title` |
 | F / autorización completa | Acepto que No Country publique mi testimonio (nombre, foto y texto) en la galería y en Discord. El email no se muestra en público. El equipo lo revisa antes de publicarlo. | Acepto que No Country publique mi testimonio (nombre, foto y texto) en la galería y en Discord. El email no se muestra en público. El equipo lo revisa antes de publicarlo. | Concordo que a No Country publique meu depoimento (nome, foto e texto) na galeria e no Discord. O e-mail não é exibido publicamente. A equipe revisa o depoimento antes da publicação. | `form.consent.body` |
 
 **La autorización no se da por aprobada en portugués.** El texto ES se conserva íntegro para evitar ampliar su significado. Ambos deben pasar por revisión del equipo correspondiente. No se añaden Instagram, LinkedIn, video, otros usos o canales; no se mueve la casilla ni se altera su obligatoriedad o el registro `consent_at`. Las etiquetas reutilizadas de País, Empresa, Puesto, Ocupación y enlaces están inventariadas arriba; sus valores dinámicos no se traducen.
@@ -190,7 +189,6 @@ Se muestran todos los mensajes alcanzables, agrupando repeticiones cliente/servi
 | V + R / YouTube | Pegá un link de YouTube (youtube.com o youtu.be). | Ingresa un enlace completo de YouTube (youtube.com o youtu.be). | Insira um link completo do YouTube (youtube.com ou youtu.be). | `form.errors.video_url.invalid` |
 | V + R / Instagram | Usá tu usuario (@nombre) o el link de Instagram. | Ingresa tu usuario (@nombre) o el enlace de Instagram. | Informe seu usuário (@nome) ou o link do Instagram. | `form.errors.instagram.invalid` |
 | V + R / LinkedIn | Pegá tu perfil (linkedin.com/in/…) o tu usuario. | Ingresa tu perfil (linkedin.com/in/…) o tu nombre de usuario. | Informe seu perfil (linkedin.com/in/…) ou seu nome de usuário. | `form.errors.linkedin.invalid` |
-| V + R / consentimiento | Tenés que aceptar para enviar. | Debes aceptar la autorización para enviar tu testimonio. | Você precisa aceitar a autorização para enviar seu depoimento. | `form.errors.consent.required` |
 | R / resumen de errores; V / comparación literal | Revisá los campos marcados. | Revisa los campos marcados. | Revise os campos indicados. | `form.errors.validation.summary` |
 | A / extracción ausente | No pudimos armar el recorte del testimonio. Revisá el texto. | No se pudo preparar el extracto del testimonio. Revisa el texto. | Não foi possível preparar o trecho do depoimento. Revise o texto. | `form.errors.submit.excerptFailed` |
 | S / configuración no disponible | Falta SUPABASE_SERVICE_ROLE_KEY. El envío no se puede guardar todavía. | No se puede guardar el testimonio en este momento. Inténtalo más tarde. | Não é possível salvar o depoimento neste momento. Tente novamente mais tarde. | `form.errors.submit.unavailable` |
@@ -278,4 +276,48 @@ Voseo localizado: «Contanos», «Compartí», «querés», «Elegí», «Selecc
 
 También se sustituyen anglicismos innecesarios: «Links» → «Enlaces», «caption» → «descripción de Instagram», «post» → «publicación» y «Email» → «Correo electrónico». Portugués utiliza sus usos naturales («links», «legenda», «e-mail», «depoimento», «cargo», «equipe»), no calcos palabra por palabra. «Revisa», «Comparte» o «Ingresa» ya son tuteo neutro; «Conseguiste Empleo» se conserva tal como fue confirmado.
 
-**Actualización (Issue 2, ES/EN/PT):** el nuevo catálogo inglés añade la clave `form.language.en` al conjunto original; los tres catálogos actuales tienen 164 hojas de texto, con iguales parámetros. Las etiquetas visibles del selector son EN, ES y PT. Se usa `pt` como identificador canónico y `pt-BR` se acepta como alias de entrada; la variante lingüística continúa siendo portugués brasileño. El inventario histórico ES/PT-BR no se reescribió para que conserve su trazabilidad.
+**Actualización (Issue 2, ES/EN/PT):** el nuevo catálogo inglés añade la clave `form.language.en` al conjunto original; esa etapa deja 164 hojas de texto, con iguales parámetros. Las etiquetas visibles del selector son EN, ES y PT. Se usa `pt` como identificador canónico y `pt-BR` se acepta como alias de entrada; la variante lingüística continúa siendo portugués brasileño. El inventario histórico ES/PT-BR no se reescribió para que conserve su trazabilidad.
+
+## Navegación hacia pasos anteriores — etapa 1
+
+Se añaden dos claves (166 en total): el nombre accesible del botón y la indicación móvil. EN: `Back to step {step}: {title}` y `Tap an earlier step to go back`. Los parámetros del botón son un número de paso y su etiqueta localizada; no incluyen datos del participante.
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| F — StepProgress | Nuevo control | Volver al paso {step}: {title} | Voltar à etapa {step}: {title} | `form.navigation.backToStep` |
+| F — StepProgress | Indicación móvil desde paso 2 | Toca un paso anterior para volver | Toque em uma etapa anterior para voltar | `form.navigation.previousStepsHint` |
+
+## Resumen visual — etapa 3
+
+Dos títulos nuevos (168 claves en total). EN: `Personal details` y `Your experience`. Se reutilizan las etiquetas localizadas de los campos como textos alternativos de las fotografías. El estado `form.review.captureMissing` ahora identifica explícitamente la fotografía de experiencia ausente: ES «Sin fotografía de experiencia (opcional)», EN «No experience photo attached (optional)» y PT «Sem foto da experiência (opcional)».
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| F — Resumen | Sección personal | Datos personales | Dados pessoais | `form.review.personalTitle` |
+| F — Resumen | Sección experiencia | Tu experiencia | Sua experiência | `form.review.experienceTitle` |
+
+## Edición desde el resumen — etapa 4
+
+Cuatro claves nuevas respecto de la etapa 3 (172 en total). EN: `Edit`, `Save changes`, `Edit summary` y `Save changes to the summary`. Sustituyen la propuesta sin aprobar de tres botones por sección y su parámetro `{section}`. Los nombres accesibles incluyen el texto visible del único control global, sin datos del participante. Se conservan las claves internas `done` y `doneSummary`: guardar cambios finaliza la edición local, sin persistencia adicional.
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| F — Resumen | Activar edición global | Editar | Editar | `form.review.edit` |
+| F — Resumen | Finalizar edición local | Guardar cambios | Salvar alterações | `form.review.done` |
+| F — Resumen | Nombre accesible de edición | Editar resumen | Editar resumo | `form.review.editSummary` |
+| F — Resumen | Nombre accesible de finalización | Guardar cambios del resumen | Salvar alterações do resumo | `form.review.doneSummary` |
+
+## Consentimiento — etapa 5 simplificada
+
+El checkbox conserva íntegro el texto vigente en el hero y controla solo su CTA. No se transfiere ni verifica su estado en el formulario. Las claves internas de los cinco pasos se conservan y el quinto sigue siendo «Revisión y envío» / «Review and submit» / «Revisão e envio».
+
+El namespace actual de autorización contiene únicamente `body`, `action` y `submission`. Se retiran estados de registro de aceptación, avisos de acceso, error de checkbox obligatorio y el título sin consumidor. Los catálogos completos tienen 172 claves. La revisión editorial/legal permanece pendiente para ambos textos y para la suficiencia del mecanismo por envío.
+
+| Archivo | Texto actual | Español | Portugués brasileño | Clave |
+| --- | --- | --- | --- | --- |
+| HeroConsent | CTA | Compartir mi testimonio | Compartilhar meu depoimento | `form.consent.action` |
+| EnviarForm | Información antes del envío | Al enviar tu testimonio, autorizas a No Country a publicar tu nombre, fotografías y relato en la galería de testimonios y en Discord. Tu correo electrónico no se publicará. El equipo revisará el contenido antes de publicarlo. | Ao enviar seu depoimento, você autoriza a No Country a publicar seu nome, fotografias e relato na galeria de depoimentos e no Discord. Seu e-mail não será publicado. A equipe revisará o conteúdo antes da publicação. | `form.consent.submission` |
+
+EN: «Share my testimonial» y «By submitting your testimonial, you authorize No Country to publish your name, photos, and story in the testimonials gallery and on Discord. Your email address will not be published. The team will review the content before publishing it.».
+
+El cuerpo del checkbox permanece en su fila histórica sin cambios. No se recupera la ayuda redundante del hero. La información final aparece solo en el paso 5 y describe la autorización manifestada al enviar; no afirma que el servidor verificó el checkbox del hero.

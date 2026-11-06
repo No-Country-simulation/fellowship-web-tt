@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   FORM_FIELDS, isFieldActive, resolveFormErrors, updateFormErrors,
-  validateField, validateFormStep, type FormValidation, type FormValues,
+  validateField, validateForm, validateFormStep, type FormValidation, type FormValues,
 } from "./form-validation";
 import {
   AVATAR_MAX_BYTES, CAPTURE_MAX_BYTES, FIELD_MAX_CHARS, FIELD_STEP,
@@ -41,8 +41,8 @@ describe("validation rules characterized before migration", () => {
   });
 
   it("keeps required errors, active professional fields and minimum correction step", () => {
-    const values = validValues({ type: "", full_name: "", country: "", email: "", avatar: null, story: "", consent: false });
-    const expected = [["type"], ["full_name", "country", "email", "avatar"], ["story"], [], ["consent"]];
+    const values = validValues({ type: "", full_name: "", country: "", email: "", avatar: null, story: "" });
+    const expected = [["type"], ["full_name", "country", "email", "avatar"], ["story"], [], []];
     for (let step = 1; step <= 5; step++) {
       assert.deepEqual(Object.keys(activeErrors(validateFormStep(step, values))), expected[step - 1]);
     }
@@ -109,7 +109,7 @@ describe("validation rules characterized before migration", () => {
     if (!result.ok) assert.deepEqual(result.fieldErrors.avatar, formIssue("avatar.required"));
   });
 
-  it("keeps parsed data, active payload, normalization and server consent timestamp", () => {
+  it("keeps parsed data, active payload, normalization and server submission timestamp", () => {
     const before = Date.now();
     for (const type of TESTIMONIAL_TYPES) {
       const result = parseTestimonialForm(formDataFor(validValues({ type, country: " Brasil ", full_name: " Persona ", instagram: "persona", linkedin: "persona" })));
@@ -121,6 +121,108 @@ describe("validation rules characterized before migration", () => {
       assert.equal(result.data.linkedin, "https://www.linkedin.com/in/persona");
       assert.deepEqual(result.data.payload, type === "simulation" ? { primary_role: "Desarrollo" } : type === "first_job" ? { company: "Empresa de prueba", role_achieved: "Desarrollo web" } : { previous_profession: "Docencia", new_role: "Desarrollo" });
       assert.ok(Date.parse(result.data.consentAt) >= before && Date.parse(result.data.consentAt) <= Date.now());
+    }
+  });
+});
+
+describe("integral client validation before submission", () => {
+  it("keeps review step free of fields while validating active data and preserving server rejections", () => {
+    for (const type of TESTIMONIAL_TYPES) {
+      const values = validValues({ type }), previous = { ...values };
+      assert.deepEqual(validateFormStep(5, values), {});
+      assert.deepEqual(activeErrors(validateForm(values)), {});
+      assert.equal(validateForm(values, { email: formIssue("email.invalid") }).email?.code, "email.invalid");
+      assert.deepEqual(values, previous);
+    }
+  });
+  it("checks all active fields in every category without mutating values or files", () => {
+    for (const type of TESTIMONIAL_TYPES) {
+      const values = validValues({ type });
+      const before = { ...values };
+      const errors = validateForm(values);
+      assert.deepEqual(activeErrors(errors), {});
+      assert.deepEqual(Object.keys(errors).sort(), FORM_FIELDS.filter(field => isFieldActive(field, type)).sort());
+      assert.deepEqual(values, before);
+      assert.equal(values.avatar, before.avatar);
+      assert.equal(values.capture, before.capture);
+    }
+  });
+
+  it("finds the earliest invalid step without treating undefined overrides as errors", () => {
+    const cases: [Partial<FormValues>, number][] = [
+      [{ type: "", email: "invalid", story: "x" }, 1],
+      [{ full_name: "", email: "invalid", story: "x" }, 2],
+      [{ story: "x", video_url: "invalid" }, 3],
+      [{ video_url: "invalid" }, 4],
+    ];
+    for (const type of TESTIMONIAL_TYPES) {
+      for (const [updates, expectedStep] of cases) {
+        const errors = validateForm(validValues({ type, ...updates }));
+        assert.equal(firstErrorStep(activeErrors(errors)), expectedStep);
+        if (expectedStep > 1) assert.ok(Object.prototype.hasOwnProperty.call(errors, "type") && errors.type === undefined);
+      }
+    }
+  });
+
+  it("rechecks newly active professional fields while retaining inactive category values", () => {
+    const values = validValues({ type: "first_job", previous_profession: "", new_role: "" });
+    assert.deepEqual(activeErrors(validateForm(values)), {});
+    const changed = { ...values, type: "career_change" as const };
+    assert.deepEqual(Object.keys(activeErrors(validateForm(changed))), ["previous_profession", "new_role"]);
+    assert.equal(changed.company, values.company);
+    assert.equal(changed.role_achieved, values.role_achieved);
+    assert.deepEqual(activeErrors(validateForm({ ...changed, type: "first_job" })), {});
+    const inactiveInvalid = validValues({ type: "simulation", company: "x".repeat(FIELD_MAX_CHARS + 1), previous_profession: "" });
+    assert.deepEqual(activeErrors(validateForm(inactiveInvalid)), {});
+    assert.equal(inactiveInvalid.company.length, FIELD_MAX_CHARS + 1);
+  });
+
+  it("preserves unedited server rejections through step and integral checks", () => {
+    const fields = { email: formIssue("email.invalid"), story: formIssue("story.minLength", { min: STORY_MIN_CHARS }) };
+    const response = serverResponse(fields);
+    let validation: FormValidation = { response, overrides: {} };
+    const values = validValues();
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const resolved = resolveFormErrors(response, validation, values.type, false);
+      assert.equal(validateFormStep(2, values, resolved.serverErrors).email, fields.email);
+      const errors = validateForm(values, resolved.serverErrors);
+      assert.equal(errors.email, fields.email);
+      assert.equal(errors.story, fields.story);
+      validation = updateFormErrors(validation, response, errors);
+      assert.equal(validation.response, response);
+      assert.equal(resolveFormErrors(response, validation, values.type, false).issue?.code, "validation.summary");
+    }
+    validation = updateFormErrors(validation, response, { email: undefined });
+    const remaining = validateForm(values, resolveFormErrors(response, validation, values.type, false).serverErrors);
+    assert.equal(remaining.email, undefined);
+    assert.equal(remaining.story, fields.story);
+    validation = updateFormErrors(validation, response, { ...remaining, story: undefined });
+    assert.deepEqual(activeErrors(validateForm(values, resolveFormErrors(response, validation, values.type, false).serverErrors)), {});
+  });
+
+  it("filters inactive server fields and restores their pending rejection when reactivated", () => {
+    const response = serverResponse({ company: formIssue("company.required") });
+    const values = validValues({ type: "simulation" });
+    let validation: FormValidation = { response, overrides: {} };
+    const errors = validateForm(values, resolveFormErrors(response, validation, values.type, false).serverErrors);
+    assert.deepEqual(activeErrors(errors), {});
+    assert.equal(Object.prototype.hasOwnProperty.call(errors, "company"), false);
+    validation = updateFormErrors(validation, response, errors);
+    const returned = { ...values, type: "first_job" as const };
+    assert.equal(validateForm(returned, resolveFormErrors(response, validation, returned.type, false).serverErrors).company?.code, "company.required");
+  });
+
+  it("presents integral failures in ES/EN/PT without changing semantic errors", () => {
+    for (const type of TESTIMONIAL_TYPES) {
+      const values = validValues({ type, email: "invalid", story: "x" });
+      const errors = validateForm(values);
+      const validation = updateFormErrors({ response: initialSubmitState, overrides: {} }, initialSubmitState, errors);
+      const resolved = resolveFormErrors(initialSubmitState, validation, type, false);
+      for (const locale of FORM_LOCALES) {
+        const presented = presentFormErrors(resolved, locale);
+        assert.equal(presented.fieldErrors.email, getFormMessages(locale).form.errors.email.invalid);
+        assert.ok(presented.fieldErrors.story);      }
+      assert.deepEqual(activeErrors(errors), activeErrors(validateForm(values)));
     }
   });
 });
@@ -210,7 +312,7 @@ describe("semantic issues and locale-independent presentation", () => {
     { avatar: new File([new Uint8Array(AVATAR_MAX_BYTES + 1)], "avatar.png", { type: "image/png" }) },
     { capture: new File([new Uint8Array(CAPTURE_MAX_BYTES + 1)], "capture.png", { type: "image/png" }) },
     { video_url: "https://example.com/not-youtube" }, { instagram: "https://example.com/no/user" },
-    { linkedin: "https://example.com/no/profile" }, { consent: false },
+    { linkedin: "https://example.com/no/profile" },
   ];
 
   it("produces identical client/server incidences across all failure cases and steps", () => {
@@ -323,10 +425,8 @@ describe("semantic issues and locale-independent presentation", () => {
       assert.equal(parseTestimonialForm(formDataFor(values)).ok, true);
     }
     const data = formDataFor(validValues());
-    data.set("consent", "true");
     const parsed = parseTestimonialForm(data);
-    if (parsed.ok) assert.fail();
-    assert.equal(parsed.fieldErrors.consent?.code, "consent.required");
+    assert.equal(parsed.ok, true);
   });
 });
 

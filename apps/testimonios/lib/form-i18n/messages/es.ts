@@ -10,6 +10,8 @@ export const es = {
     navigation: {
       home: "Volver al inicio",
       back: "Atrás",
+      backToStep: "Volver al paso {step}: {title}",
+      previousStepsHint: "Toca un paso anterior para volver",
       next: "Siguiente",
       correct: "Corregir los datos"
     },
@@ -41,8 +43,8 @@ export const es = {
         short: "Enlaces"
       },
       consent: {
-        title: "Consentimiento",
-        short: "Consentimiento"
+        title: "Revisión y envío",
+        short: "Revisión y envío"
       }
     },
     progress: "Paso {step} de {total} · {title}",
@@ -138,9 +140,15 @@ export const es = {
       optionalStep: "Todo este paso es opcional."
     },
     review: {
+      edit: "Editar",
+      done: "Guardar cambios",
+      editSummary: "Editar resumen",
+      doneSummary: "Guardar cambios del resumen",
       title: "Revisa tu testimonio",
       description: "Comprueba que los datos sean correctos antes de enviarlo.",
       summaryTitle: "Resumen",
+      personalTitle: "Datos personales",
+      experienceTitle: "Tu experiencia",
       testimonialTitle: "Datos de tu testimonio",
       typeLabel: "Tipo de experiencia",
       nameLabel: "Nombre",
@@ -152,12 +160,13 @@ export const es = {
       avatarReady: "Lista",
       avatarMissing: "Pendiente (obligatoria)",
       captureAttached: "Adjunta",
-      captureMissing: "Sin adjuntar (opcional)",
+      captureMissing: "Sin fotografía de experiencia (opcional)",
       moderationHint: "El equipo de No Country revisará tu testimonio antes de publicarlo."
     },
     consent: {
-      title: "Consentimiento",
-      body: "Acepto que No Country publique mi testimonio (nombre, foto y texto) en la galería y en Discord. El email no se muestra en público. El equipo lo revisa antes de publicarlo."
+      body: "Acepto que No Country publique mi testimonio (nombre, foto y texto) en la galería y en Discord. El email no se muestra en público. El equipo lo revisa antes de publicarlo.",
+      action: "Compartir mi testimonio",
+      submission: "Al enviar tu testimonio, autorizas a No Country a publicar tu nombre, fotografías y relato en la galería de testimonios y en Discord. Tu correo electrónico no se publicará. El equipo revisará el contenido antes de publicarlo."
     },
     images: {
       addAvatar: "Agregar foto de perfil",
@@ -220,9 +229,6 @@ export const es = {
       },
       linkedin: {
         invalid: "Ingresa tu perfil (linkedin.com/in/…) o tu nombre de usuario."
-      },
-      consent: {
-        required: "Debes aceptar la autorización para enviar tu testimonio."
       },
       validation: {
         summary: "Revisa los campos marcados."

@@ -10,6 +10,8 @@ export const en = {
     navigation: {
       home: "Back to home",
       back: "Back",
+      backToStep: "Back to step {step}: {title}",
+      previousStepsHint: "Tap an earlier step to go back",
       next: "Next",
       correct: "Correct the information"
     },
@@ -41,8 +43,8 @@ export const en = {
         short: "Links"
       },
       consent: {
-        title: "Consent",
-        short: "Consent"
+        title: "Review and submit",
+        short: "Review and submit"
       }
     },
     progress: "Step {step} of {total} · {title}",
@@ -138,9 +140,15 @@ export const en = {
       optionalStep: "This entire step is optional."
     },
     review: {
+      edit: "Edit",
+      done: "Save changes",
+      editSummary: "Edit summary",
+      doneSummary: "Save changes to the summary",
       title: "Review your testimonial",
       description: "Make sure the information is correct before submitting.",
       summaryTitle: "Summary",
+      personalTitle: "Personal details",
+      experienceTitle: "Your experience",
       testimonialTitle: "Your testimonial details",
       typeLabel: "Type of experience",
       nameLabel: "Name",
@@ -152,12 +160,13 @@ export const en = {
       avatarReady: "Ready",
       avatarMissing: "Missing (required)",
       captureAttached: "Attached",
-      captureMissing: "Not attached (optional)",
+      captureMissing: "No experience photo attached (optional)",
       moderationHint: "The No Country team will review your testimonial before publishing it."
     },
     consent: {
-      title: "Consent",
-      body: "I agree that No Country may publish my testimonial (name, photo, and text) in the gallery and on Discord. My email address will not be displayed publicly. The team will review it before publishing."
+      body: "I agree that No Country may publish my testimonial (name, photo, and text) in the gallery and on Discord. My email address will not be displayed publicly. The team will review it before publishing.",
+      action: "Share my testimonial",
+      submission: "By submitting your testimonial, you authorize No Country to publish your name, photos, and story in the testimonials gallery and on Discord. Your email address will not be published. The team will review the content before publishing it."
     },
     images: {
       addAvatar: "Add profile photo",
@@ -220,9 +229,6 @@ export const en = {
       },
       linkedin: {
         invalid: "Enter your profile (linkedin.com/in/…) or username."
-      },
-      consent: {
-        required: "You must accept the authorization to submit your testimonial."
       },
       validation: {
         summary: "Review the highlighted fields."

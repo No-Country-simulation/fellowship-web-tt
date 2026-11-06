@@ -2,12 +2,12 @@
 
 Landing de captación: invita al talento a compartir su experiencia en `/enviar`. Componente de servidor; el carrusel independiente aporta las historias publicadas como soporte visual.
 
-**Archivos:** `components/gallery-hero.tsx` y `components/gallery-hero.module.css`.
+**Archivos:** `components/gallery-hero.tsx`, `components/gallery-hero.module.css` y la isla cliente `components/hero-consent.tsx`.
 
 ## Uso y contrato
 
 ```tsx
-<GalleryHero stories={heroStories} />
+<GalleryHero stories={heroStories} locale={locale} />
 ```
 
 `stories: readonly HeroStory[] | null` procede de la única consulta pública de `app/(public)/page.tsx`. `[]` significa cero publicados; `null` significa error de carga. El hero no consulta datos ni transforma historias.
@@ -16,7 +16,7 @@ El copy usa español neutro latinoamericano:
 
 - H1: «Tu experiencia merece ser compartida.»
 - Descripción: «Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales.»
-- CTA: «Compartir mi testimonio», dirigido a `/enviar`.
+- CTA: «Compartir mi testimonio», habilitado solo con la casilla marcada. Navega directamente a `/enviar` con el idioma, sin registrar ni transferir el estado del checkbox. El acceso directo al formulario también es válido.
 
 El mensaje expresa una oportunidad, sin prometer publicación automática ni visibilidad garantizada. La metadata específica del home es «Comparte tu testimonio · No Country», con descripción de captación. Las fichas conservan su metadata individual.
 
@@ -26,7 +26,7 @@ El home monta exclusivamente este hero dentro de su `main`: la grilla, búsqueda
 
 - Con publicados: [GalleryHeroCarousel](./gallery-hero-carousel.md), con hasta tres historias reales.
 - Cero publicados: texto «Tu historia puede inspirar a otras personas de la comunidad.», sin tarjetas ni controles.
-- Error: estado discreto «En este momento no se pueden mostrar las historias de la comunidad.», sin fingir una lista vacía. El CTA permanece disponible.
+- Error: estado discreto «En este momento no se pueden mostrar las historias de la comunidad.», sin fingir una lista vacía. La autorización y el CTA permanecen disponibles con su guard de aceptación.
 
 Sin historias no se reserva una columna vacía para el carrusel. En la ficha, los enlaces al home dicen «Volver al inicio».
 
@@ -41,6 +41,10 @@ En tablet, móvil o con fuente ampliada que impida esas columnas, el carrusel ap
 El padding horizontal del hero se limita a 24px en móvil y 32px desde tablet, aunque aumente la fuente. Así no se estrecha progresivamente la columna de lectura al ampliar el texto. El avatar y el padding de la publicación también tienen límites independientes del tamaño tipográfico.
 
 El título tiene un único H1, wrapping natural y destacado con el degradado de marca. El CTA conserva la variante compartida `gradient`, foco visible, altura mínima de 48px, wrapping y altura automática. El carrusel tiene un nombre accesible propio.
+
+La casilla nativa empieza desmarcada y tiene un label asociado con la autorización completa. No muestra la ayuda redundante retirada; el `gap-sm` de la isla separa el label del CTA. Su label conserva área táctil de al menos 44px. Tab/Espacio y toque permiten alternarla; el botón nativo queda realmente deshabilitado al desmarcarla. Enter sobre el CTA habilitado usa navegación cliente de Next. No hay un formulario de registro, Server Action, cookie o token de consentimiento. Se reutiliza sin cambios el texto de autorización de los catálogos (galería/Discord, correo privado, revisión previa). La isla admite ES/EN/PT según query o preferencia; el resto del hero mantiene su copy previo en español. `GalleryHero` continúa en servidor y el carrusel no cambia.
+
+El checkbox controla únicamente la navegación del hero. En `/enviar` no se verifica que se haya marcado: el paso 5 informa sobre la autorización mediante el envío. El servidor sigue validando los datos y registra la fecha del envío válido en `consent_at`; no acredita una aceptación previa. Véase el [diseño vigente y sus limitaciones](../../form-steps-summary.md#etapa-5--autorización-simplificada-en-hero-y-envío) y las [capturas](../assets/hero-consent/README.md). La suficiencia del mecanismo y el copy se revisarán con Geraldine/Leandro y el equipo en Demo Day, con revisión editorial/legal pendiente. La integración con `nocountry.tech` se coordinará con Matías sin transmisión del estado del checkbox.
 
 La consulta pública y `force-dynamic` se conservan. No se añaden consultas, imágenes PNG remotas, credenciales ni datos administrativos al contrato cliente. La selección aleatoria continúa exclusivamente en servidor.
 

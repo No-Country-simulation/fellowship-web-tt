@@ -229,7 +229,8 @@ try {
   const publicSignature = () => evaluate(() => ({ header: document.querySelector("body > header").textContent, footer: document.querySelector("body > footer").textContent, links: [...document.querySelectorAll("body > header a,body > footer a")].map(el => [el.getAttribute("href"), el.getAttribute("target"), el.textContent]) }));
   const publicChrome = await publicSignature();
   await screenshot("home-1440.png", 1440);
-  await clientLink('main a[href="/enviar"]', "/enviar");
+  await evaluate(()=>document.querySelector("#hero-consent-checkbox").click());
+  await clientLink("#hero-consent button", "/enviar");
   await until(() => evaluate(() => !!document.querySelector("main form")), "home to form");
   await chromeCheck(true); await language("pt");
   await clientLink('main a[href="/"]', "/");
@@ -262,7 +263,7 @@ try {
     assert.equal(await evaluate(() => document.querySelector("main h1").textContent), "Página no encontrada");
     assert.ok(!await evaluate(() => document.title.includes("Compartilhe")));
     await clientLink('main a[href="/"]', "/");
-    await until(() => evaluate(() => !!document.querySelector('main a[href="/enviar"]')), "404 return home");
+    await until(() => evaluate(() => !!document.querySelector("#hero-consent button")), "404 return home");
     await chromeCheck(false);
   }
   checks.push("single shared root; home/detail unchanged chrome and metadata; client navigation across layouts; unmatched/nested/missing-slug 404 chrome and noindex");
@@ -404,12 +405,10 @@ try {
   await layout(); await language("es"); await layout(); await language("pt");
   await next(); assert.equal(await step(), 5); await focusCheck(); await layout();
   assert.ok(await evaluate(() => [...document.querySelectorAll("form dd")].some(el => el.textContent === "Espanha")));
-  await evaluate(() => document.querySelector('input[name="consent"]').click());
+
   await language("es");
   await layout();
-  assert.equal(await evaluate(() => document.querySelector('input[name="consent"]').checked), true);
-  assert.equal(await evaluate(() => document.querySelector('input[name="consent"]').parentElement.querySelector("span").firstChild.textContent.trim()), "Acepto que No Country publique mi testimonio (nombre, foto y texto) en la galería y en Discord. El email no se muestra en público. El equipo lo revisa antes de publicarlo.");
-  checks.push("all five steps/three categories, retained professional data/story/links, translated country label, exact ES consent, responsive 320/375/768/1024/1440 and 200% font");
+  checks.push("all five steps/three categories, retained professional data/story/links, translated country label, direct access and final submission authorization, responsive 320/375/768/1024/1440 and 200% font");
 
   response = null; await button("Enviar testimonio");
   await until(() => pausedPosts.length === 1, "intercepted pending action");
@@ -440,7 +439,7 @@ try {
   await layout();
   // Regression: copied feedback is tied to the current URL and resets even on ES → PT → ES.
   await button("Copiar enlace");
-  assert.equal(await evaluate(() => navigator.clipboard.readText()), origin + "/enviar?lang=es");
+  assert.equal(await evaluate(() => navigator.clipboard.readText()), origin + "/?lang=es#hero-consent");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Enlace copiado")));
   await language("pt");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar link")));
@@ -448,8 +447,8 @@ try {
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar enlace")));
   await language("pt");
   await layout();
-  const invite = await evaluate(() => document.querySelector('main a[href*="/enviar?lang="]').href);
-  assert.equal(invite, origin + "/enviar?lang=pt");
+  const invite = await evaluate(() => document.querySelector('main a[href*="#hero-consent"]').href);
+  assert.equal(invite, origin + "/?lang=pt#hero-consent");
   await button("Copiar link");
   assert.equal(await evaluate(() => navigator.clipboard.readText()), invite);
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Link copiado")));
@@ -459,8 +458,8 @@ try {
   const payloads = await evaluate(() => window.__qaPayloads);
   assert.equal(payloads.length, 2); assert.equal(interceptedPosts, 2);
   for (const payload of payloads) {
-    assert.deepEqual(Object.keys(payload).sort(), ["type", "full_name", "country", "email", "story", "company", "role_achieved", "video_url", "instagram", "linkedin", "consent", "avatar", "capture"].sort());
-    assert.equal(payload.type, "first_job"); assert.equal(payload.country, "España"); assert.equal(payload.consent, "1");
+    assert.deepEqual(Object.keys(payload).sort(), ["type", "full_name", "country", "email", "story", "company", "role_achieved", "video_url", "instagram", "linkedin", "avatar", "capture"].sort());
+    assert.equal(payload.type, "first_job"); assert.equal(payload.country, "España"); assert.equal(payload.consent, undefined);
     assert.equal(payload.full_name, "Persona QA"); assert.equal(payload.avatar.type, "image/jpeg"); assert.equal(payload.capture.type, "image/jpeg");
   }
   assert.equal(payloads[0].story, story); assert.equal(payloads[1].story, story + " Corrección QA.");

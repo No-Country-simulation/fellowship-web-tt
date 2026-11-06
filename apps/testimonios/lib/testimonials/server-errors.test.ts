@@ -131,6 +131,30 @@ function storeHarness(options: {
 }
 
 describe("Server Action errors with fully isolated doubles", () => {
+  it("accepts direct submissions without cookie infrastructure and timestamps the valid request on the server", async () => {
+    for (const type of ["simulation", "first_job", "career_change"] as const) {
+      const action = actionHarness(), data = formDataFor(validValues({ type }));
+      const before = Date.now();
+      assert.equal((await action.submitTestimonial(initialSubmitState, data)).status, "success");
+      assert.equal(action.savedData.length, 1);
+      const time = Date.parse(action.savedData[0].consentAt);
+      assert.ok(time >= before && time <= Date.now());
+      assert.equal(action.notifications.length, 1);
+    }
+  });
+
+  it("ignores client claims about prior authorization dates and never persists an invalid submission", async () => {
+    const action = actionHarness(), data = formDataFor(validValues());
+    data.set("consentAt", "2000-01-01T00:00:00.000Z");
+    data.set("consent_at", "2000-01-01T00:00:00.000Z");
+    const before = Date.now();
+    assert.equal((await action.submitTestimonial(initialSubmitState, data)).status, "success");
+    assert.ok(Date.parse(action.savedData[0].consentAt) >= before);
+    const invalid = actionHarness();data.set("story", "");
+    assert.equal((await invalid.submitTestimonial(initialSubmitState, data)).status, "error");
+    assert.equal(invalid.savedData.length, 0);
+    assert.equal(invalid.notifications.length, 0);
+  });
   it("returns serializable semantic validation errors without saving or notifying", async () => {
     const action = actionHarness();
     const result = wire(await action.submitTestimonial(initialSubmitState, new FormData()));
@@ -146,7 +170,7 @@ describe("Server Action errors with fully isolated doubles", () => {
 
   it("keeps integral server validation and the earliest correction step", async () => {
     const action = actionHarness();
-    const result = await action.submitTestimonial(initialSubmitState, formDataFor(validValues({ full_name: "", story: "", consent: true })));
+    const result = await action.submitTestimonial(initialSubmitState, formDataFor(validValues({ full_name: "", story: "" })));
     if (result.status !== "error") assert.fail();
     assert.equal(result.step, 2);
     assert.equal(result.fieldErrors?.story?.code, "story.required");

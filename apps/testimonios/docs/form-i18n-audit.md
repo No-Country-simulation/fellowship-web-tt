@@ -1,5 +1,7 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
+Nota histórica: las referencias al checkbox obligatorio y su payload en esta auditoría describen el formulario anterior. El flujo vigente permite acceso directo y muestra autorización informada antes del envío; véase la [etapa 5 simplificada](./form-steps-summary.md#etapa-5--autorización-simplificada-en-hero-y-envío). Las evidencias y resultados originales se conservan como historial.
+
 Auditoría original: 31 de octubre de 2026. Cierre de QA de etapa 5: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`, destino propuesto: `dev`.
 
 **Estado actual: ajustes de UX implementados y colores oficiales restaurados por decisión de producto; contraste vigente FAIL y última revisión manual PENDIENTE.** El selector aparece solo en el header, sin portal; el foco nativo ya no provoca el salto reproducido en Chrome. Ver [0.g](#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system). Los PASS de contraste de 0.f son históricos y corresponden a overrides retirados. Permanecen pendientes popup nativo con puntero, Safari/Firefox, lector real, zoom manual, revisión brasileña, pregunta de empleo y consentimiento ES/PT. Fidelidad visual y accesibilidad son aprobaciones diferentes.

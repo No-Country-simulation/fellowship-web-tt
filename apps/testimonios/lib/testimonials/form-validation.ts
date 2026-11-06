@@ -20,13 +20,12 @@ import type { SubmitState } from "./submit-state";
 import { isTestimonialType, type TestimonialType } from "./types";
 
 export type FormValues = Record<
-  Exclude<FormField, "type" | "avatar" | "capture" | "consent">,
+  Exclude<FormField, "type" | "avatar" | "capture">,
   string
 > & {
   type: TestimonialType | "";
   avatar: File | null;
   capture: File | null;
-  consent: boolean;
 };
 
 export const FORM_FIELDS = Object.keys(FIELD_STEP) as FormField[];
@@ -140,18 +139,33 @@ export function validateField(
         return formIssue("linkedin.invalid");
       }
       return undefined;
-    case "consent":
-      return values.consent ? undefined : formIssue("consent.required");
   }
 }
 
-/** Incluye undefined para registrar también los campos que ya fueron corregidos. */
-export function validateFormStep(step: number, values: FormValues): FieldErrors {
+/** Conserva rechazos activos del servidor; undefined registra las correcciones. */
+export function validateFormStep(
+  step: number,
+  values: FormValues,
+  serverErrors: FieldErrors = {},
+): FieldErrors {
   const errors: FieldErrors = {};
   for (const field of FORM_FIELDS) {
     if (FIELD_STEP[field] === step && isFieldActive(field, values.type)) {
-      errors[field] = validateField(field, values);
+      const localIssue = validateField(field, values);
+      errors[field] = serverErrors[field] ?? localIssue;
     }
+  }
+  return errors;
+}
+
+/** Comprueba todos los pasos con las mismas reglas y sin validar campos inactivos. */
+export function validateForm(
+  values: FormValues,
+  serverErrors: FieldErrors = {},
+): FieldErrors {
+  const errors: FieldErrors = {};
+  for (const step of new Set(Object.values(FIELD_STEP))) {
+    Object.assign(errors, validateFormStep(step, values, serverErrors));
   }
   return errors;
 }
