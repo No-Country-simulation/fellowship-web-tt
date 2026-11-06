@@ -26,7 +26,7 @@ Los datos que **cambian según el tipo** van en un solo `payload jsonb`. Así `t
 
 - `in_review` — entra así el form
 - `published` — sale a galería y redes
-- `rejected` — lo rechazó un admin; no es un archivo. El panel puede devolver esa fila a `in_review` sin migración. El panel los borra en lote (tope 100), solo si la fila sigue `rejected`: primero avatar (`avatars`), foto testimonial (`captures`, si existe) y `share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla, la fila queda para reintentar. Sin migración (`service_role`)
+- `rejected` — lo rechazó un admin con un motivo (`reject_reason`, obligatorio en la action del panel); no es un archivo. El panel puede devolver esa fila a `in_review` sin migración. El panel los borra en lote (tope 100), solo si la fila sigue `rejected`: primero avatar (`avatars`), foto testimonial (`captures`, si existe) y `share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla, la fila queda para reintentar. Sin migración (`service_role`)
 - `archived` — sale de la galería; el motivo queda en `archive_reason`. Los posts ya enviados no se borran
 
 ---
@@ -41,6 +41,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `type` | `testimonial_type` | no | | Rama del form. Define la forma de `payload` |
 | `status` | `testimonial_status` | no | `in_review` | |
 | `archive_reason` | `text` | sí | | Obligatorio solo si `status = 'archived'`: texto con `btrim` no vacío y hasta 500 caracteres (`char_length`). En cualquier otro estado es null. Solo admin. No entra en `testimonials_public` |
+| `reject_reason` | `text` | sí | | Motivo de rechazo. Si `status = 'rejected'` es null (rechazados históricos) o un texto con `btrim` no vacío y hasta 500 caracteres; el panel lo exige al rechazar. En cualquier otro estado es null. Solo admin. No entra en `testimonials_public` |
 | `slug` | `text` | no | | Único. URL `/t/{slug}` |
 | `full_name` | `text` | no | | Público |
 | `country` | `text` | sí | | País. Se muestra junto al nombre. Null en envíos anteriores |
@@ -71,7 +72,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). `payload_is_object` (`jsonb_typeof(payload) = 'object'`) y `payload_matches_type` ya están en la base (formas abajo). Los crea [`20260906000000_init.sql`](../supabase/migrations/20260906000000_init.sql); [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql) reemplaza `payload_matches_type`.
 
-`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `buffer_*_post_id` de [`20261020180000_buffer_post_ids.sql`](../supabase/migrations/20261020180000_buffer_post_ids.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `discord_caption` de [`20261027221527_discord_caption.sql`](../supabase/migrations/20261027221527_discord_caption.sql): la escribe solo el panel. `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `archived` de [`20261028190000_archived_status.sql`](../supabase/migrations/20261028190000_archived_status.sql). `archive_reason` y el check `testimonials_archive_reason_matches_status` de [`20261028190001_archive_reason.sql`](../supabase/migrations/20261028190001_archive_reason.sql): motivo con texto (hasta 500) solo si `status = 'archived'`; null en el resto. `li_caption`, `discord_caption`, `archive_reason` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
+`discord_posted_at` sale de [`20260909000000_discord_posted_at.sql`](../supabase/migrations/20260909000000_discord_posted_at.sql). Buffer (`share-cards` + `buffer_*_posted_at`) de [`20260917000000_share_cards.sql`](../supabase/migrations/20260917000000_share_cards.sql) y [`20260917000001_buffer_posted_at.sql`](../supabase/migrations/20260917000001_buffer_posted_at.sql). `buffer_*_post_id` de [`20261020180000_buffer_post_ids.sql`](../supabase/migrations/20261020180000_buffer_post_ids.sql). `linkedin` y `li_caption` de [`20260919183000_li_caption.sql`](../supabase/migrations/20260919183000_li_caption.sql). `discord_caption` de [`20261027221527_discord_caption.sql`](../supabase/migrations/20261027221527_discord_caption.sql): la escribe solo el panel. `country` y el puesto de simulación de [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql). `archived` de [`20261028190000_archived_status.sql`](../supabase/migrations/20261028190000_archived_status.sql). `archive_reason` y el check `testimonials_archive_reason_matches_status` de [`20261028190001_archive_reason.sql`](../supabase/migrations/20261028190001_archive_reason.sql): motivo con texto (hasta 500) solo si `status = 'archived'`; null en el resto. `reject_reason` y el check `testimonials_reject_reason_matches_status` de [`20261029120000_reject_reason.sql`](../supabase/migrations/20261029120000_reject_reason.sql): motivo de rechazo (hasta 500), null en rechazados históricos y en el resto de los estados. `li_caption`, `discord_caption`, `archive_reason`, `reject_reason` y los `buffer_*` no van en `testimonials_public`. `linkedin` sí: la galería puede mostrarlo.
 
 ---
 
@@ -134,7 +135,7 @@ Galería y `/t/[slug]` (rol `anon`). **Sin** `email`.
 
 Columnas: `id`, `type`, `slug`, `full_name`, `country`, `instagram`, `linkedin`, `story`, `quote`, `avatar_path`, `capture_path`, `video_url`, `payload`, `published_at`.
 
-`where status = 'published'`. Un `archived` no entra por ese filtro. La vista no se modifica y no lista `archive_reason`.
+`where status = 'published'`. Un `archived` no entra por ese filtro. La vista no se modifica y no lista `archive_reason` ni `reject_reason`.
 
 ---
 

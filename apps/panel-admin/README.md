@@ -26,6 +26,25 @@ el repository lee y escribe Supabase con `service_role`. El resto del panel sigu
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
 
+**Límites de «Datos de la card».** Salen del espacio de la card, no del formulario público (que
+sigue aceptando hasta 120). Viven en `CARD_LIMITS` (`infrastructure/cardFields.ts`) y
+`QUOTE_EDIT_MAX_CHARS` (`captionTemplates.ts`); la UI y `validateCardEdits` leen las mismas constantes.
+
+| Campo | Tope | Avisa desde |
+| --- | --- | --- |
+| Nombre | 40 | 35 |
+| Empresa | 40 | 32 |
+| Puesto del primer empleo, puesto principal, oficio anterior, rol nuevo | 50 | 40 |
+| País | 60 | 48 |
+| Cita de la historia | 300 | 240 (80 %) |
+
+Los inputs no cortan la escritura ni el pegado. El contador es gris hasta el umbral, ámbar desde
+el umbral y rojo al pasar el tope (ej. `43/40`, con borde rojo y mensaje). Mientras haya un campo
+excedido, «Guardar» y «Publicar» quedan deshabilitados. El servidor valida los mismos topes al
+guardar y al publicar. El largo se cuenta sin espacios en los extremos y por caracteres (un emoji
+simple cuenta 1). Los testimonios que llegaron con valores entre el tope nuevo y 120 se abren
+igual, con el campo en rojo, hasta que se acorten.
+
 | Ruta | Qué es |
 | --- | --- |
 | `/testimonials` | Inbox: lista de envíos y, al elegir uno, la ficha al lado |
@@ -100,9 +119,13 @@ ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar
 `published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
 de publicados vuelve a ofrecer Reintentar. La ficha de un archivado solo ofrece «Volver a publicar».
 
+Rechazar pide un motivo obligatorio (hasta 500 caracteres) que se guarda en `reject_reason` y se muestra
+en el detalle del rechazado; los rechazados anteriores muestran «Sin motivo registrado». El motivo es solo
+para admin: no va a la vista pública ni a las redes.
+
 Desde el detalle de un rechazado se puede devolver el envío a revisión (`rejected` → `in_review`).
 Pide confirmación. El update solo gana si la fila sigue `rejected`: el estado pasa a `in_review`
-y `archive_reason` sigue null. No modifica `published_at`, la cita, los captions, `payload`, los
+y `archive_reason` y `reject_reason` quedan null (volver a revisión limpia el motivo). No modifica `published_at`, la cita, los captions, `payload`, los
 ids ni las fechas de los posts, ni los archivos de Storage, y no manda nada a Discord, Instagram
 ni LinkedIn. Al confirmar, el detalle abre el formulario de revisión (guardar, publicar o rechazar
 de nuevo) y queda con `?status=in_review`. Si la fila ya no está `rejected`, el diálogo muestra
@@ -123,7 +146,7 @@ y muestra un resultado. No requiere migración: usa `service_role`.
 Antes de desplegar el panel hay que aplicar la migración
 `20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan
 para todos los envíos. Archivar además necesita `20261028190000_archived_status.sql` y
-`20261028190001_archive_reason.sql` (el estado `archived` y el motivo).
+`20261028190001_archive_reason.sql` (el estado `archived` y el motivo). Rechazar necesita `20261029120000_reject_reason.sql`.
 
 Un reintento de LinkedIn de un testimonio publicado antes de este cambio ya no agrega el link del
 video al final: se manda el texto guardado.

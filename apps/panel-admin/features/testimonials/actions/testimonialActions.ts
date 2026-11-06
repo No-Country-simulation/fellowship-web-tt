@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 import { INBOX_FILTERS_FIELD, inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
 import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
 import { hasCommunityWebhook } from "../infrastructure/discord";
-import { validateCardEdits } from "../infrastructure/cardFields";
-import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
+import { cardTextLength, validateCardEdits } from "../infrastructure/cardFields";
+import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS, QUOTE_TOO_LONG_MESSAGE } from "../infrastructure/quote";
 import {
   archiveTestimonial,
   getTestimonialById,
@@ -17,7 +17,6 @@ import {
   deleteRejectedTestimonials,
   isInboxCursorTimestamp,
   loadInboxSlice,
-  rejectArchivedTestimonial,
   rejectTestimonial,
   republishTestimonial,
   returnRejectedToReview,
@@ -34,6 +33,7 @@ import type {
 } from "../types/reviewState";
 import {
   ARCHIVE_REASON_MAX_CHARS,
+  REJECT_REASON_MAX_CHARS,
   BULK_DELETE_MAX,
   isTestimonialStatus,
   type InboxPageCursor,
@@ -66,7 +66,17 @@ export async function reviewTestimonial(
   }
 
   if (intent === "reject") {
-    const rejected = await rejectTestimonial(id);
+    const reason = readString(formData, "reason");
+    if (!reason) {
+      return { status: "error", message: "El motivo no puede estar vacío." };
+    }
+    if (reason.length > REJECT_REASON_MAX_CHARS) {
+      return {
+        status: "error",
+        message: `El motivo puede tener hasta ${REJECT_REASON_MAX_CHARS} caracteres.`,
+      };
+    }
+    const rejected = await rejectTestimonial(id, reason);
     if (!rejected.ok) {
       return { status: "error", message: rejected.message };
     }
@@ -83,10 +93,10 @@ export async function reviewTestimonial(
   if (!quote) {
     return { status: "error", message: "La cita de la historia no puede estar vacía." };
   }
-  if (quote.length > QUOTE_EDIT_MAX_CHARS) {
+  if (cardTextLength(quote) > QUOTE_EDIT_MAX_CHARS) {
     return {
       status: "error",
-      message: `La cita de la historia puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
+      message: QUOTE_TOO_LONG_MESSAGE,
     };
   }
 
@@ -304,30 +314,6 @@ export async function returnRejectedToReviewAction(
 
   revalidateTestimonials(id);
   redirectWithFilters(`/testimonials/${id}`, formData, { status: "in_review" });
-}
-
-/** Archivado → rechazado. Igual que el rechazo de revisión: inbox con los filtros del form. */
-export async function rejectArchivedAction(id: string, formData: FormData): Promise<void> {
-  if (!isTestimonialId(id)) {
-    redirectWithFilters("/testimonials", formData);
-  }
-
-  const current = await getTestimonialById(id);
-  if (!current.ok) {
-    redirectWithFilters("/testimonials", formData);
-  }
-
-  if (current.testimonial.status !== "archived") {
-    redirectWithFilters(`/testimonials/${id}`, formData);
-  }
-
-  const rejected = await rejectArchivedTestimonial(id);
-  if (!rejected.ok) {
-    redirectWithFilters(`/testimonials/${id}`, formData);
-  }
-
-  revalidateTestimonials(id);
-  redirectWithFilters("/testimonials", formData);
 }
 
 /**

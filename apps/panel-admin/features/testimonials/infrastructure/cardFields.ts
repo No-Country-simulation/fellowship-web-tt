@@ -1,31 +1,51 @@
 import type {
-  CardDesign,
   CareerChangePayload,
   FirstJobPayload,
   SimulationPayload,
   TestimonialType,
 } from "../types/testimonial";
 
-/**
- * Mismos topes que el formulario público (`NAME_MAX_CHARS` / `FIELD_MAX_CHARS`).
- * Duplicados a propósito: el panel no importa desde `apps/testimonios`.
- */
-export const CARD_NAME_MAX_CHARS = 120;
-export const CARD_FIELD_MAX_CHARS = 120;
-/**
- * Foto y Empresa usan 40px (piso 32px). Recorrido y Antes y ahora usan 30px.
- * A partir de este largo se recomienda usar iniciales.
- */
-export const CARD_NAME_LONG_CHARS = 40;
-/**
- * Cita (56px), Retrato (54px) y Perfil (52px al lado del avatar) dejan entrar menos texto.
- */
-export const CARD_NAME_TIGHT_CHARS = 35;
+export type CardTextLimit = {
+  /** Tope duro: por encima se marca el campo y no se guarda. */
+  max: number;
+  /** Desde acá el contador avisa, sin bloquear. */
+  warn: number;
+};
 
-const TIGHT_NAME_DESIGNS = new Set<CardDesign>(["quote", "portrait", "profile"]);
+/**
+ * Topes de «Datos de la card». Salen del espacio de la card, no del formulario público
+ * (que acepta hasta 120): el panel adapta el dato a la imagen.
+ * Única fuente: la usan la UI y `validateCardEdits`.
+ */
+export const CARD_LIMITS = {
+  fullName: { max: 40, warn: 35 },
+  country: { max: 60, warn: 48 },
+  primary_role: { max: 50, warn: 40 },
+  company: { max: 40, warn: 32 },
+  role_achieved: { max: 50, warn: 40 },
+  previous_profession: { max: 50, warn: 40 },
+  new_role: { max: 50, warn: 40 },
+} as const satisfies Record<CardFieldErrorKey, CardTextLimit>;
 
-export function cardNameHintLimit(design: CardDesign) {
-  return TIGHT_NAME_DESIGNS.has(design) ? CARD_NAME_TIGHT_CHARS : CARD_NAME_LONG_CHARS;
+/**
+ * Largo que se compara con el tope, igual en cliente y servidor: sin espacios en los
+ * extremos y por caracteres (un emoji simple cuenta 1, no 2 unidades UTF-16).
+ */
+export function cardTextLength(value: string): number {
+  return Array.from(value.trim()).length;
+}
+
+export type CardTextLevel = "ok" | "warn" | "over";
+
+export function cardTextLevel(value: string, limit: CardTextLimit): CardTextLevel {
+  const length = cardTextLength(value);
+  if (length > limit.max) return "over";
+  return length >= limit.warn ? "warn" : "ok";
+}
+
+/** Mensaje de un campo que pasa el tope. */
+function tooLong(subject: string, feminine = false) {
+  return `${subject} es muy ${feminine ? "larga" : "largo"} para la card.`;
 }
 
 export const CARD_PAYLOAD_KEYS = [
@@ -115,23 +135,23 @@ const INPUT_KEYS = [
 const PAYLOAD_FIELD_COPY: Record<CardPayloadKey, { empty: string; long: string }> = {
   primary_role: {
     empty: "El puesto principal es obligatorio.",
-    long: `El puesto principal supera ${CARD_FIELD_MAX_CHARS} caracteres.`,
+    long: tooLong("El puesto principal"),
   },
   company: {
     empty: "La empresa es obligatoria.",
-    long: `La empresa supera ${CARD_FIELD_MAX_CHARS} caracteres.`,
+    long: tooLong("La empresa", true),
   },
   role_achieved: {
     empty: "El puesto del primer empleo es obligatorio.",
-    long: `El puesto del primer empleo supera ${CARD_FIELD_MAX_CHARS} caracteres.`,
+    long: tooLong("El puesto del primer empleo"),
   },
   previous_profession: {
     empty: "El oficio anterior es obligatorio.",
-    long: `El oficio anterior supera ${CARD_FIELD_MAX_CHARS} caracteres.`,
+    long: tooLong("El oficio anterior"),
   },
   new_role: {
     empty: "El rol nuevo es obligatorio.",
-    long: `El rol nuevo supera ${CARD_FIELD_MAX_CHARS} caracteres.`,
+    long: tooLong("El rol nuevo"),
   },
 };
 
@@ -222,8 +242,8 @@ export function validateCardEdits(type: TestimonialType, edits: CardEdits): Card
 
   if (!fullName) {
     errors.fullName = "El nombre es obligatorio.";
-  } else if (fullName.length > CARD_NAME_MAX_CHARS) {
-    errors.fullName = `El nombre supera ${CARD_NAME_MAX_CHARS} caracteres.`;
+  } else if (cardTextLength(fullName) > CARD_LIMITS.fullName.max) {
+    errors.fullName = tooLong("El nombre");
   }
 
   const countryMessage = validateCountry(country);
@@ -238,7 +258,7 @@ export function validateCardEdits(type: TestimonialType, edits: CardEdits): Card
       errors[field.key] = PAYLOAD_FIELD_COPY[field.key].empty;
       continue;
     }
-    if (value.length > CARD_FIELD_MAX_CHARS) {
+    if (cardTextLength(value) > CARD_LIMITS[field.key].max) {
       errors[field.key] = PAYLOAD_FIELD_COPY[field.key].long;
       continue;
     }
@@ -257,8 +277,8 @@ function validateCountry(country: string): string | undefined {
   if (!country) {
     return "El país es obligatorio.";
   }
-  if (country.length > CARD_FIELD_MAX_CHARS) {
-    return `El país supera ${CARD_FIELD_MAX_CHARS} caracteres.`;
+  if (cardTextLength(country) > CARD_LIMITS.country.max) {
+    return tooLong("El país");
   }
   if (!COUNTRY_HAS_LETTER.test(country) || !COUNTRY_CHARS.test(country)) {
     return "Ingresá un nombre de país válido, sin números.";
