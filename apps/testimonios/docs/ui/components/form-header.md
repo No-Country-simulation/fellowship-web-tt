@@ -7,12 +7,12 @@ import { FormHeader } from "@/components/form-header";
 
 // app/enviar/page.tsx, dentro del mismo FormLocaleProvider y Suspense.
 <FormHeader />
-<EnviarExperience />
+<EnviarExperience stories={heroStories} />
 ```
 
-No recibe props. Requiere `FormLocaleProvider`; el header declara su idioma vigente. Reutiliza `/brand/logo-no-country.png`, con el alt «No Country», dimensiones intrínsecas y carga eager. El logo no tiene enlace ni participa del orden de Tab. Los enlaces «Volver al inicio» de introducción y éxito permanecen.
+No recibe props. Requiere `FormLocaleProvider`; el header declara su idioma vigente. Reutiliza `/brand/logo-no-country.png`, con el alt «No Country», dimensiones intrínsecas y carga eager. El logo no tiene enlace ni participa del orden de Tab. Se retira el enlace a la galería de la introducción; el regreso al hero usa el control existente en el paso 1. El enlace de éxito apunta a `/enviar`.
 
-`form-header.module.css` usa tokens existentes, borde inferior discreto, altura mínima de 4rem y ancho máximo de 51rem (contenido de 48rem más padding). Es sticky y permanece en el scroll del documento. Desde 320px, logo y botón de idioma compacto comparten fila; con fuentes ampliadas pueden envolver y aumentar la altura. El botón muestra ES/EN/PT y tiene un nombre accesible localizado; el menú se abre por debajo, alineado a la derecha. No se ocultan header/footer institucionales: esos componentes no se montan en esta ruta.
+`form-header.module.css` mantiene tokens, borde inferior, altura mínima de 4rem y padding vertical. El ancho/margen lateral procede exclusivamente de `form-layout.module.css`, compartido con hero y formulario: wrapper exterior con 24px y 32px desde 48rem, e interior centrado de hasta 70rem sin padding horizontal. Logo y selector coinciden con los extremos de contenido. El header sigue sticky; con fuentes ampliadas puede envolver y aumentar su altura. El botón muestra ES/EN/PT y tiene un nombre accesible localizado; el menú se abre debajo, alineado a la derecha. Navbar/footer institucionales no se montan en esta ruta.
 
 El único selector permanece en este header durante los cinco pasos, éxito y recorte. No se porta al diálogo: la modalidad nativa lo vuelve inerte hasta cerrar el recorte. Para cambiar idioma se cancela o confirma la imagen y luego se usa el header.
 
@@ -27,3 +27,5 @@ QA y capturas: [auditoría, etapa 4](../../form-i18n-audit.md#0d-etapa-4--header
 Pendientes: revisión visual humana y accesibilidad con lectores/navegadores reales. Cualquier información legal obligatoria adicional necesita definición del equipo antes del lanzamiento; no se inventan textos o destinos legales.
 
 Actualización: el selector compacto replica la referencia visual de Talent y guarda preferencia en cookie; seleccionarlo no modifica `?lang=`. Los enlaces localizados siguen funcionando.
+
+El header también rodea la introducción integrada en /enviar. Su selector actualiza hero y formulario, sin duplicar navegación institucional. Véase [integración](../../hero-form-integration.md).

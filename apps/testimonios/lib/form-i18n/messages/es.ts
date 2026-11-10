@@ -8,12 +8,31 @@ export const es = {
       description: "Comparte tu experiencia con No Country. Completa cinco pasos para enviar tu testimonio a revisión."
     },
     navigation: {
+      backToIntro: "Volver a la introducción",
       home: "Volver al inicio",
       back: "Atrás",
       backToStep: "Volver al paso {step}: {title}",
       previousStepsHint: "Toca un paso anterior para volver",
       next: "Siguiente",
       correct: "Corregir los datos"
+    },
+    hero: {
+      eyebrow: "Tu historia en No Country",
+      title: "Tu experiencia merece",
+      highlight: "ser compartida.",
+      description: "Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales.",
+      empty: "Tu historia puede inspirar a otras personas de la comunidad.",
+      unavailable: "En este momento no se pueden mostrar las historias de la comunidad.",
+      carouselPlural: "Testimonios publicados de la comunidad",
+      carouselSingle: "Testimonio publicado de la comunidad",
+      carousel: "carrusel",
+      slide: "diapositiva",
+      readStory: "Leer historia",
+      readStoryOf: "Leer la historia de",
+      previous: "Testimonio anterior",
+      next: "Siguiente testimonio",
+      of: "de",
+      testimonial: "Testimonio"
     },
     intro: {
       title: "Comparte tu experiencia",
@@ -176,6 +195,7 @@ export const es = {
       removeCapture: "Quitar foto de tu experiencia"
     },
     errors: {
+      consent: { required: "Acepta la autorización de publicación para continuar." },
       image: {
         cropFailed: "No se pudo recortar la foto."
       },

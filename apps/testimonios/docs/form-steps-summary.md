@@ -1,10 +1,12 @@
 # Navegación y resumen del formulario — etapas 1 a 4
 
-Fecha: 5 de noviembre de 2026. Rama: `feat/testimonios-form-steps-summary`.
+Fecha histórica: 5 de noviembre de 2026. Rama: `feat/testimonios-form-steps-summary`. Las cinco etapas fueron aprobadas en Demo Day y mergeadas a `dev`, según la confirmación del desarrollador. Las referencias a revisión/commit pendientes más abajo son históricas. Flujo vigente y nueva revisión: [Hero y formulario integrados](./hero-form-integration.md).
+
+Actualización de layout: el contenedor común de `/enviar` usa ahora 70rem y gutters acotados de 24/32px. Las compensaciones de margen negativo del resumen descritas más abajo fueron retiradas, porque el wrapper ya no aumenta su padding lateral con el texto. Se conserva el tamaño ampliado, permitiendo partir únicamente palabras que superan el ancho disponible. Véase la documentación vigente para alcance de publicación y QA actualizado.
 
 La investigación de conservación queda cerrada: el desarrollador confirmó en localhost que retroceder sin «Siguiente» y alternar categorías conserva los valores. Esta etapa no implementa una corrección de pérdida de datos.
 
-Las etapas 1 (navegación interactiva), 2 (validación integral antes del envío) y 3 (resumen visual y ajuste de legibilidad) quedaron aprobadas manualmente, documentadas y commiteadas por el desarrollador. Las secciones siguientes conservan sus decisiones, resultados técnicos y limitaciones específicas de QA. La etapa 4 queda pendiente de revisión en localhost.
+Las etapas 1–5 quedaron aprobadas manualmente, documentadas, commiteadas y mergeadas por el desarrollador. Las secciones siguientes conservan decisiones, resultados técnicos y limitaciones de QA; no describen la nueva integración del hero en `/enviar` ni su declaración afirmativa requerida en servidor.
 
 ## Navegación implementada
 

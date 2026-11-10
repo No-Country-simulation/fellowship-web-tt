@@ -118,10 +118,10 @@ describe("language preference precedence", () => {
 describe("link construction without navigation", () => {
   it("invites to the hero in each language without changing direct form URLs", () => {
     for (const locale of FORM_LOCALES) {
-      assert.equal(buildHeroHref(locale), `/?lang=${locale}#hero-consent`);
+      assert.equal(buildHeroHref(locale), `/enviar?lang=${locale}`);
       assert.equal(buildFormHref(locale), `/enviar?lang=${locale}`);
     }
-    assert.equal(buildHeroHref("invalid" as "es"), "/?lang=es#hero-consent");
+    assert.equal(buildHeroHref("invalid" as "es"), "/enviar?lang=es");
   });
   it("generates explicit canonical locale links", () => {
     assert.equal(buildFormHref("es"), "/enviar?lang=es");
@@ -188,6 +188,18 @@ describe("complete dictionaries and historical inventory", () => {
 });
 
 describe("typed parameter interpolation", () => {
+  it("preserves accented introduction labels and localizes carousel controls", () => {
+    assert.equal(es.form.navigation.backToIntro, "Volver a la introducción");
+    assert.equal(ptBR.form.navigation.backToIntro, "Voltar à introdução");
+    assert.equal(ptBR.form.hero.title, "Sua experiência merece");
+    assert.equal(ptBR.form.hero.next, "Próximo depoimento");
+    for (const locale of FORM_LOCALES) {
+      const copy = getFormMessages(locale).form;
+      for (const text of [...Object.values(copy.hero), copy.navigation.backToIntro, copy.errors.consent.required]) {
+        assert.ok(text && !/[?\uFFFD]/u.test(text), "intro copy retains its source encoding");
+      }
+    }
+  });
   it("names the fifth step as review and submission while preserving five localized steps", () => {
     const expected = { es: "Revisión y envío", en: "Review and submit", pt: "Revisão e envio" };
     for (const locale of FORM_LOCALES) {

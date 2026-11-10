@@ -10,7 +10,7 @@ import { validValues, formDataFor } from "./form-errors.fixtures";
 import { formIssue } from "./issues";
 import { firstErrorStep, parseTestimonialForm, type ParsedTestimonial } from "./parse";
 import { initialSubmitState } from "./submit-state";
-import { typeOption } from "./types";
+import { TESTIMONIAL_TYPES, typeOption } from "./types";
 
 type ActionModule = typeof import("./actions");
 type StoreModule = typeof import("./store");
@@ -131,7 +131,7 @@ function storeHarness(options: {
 }
 
 describe("Server Action errors with fully isolated doubles", () => {
-  it("accepts direct submissions without cookie infrastructure and timestamps the valid request on the server", async () => {
+  it("accepts affirmative declarations without cookies and timestamps the valid request on the server", async () => {
     for (const type of ["simulation", "first_job", "career_change"] as const) {
       const action = actionHarness(), data = formDataFor(validValues({ type }));
       const before = Date.now();
@@ -157,7 +157,9 @@ describe("Server Action errors with fully isolated doubles", () => {
   });
   it("returns serializable semantic validation errors without saving or notifying", async () => {
     const action = actionHarness();
-    const result = wire(await action.submitTestimonial(initialSubmitState, new FormData()));
+    const data = new FormData();
+    data.set("consent", "on");
+    const result = wire(await action.submitTestimonial(initialSubmitState, data));
     assert.equal(result.status, "error");
     if (result.status !== "error") assert.fail();
     assert.equal(result.issue.code, "validation.summary");
@@ -166,6 +168,30 @@ describe("Server Action errors with fully isolated doubles", () => {
     assert.equal("message" in result, false);
     assert.equal(action.savedData.length, 0);
     assert.equal(action.notifications.length, 0);
+  });
+
+  it("rejects absent, negative, malformed and repeated declarations before any persistence or notification", async () => {
+    for (const type of TESTIMONIAL_TYPES) {
+      const cases: (FormDataEntryValue[] | undefined)[] = [undefined, [""], ["off"], ["false"], ["true"], ["1"],
+        [" on "], ["on", "on"], ["off", "on"], [new File(["on"], "consent.txt")]];
+      for (const declarations of cases) {
+        const action = actionHarness();
+        const data = formDataFor(validValues({ type }));
+        data.delete("consent");
+        for (const value of declarations ?? []) data.append("consent", value);
+        const parsed = parseTestimonialForm(data);
+        assert.equal(parsed.ok, false);
+        if (parsed.ok) assert.fail();
+        assert.equal(parsed.issue.code, "consent.required");
+        assert.equal("data" in parsed, false, "no parsed timestamp without consent");
+        const result = wire(await action.submitTestimonial(initialSubmitState, data));
+        assert.equal(result.status, "error");
+        if (result.status !== "error") assert.fail();
+        assert.equal(result.issue.code, "consent.required");
+        assert.deepEqual(action.savedData, []);
+        assert.deepEqual(action.notifications, []);
+      }
+    }
   });
 
   it("keeps integral server validation and the earliest correction step", async () => {

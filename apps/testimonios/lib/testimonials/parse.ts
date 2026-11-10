@@ -268,6 +268,11 @@ export function validateImageFile(
 
 /** Valid submission records server time; it does not verify a prior hero checkbox. */
 export function parseTestimonialForm(formData: FormData): ParseResult {
+  // Affirmation is required independently of the client gate. Ignore client timestamps.
+  const declarations = formData.getAll("consent");
+  if (declarations.length !== 1 || declarations[0] !== "on") {
+    return { ok: false, fieldErrors: {}, issue: formIssue("consent.required") };
+  }
   const fieldErrors: FieldErrors = {};
   const typeRaw = readString(formData, "type");
   const fullName = readString(formData, "full_name");

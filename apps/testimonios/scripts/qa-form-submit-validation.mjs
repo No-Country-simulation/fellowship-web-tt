@@ -1,3 +1,4 @@
+import { enterForm } from "./qa-enter-form.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
@@ -13,8 +14,9 @@ import { fileURLToPath } from "node:url";
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const summaryEdit = process.argv.includes('--summary-edit');
-const heroConsent = process.argv.includes('--hero-consent');
-const output = join(appDir, heroConsent ? "docs/ui/assets/hero-consent/submit-regression" : summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
+const integration = process.argv.includes('--hero-form');
+const heroConsent = integration || process.argv.includes('--hero-consent');
+const output = join(appDir, integration ? "docs/ui/assets/hero-form-integration/submit-regression" : heroConsent ? "docs/ui/assets/hero-consent/submit-regression" : summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let expectAction = false, pendingAction = null;
 async function port(){const s=createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}
@@ -32,21 +34,23 @@ try{
  const target=await (await fetch('http://127.0.0.1:'+debugPort+'/json/new?about:blank',{method:'PUT'})).json();
  socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{socket.onopen=r;socket.onerror=j;});
  cdp=(method,params={})=>new Promise((r,j)=>{const id=++seq;const timer=setTimeout(()=>{pending.delete(id);j(Error('CDP timeout '+method));},15000);pending.set(id,{r,j,timer});socket.send(JSON.stringify({id,method,params}));});
+ // Navigation may cancel a paused image before CDP receives its continuation.
+ function intercept(method,params){void cdp(method,params).catch(error=>{if(!/Invalid InterceptionId/i.test(error.message))errors.push('request interception failed');});}
  socket.onmessage=({data})=>{
   const e=JSON.parse(data);
   if(e.id){const p=pending.get(e.id);if(!p)return;pending.delete(e.id);clearTimeout(p.timer);if(e.error)p.j(Error(e.error.message));else p.r(e.result);}
   else if(e.method==='Runtime.exceptionThrown')errors.push('browser exception');
   else if(e.method==='Fetch.requestPaused'){
    const {requestId,request}=e.params;const u=new URL(request.url);
-   if(request.method!=='GET'&&request.method!=='HEAD'){blockedPosts++;if(expectAction&&request.method==='POST'){pendingAction=requestId;}else void cdp('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
-   else if(u.origin!==origin){blockedExternal++;void cdp('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
-   else void cdp('Fetch.continueRequest',{requestId});
+   if(request.method!=='GET'&&request.method!=='HEAD'){blockedPosts++;if(expectAction&&request.method==='POST'){pendingAction=requestId;}else intercept('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
+   else if(u.origin!==origin){blockedExternal++;intercept('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
+   else intercept('Fetch.continueRequest',{requestId});
   }
  };
  async function ev(fn,...args){const v=await cdp('Runtime.evaluate',{expression:'('+fn.toString()+')(...'+JSON.stringify(args)+')',awaitPromise:true,returnByValue:true});if(v.exceptionDetails)throw Error(v.exceptionDetails.text);return v.result?.value;}
  await cdp('Page.enable');await cdp('Runtime.enable');await cdp('Fetch.enable',{patterns:[{urlPattern:'*',requestStage:'Request'}]});
  async function click(selector){
-  const p=await ev(sel=>{const e=document.querySelector(sel);if(!e)throw Error('missing '+sel);e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2};},selector);
+  const p=await ev(sel=>{const e=document.querySelector(sel);if(!e)throw Error('missing '+sel);e.scrollIntoView({block:'center'});const r=[...e.getClientRects()].find(r=>r.width>0&&r.height>0)??e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2};},selector);
   await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...p});await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...p});
  }
  async function button(kind){const sel=await ev(kind=>{const texts={next:['Siguiente','Next','Pr\u00f3ximo'],back:['Atr\u00e1s','Back','Voltar']};const e=[...document.querySelectorAll('form button')].find(e=>texts[kind].includes(e.textContent.trim()));if(!e)throw Error('missing button '+kind);e.setAttribute('data-investigation',kind);return '[data-investigation="'+kind+'"]';},kind);await click(sel);}
@@ -67,6 +71,7 @@ try{
   await cdp('Page.navigate',{url:origin+'/enviar?lang='+locale});
   await until(()=>ev(()=>!!document.querySelector('form input[name="full_name"]')&&document.readyState==='complete'),'form');
   await pause(150);
+  await enterForm(ev,until);
   await click('form ol li:last-child > span');assert.equal(await step(),1,'future step cannot advance from step 1');
   await click('[name="type"][value="'+category+'"]');await next();
   await type('full_name','Persona Sintetica');await type('email','persona@example.com');
@@ -89,7 +94,7 @@ try{
  const recordPayloads=()=>{
   window.__qaPayloads=[];const records=new WeakMap(),original=FormData.prototype.set;
   FormData.prototype.set=function(name,value,...rest){
-   if(name==='type'){const record={};records.set(this,record);window.__qaPayloads.push(record);}
+   if((name==='consent'||name==='type')&&!records.has(this)){const record={};records.set(this,record);window.__qaPayloads.push(record);}
    const record=records.get(this);if(record)record[name]=value instanceof File?{name:value.name,type:value.type,size:value.size}:value;
    return original.call(this,name,value,...rest);
   };
@@ -118,9 +123,9 @@ try{
  }
  async function checkPayload(category){
   const payload=await ev(()=>window.__qaPayloads.at(-1));
-  const expected=['type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar'];
+  const expected=['consent','type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar'];
   assert.deepEqual(Object.keys(payload).sort(),expected.sort(),'only active professional fields are sent');
-  assert.equal(payload.type,category);assert.equal(payload.country,'Argentina');assert.equal(payload.consent,undefined);assert.equal(payload.avatar.type,'image/jpeg');
+  assert.equal(payload.type,category);assert.equal(payload.country,'Argentina');assert.equal(payload.consent,'on');assert.equal(payload.avatar.type,'image/jpeg');
   return {type:payload.type,keys:Object.keys(payload).sort()};
  }
  async function mockAction(response,category){
@@ -180,15 +185,23 @@ try{
   for(const name of roleNames(category))assert.equal((await snap()).fields[name],originals[name],'inactive values survived');
   await button('next');assert.equal(await step(),3,'returning category retains its pending server rejection');await focusedError(professional);
   await replace(professional,'Revisado '+professional);await next();await next();
+  await mockAction({status:'error',issue:{code:'consent.required'},fieldErrors:{},step:1},category);
+  await until(()=>ev(()=>document.activeElement.id==='hero-consent-checkbox'&&!document.querySelector('#hero-consent-checkbox').checked),'server consent rejection returns to visible checkbox');
+  assert.ok(await ev(()=>!document.querySelector('form').getClientRects().length&&!!document.querySelector('#hero-consent-error')),'consent rejection keeps data hidden and identifies the affirmation');
+  await enterForm(ev,until);assert.equal(await step(),5,'renewed affirmation resumes the unchanged review');
+  assert.equal(await ev(()=>!!document.querySelector('form [role="alert"]')),false,'renewing affirmation clears only its own error');
   const finalPayload=await mockAction({status:'success'},category);
   await until(()=>ev(()=>!!document.querySelector('main h1')&&!document.querySelector('form')),'mock success');
   assert.ok(await ev(()=>document.activeElement===document.querySelector('main h1')),'success focus retained');
-  assert.ok(await ev((origin,locale)=>[...document.querySelectorAll('main a')].some(a=>a.href===origin+'/?lang='+locale+'#hero-consent'),origin,locale),'invitation starts at the hero in the current language');
-  reports.push({locale,category,width,result:'PASS',localStepsBlocked:[2,3,4],noPayloadBeforeValidation:true,accessibleFocus:true,valuesRetained:true,serverErrorsRetained:true,newResponseIdentity:true,categoryRoundtrip:true,payloads:[firstPayload,switchedPayload,finalPayload]});
+  assert.ok(await ev((origin,locale)=>[...document.querySelectorAll('main a')].some(a=>a.href===origin+'/enviar?lang='+locale),origin,locale),'invitation starts at the hero in the current language');
+  reports.push({locale,category,width,result:'PASS',localStepsBlocked:[2,3,4],noPayloadBeforeValidation:true,accessibleFocus:true,valuesRetained:true,serverErrorsRetained:true,newResponseIdentity:true,categoryRoundtrip:true,consentRejectionRecoverable:true,payloads:[firstPayload,switchedPayload,finalPayload]});
   console.log(JSON.stringify({progress:reports.length,locale,category,result:'PASS'}));
+  await click('main a[href*="/enviar?lang="]');
+  await until(()=>ev(()=>!!document.querySelector('#hero-consent-checkbox')&&document.readyState==='complete'),'invitation opens a fresh introduction');
+  assert.ok(await ev(()=>!document.querySelector('#hero-consent-checkbox').checked&&document.querySelector('#hero-consent button').disabled&&!document.querySelector('form').getClientRects().length&&document.querySelector('[name="full_name"]').value===''),'invitation resets acceptance and the completed draft');
  }
- assert.equal(blockedPosts,36);assert.equal(blockedExternal,0);assert.equal(errors.length,0);
- const report={result:'PASS',reports,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,scope:'Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.',manual:heroConsent?'Stage 5 direct-access submission and inline editing regression. Physical devices, native zoom and screen readers remain manual.':summaryEdit?'Stage 2 validation regression against Stage 4 global inline summary editing. Real screen reader and mobile hardware remain manual.':'Real screen reader and mobile hardware remain manual. No visual summary changes.'};
+ assert.equal(blockedPosts,45);assert.equal(blockedExternal,0);assert.equal(errors.length,0);
+ const report={result:'PASS',reports,blockedPosts,realSubmissions:0,blockedExternal,browserExceptionCount:errors.length,scope:'Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.',manual:heroConsent?'Integrated introduction, consent rejection and inline editing regression. Physical devices, native zoom and screen readers remain manual.':summaryEdit?'Stage 2 validation regression against Stage 4 global inline summary editing. Real screen reader and mobile hardware remain manual.':'Real screen reader and mobile hardware remain manual. No visual summary changes.'};
  await writeFile(join(output,'qa-results.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 } catch(e){console.log(JSON.stringify({result:'FAILED',error:e.message,reports,blockedPosts,blockedExternal,browserExceptionCount:errors.length}));process.exitCode=1;}
 finally{

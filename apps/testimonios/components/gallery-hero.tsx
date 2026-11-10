@@ -1,32 +1,30 @@
 import { HeroConsent } from "@/components/hero-consent";
 import type { FormLocale } from "@/lib/form-i18n/locales";
+import { getFormMessages } from "@/lib/form-i18n/messages";
 
 import { GalleryHeroCarousel } from "@/components/gallery-hero-carousel";
 import type { HeroStory } from "@/components/gallery-hero-data";
 import { cn } from "@/lib/utils";
 
 import styles from "./gallery-hero.module.css";
-
-// Captación de talento: compartir no implica publicación automática.
-const HERO_COPY = {
-  eyebrow: "Tu historia en No Country",
-  title: "Tu experiencia merece",
-  highlight: "ser compartida.",
-  description:
-    "Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales.",
-} as const;
+import layout from "./form-layout.module.css";
 
 type GalleryHeroProps = {
   stories: readonly HeroStory[] | null;
-  locale?: FormLocale;
+  locale: FormLocale;
+  accepted: boolean;
+  onAcceptedChange: (accepted: boolean) => void;
+  onStart: () => void;
+  error?: string;
 };
 
-/** Landing de captación de servidor, con publicados seleccionados y estados vacío/error. */
-export function GalleryHero({ stories, locale = "es" }: GalleryHeroProps) {
+/** Introductory view; published stories still come from the server, consent from the flow. */
+export function GalleryHero({ stories, locale, ...consent }: GalleryHeroProps) {
+  const copy = getFormMessages(locale).form.hero;
   return (
     <section
       aria-labelledby="gallery-title"
-      className={cn(styles.hero, "@container border-b border-border-subtle py-xl 2xl:py-3xl")}>
+      className={cn(styles.hero, layout.gutter, "@container border-b border-border-subtle py-xl 2xl:py-3xl")}>
       <div aria-hidden="true" className={styles.backdrop}>
         <svg
           className={styles.art}
@@ -130,7 +128,7 @@ export function GalleryHero({ stories, locale = "es" }: GalleryHeroProps) {
       </div>
       <div
         className={cn(
-          "mx-auto grid w-full max-w-[70rem] gap-lg",
+          layout.container, "grid gap-lg",
           stories && stories.length > 0 && styles.withStories,
         )}>
         <div className="min-w-0 wrap-anywhere">
@@ -139,28 +137,29 @@ export function GalleryHero({ stories, locale = "es" }: GalleryHeroProps) {
               aria-hidden="true"
               className="h-0.5 w-7 shrink-0 rounded-full bg-brand-gradient"
             />
-            {HERO_COPY.eyebrow}
+            {copy.eyebrow}
           </p>
           <h1
             id="gallery-title"
+            tabIndex={-1}
             className="mt-md text-[2.125rem] font-bold leading-[1.1] tracking-tight text-text-primary sm:text-5xl">
-            {HERO_COPY.title}{" "}
-            <span className="text-brand-gradient inline-block">{HERO_COPY.highlight}</span>
+            {copy.title}{" "}
+            <span className="text-brand-gradient inline-block">{copy.highlight}</span>
           </h1>
           <p className="mt-md max-w-[36rem] text-base leading-relaxed text-text-secondary sm:text-lg">
-            {HERO_COPY.description}
+            {copy.description}
           </p>
-          <HeroConsent locale={locale} />
+          <HeroConsent locale={locale} {...consent} />
         </div>
         {stories === null ? (
           <p role="status" className="text-sm leading-relaxed text-text-secondary">
-            En este momento no se pueden mostrar las historias de la comunidad.
+            {copy.unavailable}
           </p>
         ) : stories.length > 0 ? (
-          <GalleryHeroCarousel stories={stories} />
+          <GalleryHeroCarousel stories={stories} locale={locale} />
         ) : (
           <p className="max-w-[36rem] text-sm leading-relaxed text-text-secondary">
-            Tu historia puede inspirar a otras personas de la comunidad.
+            {copy.empty}
           </p>
         )}
       </div>

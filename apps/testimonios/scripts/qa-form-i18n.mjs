@@ -1,3 +1,4 @@
+import { enterForm } from "./qa-enter-form.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
@@ -11,9 +12,9 @@ import { fileURLToPath } from "node:url";
 // EVERY browser POST is intercepted before it can reach Next/the action/services.
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
-const chromePath = process.argv[2] ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
+const chromePath = process.argv.slice(2).find(arg => !arg.startsWith("--")) ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-const output = join(appDir, "docs/ui/assets/form-regression-current");
+const output = join(appDir, process.argv.includes("--hero-form") ? ".next/hero-form-i18n" : "docs/ui/assets/form-regression-current");
 const profile = await mkdtemp(join(tmpdir(), "testimonios-i18n-browser-"));
 async function freePort() {
   const server = createServer();
@@ -100,7 +101,7 @@ try {
     const records = new WeakMap();
     const originalSet = FormData.prototype.set;
     FormData.prototype.set = function(name, value, ...rest) {
-      if (name === 'type') { const record = {}; records.set(this, record); window.__qaPayloads.push(record); }
+      if ((name === 'consent' || name === 'type') && !records.has(this)) { const record = {}; records.set(this, record); window.__qaPayloads.push(record); }
       const record = records.get(this);
       if (record) record[name] = value instanceof File ? {name:value.name,type:value.type,size:value.size} : value;
       return originalSet.call(this, name, value, ...rest);
@@ -118,12 +119,14 @@ try {
     await until(() => evaluate((expected, selector) => location.href === expected && document.readyState === "complete" && !!document.querySelector(selector), origin + path, selector), path);
     await evaluate(() => document.fonts.ready.then(() => true));
     await pause(150);
+    if (path.startsWith("/enviar") && selector === "main form") await enterForm(evaluate, until);
   }
   async function clientLink(selector, path) {
     await evaluate(selector => { window.__qaDocument = document.documentElement; document.querySelector(selector).click(); }, selector);
     await until(() => evaluate(path => location.pathname === path && !!document.querySelector("main"), path), `client navigation ${path}`);
     await pause(200);
     assert.equal(await evaluate(() => window.__qaDocument === document.documentElement), true, "same root document on navigation");
+    if (path === "/enviar") await enterForm(evaluate, until);
   }
   async function chromeCheck(form) {
     assert.deepEqual(await evaluate(() => ({ headers: document.querySelectorAll("body > header").length, footers: document.querySelectorAll("body > footer").length, formHeaders: document.querySelectorAll("[data-form-header]").length, selectors: document.querySelectorAll("[data-form-language-select]").length, mains: document.querySelectorAll("main").length })), { headers: 1, footers: form ? 0 : 1, formHeaders: form ? 1 : 0, selectors: form ? 1 : 0, mains: 1 });
@@ -173,7 +176,7 @@ try {
   const back = async () => { await button(({ es: "Atrás", en: "Back", pt: "Voltar" })[await locale()]); await focusCheck(); };
   const step = () => evaluate(() => Number(document.querySelector("form h2").textContent.match(/\d+/)[0]));
   async function layout() {
-    for (const width of [320, 375, 768, 1024, 1440]) {
+    for (const width of [320, 375, 768, 1024, 1440, 1920]) {
       await viewport(width);
       await pause(35);
       assert.equal(await evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `overflow at ${width}`);
@@ -229,11 +232,11 @@ try {
   const publicSignature = () => evaluate(() => ({ header: document.querySelector("body > header").textContent, footer: document.querySelector("body > footer").textContent, links: [...document.querySelectorAll("body > header a,body > footer a")].map(el => [el.getAttribute("href"), el.getAttribute("target"), el.textContent]) }));
   const publicChrome = await publicSignature();
   await screenshot("home-1440.png", 1440);
-  await evaluate(()=>document.querySelector("#hero-consent-checkbox").click());
-  await clientLink("#hero-consent button", "/enviar");
+  await clientLink('main a[href^="/enviar"]', "/enviar");
   await until(() => evaluate(() => !!document.querySelector("main form")), "home to form");
   await chromeCheck(true); await language("pt");
-  await clientLink('main a[href="/"]', "/");
+  // The approved flow no longer has a gallery-exit link in its introduction.
+  await evaluate(() => history.back());
   await until(() => evaluate(() => !!document.querySelector('body > footer')), "public layout restored");
   await chromeCheck(false);
   assert.deepEqual(await evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]').content })), homeMetadata, "public metadata restored after client locale mutation");
@@ -263,7 +266,7 @@ try {
     assert.equal(await evaluate(() => document.querySelector("main h1").textContent), "Página no encontrada");
     assert.ok(!await evaluate(() => document.title.includes("Compartilhe")));
     await clientLink('main a[href="/"]', "/");
-    await until(() => evaluate(() => !!document.querySelector("#hero-consent button")), "404 return home");
+    await until(() => evaluate(() => !!document.querySelector("#hero-consent")), "404 return home");
     await chromeCheck(false);
   }
   checks.push("single shared root; home/detail unchanged chrome and metadata; client navigation across layouts; unmatched/nested/missing-slug 404 chrome and noindex");
@@ -300,7 +303,9 @@ try {
   await language("es");
   assert.equal(await evaluate(() => location.href), originalUrl);
   checks.push("selector updates state and cookie without URL changes; reload without lang preserves preference");
-  await evaluate(() => document.querySelector('main a[href="/"]').focus());
+  // With the redundant gallery link removed, the category radio is the first
+  // focusable form control; Shift+Tab must reach the unchanged header selector.
+  await evaluate(() => document.querySelector('form input[name="type"]').focus());
   await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
   await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: 8 });
   assert.equal(await evaluate(() => document.activeElement.hasAttribute("data-form-language-trigger") && getComputedStyle(document.activeElement).outlineStyle !== "none"), true, "keyboard select keeps visible focus");
@@ -439,7 +444,7 @@ try {
   await layout();
   // Regression: copied feedback is tied to the current URL and resets even on ES → PT → ES.
   await button("Copiar enlace");
-  assert.equal(await evaluate(() => navigator.clipboard.readText()), origin + "/?lang=es#hero-consent");
+  assert.equal(await evaluate(() => navigator.clipboard.readText()), origin + "/enviar?lang=es");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Enlace copiado")));
   await language("pt");
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar link")));
@@ -447,8 +452,8 @@ try {
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Copiar enlace")));
   await language("pt");
   await layout();
-  const invite = await evaluate(() => document.querySelector('main a[href*="#hero-consent"]').href);
-  assert.equal(invite, origin + "/?lang=pt#hero-consent");
+  const invite = await evaluate(() => document.querySelector('main a[href*="/enviar?lang="]').href);
+  assert.equal(invite, origin + "/enviar?lang=pt");
   await button("Copiar link");
   assert.equal(await evaluate(() => navigator.clipboard.readText()), invite);
   assert.ok(await evaluate(() => [...document.querySelectorAll("main button")].some(el => el.textContent.trim() === "Link copiado")));
@@ -458,8 +463,8 @@ try {
   const payloads = await evaluate(() => window.__qaPayloads);
   assert.equal(payloads.length, 2); assert.equal(interceptedPosts, 2);
   for (const payload of payloads) {
-    assert.deepEqual(Object.keys(payload).sort(), ["type", "full_name", "country", "email", "story", "company", "role_achieved", "video_url", "instagram", "linkedin", "avatar", "capture"].sort());
-    assert.equal(payload.type, "first_job"); assert.equal(payload.country, "España"); assert.equal(payload.consent, undefined);
+    assert.deepEqual(Object.keys(payload).sort(), ["consent", "type", "full_name", "country", "email", "story", "company", "role_achieved", "video_url", "instagram", "linkedin", "avatar", "capture"].sort());
+    assert.equal(payload.type, "first_job"); assert.equal(payload.country, "España"); assert.equal(payload.consent, "on");
     assert.equal(payload.full_name, "Persona QA"); assert.equal(payload.avatar.type, "image/jpeg"); assert.equal(payload.capture.type, "image/jpeg");
   }
   assert.equal(payloads[0].story, story); assert.equal(payloads[1].story, story + " Corrección QA.");

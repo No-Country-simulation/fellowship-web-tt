@@ -8,12 +8,31 @@ export const en = {
       description: "Share your experience with No Country. Complete five steps to submit your testimonial for review."
     },
     navigation: {
+      backToIntro: "Back to introduction",
       home: "Back to home",
       back: "Back",
       backToStep: "Back to step {step}: {title}",
       previousStepsHint: "Tap an earlier step to go back",
       next: "Next",
       correct: "Correct the information"
+    },
+    hero: {
+      eyebrow: "Your story at No Country",
+      title: "Your experience deserves",
+      highlight: "to be shared.",
+      description: "Share your story with No Country, highlight your professional journey and have the opportunity to gain visibility on our official channels.",
+      empty: "Your story can inspire others in the community.",
+      unavailable: "Community stories cannot be displayed right now.",
+      carouselPlural: "Published community testimonials",
+      carouselSingle: "Published community testimonial",
+      carousel: "carousel",
+      slide: "slide",
+      readStory: "Read story",
+      readStoryOf: "Read the story of",
+      previous: "Previous testimonial",
+      next: "Next testimonial",
+      of: "of",
+      testimonial: "Testimonial"
     },
     intro: {
       title: "Share your experience",
@@ -176,6 +195,7 @@ export const en = {
       removeCapture: "Remove photo of your experience"
     },
     errors: {
+      consent: { required: "Accept the publication authorization to continue." },
       image: {
         cropFailed: "The photo could not be cropped."
       },
