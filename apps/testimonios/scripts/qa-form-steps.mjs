@@ -1,3 +1,4 @@
+import { enterForm } from "./qa-enter-form.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
@@ -63,6 +64,7 @@ try{
   await cdp('Page.navigate',{url:origin+'/enviar?lang='+locale});
   await until(()=>ev(()=>!!document.querySelector('form input[name="full_name"]')&&document.readyState==='complete'),'form');
   await pause(150);
+  await enterForm(ev,until);
   await progressProbe(1,locale);await click('form ol li:last-child > span');assert.equal(await step(),1,'future step cannot advance from step 1');
   await click('[name="type"][value="'+category+'"]');await next();
   await type('full_name','Persona Sintetica');await type('email','persona@example.com');

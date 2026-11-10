@@ -1,3 +1,4 @@
+import { enterForm } from "./qa-enter-form.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
@@ -213,6 +214,7 @@ try {
     await evaluate(() => document.fonts.ready.then(() => true));
     assert.equal(await evaluate(()=>Math.abs(window.qaRatio(new Uint8ClampedArray([255,255,255]),new Uint8ClampedArray([102,102,102]))-5.74183648145415)<.00001),true,'raster luminance uses floating point, not clamped channels');
     await pause(100);
+    await enterForm(evaluate,until);
     // Check all currently mounted references, including inactive fieldsets, for every category.
     for (const category of ["simulation", "first_job", "career_change"]) {
       await evaluate(category => document.querySelector(`input[value="${category}"]`).click(), category);

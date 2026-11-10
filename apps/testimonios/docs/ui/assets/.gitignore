@@ -28,3 +28,16 @@
 !/hero-consent/summary-regression/qa-results.json
 !/hero-consent/submit-regression/
 !/hero-consent/submit-regression/qa-results.json
+
+# Hero/form integration: four representative images, full reports, no matrix duplicates.
+/hero-form-integration/**
+!/hero-form-integration/README.md
+!/hero-form-integration/qa-results.json
+!/hero-form-integration/hero-es-320.png
+!/hero-form-integration/hero-en-1440.png
+!/hero-form-integration/hero-pt-375-200.png
+!/hero-form-integration/es-375-review-submit.png
+!/hero-form-integration/summary-regression/
+!/hero-form-integration/summary-regression/qa-results.json
+!/hero-form-integration/submit-regression/
+!/hero-form-integration/submit-regression/qa-results.json

@@ -1,3 +1,4 @@
+import { enterForm } from "./qa-enter-form.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
@@ -206,6 +207,7 @@ try {
     await cdp('Page.navigate',{url:origin+'/enviar?lang='+initialLocale});
     await until(()=>evaluate(locale=>!!document.querySelector('main form')&&document.querySelector('main').lang===(locale==='pt'?'pt-BR':locale)&&document.readyState==='complete',initialLocale),'form');
     await evaluate(()=>document.fonts.ready.then(()=>true));await pause(100);
+    await enterForm(evaluate,until);
     await evaluate(()=>{window.__qaForm=document.querySelector('form');});
     if(phase==='compact'){
       await evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));

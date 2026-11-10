@@ -321,3 +321,28 @@ El namespace actual de autorización contiene únicamente `body`, `action` y `su
 EN: «Share my testimonial» y «By submitting your testimonial, you authorize No Country to publish your name, photos, and story in the testimonials gallery and on Discord. Your email address will not be published. The team will review the content before publishing it.».
 
 El cuerpo del checkbox permanece en su fila histórica sin cambios. No se recupera la ayuda redundante del hero. La información final aparece solo en el paso 5 y describe la autorización manifestada al enviar; no afirma que el servidor verificó el checkbox del hero.
+
+## Integración del hero en /enviar — 10 de noviembre de 2026
+
+Copy localizado del hero y sus controles. La aceptación explícita se valida en servidor; la fecha no certifica lectura ni identidad. Se mantienen los textos editoriales aprobados del formulario.
+
+| Archivo/componente | Texto actual | Propuesta en español neutro | Propuesta inicial pt-BR | Clave sugerida |
+| --- | --- | --- | --- | --- |
+| Hero / flujo | Volver a la introducción | Volver a la introducción | Voltar à introdução | `form.navigation.backToIntro` |
+| Hero / flujo | Tu historia en No Country | Tu historia en No Country | Sua história na No Country | `form.hero.eyebrow` |
+| Hero / flujo | Tu experiencia merece | Tu experiencia merece | Sua experiência merece | `form.hero.title` |
+| Hero / flujo | ser compartida. | ser compartida. | ser compartilhada. | `form.hero.highlight` |
+| Hero / flujo | Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales. | Comparte tu historia con No Country, destaca tu recorrido profesional y ten la oportunidad de ganar visibilidad en nuestros canales oficiales. | Compartilhe sua história com a No Country, destaque sua trajetória profissional e tenha a oportunidade de ganhar visibilidade em nossos canais oficiais. | `form.hero.description` |
+| Hero / flujo | Tu historia puede inspirar a otras personas de la comunidad. | Tu historia puede inspirar a otras personas de la comunidad. | Sua história pode inspirar outras pessoas da comunidade. | `form.hero.empty` |
+| Hero / flujo | En este momento no se pueden mostrar las historias de la comunidad. | En este momento no se pueden mostrar las historias de la comunidad. | Não é possível mostrar as histórias da comunidade neste momento. | `form.hero.unavailable` |
+| Hero / flujo | Testimonios publicados de la comunidad | Testimonios publicados de la comunidad | Depoimentos publicados da comunidade | `form.hero.carouselPlural` |
+| Hero / flujo | Testimonio publicado de la comunidad | Testimonio publicado de la comunidad | Depoimento publicado da comunidade | `form.hero.carouselSingle` |
+| Hero / flujo | carrusel | carrusel | carrossel | `form.hero.carousel` |
+| Hero / flujo | diapositiva | diapositiva | slide | `form.hero.slide` |
+| Hero / flujo | Leer historia | Leer historia | Ler história | `form.hero.readStory` |
+| Hero / flujo | Leer la historia de | Leer la historia de | Ler a história de | `form.hero.readStoryOf` |
+| Hero / flujo | Testimonio anterior | Testimonio anterior | Depoimento anterior | `form.hero.previous` |
+| Hero / flujo | Siguiente testimonio | Siguiente testimonio | Próximo depoimento | `form.hero.next` |
+| Hero / flujo | de | de | de | `form.hero.of` |
+| Hero / flujo | Testimonio | Testimonio | Depoimento | `form.hero.testimonial` |
+| Hero / flujo | Acepta la autorización de publicación para continuar. | Acepta la autorización de publicación para continuar. | Aceite a autorização de publicação para continuar. | `form.errors.consent.required` |

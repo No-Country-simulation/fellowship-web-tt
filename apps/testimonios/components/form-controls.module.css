@@ -22,14 +22,3 @@
 .compactPicker {
   padding: min(var(--spacing-sm), 16px);
 }
-
-@media (width < 40rem) {
-  /* At 200%, the PT heading's longest word needs 283px. Keep normal spacing
-   * and recover excess rem gutters, retaining at least 8px at either edge. */
-  .summaryHeading {
-    margin-inline: max(
-      calc(min(var(--spacing-xs), 8px) - var(--spacing-md)),
-      min(0px, calc(48px - var(--spacing-xl)))
-    );
-  }
-}

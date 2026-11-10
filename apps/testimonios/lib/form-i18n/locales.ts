@@ -71,7 +71,9 @@ export function buildFormHref(
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
-/** Invitation starts at the local hero; direct form links remain supported. */
+/** Invitation starts at the integrated introduction, with the current language. */
 export function buildHeroHref(locale: FormLocale): string {
-  return `/?lang=${normalizeFormLocale(locale)}#hero-consent`;
+  // A native invitation link starts a new document even on the same route.
+  // A fragment-only navigation could otherwise keep the existing success state.
+  return buildFormHref(locale);
 }

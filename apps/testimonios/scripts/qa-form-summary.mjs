@@ -1,3 +1,4 @@
+import { enterForm } from "./qa-enter-form.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { mkdtemp, mkdir, rm, readFile, writeFile } from "node:fs/promises";
@@ -14,10 +15,11 @@ const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const diagnosis = process.argv.includes('--diagnose');
 const editSummary = process.argv.includes('--edit-summary');
-const heroConsent = process.argv.includes('--hero-consent');
+const integration = process.argv.includes('--hero-form');
+const heroConsent = integration || process.argv.includes('--hero-consent');
 const representativeOnly = heroConsent || process.argv.includes('--representative-only');
 assert.ok(!representativeOnly || editSummary, '--representative-only requires --edit-summary');
-const output = join(appDir, heroConsent ? "docs/ui/assets/hero-consent/summary-regression" : editSummary ? "docs/ui/assets/form-summary-inline" : "docs/ui/assets/form-summary", ...(diagnosis ? ['investigation'] : []));
+const output = join(appDir, integration ? "docs/ui/assets/hero-form-integration/summary-regression" : heroConsent ? "docs/ui/assets/hero-consent/summary-regression" : editSummary ? "docs/ui/assets/form-summary-inline" : "docs/ui/assets/form-summary", ...(diagnosis ? ['investigation'] : []));
 const captures=[];
 const versionedCaptures = [
  'en-1440-100-present.png', 'en-1440-100-present-editing.png',
@@ -68,15 +70,17 @@ try{
  const target=await (await fetch('http://127.0.0.1:'+debugPort+'/json/new?about:blank',{method:'PUT'})).json();
  socket=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{socket.onopen=r;socket.onerror=j;});
  cdp=(method,params={})=>new Promise((r,j)=>{const id=++seq;const timer=setTimeout(()=>{pending.delete(id);j(Error('CDP timeout '+method));},15000);pending.set(id,{r,j,timer});socket.send(JSON.stringify({id,method,params}));});
+ // Navigation may cancel a paused image before CDP receives its continuation.
+ function intercept(method,params){void cdp(method,params).catch(error=>{if(!/Invalid InterceptionId/i.test(error.message))errors.push('request interception failed');});}
  socket.onmessage=({data})=>{
   const e=JSON.parse(data);
   if(e.id){const p=pending.get(e.id);if(!p)return;pending.delete(e.id);clearTimeout(p.timer);if(e.error)p.j(Error(e.error.message));else p.r(e.result);}
   else if(e.method==='Runtime.exceptionThrown')errors.push('browser exception');
   else if(e.method==='Fetch.requestPaused'){
    const {requestId,request}=e.params;const u=new URL(request.url);
-   if(request.method!=='GET'&&request.method!=='HEAD'){blockedPosts++;if(expectAction&&request.method==='POST'){pendingAction=requestId;}else void cdp('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
-   else if(u.origin!==origin){blockedExternal++;void cdp('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
-   else void cdp('Fetch.continueRequest',{requestId});
+   if(request.method!=='GET'&&request.method!=='HEAD'){blockedPosts++;if(expectAction&&request.method==='POST'){pendingAction=requestId;}else intercept('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
+   else if(u.origin!==origin){blockedExternal++;intercept('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});}
+   else intercept('Fetch.continueRequest',{requestId});
   }
  };
  async function ev(fn,...args){const v=await cdp('Runtime.evaluate',{expression:'('+fn.toString()+')(...'+JSON.stringify(args)+')',awaitPromise:true,returnByValue:true});if(v.exceptionDetails)throw Error(v.exceptionDetails.text);return v.result?.value;}
@@ -105,6 +109,7 @@ try{
   await until(()=>ev(()=>Object.keys(document.querySelector('form')).some(k=>k.startsWith('__reactProps$'))),'React hydration');
   await ev(()=>document.fonts.ready.then(()=>true));
   await pause(150);
+  await enterForm(ev,until);
   await click('form ol li:last-child > span');assert.equal(await step(),1,'future step cannot advance from step 1');
   await click('[name="type"][value="'+category+'"]');await next();
   await type('full_name','Persona Sintetica');await type('email','persona@example.com');
@@ -133,7 +138,7 @@ try{
   const create=URL.createObjectURL,revoke=URL.revokeObjectURL,set=FormData.prototype.set,records=new WeakMap();
   URL.createObjectURL=function(file){const url=create.call(URL,file);window.__qaUrls.set(url,{file,revokes:0});return url;};
   URL.revokeObjectURL=function(url){const record=window.__qaUrls.get(url);if(record)record.revokes++;return revoke.call(URL,url);};
-  FormData.prototype.set=function(name,value,...rest){if(name==='type'){const record={};records.set(this,record);window.__qaPayloads.push(record);}const record=records.get(this);if(record)record[name]=value;return set.call(this,name,value,...rest);};
+  FormData.prototype.set=function(name,value,...rest){if((name==='consent'||name==='type')&&!records.has(this)){const record={};records.set(this,record);window.__qaPayloads.push(record);}const record=records.get(this);if(record)record[name]=value;return set.call(this,name,value,...rest);};
  };
  await cdp('Page.addScriptToEvaluateOnNewDocument',{source:'('+recorder.toString()+')()'});
  const live=()=>ev(()=>[...window.__qaUrls.values()].filter(x=>x.revokes===0).length);
@@ -317,7 +322,7 @@ try{
  });}
  async function diagnose(){
   const measurements=[];
-  for(const width of [320,375,768,1440])for(const scale of [1,2]){
+  for(const width of [320,375,768,1024,1440,1920])for(const scale of [1,2]){
    await cdp('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
    await ev(scale=>{document.documentElement.style.fontSize=16*scale+'px';window.scrollTo(0,0);},scale);await pause(120);
    const before=await layoutProbe();
@@ -335,7 +340,7 @@ try{
  }
  async function responsive(locale,category,hasCapture,inline=false){
   const checks=[];
-  for(const width of [320,375,768,1440])for(const scale of [1,2]){
+  for(const width of [320,375,768,1024,1440,1920])for(const scale of [1,2]){
    await cdp('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
    await ev(scale=>{document.documentElement.style.fontSize=16*scale+'px';},scale);await pause(90);
    assert.ok(await ev(()=>{const w=document.documentElement.clientWidth,root=document.querySelector('[aria-labelledby="testimonial-summary-title"]');return document.documentElement.scrollWidth<=w&&[...root.querySelectorAll('section,img,dd')].every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=w+1;});}),'summary fits '+locale+' '+category+' '+width+' '+scale);
@@ -343,12 +348,23 @@ try{
    const layout=await layoutProbe();
    const reading=await ev(()=>{
     const cards=[...document.querySelectorAll('[aria-labelledby="testimonial-summary-title"] > section')];
-    const splitTitleWords=[];
-    for(const title of [document.querySelector('[data-summary-heading] h3'),...cards.map(card=>card.querySelector('h5'))]){const text=title.firstChild;for(const match of text.textContent.matchAll(/\S+/g)){const range=document.createRange();range.setStart(text,match.index);range.setEnd(text,match.index+match[0].length);if(new Set([...range.getClientRects()].map(r=>Math.round(r.top))).size>1)splitTitleWords.push(match[0]);}}
+    const splitTitleWords=[],oversizedTitleWords=[],context=document.createElement('canvas').getContext('2d');
+    for(const title of [document.querySelector('[data-summary-heading] h3'),...cards.map(card=>card.querySelector('h5'))]){
+     const text=title.firstChild,style=getComputedStyle(title),available=title.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+     context.font=[style.fontWeight,style.fontSize,style.fontFamily].join(' ');context.letterSpacing=style.letterSpacing==='normal'?'0px':style.letterSpacing;
+     for(const match of text.textContent.matchAll(/\S+/g)){
+      const range=document.createRange();range.setStart(text,match.index);range.setEnd(text,match.index+match[0].length);
+      if(new Set([...range.getClientRects()].map(r=>Math.round(r.top))).size>1){
+       const naturalWidth=context.measureText(match[0]).width;
+       if(naturalWidth<=available+1)splitTitleWords.push(match[0]);
+       else oversizedTitleWords.push({word:match[0],naturalWidth,available});
+      }
+     }
+    }
     const story=document.querySelector('[aria-labelledby="summary-experience-title"] textarea,[aria-labelledby="summary-experience-title"] dl > div:last-child dd');
-    return{splitTitleWords,storyEms:(story.clientWidth-parseFloat(getComputedStyle(story).paddingLeft)-parseFloat(getComputedStyle(story).paddingRight))/parseFloat(getComputedStyle(story).fontSize)};
+    return{splitTitleWords,oversizedTitleWords,storyEms:(story.clientWidth-parseFloat(getComputedStyle(story).paddingLeft)-parseFloat(getComputedStyle(story).paddingRight))/parseFloat(getComputedStyle(story).fontSize)};
    });
-   assert.deepEqual(reading.splitTitleWords,[],'ordinary heading words remain whole');
+   assert.deepEqual(reading.splitTitleWords,[],'heading words stay whole when they fit; oversized words may wrap without shrinking enlarged text');
    assert.ok(reading.storyEms>=(inline?6:7),'usable story width: '+JSON.stringify({locale,category,width,scale,inline,reading,story:layout.elements.story}));
    const placement=await ev(()=>{const heading=document.querySelector('[data-summary-heading]'),root=document.querySelector('#testimonial-summary'),actions=document.querySelectorAll('[aria-controls="testimonial-summary"]'),action=actions[0],b=action.getBoundingClientRect(),h=heading.querySelector('h3').getBoundingClientRect(),isEditing=action.getAttribute('aria-pressed')==='true',last=[...root.querySelectorAll(':scope > section')].at(-1).getBoundingClientRect(),submit=document.querySelector('button[type="submit"]').getBoundingClientRect();return{single:actions.length===1,touch:b.width>=44&&b.height>=44,fits:b.left>=0&&b.right<=document.documentElement.clientWidth,noOverlap:!(h.left<b.right-1&&h.right>b.left+1&&h.top<b.bottom-1&&h.bottom>b.top+1),headerButtons:heading.querySelectorAll('button').length,atFooter:isEditing?!!action.closest('#testimonial-summary')&&action.hasAttribute('data-summary-done')&&b.top>=last.bottom&&b.bottom<=submit.top:!root.querySelector('[data-summary-done]'),mode:isEditing?'editing':'reading'};});
    assert.ok(placement.single&&placement.touch&&placement.fits&&placement.noOverlap&&placement.atFooter,'one action, with accessible geometry and correct footer placement');assert.equal(placement.headerButtons,inline?0:1,'no Done control remains in the header');
@@ -380,8 +396,8 @@ try{
   }
   assert.ok(await ev(hasCapture=>{const payload=window.__qaPayloads.at(-1),avatar=document.querySelector('[aria-labelledby="summary-personal-title"] img'),capture=document.querySelector('[aria-labelledby="summary-media-title"] img');return payload.avatar===window.__qaUrls.get(avatar.src).file&&(hasCapture?payload.capture===window.__qaUrls.get(capture.src).file:!('capture'in payload));},hasCapture),'payload contains exactly the files displayed');
   const payload=await ev(()=>{const p=window.__qaPayloads.at(-1);return{keys:Object.keys(p).sort(),type:p.type,story:p.story,consent:p.consent};});
-  assert.deepEqual(payload.keys,['type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar',...(hasCapture?['capture']:[])].sort());
-  assert.equal(payload.type,category);assert.equal(payload.story,story);assert.equal(payload.consent,undefined);
+  assert.deepEqual(payload.keys,['consent','type','full_name','country','email','story',...roleNames(category),'video_url','instagram','linkedin','avatar',...(hasCapture?['capture']:[])].sort());
+  assert.equal(payload.type,category);assert.equal(payload.story,story);assert.equal(payload.consent,'on');
   await cdp('Fetch.fulfillRequest',{requestId:pendingAction,responseCode:200,responseHeaders:[{name:'content-type',value:'text/x-component'}],body:Buffer.from('0:'+JSON.stringify({a:response,f:''})+'\n').toString('base64')});
   pendingAction=null;expectAction=false;await until(()=>ev(()=>!document.querySelector('form')||!document.querySelector('button[type="submit"]').disabled),'mock completed');
  }

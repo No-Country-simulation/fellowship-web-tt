@@ -13,6 +13,7 @@ export type FormMessages = {
       readonly description: string;
     };
     readonly navigation: {
+      readonly backToIntro: string;
       readonly home: string;
       readonly back: string;
       readonly backToStep: string;
@@ -25,6 +26,11 @@ export type FormMessages = {
       readonly description: string;
       readonly requiredHint: string;
     };
+    readonly hero: Readonly<Record<
+      "eyebrow" | "title" | "highlight" | "description" | "empty" | "unavailable" |
+      "carouselPlural" | "carouselSingle" | "carousel" | "slide" | "readStory" |
+      "readStoryOf" | "previous" | "next" | "of" | "testimonial", string
+    >>;
     readonly common: {
       readonly asterisk: string;
       readonly required: string;
@@ -163,6 +169,7 @@ export type FormMessages = {
       readonly removeCapture: string;
     };
     readonly errors: {
+      readonly consent: { readonly required: string };
       readonly image: {
         readonly cropFailed: string;
       };

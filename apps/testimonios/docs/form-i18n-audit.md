@@ -1,6 +1,8 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
-Nota histórica: las referencias al checkbox obligatorio y su payload en esta auditoría describen el formulario anterior. El flujo vigente permite acceso directo y muestra autorización informada antes del envío; véase la [etapa 5 simplificada](./form-steps-summary.md#etapa-5--autorización-simplificada-en-hero-y-envío). Las evidencias y resultados originales se conservan como historial.
+> Flujo vigente desde el 10 de noviembre de 2026: el hero inicia /enviar bajo FormHeader, con declaración afirmativa requerida por el servidor; / recupera la galería. Las descripciones anteriores de hero independiente y acceso directo a pasos son históricas. Véase [Hero y formulario integrados](./hero-form-integration.md).
+
+Nota histórica: las referencias al checkbox dentro de los pasos describen una versión anterior. La [etapa 5 simplificada](./form-steps-summary.md#etapa-5--autorización-simplificada-en-hero-y-envío) permitió acceso directo a los pasos y mostró autorización informada al enviar. La integración actual requiere la declaración del hero; las evidencias y resultados originales se conservan como historial.
 
 Auditoría original: 31 de octubre de 2026. Cierre de QA de etapa 5: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`, destino propuesto: `dev`.
 

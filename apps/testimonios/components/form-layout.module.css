@@ -1,0 +1,15 @@
+/* /enviar only: gutters belong to the outer wrapper, never to the container. */
+.gutter {
+  padding-inline: min(var(--spacing-md), 24px);
+}
+
+.container {
+  width: 100%;
+  min-width: 0;
+  max-width: 70rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 48rem) {
+  .gutter { padding-inline: min(var(--spacing-lg), 32px); }
+}

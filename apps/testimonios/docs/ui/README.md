@@ -1,5 +1,7 @@
 # UI — guía para el equipo
 
+> Flujo aprobado: `/enviar`, con hero y cinco pasos bajo FormHeader. `/` y `/t/[slug]` conservan la experiencia pública futura, todavía sin aprobación de publicación definitiva. Sus rutas siguen incluidas en el build: no hay restricciones implementadas. Layout y alternativas de despliegue: [Hero y formulario integrados](../hero-form-integration.md).
+
 Documentación de los componentes reutilizables de `apps/testimonios`.
 
 **Objetivo:** cualquier dev puede armar galería, ficha o form sin reimplementar chrome ni cards.
@@ -65,7 +67,7 @@ Tokens y utilidades visuales viven en `app/globals.css` (incluye el scrollbar fi
 
 ## Composición de la landing
 
-El home prioriza la captación hacia `/enviar`. La galería permanece implementada pero no se monta; el carrusel utiliza únicamente publicados y las fichas `/t/[slug]` siguen disponibles. Véase [QA de la landing y comparación con Canvas](./capture-landing-qa.md).
+La captación aprobada vive en `/enviar`; `/` monta la galería futura y `/t/[slug]` conserva las fichas pendientes. El [QA histórico de la landing](./capture-landing-qa.md) describe la composición anterior y la comparación con Canvas.
 
 El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--etapa-4) documenta la matriz responsive, teclado y regresiones de las tres rutas. Distingue pruebas vivas, estados aislados y pendientes manuales; el cierre no equivale a certificación de accesibilidad ni aprobación visual humana.
 
@@ -73,15 +75,15 @@ El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--
 
 Las etapas 3 y 4 de i18n conectan ES/PT-BR exclusivamente en `/enviar`, con `FormLocaleProvider`, [FormHeader](./components/form-header.md) y un único [FormLanguageSelect](./components/form-language-select.md). Esa ruta no monta navbar/footer institucionales. La introducción consume el contexto y conserva el SVG y su composición; sigue entrando como children a `EnviarForm` y desaparece en éxito. Véase la [auditoría](../form-i18n-audit.md) para metadata, estado, QA y límites de revisión.
 
-`app/(public)/page.tsx` obtiene las historias en el servidor y conserva `force-dynamic`. Su `<main>` propio contiene un hero de ancho completo, con contenido centrado de hasta `70rem` (1120px). `PageShell` continúa en el estado de error de la ficha; `/enviar` resuelve query y metadata en `app/enviar/page.tsx` y conserva su `<main>` de ancho `max-w-3xl` mediante `EnviarExperience`. `EnviarIntro` se pasa como children a `EnviarForm`: aparece durante los pasos y se retira al mostrar el éxito. En ese estado, `SuccessCard` proporciona el único `h1` y recibe el foco existente; el selector permanece disponible.
+`app/(public)/page.tsx` consulta publicados y monta la galería, conservando `force-dynamic`. `/enviar` resuelve query, metadata y hasta tres historias para su hero en `app/enviar/page.tsx`. `form-layout.module.css` comparte contenido de hasta 70rem, padding exterior de 24px y 32px desde 48rem entre header, hero y formulario, sin modificar contenedores globales. La descripción del hero conserva 36rem y los párrafos largos del formulario 44rem. `EnviarIntro` entra como children a `EnviarForm` y desaparece en éxito; se retira su enlace a `/` porque el paso 1 ya permite volver al hero. `SuccessCard` conserva el foco; el selector permanece disponible.
 
 Las tres rutas usan el scroll del documento. El layout es una columna flexible con altura mínima de `100dvh`; cada `<main>` crece con su contenido y no crea un scroll independiente. El header institucional es sticky y publica su altura real para el offset de scroll. El formulario enfoca pasos y errores sin scroll automático y luego desplaza el documento, descontando la altura real del header y 16px de separación. Su contenedor permite cortar palabras demasiado anchas y sus botones de navegación admiten varias líneas para no depender del antiguo scroll horizontal al ampliar la fuente. Los diálogos modales bloquean el scroll raíz mediante `html:has(dialog:modal)`; `scrollbar-gutter: stable` conserva el ancho al abrirlos y cerrarlos. Los paneles de diálogo mantienen su scroll interno cuando hace falta.
 
-`GalleryHero` permanece en el servidor e integra `GalleryHeroCarousel`, un componente cliente que recibe hasta tres testimonios de la misma consulta pública de `app/(public)/page.tsx`. `selectHeroStories` selecciona sin reemplazo y transmite exclusivamente identidad, slug y datos públicos de presentación; incluye tipo real, país, rol, empresa y profesión anterior cuando existen para la réplica de Cita. No hay ejemplos ficticios ni consultas adicionales. El hero distingue cero publicados y error de carga, manteniendo el CTA. La galería preservada filtra en memoria y no se monta en el home.
+`GalleryHero` es una vista de `EnviarExperience` e integra `GalleryHeroCarousel`, con datos seleccionados en servidor por `selectHeroStories`. Transmite identidad, slug y datos públicos de presentación, sin consultas desde el cliente. El hero distingue cero publicados y error de carga y mantiene el CTA. «Leer historia» conserva el enlace a la ficha futura; debe resolverse esa dependencia antes de restringir rutas.
 
-Para una futura reutilización, `TestimonialsGallery` conserva su contrato y distribución: una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. No se eliminan historias, componentes ni páginas de detalle al ocultar esa sección.
+`TestimonialsGallery` conserva contrato y distribución: una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Se monta en `/`; no se elimina ni rediseña en el ajuste de `/enviar`.
 
-La barra preservada de `TestimonialsGallery` mantiene búsqueda, filtros y contador para usos futuros. Su API y su distribución se describen en la ficha correspondiente; el home ya no presenta el encabezado «Explorá las historias» ni los estados de esa sección.
+La barra de `TestimonialsGallery` mantiene búsqueda, filtros y contador. Su API se describe en la ficha correspondiente. Conservar el código accesible no equivale a aprobar su publicación.
 
 Al ampliar la fuente, el CTA puede ocupar varias líneas y el hero apila sus columnas si no dispone de `56rem`. La publicación tiene hasta 340px de ancho, cita limitada visualmente a cinco/seis líneas y autor en filas de nombre, país y puesto. Los textos completos se conservan en el DOM; el nombre muestra elipsis en una línea. Solo los metadatos y la fuente ampliada pueden hacer crecer la tarjeta por encima de la referencia 4:5. Los controles permanecen fuera de su área visual. Los detalles están documentados en cada componente.
 

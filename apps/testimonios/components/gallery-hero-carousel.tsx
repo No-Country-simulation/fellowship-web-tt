@@ -7,6 +7,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { HeroStory } from "@/components/gallery-hero-data";
 import { HeroTestimonialCard } from "@/components/hero-testimonial-card";
 import { cn } from "@/lib/utils";
+import { getFormMessages } from "@/lib/form-i18n/messages";
+import type { FormLocale } from "@/lib/form-i18n/locales";
 
 import styles from "./gallery-hero-carousel.module.css";
 
@@ -20,21 +22,24 @@ type CarouselMotion = {
 
 type GalleryHeroCarouselProps = {
   stories: readonly HeroStory[];
+  locale: FormLocale;
 };
 
 /** Publicados seleccionados en servidor; reinicia la navegación si cambian sus identidades u orden. */
-export function GalleryHeroCarousel({ stories }: GalleryHeroCarouselProps) {
+export function GalleryHeroCarousel({ stories, locale }: GalleryHeroCarouselProps) {
   if (stories.length === 0) return null;
 
   return (
     <HeroStoryStack
       key={JSON.stringify(stories.map((story) => story.id))}
       stories={stories}
+      locale={locale}
     />
   );
 }
 
-function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
+function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
+  const copy = getFormMessages(locale).form.hero;
   const [{ activeIndex, hasNavigated, motion }, setNavigation] = useState<{
     activeIndex: number;
     hasNavigated: boolean;
@@ -97,9 +102,9 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
   return (
     <section
       aria-label={hasNavigation
-        ? "Testimonios publicados de la comunidad"
-        : "Testimonio publicado de la comunidad"}
-      aria-roledescription={hasNavigation ? "carrusel" : undefined}
+        ? copy.carouselPlural
+        : copy.carouselSingle}
+      aria-roledescription={hasNavigation ? copy.carousel : undefined}
       data-count={total}
       className={styles.carousel}
     >
@@ -121,8 +126,8 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
                 <div
                   key={story.id}
                   role={hasNavigation ? "group" : undefined}
-                  aria-roledescription={hasNavigation ? "diapositiva" : undefined}
-                  aria-label={hasNavigation ? `${index + 1} de ${total}` : undefined}
+                  aria-roledescription={hasNavigation ? copy.slide : undefined}
+                  aria-label={hasNavigation ? `${index + 1} ${copy.of} ${total}` : undefined}
                   aria-hidden={!active}
                   inert={!active}
                   data-position={position}
@@ -148,16 +153,16 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
       <div className="mt-sm flex min-w-0 flex-wrap items-center justify-between gap-xs">
         <Link
           href={`/t/${stories[activeIndex].slug}`}
-          aria-label={`Leer la historia de ${stories[activeIndex].fullName}`}
+          aria-label={`${copy.readStoryOf} ${stories[activeIndex].fullName}`}
           className="inline-flex min-h-11 max-w-full items-center rounded-button text-sm font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
         >
-          Leer historia
+          {copy.readStory}
         </Link>
         {hasNavigation ? (
             <div className="flex items-center gap-xs">
               <button
                 type="button"
-                aria-label="Testimonio anterior"
+                aria-label={copy.previous}
                 aria-controls={`${id}-stories`}
                 onClick={() => navigate(-1)}
                 className={CONTROL_CLASSES}
@@ -169,7 +174,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
               </span>
               <button
                 type="button"
-                aria-label="Siguiente testimonio"
+                aria-label={copy.next}
                 aria-controls={`${id}-stories`}
                 onClick={() => navigate(1)}
                 className={CONTROL_CLASSES}
@@ -181,7 +186,7 @@ function HeroStoryStack({ stories }: GalleryHeroCarouselProps) {
       </div>
       {hasNavigation ? (
         <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-          {hasNavigated ? `Testimonio ${activeIndex + 1} de ${total}` : ""}
+          {hasNavigated ? `${copy.testimonial} ${activeIndex + 1} ${copy.of} ${total}` : ""}
         </p>
       ) : null}
     </section>

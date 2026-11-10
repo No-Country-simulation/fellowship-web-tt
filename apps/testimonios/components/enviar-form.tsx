@@ -15,6 +15,7 @@ import { BriefcaseBusiness, ChevronDown, Laptop, Pencil, TrendingUp } from "luci
 import { Button, buttonVariants } from "@repo/ui/button";
 
 import { getSiteUrl } from "@/lib/site";
+import { focusAndReveal } from "@/lib/form-focus";
 import { useFormLocale } from "./form-locale-provider";
 import { getFormMessages } from "@/lib/form-i18n/messages";
 import { getFormCountryOptions } from "@/lib/form-i18n/countries";
@@ -69,22 +70,15 @@ const TYPE_ICONS = {
   career_change: TrendingUp,
 } satisfies Record<TestimonialType, typeof Laptop>;
 
-function focusAndReveal(control: HTMLElement | null) {
-  if (!control) return;
-  control.focus({ preventScroll: true });
-  const header = document.querySelector<HTMLElement>("[data-form-header]");
-  const headerHeight = header?.getBoundingClientRect().height ?? 0;
-  const anchor = control.closest<HTMLElement>("[data-field], label") ?? control;
-  window.scrollTo({
-    top: Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - headerHeight - 16),
-    behavior: "instant",
-  });
-}
-
 /**
  * Recibe la introducción traducible y la retira al mostrar el éxito.
  */
-export function EnviarForm({ children }: { children: ReactNode }) {
+export function EnviarForm({ children, consent, onReturnToHero, onConsentRequired }: {
+  children: ReactNode;
+  consent: boolean;
+  onReturnToHero: () => void;
+  onConsentRequired: () => void;
+}) {
   const { locale, t } = useFormLocale();
   const formMessages = getFormMessages(locale).form;
   const countryOptions = getFormCountryOptions(locale);
@@ -92,6 +86,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     submitTestimonial,
     initialSubmitState,
   );
+  useEffect(() => {
+    if (!pending && state.status === "error" && state.issue?.code === "consent.required") {
+      onConsentRequired();
+    }
+  }, [state, pending, onConsentRequired]);
   const [step, setStep] = useState(1);
   const [summaryEditing, setSummaryEditing] = useState(false);
   const summaryEditRef = useRef<HTMLButtonElement>(null);
@@ -171,7 +170,10 @@ export function EnviarForm({ children }: { children: ReactNode }) {
   const resolvedErrors = resolveFormErrors(state, validation, type, pending);
   const { fieldErrors, serverErrors } = resolvedErrors;
   const { fieldErrors: fieldMessages, serverErrors: serverMessages, unknownErrors, message: serverMessage } =
-    presentFormErrors(resolvedErrors, locale);
+    presentFormErrors({ ...resolvedErrors,
+      // Renewing the declaration corrects this one issue; keep every data rejection.
+      issue: consent && resolvedErrors.issue?.code === "consent.required" ? undefined : resolvedErrors.issue,
+    }, locale);
   const correctionStep = Object.keys(serverErrors).length
     ? firstErrorStep(serverErrors)
     : undefined;
@@ -261,6 +263,11 @@ export function EnviarForm({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (!consent) {
+      onConsentRequired();
+      return;
+    }
+
     const nextErrors = validateForm(values, serverErrors);
     updateErrors(nextErrors);
     // firstErrorStep recibe solo errores: las claves undefined también son overrides.
@@ -276,6 +283,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
     }
 
     const formData = new FormData();
+    formData.set("consent", "on");
     if (type) {
       formData.set("type", type);
     }
@@ -810,7 +818,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         className={cn(step === 5 && "flex flex-col gap-md")}
       >
         <legend className="sr-only">{t("form.steps.consent.title")}</legend>
-        <div data-summary-heading="" className={cn("min-w-0", controls.summaryHeading)}>
+        <div data-summary-heading="" className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-sm gap-y-xs">
             <h3 className="min-w-0 max-w-full flex-initial text-heading-3 text-text-primary">{t("form.review.title")}</h3>
             {!summaryEditing ? <Button
@@ -833,9 +841,8 @@ export function EnviarForm({ children }: { children: ReactNode }) {
             {t("form.review.description")}
           </p>
         </div>
-        {/* Cap only mobile summary gutters at their 16px-root token sizes. Enlarged
-            text keeps room to reflow without changing other steps or desktop. */}
-        <section id="testimonial-summary" aria-labelledby="testimonial-summary-title" className="min-w-0 space-y-md max-sm:mx-[min(0px,calc(24px_-_var(--spacing-md)))]">
+        {/* The shared outer gutter already stays bounded with enlarged text. */}
+        <section id="testimonial-summary" aria-labelledby="testimonial-summary-title" className="min-w-0 space-y-md">
           <h4 id="testimonial-summary-title" className="sr-only">{t("form.review.summaryTitle")}</h4>
           <section aria-labelledby="summary-personal-title" className="rounded-card border border-border bg-card p-sm max-sm:px-[min(var(--spacing-sm),16px)] sm:p-md">
             <h5 id="summary-personal-title" className="text-lg font-semibold text-text-primary">{t("form.review.personalTitle")}</h5>
@@ -891,7 +898,7 @@ export function EnviarForm({ children }: { children: ReactNode }) {
               ))}
               <div className="min-w-0 border-t border-border-subtle pt-sm sm:col-span-2">
                 <dt className="text-body-small text-text-secondary">{selected?.storyLabel ?? t("form.steps.story.title")}</dt>
-                <dd className="mt-xs text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : t("form.review.missing")}</dd>
+                <dd className="mt-xs max-w-[44rem] text-body leading-relaxed whitespace-pre-wrap wrap-anywhere text-text-primary">{story.trim() ? story : t("form.review.missing")}</dd>
               </div>
             </dl>
             )}
@@ -982,24 +989,22 @@ export function EnviarForm({ children }: { children: ReactNode }) {
         ) : null}
       </fieldset>
 
-      <div className={cn("flex flex-wrap items-center gap-sm", step === 1 ? "justify-end" : "justify-between border-t border-border pt-md")}>
+      <div className={cn("flex flex-wrap items-center justify-between gap-sm", step > 1 && "border-t border-border pt-md")}>
         {step === STEPS ? (
           <p id="submission-authorization" className="w-full min-w-0 text-body-small leading-relaxed text-text-secondary">
-            {t("form.consent.submission")}
+            <span className="block max-w-[44rem]">{t("form.consent.submission")}</span>
           </p>
         ) : null}
-        {step > 1 ? (
-          <Button
+        <Button
             type="button"
             variant="outline"
             size="lg"
             className="h-auto min-h-11 max-w-full px-sm whitespace-normal"
-            disabled={step === 1 || pending}
-            onClick={() => navigateBackTo(step - 1)}
+            disabled={pending}
+            onClick={() => step === 1 ? onReturnToHero() : navigateBackTo(step - 1)}
           >
-            {t("form.navigation.back")}
-          </Button>
-        ) : null}
+            {step === 1 ? t("form.navigation.backToIntro") : t("form.navigation.back")}
+        </Button>
         {step < STEPS ? (
           <Button
             key="next"
@@ -1061,7 +1066,7 @@ function StepProgress({ step, pending, onNavigateBack, headingRef }: {
   const steps = getFormMessages(locale).form.steps;
   return (
     <div>
-      <h2 ref={headingRef} tabIndex={-1} className="text-overline text-text-secondary focus:outline-none">
+      <h2 ref={headingRef} data-form-step-heading="" tabIndex={-1} className="text-overline text-text-secondary focus:outline-none">
         {t("form.progress", { step, total: STEPS, title: steps[STEP_KEYS[step - 1]].title })}
       </h2>
       <ol className="mt-md grid grid-cols-5">
@@ -1161,14 +1166,14 @@ function SuccessCard({ inviteUrl: baseInviteUrl }: { inviteUrl: string }) {
       <h1 ref={headingRef} tabIndex={-1} className="mt-xs text-2xl font-bold tracking-tight text-text-primary focus:outline-none sm:text-3xl">
         {t("form.success.title")}
       </h1>
-      <p className="mt-sm text-body text-text-secondary">
+      <p className="mt-sm max-w-[44rem] text-body text-text-secondary">
         {t("form.success.description")}
       </p>
       <div className="mt-md border-t border-border pt-md">
         <p className="text-body text-text-primary">
           {t("form.success.inviteTitle")}
         </p>
-        <p className="mt-xs text-body text-text-secondary">
+        <p className="mt-xs max-w-[44rem] text-body text-text-secondary">
           {t("form.success.inviteDescription")}
         </p>
         <p className="mt-sm break-all text-body">

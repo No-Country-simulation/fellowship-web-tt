@@ -7,6 +7,7 @@ import { useLayoutEffect, useRef } from "react";
 import { FormLanguageSelect } from "./form-language-select";
 import { useFormLocale } from "./form-locale-provider";
 import styles from "./form-header.module.css";
+import layout from "./form-layout.module.css";
 
 /** Form-only sticky brand and unique selector; the logo deliberately has no link. */
 export function FormHeader() {
@@ -28,8 +29,8 @@ export function FormHeader() {
   }, []);
 
   return (
-    <header ref={headerRef} data-form-header="" lang={formHtmlLang(locale)} className={styles.header}>
-      <div className={styles.row}>
+    <header ref={headerRef} data-form-header="" lang={formHtmlLang(locale)} className={`${styles.header} ${layout.gutter}`}>
+      <div className={`${layout.container} ${styles.row}`}>
         <Image src="/brand/logo-no-country.png" alt="No Country" width={1229} height={207}
           sizes="(min-width: 768px) 143px, 96px" loading="eager" className={styles.logo} />
         <FormLanguageSelect />

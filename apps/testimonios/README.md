@@ -16,9 +16,9 @@ Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http:
 
 | Ruta | Qué es |
 | --- | --- |
-| `/` | Landing de captación hacia `/enviar`, con carrusel de hasta tres publicados |
-| `/enviar` | Formulario público, sin login (país y avatar obligatorios; captura, YouTube, Instagram y LinkedIn opcionales) |
-| `/t/[slug]` | Ficha de un testimonio publicado |
+| `/` | Galería con navbar/footer institucionales; funcionalidad futura, sin aprobación de publicación definitiva |
+| `/enviar` | Flujo aprobado de captación: hero, autorización, carrusel, cinco pasos, resumen/edición/envío y éxito; destino de la plataforma de simulaciones |
+| `/t/[slug]` | Ficha de un publicado; pendiente junto con la galería |
 
 El video del envío es solo un link de YouTube (`youtube.com` o `youtu.be`). No hay upload de mp4.
 
@@ -55,8 +55,10 @@ El talento no entra a Auth. `/enviar` inserta con `service_role`. `anon` solo le
 
 Deploy: en Vercel, Root Directory `apps/testimonios`.
 
+El build actual incluye las tres rutas. Declarar la galería como futura no restringe su acceso; falta definir la política de exposición en el hosting o la aplicación. «Leer historia» del carrusel depende de `/t/[slug]` y se conserva. No se han implementado flags, redirecciones ni restricciones. Configuración revisada, límites y alternativas: [Alcance de publicación](./docs/hero-form-integration.md#alcance-de-publicación).
+
 ## UI
 
-Tokens y type scale: DM Sans y paleta oscura de `app/globals.css`, con el [design system de la landing](../landing-contratar/docs/ui/design-system.md) como referencia interna. Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). El home prioriza captar testimonios; conserva el chrome institucional y la galería implementada, temporalmente sin montar. El carrusel utiliza una réplica HTML de Cita, con variables locales fieles al Canvas administrativo; no muestra PNG finales. Scrollbar fino en `app/globals.css` (thumb de borde, hover cyan).
+Tokens y type scale: DM Sans y paleta oscura de `app/globals.css`, con el [design system de la landing](../landing-contratar/docs/ui/design-system.md) como referencia interna. Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). `/enviar` reúne hero y formulario bajo FormHeader, con contenedor compartido de 70rem y gutters de 24/32px; `/` conserva la galería futura y su chrome institucional. El carrusel utiliza una réplica HTML de Cita; no muestra PNG finales. Scrollbar fino en `app/globals.css`.
 
 Componentes reutilizables (PageShell, TestimonialCard, Field, etc.): [docs/ui](./docs/ui/README.md).

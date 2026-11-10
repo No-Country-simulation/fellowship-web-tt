@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useId } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useFormLocale } from "./form-locale-provider";
 
 /** Existing editorial composition with live form copy; removed on success as before. */
@@ -13,13 +11,6 @@ export function EnviarIntro() {
   return (
     <header className="flex items-center gap-lg">
       <div className="min-w-0 flex-1">
-        <Link
-          href="/"
-          className="mb-sm inline-flex min-h-11 items-center gap-xs rounded-sm text-sm font-medium text-text-secondary transition-colors hover:text-accent-cyan focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan motion-reduce:transition-none"
-        >
-          <ArrowLeft aria-hidden="true" className="size-4 shrink-0" />
-          {t("form.navigation.home")}
-        </Link>
         <h1 className="type-section text-text-primary">{t("form.intro.title")}</h1>
         <p className="mt-xs max-w-[44rem] text-body leading-normal text-text-secondary md:mt-sm md:text-body-large md:leading-relaxed">
           {t("form.intro.description")}

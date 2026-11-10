@@ -13,6 +13,7 @@ export function validValues(updates: Partial<FormValues> = {}): FormValues {
 
 export function formDataFor(values: FormValues): FormData {
   const data = new FormData();
+  data.set("consent", "on");
   for (const [key, value] of Object.entries(values)) {
     if (value instanceof File) data.set(key, value);
     else if (typeof value === "string") data.set(key, value);
