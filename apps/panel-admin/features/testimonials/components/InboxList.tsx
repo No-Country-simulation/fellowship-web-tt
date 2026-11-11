@@ -74,7 +74,7 @@ function normalize(value: string) {
 function filterSelectClass(isDefault: boolean) {
   // Sin cn: tailwind-merge trata text-admin-caption como color y lo pisa.
   return [
-    "h-8 w-full min-w-0 cursor-pointer rounded-md border bg-background px-1.5 text-admin-caption outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    "h-10 md:h-8 w-full min-w-0 cursor-pointer rounded-md border bg-background px-1.5 text-admin-caption outline-none focus-visible:ring-2 focus-visible:ring-ring",
     isDefault ? "border-input text-muted-foreground" : "border-primary text-foreground",
   ].join(" ");
 }
@@ -308,7 +308,7 @@ export function InboxList({
               maxLength={INBOX_SEARCH_MAX}
               placeholder="Buscar nombre o cita"
               aria-label="Buscar testimonios"
-              className="h-8 w-full rounded-md border border-input bg-background pl-7 pr-7 text-admin-caption text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+              className="h-10 md:h-8 w-full rounded-md border border-input bg-background pl-7 pr-7 text-admin-caption text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
             />
             {query ? (
               <Link

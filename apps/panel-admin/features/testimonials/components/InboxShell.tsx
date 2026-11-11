@@ -143,7 +143,7 @@ function InboxFrame({ list, children }: { list: ReactNode; children: ReactNode }
 
   return (
     <InboxSelectionContext.Provider value={{ activeId, onSelect }}>
-      <div className="flex h-[calc(100vh-6rem)] min-h-0 overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex h-[calc(100dvh-6rem)] min-h-0 overflow-hidden rounded-lg border border-border bg-card">
         {/* Mismo nodo con o sin ficha. Cambiar aside/section remonta la lista,
             pierde el aviso de borrado y no refresca al salir de la ficha. */}
         <div
