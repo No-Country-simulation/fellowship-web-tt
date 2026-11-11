@@ -188,6 +188,14 @@ describe("complete dictionaries and historical inventory", () => {
 });
 
 describe("typed parameter interpolation", () => {
+  it("offers local readable carousel text and safe preview states in ES/EN/PT", () => {
+    for (const [locale, label] of [["es", "Leer testimonio en texto"], ["en", "Read testimonial as text"], ["pt", "Ler depoimento em texto"]] as const) {
+      const copy = getFormMessages(locale).form.hero;
+      assert.equal(copy.readText, label);
+      assert.ok(copy.imageLoading && copy.imageUnavailable);
+      assert.notEqual(copy.imageLoading, copy.imageUnavailable);
+    }
+  });
   it("preserves accented introduction labels and localizes carousel controls", () => {
     assert.equal(es.form.navigation.backToIntro, "Volver a la introducción");
     assert.equal(ptBR.form.navigation.backToIntro, "Voltar à introdução");

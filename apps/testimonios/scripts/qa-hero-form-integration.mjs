@@ -15,7 +15,7 @@ const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const sharp = createRequire(require.resolve('next/package.json'))('sharp');
 const avatarPng = await sharp(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="104" height="104"><rect width="104" height="104" fill="#12132a"/><circle cx="52" cy="35" r="20" fill="#02beef"/><ellipse cx="52" cy="104" rx="42" ry="44" fill="#7983f5"/></svg>')).png().toBuffer();
-const output = join(appDir,"docs/ui/assets/hero-form-integration");
+const output = join(appDir, process.argv.includes('--carousel-images') ? "docs/ui/assets/carousel-optimized/form-regression" : "docs/ui/assets/hero-form-integration");
 const refreshHeroOnly = process.argv.includes('--refresh-hero-only');
 const pause = ms => new Promise(r => setTimeout(r, ms));
 async function port(){const s=createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}

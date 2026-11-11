@@ -41,3 +41,30 @@
 !/hero-form-integration/summary-regression/qa-results.json
 !/hero-form-integration/submit-regression/
 !/hero-form-integration/submit-regression/qa-results.json
+
+# Optimized carousel: four representative screenshots and reports only.
+# Keep generated Canvas originals, matrix captures and regression extras local.
+/carousel-optimized/**
+!/carousel-optimized/README.md
+!/carousel-optimized/qa-results.json
+!/carousel-optimized/performance-before.json
+!/carousel-optimized/performance-after.json
+!/carousel-optimized/public-probe.json
+!/carousel-optimized/en-1440.png
+!/carousel-optimized/es-320-text.png
+!/carousel-optimized/pt-375-200.png
+!/carousel-optimized/es-375-error.png
+!/carousel-optimized/form-regression/
+/carousel-optimized/form-regression/*
+!/carousel-optimized/form-regression/qa-results.json
+!/carousel-optimized/submit-regression/
+/carousel-optimized/submit-regression/*
+!/carousel-optimized/submit-regression/qa-results.json
+
+# Availability correction: reports only; no new image matrix or diagnostic scripts.
+/carousel-availability/**
+!/carousel-availability/README.md
+!/carousel-availability/public-check.json
+!/carousel-availability/public-cache.json
+!/carousel-availability/before.json
+!/carousel-availability/after.json

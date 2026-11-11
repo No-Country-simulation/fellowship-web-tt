@@ -1,10 +1,35 @@
 import "server-only";
+import { after } from "next/server";
 
 import type { PublicTestimonial } from "@/lib/testimonials/public";
 import type { HeroTestimonialCardContent } from "@/components/hero-testimonial-card";
+import { publicStorageUrl } from "@/lib/supabase/storage";
+import { availableShareCardUrls } from "@/lib/testimonials/share-card-availability";
 
 export type HeroStory = HeroTestimonialCardContent &
   Pick<PublicTestimonial, "id" | "slug" | "typeLabel">;
+
+function shareCardUrl(slug: string): string | null {
+  return slug && slug !== "." && slug !== ".." && !/[\\/?#]/.test(slug)
+    ? publicStorageUrl("share-cards", `${slug}/instagram.png`) : null;
+}
+
+/** Uses confirmed public artwork within a 200ms budget; after() completes pending metadata probes. */
+export async function selectAvailableHeroStories(testimonials: readonly PublicTestimonial[]): Promise<HeroStory[]> {
+  const candidates = testimonials.map(testimonial => ({ testimonial, url: shareCardUrl(testimonial.slug) }));
+  const available = new Set<string>();
+  const checking = availableShareCardUrls(candidates.flatMap(({ url }) => url ? [url] : []), available);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const completed = await Promise.race([
+    checking.then(() => true),
+    new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 200); }),
+  ]);
+  clearTimeout(timer);
+  if (!completed) after(() => checking.then(() => undefined));
+  const eligible = candidates.filter(({ url }) => url && available.has(url)).map(({ testimonial }) => testimonial);
+  if (eligible.length) return selectHeroStories(eligible);
+  return selectHeroStories(testimonials).map(story => ({ ...story, imageUrl: null }));
+}
 
 /** Elige hasta tres publicados sin reemplazo en servidor, sin alterar el orden de la galería. */
 export function selectHeroStories(testimonials: readonly PublicTestimonial[]): HeroStory[] {
@@ -19,7 +44,7 @@ export function selectHeroStories(testimonials: readonly PublicTestimonial[]): H
   }
 
   return candidates.slice(0, 3).map((testimonial) => {
-    const { id, slug, type, quote, fullName, typeLabel, avatarUrl, country } = testimonial;
+    const { id, slug, type, quote, story, fullName, typeLabel, country } = testimonial;
     const role = type === "simulation"
       ? testimonial.simulation?.primary_role
       : type === "first_job"
@@ -31,9 +56,10 @@ export function selectHeroStories(testimonials: readonly PublicTestimonial[]): H
       slug,
       type,
       quote,
+      story,
       fullName,
       typeLabel,
-      avatarUrl,
+      imageUrl: shareCardUrl(slug),
       country,
       role: role?.trim() || null,
       company: type === "first_job" ? testimonial.firstJob?.company.trim() || null : null,

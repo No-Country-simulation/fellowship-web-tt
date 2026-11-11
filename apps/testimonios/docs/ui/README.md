@@ -25,7 +25,7 @@ Las [etapas de navegación, validación y resumen del formulario](../form-steps-
 | [Propuesta para la web oficial](./official-chrome-improvements.md) | Registro de hallazgos, diferencias deliberadas y QA integral del chrome |
 | [GalleryHero](./components/gallery-hero.md) | Landing de captación, CTA y composición del hero |
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Hasta tres testimonios publicados, apilados y con navegación manual |
-| [HeroTestimonialCard](./components/hero-testimonial-card.md) | Réplica HTML de la plantilla Canvas Cita, con variantes por tipo |
+| [HeroTestimonialCard](./components/hero-testimonial-card.md) | Arte administrativo optimizado, carga bajo demanda y alternativa textual en el carrusel |
 | [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla; temporalmente fuera del home |
 | [TestimonialDetail](./components/testimonial-detail.md) | Ficha editorial de servidor, contexto profesional y medios opcionales |
 | [TestimonialCapture](./components/testimonial-capture.md) | Foto testimonial a tamaño natural, sin pie visible y con ampliación accesible |
