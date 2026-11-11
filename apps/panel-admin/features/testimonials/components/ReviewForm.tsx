@@ -838,30 +838,32 @@ export function ReviewForm({
                 {cardAttempt === "retry" ? "Reintentando…" : "Reintentar imagen"}
               </button>
             ) : null}
-            <button
-              type="submit"
-              name="intent"
-              value="save"
-              disabled={
-                pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
-              }
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
-              onClick={() => setIntent("save")}
-            >
-              {pending && intent === "save" ? "Guardando…" : "Guardar borrador"}
-            </button>
-            <button
-              type="button"
-              disabled={
-                pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
-              }
-              className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:w-auto")}
-              onClick={() => setConfirmPublish(true)}
-            >
-              {(pending && intent === "publish") || cardAttempt === "publish"
-                ? "Publicando…"
-                : "Publicar"}
-            </button>
+            <div className="grid grid-cols-2 gap-2 sm:contents">
+              <button
+                type="submit"
+                name="intent"
+                value="save"
+                disabled={
+                  pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+                }
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
+                onClick={() => setIntent("save")}
+              >
+                {pending && intent === "save" ? "Guardando…" : "Guardar borrador"}
+              </button>
+              <button
+                type="button"
+                disabled={
+                  pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+                }
+                className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:w-auto")}
+                onClick={() => setConfirmPublish(true)}
+              >
+                {(pending && intent === "publish") || cardAttempt === "publish"
+                  ? "Publicando…"
+                  : "Publicar"}
+              </button>
+            </div>
           </div>
         </div>
       </footer>

@@ -82,7 +82,7 @@ export function ShareRetry({
       <button
         type="submit"
         disabled={pending}
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-10 md:h-7")}
       >
         {pending ? "Enviando…" : label}
       </button>
