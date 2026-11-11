@@ -790,11 +790,11 @@ export function ReviewForm({
       </div>
 
       <footer className="shrink-0 border-t border-border bg-card px-5 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <button
             type="button"
             disabled={pending || preparingCard || rejectPending}
-            className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
+            className={cn(buttonVariants({ variant: "destructive", size: "lg" }), "order-last w-full sm:order-none sm:w-auto")}
             aria-haspopup="dialog"
             aria-expanded={confirmReject}
             onClick={() => setConfirmReject(true)}
@@ -802,7 +802,7 @@ export function ReviewForm({
             {rejectPending ? "Rechazando…" : "Rechazar"}
           </button>
 
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             {state.status === "saved" ? (
               <p className="text-admin-caption text-tone-success" role="status">
                 Cambios guardados. Todavía no está publicado.
@@ -830,7 +830,7 @@ export function ReviewForm({
                 disabled={
                   pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
                 }
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
                 onClick={() => {
                   void publishWithCard("retry");
                 }}
@@ -845,7 +845,7 @@ export function ReviewForm({
               disabled={
                 pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
               }
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
               onClick={() => setIntent("save")}
             >
               {pending && intent === "save" ? "Guardando…" : "Guardar borrador"}
@@ -855,7 +855,7 @@ export function ReviewForm({
               disabled={
                 pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
               }
-              className={cn(buttonVariants({ variant: "default", size: "lg" }))}
+              className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:w-auto")}
               onClick={() => setConfirmPublish(true)}
             >
               {(pending && intent === "publish") || cardAttempt === "publish"

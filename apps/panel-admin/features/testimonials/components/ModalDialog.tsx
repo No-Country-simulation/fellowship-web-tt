@@ -112,7 +112,7 @@ export function ModalDialog({
         aria-describedby={descriptionId}
         tabIndex={-1}
         className={cn(
-          "flex max-h-[80vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-lg border border-border bg-card p-4 shadow-lg",
+          "flex max-h-[85dvh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-lg border border-border bg-card p-4 shadow-lg",
           className,
         )}
       >
