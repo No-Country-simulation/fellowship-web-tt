@@ -11,7 +11,9 @@ export function DetailHeader({ testimonial }: { testimonial: AdminTestimonial })
         <InboxBackLink>Testimonios</InboxBackLink>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <PageHeaderTitle>{testimonial.fullName}</PageHeaderTitle>
+        <div className="min-w-0 [overflow-wrap:anywhere]">
+          <PageHeaderTitle>{testimonial.fullName}</PageHeaderTitle>
+        </div>
         <TestimonialStatusBadge status={testimonial.status} />
         <time
           dateTime={testimonial.submittedAt}
