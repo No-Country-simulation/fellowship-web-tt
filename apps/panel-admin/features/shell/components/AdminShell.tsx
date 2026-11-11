@@ -11,7 +11,7 @@ export function AdminShell({ userLabel, children }: { userLabel: string; childre
       <Sidebar />
       <main className="flex min-w-0 flex-1 flex-col">
         <Topbar userLabel={userLabel} />
-        <div className="flex-1 px-8 py-6">{children}</div>
+        <div className="flex-1 px-4 py-4 md:px-8 md:py-6">{children}</div>
       </main>
     </div>
   );
