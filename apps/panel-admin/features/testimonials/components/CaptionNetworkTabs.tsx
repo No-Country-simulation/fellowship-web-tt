@@ -163,7 +163,7 @@ export function CaptionNetworkTabs({
             aria-label={note ? tabAria(network, note) : undefined}
             tabIndex={selected ? 0 : -1}
             className={cn(
-              "flex h-full min-w-0 cursor-pointer flex-col items-center justify-center px-1 py-1.5 text-center leading-tight",
+              "flex h-full min-h-10 min-w-0 cursor-pointer flex-col md:min-h-0 items-center justify-center px-1 py-1.5 text-center leading-tight",
               attached
                 ? selected
                   ? "relative z-10 rounded-t-md border border-b-0 border-primary bg-primary/10 font-medium text-foreground"

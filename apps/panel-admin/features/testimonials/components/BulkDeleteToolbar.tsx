@@ -77,7 +77,7 @@ export function BulkDeleteToolbar({
                   disabled={deleting}
                   aria-haspopup="dialog"
                   aria-expanded={draft !== null}
-                  className={buttonVariants({ variant: "destructive", size: "sm" })}
+                  className={cn(buttonVariants({ variant: "destructive", size: "sm" }), "h-10 md:h-7")}
                   onClick={() => setDraft({ ids, names })}
                 >
                   Eliminar

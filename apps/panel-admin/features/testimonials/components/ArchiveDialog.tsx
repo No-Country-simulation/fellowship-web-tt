@@ -20,7 +20,7 @@ export function ArchiveDialog({ id }: { id: string }) {
     <>
       <button
         type="button"
-        className={buttonVariants({ variant: "outline", size: "sm" })}
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-10 md:h-7")}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen(true)}
