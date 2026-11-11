@@ -1,9 +1,12 @@
 import type { TestimonialDto } from "../dtos/testimonialDto";
 import { reviewCaptions } from "../quote";
+import { AVATARS_BUCKET, publicStorageUrl } from "../supabase/storage";
 import { youtubeEmbedSrc } from "../youtube";
 import {
   careerChangeFields,
   firstJobFields,
+  isTestimonialStatus,
+  isTestimonialType,
   simulationFields,
   typeOption,
   type AdminInboxItem,
@@ -30,6 +33,7 @@ export const TestimonialMapper = {
       typeLabel,
       status: dto.status,
       archiveReason: dto.archive_reason ?? null,
+      rejectReason: dto.reject_reason ?? null,
       fullName: dto.full_name,
       country: dto.country,
       email: dto.email,
@@ -56,21 +60,57 @@ export const TestimonialMapper = {
       bufferLinkedinPostId: dto.buffer_linkedin_post_id ?? null,
     };
   },
-
-  toInboxItem(dto: TestimonialDto, media: TestimonialMedia): AdminInboxItem {
-    const view = this.fromDto(dto, media);
-    return {
-      id: view.id,
-      type: view.type,
-      typeLabel: view.typeLabel,
-      status: view.status,
-      fullName: view.fullName,
-      quote: view.quote,
-      avatarUrl: view.avatarUrl,
-      submittedAt: view.submittedAt,
-    };
-  },
 };
+
+/** Fila estrecha de la lista. No es `TestimonialDto`. */
+export type InboxListRow = {
+  id: string;
+  type: string;
+  status: string;
+  full_name: string;
+  quote: string;
+  avatar_path: string;
+  submitted_at: string;
+};
+
+/**
+ * Arma el ítem con la columna `quote` y el avatar público.
+ * Si el tipo no es conocido o el mapeo lanza, la fila no entra.
+ */
+export function mapInboxRows(rows: readonly InboxListRow[]): {
+  items: AdminInboxItem[];
+  omitted: number;
+} {
+  const items: AdminInboxItem[] = [];
+  let omitted = 0;
+  for (const row of rows) {
+    const item = mapInboxRow(row);
+    if (!item) {
+      omitted += 1;
+      continue;
+    }
+    items.push(item);
+  }
+  return { items, omitted };
+}
+
+function mapInboxRow(row: InboxListRow): AdminInboxItem | null {
+  try {
+    if (!isTestimonialType(row.type) || !isTestimonialStatus(row.status)) return null;
+    return {
+      id: row.id,
+      type: row.type,
+      typeLabel: typeOption(row.type).label,
+      status: row.status,
+      fullName: row.full_name,
+      quote: row.quote,
+      avatarUrl: publicStorageUrl(AVATARS_BUCKET, row.avatar_path),
+      submittedAt: row.submitted_at,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export function formatSubmittedAt(iso: string) {
   return formatEsAr(

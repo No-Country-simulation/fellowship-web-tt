@@ -1,25 +1,32 @@
 "use client";
 
-import { useRef, useState, type RefObject } from "react";
+import { useEffect, useEffectEvent, useId, useRef, useState, type FormEvent } from "react";
 import { useFormStatus } from "react-dom";
 import { buttonVariants } from "@repo/ui/button";
 import { cn } from "@repo/ui/utils";
 
-import { rejectArchivedAction, republishAction } from "../actions/testimonialActions";
+import { republishAction } from "../actions/testimonialActions";
 import { INBOX_FILTERS_FIELD } from "../infrastructure/inboxQuery";
 import type { AdminTestimonial } from "../types/testimonial";
 import { useInboxFilters } from "./InboxFilters";
+import { ModalDialog } from "./ModalDialog";
 
-type ArchivedActionKind = "republish" | "reject";
+type ArchivedActionKind = "republish";
 
-const REJECT_CONFIRM = "¿Rechazar este testimonio? No sale en la galería ni en las redes.";
-const REPUBLISH_CONFIRM =
-  "¿Volver a publicar este testimonio? Vuelve a la galería. No se reenvían los posts.";
+const ARCHIVED_ACTIONS = {
+  republish: {
+    label: "Volver a publicar",
+    pendingLabel: "Volviendo a publicar…",
+    title: "¿Volver a publicar este testimonio?",
+    description: "Vuelve a la galería. No se reenvían los posts.",
+    variant: "default",
+  },
+} as const;
 
-/** Archivado: el motivo queda a la vista. Se puede volver a publicar o rechazar. */
+/** Archivado: el motivo queda a la vista. Se puede volver a publicar. */
 export function ArchivedPanel({ testimonial }: { testimonial: AdminTestimonial }) {
   const { filtersField } = useInboxFilters();
-  const busyRef = useRef<ArchivedActionKind | null>(null);
+  const [open, setOpen] = useState<ArchivedActionKind | null>(null);
   const [busy, setBusy] = useState<ArchivedActionKind | null>(null);
 
   return (
@@ -37,121 +44,174 @@ export function ArchivedPanel({ testimonial }: { testimonial: AdminTestimonial }
       </header>
       {testimonial.archiveReason ? (
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="text-admin-caption font-medium text-foreground">Motivo</h3>
-          <p className="whitespace-pre-wrap break-words text-admin-body text-foreground">
+          <h3 className="text-admin-body font-semibold text-foreground">Motivo</h3>
+          <p className="whitespace-pre-wrap break-words text-admin-caption text-muted-foreground">
             {testimonial.archiveReason}
           </p>
         </div>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        <StatusActionForm
-          action={republishAction.bind(null, testimonial.id)}
+        <ArchivedActionButton
           kind="republish"
-          label="Volver a publicar"
-          pendingLabel="Volviendo a publicar…"
-          confirm={REPUBLISH_CONFIRM}
-          variant="default"
-          filtersField={filtersField}
-          busy={busy}
-          busyRef={busyRef}
-          onBusy={setBusy}
-        />
-        <StatusActionForm
-          action={rejectArchivedAction.bind(null, testimonial.id)}
-          kind="reject"
-          label="Rechazar"
-          pendingLabel="Rechazando…"
-          confirm={REJECT_CONFIRM}
-          variant="destructive"
-          filtersField={filtersField}
-          busy={busy}
-          busyRef={busyRef}
-          onBusy={setBusy}
+          open={open === "republish"}
+          disabled={busy !== null && busy !== "republish"}
+          onOpen={() => setOpen("republish")}
         />
       </div>
+      {open ? (
+        <ArchivedActionDialog
+          id={testimonial.id}
+          kind={open}
+          filtersField={filtersField}
+          onCancel={() => setOpen(null)}
+          onBusy={() => setBusy(open)}
+          onSettled={() => setBusy(null)}
+        />
+      ) : null}
     </section>
   );
 }
 
-function StatusActionForm({
-  action,
+function ArchivedActionButton({
   kind,
-  label,
-  pendingLabel,
-  confirm,
-  variant,
-  filtersField,
-  busy,
-  busyRef,
-  onBusy,
+  open,
+  disabled,
+  onOpen,
 }: {
-  action: (formData: FormData) => Promise<void>;
   kind: ArchivedActionKind;
-  label: string;
-  pendingLabel: string;
-  confirm: string;
-  variant: "default" | "destructive";
-  filtersField: string;
-  busy: ArchivedActionKind | null;
-  busyRef: RefObject<ArchivedActionKind | null>;
-  onBusy: (kind: ArchivedActionKind) => void;
+  open: boolean;
+  disabled: boolean;
+  onOpen: () => void;
 }) {
-  return (
-    <form action={action}>
-      <input type="hidden" name={INBOX_FILTERS_FIELD} value={filtersField} readOnly />
-      <StatusActionButton
-        label={label}
-        pendingLabel={pendingLabel}
-        confirm={confirm}
-        variant={variant}
-        blocked={busy !== null && busy !== kind}
-        busyRef={busyRef}
-        onAccept={() => {
-          busyRef.current = kind;
-          onBusy(kind);
-        }}
-      />
-    </form>
-  );
-}
-
-function StatusActionButton({
-  label,
-  pendingLabel,
-  confirm,
-  variant,
-  blocked,
-  busyRef,
-  onAccept,
-}: {
-  label: string;
-  pendingLabel: string;
-  confirm: string;
-  variant: "default" | "destructive";
-  blocked: boolean;
-  busyRef: RefObject<ArchivedActionKind | null>;
-  onAccept: () => void;
-}) {
-  const { pending } = useFormStatus();
+  const copy = ARCHIVED_ACTIONS[kind];
 
   return (
     <button
-      type="submit"
-      disabled={pending || blocked}
-      className={cn(buttonVariants({ variant, size: "lg" }))}
-      onClick={(event) => {
-        if (busyRef.current) {
-          event.preventDefault();
-          return;
-        }
-        if (!window.confirm(confirm)) {
-          event.preventDefault();
-          return;
-        }
-        onAccept();
-      }}
+      type="button"
+      disabled={disabled}
+      className={cn(buttonVariants({ variant: copy.variant, size: "lg" }))}
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      onClick={onOpen}
     >
-      {pending ? pendingLabel : label}
+      {copy.label}
     </button>
+  );
+}
+
+function ArchivedActionDialog({
+  id,
+  kind,
+  filtersField,
+  onCancel,
+  onBusy,
+  onSettled,
+}: {
+  id: string;
+  kind: ArchivedActionKind;
+  filtersField: string;
+  onCancel: () => void;
+  onBusy: () => void;
+  onSettled: () => void;
+}) {
+  const action = republishAction.bind(null, id);
+  const copy = ARCHIVED_ACTIONS[kind];
+  const titleId = useId();
+  const descriptionId = useId();
+  const lock = useRef(false);
+  const [locked, setLocked] = useState(false);
+
+  function close() {
+    if (lock.current) return;
+    onCancel();
+  }
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    if (lock.current) {
+      event.preventDefault();
+      return;
+    }
+    lock.current = true;
+    setLocked(true);
+    onBusy();
+  }
+
+  function onIdle() {
+    lock.current = false;
+    setLocked(false);
+    onSettled();
+  }
+
+  return (
+    <ModalDialog open onClose={close} titleId={titleId} descriptionId={descriptionId}>
+      <form action={action} className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <input type="hidden" name={INBOX_FILTERS_FIELD} value={filtersField} readOnly />
+        <div className="flex flex-col gap-2">
+          <h2 id={titleId} className="text-admin-heading font-semibold text-foreground">
+            {copy.title}
+          </h2>
+          <p id={descriptionId} className="text-admin-caption text-muted-foreground">
+            {copy.description}
+          </p>
+        </div>
+        <ArchivedActionControls
+          locked={locked}
+          label={copy.label}
+          pendingLabel={copy.pendingLabel}
+          variant={copy.variant}
+          onCancel={close}
+          onIdle={onIdle}
+        />
+      </form>
+    </ModalDialog>
+  );
+}
+
+function ArchivedActionControls({
+  locked,
+  label,
+  pendingLabel,
+  variant,
+  onCancel,
+  onIdle,
+}: {
+  locked: boolean;
+  label: string;
+  pendingLabel: string;
+  variant: "default" | "destructive";
+  onCancel: () => void;
+  onIdle: () => void;
+}) {
+  const { pending } = useFormStatus();
+  const onIdleEvent = useEffectEvent(onIdle);
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !pending) {
+      onIdleEvent();
+    }
+    wasPending.current = pending;
+  }, [pending]);
+
+  const disabled = pending || locked;
+
+  return (
+    <div className="flex flex-wrap justify-end gap-2" aria-busy={disabled || undefined}>
+      <button
+        type="button"
+        disabled={disabled}
+        className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+        onClick={onCancel}
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        disabled={disabled}
+        className={cn(buttonVariants({ variant, size: "lg" }))}
+      >
+        {pending || locked ? pendingLabel : label}
+      </button>
+    </div>
   );
 }

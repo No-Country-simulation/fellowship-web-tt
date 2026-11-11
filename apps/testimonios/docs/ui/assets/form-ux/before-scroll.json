@@ -1,0 +1,3421 @@
+{
+  "phase": "before",
+  "checks": [
+    {
+      "width": 1440,
+      "initialLocale": "es",
+      "step": 1,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 152,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 152,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 152,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 152,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 152,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 1440,
+      "initialLocale": "es",
+      "step": 3,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 276,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 1440,
+      "initialLocale": "es",
+      "step": 5,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 839,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 839,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 839,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 839,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 451,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 839,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [
+        {
+          "variant": "root padding zero",
+          "before": 839,
+          "after": 839
+        },
+        {
+          "variant": "negative select margin",
+          "before": 839,
+          "after": 839
+        }
+      ],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 1440,
+      "initialLocale": "pt-BR",
+      "step": 1,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 152,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 152,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 1440,
+      "initialLocale": "pt-BR",
+      "step": 3,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 255,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 255,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 255,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 255,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 255,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 255,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 255,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 255,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 255,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 1440,
+      "initialLocale": "pt-BR",
+      "step": 5,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 451,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 839,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 839,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [
+        {
+          "variant": "root padding zero",
+          "before": 839,
+          "after": 839
+        },
+        {
+          "variant": "negative select margin",
+          "before": 839,
+          "after": 839
+        }
+      ],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 375,
+      "initialLocale": "es",
+      "step": 1,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 385,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 385,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 385,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 385,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 385,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 403,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 403,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 403,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 403,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 375,
+      "initialLocale": "es",
+      "step": 3,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 375,
+      "initialLocale": "es",
+      "step": 5,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 1073,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 1073,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 1073,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 1073,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 685,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 1073,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 1094,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 1094,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 1094,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 1094,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [
+        {
+          "variant": "root padding zero",
+          "before": 1073,
+          "after": 1073
+        },
+        {
+          "variant": "negative select margin",
+          "before": 1073,
+          "after": 1073
+        }
+      ],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 375,
+      "initialLocale": "pt-BR",
+      "step": 1,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 36,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 424,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 385,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 375,
+      "initialLocale": "pt-BR",
+      "step": 3,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 340,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 340,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 340,
+          "locale": "es",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 340,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 0,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 340,
+          "locale": "es",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 340,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 340,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    },
+    {
+      "width": 375,
+      "initialLocale": "pt-BR",
+      "step": 5,
+      "pointer": [
+        {
+          "phase": "before pointer",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "pointerdown",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "mousedown",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "H2",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "focusin",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "scroll",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "mouseup",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "click",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true,
+          "trusted": true
+        },
+        {
+          "phase": "native menu opened",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": true
+        },
+        {
+          "phase": "native menu cancelled",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "focus": [
+        {
+          "phase": "before focus",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after focus",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 727,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "preventedFocus": [
+        {
+          "phase": "before prevented focus",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "BODY",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "focusin",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "after prevented focus",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "keyboard": [
+        {
+          "phase": "before keyboard open",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "keyboard menu opened",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "input",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "change",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false,
+          "trusted": true
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:before",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:after",
+          "y": 1115,
+          "locale": "pt-BR",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "scroll",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "replaceState:frame",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        },
+        {
+          "phase": "after keyboard locale render",
+          "y": 1073,
+          "locale": "es",
+          "active": "SELECT",
+          "selectTop": 10,
+          "selectBottom": 54,
+          "open": false
+        }
+      ],
+      "cssExperiments": [
+        {
+          "variant": "root padding zero",
+          "before": 1115,
+          "after": 1115
+        },
+        {
+          "variant": "negative select margin",
+          "before": 1115,
+          "after": 1115
+        }
+      ],
+      "keyboardNativeOpen": false,
+      "keyboardChanged": true
+    }
+  ],
+  "blockedPosts": 0,
+  "realSubmissions": 0,
+  "browserErrors": []
+}

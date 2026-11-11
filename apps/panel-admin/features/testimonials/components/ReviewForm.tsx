@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type FormEvent,
   type ReactNode,
 } from "react";
 import { Check, ChevronDown, Copy, RotateCcw } from "lucide-react";
@@ -21,17 +22,20 @@ import { COUNTRY_OPTIONS, isListedCountry, OTHER_COUNTRY_VALUE } from "../infras
 import { INBOX_FILTERS_FIELD } from "../infrastructure/inboxQuery";
 import { useInboxFilters } from "./InboxFilters";
 import {
-  CARD_FIELD_MAX_CHARS,
+  CARD_LIMITS,
   CARD_FIELDS_BY_TYPE,
-  CARD_NAME_MAX_CHARS,
+  cardTextLength,
+  cardTextLevel,
   readCardInputs,
   sameCardInputs,
   validateCardEdits,
   type CardEdits,
   type CardInputs,
+  type CardTextLevel,
+  type CardTextLimit,
 } from "../infrastructure/cardFields";
 import { igCardContent } from "../infrastructure/ig-card";
-import { igCardPngBlob, igCardQuoteClipped } from "../infrastructure/ig-card-canvas";
+import { igCardImageDetail, igCardPngBlob, igCardQuoteClipped } from "../infrastructure/ig-card-canvas";
 import {
   buildDiscordCaption,
   buildIgCaption,
@@ -42,6 +46,8 @@ import {
   linkedInMention,
   omitVideoLine,
   QUOTE_EDIT_MAX_CHARS,
+  QUOTE_EDIT_WARN_CHARS,
+  QUOTE_TOO_LONG_MESSAGE,
   rebuildCaptionsForName,
   setCaptionVideo,
   videoCaptionLine,
@@ -52,10 +58,9 @@ import {
   SHARE_CARD_MAX_BYTES,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
   SHARE_NETWORK_LABELS,
-  SHARE_NETWORKS,
   type ShareChannels,
 } from "../types/share";
-import type { AdminTestimonial, CardDesign } from "../types/testimonial";
+import { REJECT_REASON_MAX_CHARS, type AdminTestimonial, type CardDesign } from "../types/testimonial";
 import { CaptionField } from "./CaptionField";
 import {
   CAPTION_NETWORKS,
@@ -67,10 +72,15 @@ import {
 import { CardDesignField } from "./CardDesignField";
 import { DetailHeader } from "./DetailHeader";
 import { IgShare } from "./IgShare";
-import { PublishConfirmDialog } from "./PublishConfirmDialog";
+import { ModalDialog } from "./ModalDialog";
+import { ReasonField } from "./ReasonField";
+import {
+  PublishConfirmDialog,
+  type PublishConfirmNetwork,
+} from "./PublishConfirmDialog";
 import { inputClassName, textareaClassName } from "./fields";
 
-type Intent = "save" | "publish" | "reject";
+type Intent = "save" | "publish";
 
 type CaptionSnapshot = {
   quote: string;
@@ -86,20 +96,6 @@ function captionHint(network: CaptionNetwork) {
 /** Deja el link completo o lo saca. Un link cortado no se conserva. */
 function settleVideo(caption: string, videoUrl: string | null, include: boolean) {
   return setCaptionVideo(caption, videoUrl, include && Boolean(videoUrl));
-}
-
-function captionLead(text: string) {
-  const line = text
-    .split("\n")
-    .map((part) => part.trim())
-    .find(Boolean);
-  if (!line) {
-    return "Sin descripción.";
-  }
-  if (line.length <= 140) {
-    return line;
-  }
-  return `${line.slice(0, 139)}…`;
 }
 
 function mentionNote(network: CaptionNetwork, testimonial: AdminTestimonial) {
@@ -150,6 +146,10 @@ export function ReviewForm({
 }) {
   const action = reviewTestimonial.bind(null, testimonial.id);
   const [state, formAction, pending] = useActionState(action, initialReviewState);
+  const [rejectState, rejectFormAction, rejectPending] = useActionState(
+    reviewTestimonial.bind(null, testimonial.id),
+    initialReviewState,
+  );
   const [opened] = useState(() => openedSnapshot(testimonial));
   const [openedCards] = useState(() => readCardInputs(testimonial));
   const [quote, setQuote] = useState(opened.quote);
@@ -165,8 +165,13 @@ export function ReviewForm({
   const [cardDesign, setCardDesign] = useState<CardDesign>("photo");
   const [intent, setIntent] = useState<Intent | null>(null);
   const [cardError, setCardError] = useState<string | null>(null);
+  const [cardImageDetail, setCardImageDetail] = useState<string | null>(null);
   const [cardAttempt, setCardAttempt] = useState<"publish" | "retry" | null>(null);
   const [confirmPublish, setConfirmPublish] = useState(false);
+  const [confirmReject, setConfirmReject] = useState(false);
+  // pending llega un render después: el ref corta el segundo envío y el cierre en ese hueco.
+  const rejectLock = useRef(false);
+  const formId = `admin-review-form-${testimonial.id}`;
   const [copied, setCopied] = useState(false);
   const [baseline, setBaseline] = useState<CaptionSnapshot>(opened);
   const [appliedSave, setAppliedSave] = useState(initialReviewState);
@@ -178,7 +183,8 @@ export function ReviewForm({
   const preparingCardRef = useRef(false);
   const preparingCard = cardAttempt !== null;
   const quoteEmpty = quote.trim().length === 0;
-  const quoteTooLong = quote.length > QUOTE_EDIT_MAX_CHARS;
+  const quoteLevel = cardTextLevel(quote, { max: QUOTE_EDIT_MAX_CHARS, warn: QUOTE_EDIT_WARN_CHARS });
+  const quoteTooLong = quoteLevel === "over";
   const quoteInvalid = quoteEmpty || quoteTooLong;
   const canMeasureCard = useSyncExternalStore(
     () => () => {},
@@ -188,7 +194,11 @@ export function ReviewForm({
   const cardEdits = useMemo<CardEdits>(() => ({ ...fields, quote }), [fields, quote]);
   const cardValidation = validateCardEdits(testimonial.type, cardEdits);
   const cardInvalid = !cardValidation.ok;
-  const cardMessages = cardValidation.ok ? [] : cardValidation.messages;
+  // Los errores de los campos y de la cita se muestran junto a su campo: no se repiten abajo.
+  const shownBesideField = (message: string) =>
+    message === (cardValidation.ok ? "" : cardValidation.message) ||
+    (quoteTooLong && message === QUOTE_TOO_LONG_MESSAGE);
+  const nameLevel = cardTextLevel(fields.fullName, CARD_LIMITS.fullName);
   const previewCard = useMemo(
     () => igCardContent(testimonial, quote, cardDesign, cardEdits),
     [cardDesign, cardEdits, quote, testimonial],
@@ -240,12 +250,10 @@ export function ReviewForm({
   const activeCaption = captions[captionNetwork];
   const activeMax = CAPTION_MAX_CHARS[captionNetwork];
   const activeEmpty = channels[captionNetwork] && activeCaption.trim().length === 0;
-  const targets = SHARE_NETWORKS.filter((network) => channels[network]);
   const tabNotes: Partial<Record<CaptionNetwork, CaptionTabNote>> = {};
   for (const network of CAPTION_NETWORKS) {
     tabNotes[network] = {
       publishes: channels[network],
-      edited: captions[network] !== templates[network],
       text: channels[network] ? undefined : "sin configurar",
     };
   }
@@ -274,17 +282,24 @@ export function ReviewForm({
   const instagramLinks =
     captionNetwork === "instagram" && testimonial.videoUrl ? "Instagram no admite links" : null;
   const showCaptionNotes = Boolean(mention || instagramLinks);
-  const publishLead = targets.length
-    ? `Sale en la galería y se publica en ${formatNetworkList(targets)} con la misma imagen y la descripción de cada red.`
-    : "Sale en la galería.";
-  const publishSummaries = CAPTION_NETWORKS.map((network) => {
-    const lead = captionLead(captions[network]);
-    const summary = channels[network]
-      ? lead
-      : lead === "Sin descripción."
-        ? "No se publica."
-        : `No se publica. ${lead}`;
-    return { label: SHARE_NETWORK_LABELS[network], summary };
+  const configuredNetworks = CAPTION_NETWORKS.filter((network) => channels[network]);
+  const publishLead =
+    configuredNetworks.length > 0
+      ? [
+          `Sale en la galería y en ${formatNetworkList(configuredNetworks)}.`,
+          "La imagen es la misma. Abajo, la descripción de cada red.",
+        ]
+      : ["Sale en la galería."];
+  const publishNetworks: PublishConfirmNetwork[] = CAPTION_NETWORKS.map((network) => {
+    const label = SHARE_NETWORK_LABELS[network];
+    if (!channels[network]) {
+      return { label, publishes: false };
+    }
+    return {
+      label,
+      publishes: true,
+      caption: captions[network],
+    };
   });
 
   useEffect(() => {
@@ -292,6 +307,18 @@ export function ReviewForm({
       allowUnload.current = false;
     }
   }, [state]);
+
+  useEffect(() => {
+    if (rejectState.status === "error") {
+      allowUnload.current = false;
+    }
+  }, [rejectState]);
+
+  useEffect(() => {
+    if (!rejectPending) {
+      rejectLock.current = false;
+    }
+  }, [rejectPending]);
 
   useEffect(() => {
     if (!copied) {
@@ -369,12 +396,52 @@ export function ReviewForm({
     return () => window.clearTimeout(timeout);
   }, [applyNameToCaptions, fields.fullName]);
 
+  function onRejectSubmit(event: FormEvent<HTMLFormElement>) {
+    // El diálogo está en un portal, pero en el árbol de React sigue dentro del form de guardar.
+    event.stopPropagation();
+    if (rejectLock.current || rejectPending) {
+      event.preventDefault();
+      return;
+    }
+    rejectLock.current = true;
+    allowUnload.current = true;
+  }
+
+  function closeRejectDialog() {
+    if (rejectLock.current || rejectPending) {
+      return;
+    }
+    setConfirmReject(false);
+  }
+
   async function publishWithCard(attempt: "publish" | "retry") {
     const form = formRef.current;
     if (!form || preparingCardRef.current) {
       return;
     }
     preparingCardRef.current = true;
+    setIntent("publish");
+    setCardAttempt(attempt);
+    let blob: Blob | null = null;
+    let imageDetail: string | null = null;
+    try {
+      blob = await igCardPngBlob(previewCard);
+    } catch (error) {
+      blob = null;
+      imageDetail = igCardImageDetail(error);
+    }
+    preparingCardRef.current = false;
+    setCardAttempt(null);
+    if (!blob || blob.size === 0) {
+      setCardError("No se pudo generar la imagen y el testimonio no se publicó.");
+      setCardImageDetail(imageDetail);
+      return;
+    }
+    if (blob.size > SHARE_CARD_MAX_BYTES) {
+      setCardError(SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE);
+      setCardImageDetail(null);
+      return;
+    }
     const captionsNow = applyNameToCaptions(fields.fullName);
     const formData = new FormData(form);
     formData.set("intent", "publish");
@@ -382,26 +449,9 @@ export function ReviewForm({
     formData.set("ig_caption", captionsNow.instagram);
     formData.set("li_caption", captionsNow.linkedin);
     formData.set("discord_caption", captionsNow.discord);
-    setIntent("publish");
-    setCardAttempt(attempt);
-    let blob: Blob | null = null;
-    try {
-      blob = await igCardPngBlob(previewCard);
-    } catch {
-      blob = null;
-    }
-    preparingCardRef.current = false;
-    setCardAttempt(null);
-    if (!blob || blob.size === 0) {
-      setCardError("No se pudo generar la imagen y el testimonio no se publicó.");
-      return;
-    }
-    if (blob.size > SHARE_CARD_MAX_BYTES) {
-      setCardError(SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE);
-      return;
-    }
     formData.set("share_card", new File([blob], "instagram.png", { type: "image/png" }));
     setCardError(null);
+    setCardImageDetail(null);
     allowUnload.current = true;
     startTransition(() => {
       formAction(formData);
@@ -450,14 +500,12 @@ export function ReviewForm({
 
   return (
     <form
+      id={formId}
       ref={formRef}
       action={formAction}
       onSubmit={(event) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         const value = submitter instanceof HTMLButtonElement ? submitter.value : "";
-        if (value === "reject") {
-          return;
-        }
         event.preventDefault();
         const captionsNow = applyNameToCaptions(fields.fullName);
         if (value !== "publish") {
@@ -539,13 +587,19 @@ export function ReviewForm({
                       {testimonial.typeLabel}
                     </p>
                   </div>
+                  {nameLevel === "warn" ? (
+                    <p id="admin-name-long" className="text-admin-caption text-tone-warning" role="status">
+                      Este nombre es un poco largo. En la card se lee mejor si usas iniciales.
+                    </p>
+                  ) : null}
                   <div className="grid gap-3 sm:grid-cols-2">
                     <CardTextField
                       label="Nombre"
                       name="full_name"
                       value={fields.fullName}
-                      maxLength={CARD_NAME_MAX_CHARS}
+                      limit={CARD_LIMITS.fullName}
                       error={cardValidation.ok ? undefined : cardValidation.errors.fullName}
+                      describedBy={nameLevel === "warn" ? "admin-name-long" : undefined}
                       autoComplete="name"
                       onChange={(value) => {
                         setFields((current) => ({ ...current, fullName: value }));
@@ -568,7 +622,7 @@ export function ReviewForm({
                         label={field.label}
                         name={field.key}
                         value={fields[field.key]}
-                        maxLength={CARD_FIELD_MAX_CHARS}
+                        limit={CARD_LIMITS[field.key]}
                         error={cardValidation.ok ? undefined : cardValidation.errors[field.key]}
                         onChange={(value) => {
                           setFields((current) => ({ ...current, [field.key]: value }));
@@ -590,18 +644,23 @@ export function ReviewForm({
                     </label>
                     <p
                       className={`${quoteEmpty ? "text-admin-caption" : "text-admin-micro"} shrink-0 ${
-                        quoteInvalid ? "text-destructive" : "text-muted-foreground"
+                        quoteEmpty ? "text-destructive" : LEVEL_TEXT_CLASS[quoteLevel]
                       }`}
                     >
                       {quoteEmpty
                         ? "No puede estar vacía"
-                        : `${quote.length}/${QUOTE_EDIT_MAX_CHARS}${quoteTooLong ? " · Acortala" : ""}`}
+                        : `${cardTextLength(quote)}/${QUOTE_EDIT_MAX_CHARS}`}
                     </p>
                   </div>
                   <p id="admin-quote-hint" className="text-admin-micro text-muted-foreground">
                     El fragmento de la historia que se lee en la imagen. Una o dos oraciones, cortas y
-                    con impacto.
+                    con impacto. Máximo {QUOTE_EDIT_MAX_CHARS} caracteres.
                   </p>
+                  {quoteTooLong ? (
+                    <p id="admin-quote-over" className="text-admin-caption text-destructive">
+                      {QUOTE_TOO_LONG_MESSAGE}
+                    </p>
+                  ) : null}
                   {quoteClipped ? (
                     <p id="admin-quote-clip" className="text-admin-caption text-tone-warning" role="status">
                       En este diseño la card no muestra toda la cita: la corta con “…”.
@@ -610,8 +669,13 @@ export function ReviewForm({
                   <textarea
                     id="admin-quote"
                     value={quote}
-                    maxLength={QUOTE_EDIT_MAX_CHARS}
-                    aria-describedby={quoteClipped ? "admin-quote-hint admin-quote-clip" : "admin-quote-hint"}
+                    aria-describedby={[
+                      "admin-quote-hint",
+                      quoteTooLong ? "admin-quote-over" : null,
+                      quoteClipped ? "admin-quote-clip" : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     aria-invalid={quoteInvalid || undefined}
                     className={textareaClassName}
                     onChange={(event) => onQuoteChange(event.target.value)}
@@ -726,60 +790,47 @@ export function ReviewForm({
       </div>
 
       <footer className="shrink-0 border-t border-border bg-card px-5 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <button
-            type="submit"
-            name="intent"
-            value="reject"
-            disabled={pending || preparingCard}
-            className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
-            onClick={(event) => {
-              if (
-                !window.confirm(
-                  "¿Rechazar este testimonio? No sale en la galería ni en las redes.",
-                )
-              ) {
-                event.preventDefault();
-                return;
-              }
-              allowUnload.current = true;
-              setIntent("reject");
-            }}
+            type="button"
+            disabled={pending || preparingCard || rejectPending}
+            className={cn(buttonVariants({ variant: "destructive", size: "lg" }), "order-last w-full sm:order-none sm:w-auto")}
+            aria-haspopup="dialog"
+            aria-expanded={confirmReject}
+            onClick={() => setConfirmReject(true)}
           >
-            {pending && intent === "reject" ? "Rechazando…" : "Rechazar"}
+            {rejectPending ? "Rechazando…" : "Rechazar"}
           </button>
 
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             {state.status === "saved" ? (
               <p className="text-admin-caption text-tone-success" role="status">
                 Cambios guardados. Todavía no está publicado.
               </p>
             ) : null}
-            {state.status === "error" ? (
+            {state.status === "error" && !shownBesideField(state.message) ? (
               <p className="text-admin-caption text-destructive" role="alert">
                 {state.message}
               </p>
             ) : null}
-            {cardMessages.map((problem) => (
-              <p key={problem} className="text-admin-caption text-destructive" role="alert">
-                {problem}
-              </p>
-            ))}
             {otherCaptionProblems.map((problem) => (
               <p key={problem} className="text-admin-caption text-destructive" role="alert">
                 {problem}
               </p>
             ))}
             {cardError ? (
-              <p className="text-admin-caption text-destructive" role="alert">
-                {cardError}
-              </p>
+              <div className="text-admin-caption text-destructive" role="alert">
+                <p>{cardError}</p>
+                {cardImageDetail ? <p>{cardImageDetail}</p> : null}
+              </div>
             ) : null}
             {cardError ? (
               <button
                 type="button"
-                disabled={pending || preparingCard || quoteInvalid || captionInvalid || cardInvalid}
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+                disabled={
+                  pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+                }
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
                 onClick={() => {
                   void publishWithCard("retry");
                 }}
@@ -787,34 +838,40 @@ export function ReviewForm({
                 {cardAttempt === "retry" ? "Reintentando…" : "Reintentar imagen"}
               </button>
             ) : null}
-            <button
-              type="submit"
-              name="intent"
-              value="save"
-              disabled={pending || preparingCard || quoteInvalid || captionInvalid || cardInvalid}
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-              onClick={() => setIntent("save")}
-            >
-              {pending && intent === "save" ? "Guardando…" : "Guardar borrador"}
-            </button>
-            <button
-              type="button"
-              disabled={pending || preparingCard || quoteInvalid || captionInvalid || cardInvalid}
-              className={cn(buttonVariants({ variant: "default", size: "lg" }))}
-              onClick={() => setConfirmPublish(true)}
-            >
-              {(pending && intent === "publish") || cardAttempt === "publish"
-                ? "Publicando…"
-                : "Publicar"}
-            </button>
+            <div className="grid grid-cols-2 gap-2 sm:contents">
+              <button
+                type="submit"
+                name="intent"
+                value="save"
+                disabled={
+                  pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+                }
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
+                onClick={() => setIntent("save")}
+              >
+                {pending && intent === "save" ? "Guardando…" : "Guardar borrador"}
+              </button>
+              <button
+                type="button"
+                disabled={
+                  pending || rejectPending || preparingCard || quoteInvalid || captionInvalid || cardInvalid
+                }
+                className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:w-auto")}
+                onClick={() => setConfirmPublish(true)}
+              >
+                {(pending && intent === "publish") || cardAttempt === "publish"
+                  ? "Publicando…"
+                  : "Publicar"}
+              </button>
+            </div>
           </div>
         </div>
       </footer>
       <PublishConfirmDialog
         open={confirmPublish}
         lead={publishLead}
-        clipNote={quoteClipped ? "En este diseño la card corta la cita con “…”." : null}
-        networks={publishSummaries}
+        clipNote={quoteClipped ? "En la imagen, la cita se corta con “…”." : null}
+        networks={publishNetworks}
         onCancel={() => setConfirmPublish(false)}
         onConfirm={() => {
           setConfirmPublish(false);
@@ -822,7 +879,79 @@ export function ReviewForm({
           void publishWithCard("publish");
         }}
       />
+      <RejectConfirmDialog
+        open={confirmReject}
+        action={rejectFormAction}
+        filtersField={filtersField}
+        pending={rejectPending}
+        error={rejectState.status === "error" ? rejectState.message : null}
+        onCancel={closeRejectDialog}
+        onSubmit={onRejectSubmit}
+      />
     </form>
+  );
+}
+
+function RejectConfirmDialog({
+  open,
+  action,
+  filtersField,
+  pending,
+  error,
+  onCancel,
+  onSubmit,
+}: {
+  open: boolean;
+  action: (formData: FormData) => void;
+  filtersField: string;
+  pending: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const titleId = useId();
+  const descriptionId = useId();
+  const [reason, setReason] = useState("");
+  const reasonReady = reason.trim().length > 0 && reason.length <= REJECT_REASON_MAX_CHARS;
+
+  return (
+    <ModalDialog open={open} onClose={onCancel} titleId={titleId} descriptionId={descriptionId}>
+      <form action={action} className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <input type="hidden" name="intent" value="reject" readOnly />
+        <input type="hidden" name={INBOX_FILTERS_FIELD} value={filtersField} readOnly />
+        <div className="flex flex-col gap-2">
+          <h2 id={titleId} className="text-admin-heading font-semibold text-foreground">
+            ¿Rechazar este testimonio?
+          </h2>
+          <p id={descriptionId} className="text-admin-caption text-muted-foreground">
+            No sale en la galería ni en las redes.
+          </p>
+        </div>
+        <ReasonField
+          value={reason}
+          maxChars={REJECT_REASON_MAX_CHARS}
+          error={error}
+          onChange={setReason}
+        />
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            disabled={pending}
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+            onClick={onCancel}
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={pending || !reasonReady}
+            className={cn(buttonVariants({ variant: "destructive", size: "lg" }))}
+          >
+            {pending ? "Rechazando…" : "Rechazar"}
+          </button>
+        </div>
+      </form>
+    </ModalDialog>
   );
 }
 
@@ -901,7 +1030,7 @@ function CountryField({
         <CardTextField
           label="Especificá el país"
           value={custom}
-          maxLength={CARD_FIELD_MAX_CHARS}
+          limit={CARD_LIMITS.country}
           error={error}
           autoComplete="country-name"
           onChange={(next) => {
@@ -914,12 +1043,20 @@ function CountryField({
   );
 }
 
+/** Gris hasta el umbral, ámbar desde el umbral, rojo al pasar el tope. */
+const LEVEL_TEXT_CLASS: Record<CardTextLevel, string> = {
+  ok: "text-muted-foreground",
+  warn: "text-tone-warning",
+  over: "text-destructive",
+};
+
 function CardTextField({
   label,
   name,
   value,
-  maxLength,
+  limit,
   error,
+  describedBy,
   autoComplete,
   onChange,
   onBlur,
@@ -927,8 +1064,9 @@ function CardTextField({
   label: string;
   name?: string;
   value: string;
-  maxLength: number;
+  limit: CardTextLimit;
   error?: string;
+  describedBy?: string;
   autoComplete?: string;
   onChange: (value: string) => void;
   onBlur?: (value: string) => void;
@@ -936,7 +1074,9 @@ function CardTextField({
   const id = useId();
   const errorId = `${id}-error`;
   const countId = `${id}-count`;
-  const invalid = Boolean(error);
+  const level = cardTextLevel(value, limit);
+  const invalid = Boolean(error) || level === "over";
+  const describedByIds = [describedBy, countId, invalid ? errorId : null].filter(Boolean).join(" ");
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
@@ -945,11 +1085,9 @@ function CardTextField({
         </label>
         <p
           id={countId}
-          className={`shrink-0 text-admin-micro ${
-            invalid ? "text-destructive" : "text-muted-foreground"
-          }`}
+          className={`shrink-0 text-admin-micro ${LEVEL_TEXT_CLASS[level]}`}
         >
-          {value.length}/{maxLength}
+          {cardTextLength(value)}/{limit.max}
         </p>
       </div>
       <input
@@ -957,10 +1095,9 @@ function CardTextField({
         name={name}
         type="text"
         value={value}
-        maxLength={maxLength}
         autoComplete={autoComplete}
         aria-invalid={invalid || undefined}
-        aria-describedby={invalid ? `${countId} ${errorId}` : countId}
+        aria-describedby={describedByIds}
         className={inputClassName}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur ? (event) => onBlur(event.currentTarget.value) : undefined}

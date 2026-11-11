@@ -7,11 +7,13 @@ import { TestimonialStatusBadge } from "./TestimonialStatusBadge";
 export function DetailHeader({ testimonial }: { testimonial: AdminTestimonial }) {
   return (
     <PageHeader>
-      <div className="md:hidden">
+      <div className="md:hidden [&_a]:inline-flex [&_a]:min-h-10 [&_a]:items-center">
         <InboxBackLink>Testimonios</InboxBackLink>
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <PageHeaderTitle>{testimonial.fullName}</PageHeaderTitle>
+        <div className="min-w-0 [overflow-wrap:anywhere]">
+          <PageHeaderTitle>{testimonial.fullName}</PageHeaderTitle>
+        </div>
         <TestimonialStatusBadge status={testimonial.status} />
         <time
           dateTime={testimonial.submittedAt}

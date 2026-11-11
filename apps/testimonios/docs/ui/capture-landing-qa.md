@@ -53,7 +53,7 @@ Todas usan DM Sans cargada en el hero. La tarjeta conserva la fuente del sistema
 
 Se releyó el generador actual en modo lectura, especialmente `drawAuthorText`, `drawNameAndCountry`, `truncateToWidth`, `quoteDesignPlacement` y `layoutQuote`, además de `IgShare`. Último commit local del generador inspeccionado: `4dbcfb2`.
 
-El panel limita nombres, país y rol por ancho; reserva hasta 42% del ancho para el país y reduce/recorta la cita para mantener el PNG fijo. **En este checkout nombre y país todavía comparten línea.** La estructura vertical requerida para HTML es una adaptación expresa; no se atribuye al panel un cambio que no está en el archivo actual.
+El panel limita nombres, país y rol por ancho y reduce/recorta la cita para mantener el PNG fijo. El generador ya separa nombre y país, y el HTML del hero conserva su propio criterio (nombre en una línea con elipsis).
 
 Se ejecuta nuevamente el generador original y se muestra su imagen a **340 × 425px**, junto al HTML con los mismos fixtures. No se importa ese generador en la aplicación ni se modifica el panel.
 

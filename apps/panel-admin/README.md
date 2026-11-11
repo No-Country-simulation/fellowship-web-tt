@@ -20,11 +20,30 @@ Inbox de los envíos que entran por `apps/testimonios` (`/enviar`). El código v
 `features/testimonials` (`components/`, `types/`, `infrastructure/` y `actions/`). Las páginas
 piden datos al repository. Publicar, guardar, rechazar, archivar, volver a publicar,
 reintentar y eliminar rechazados son Server Actions. Publicar y reintentar llaman al
-repository y después a Discord y Buffer. Archivar, volver a publicar, rechazar un archivado
-y eliminar rechazados no mandan posts. No hay mocks:
+repository y después a Discord y Buffer. Archivar, volver a publicar y eliminar rechazados
+no mandan posts. No hay mocks:
 el repository lee y escribe Supabase con `service_role`. El resto del panel sigue en mock.
 
 No hay login propio. En el panel real esta pantalla queda detrás del JWT que ya cubre el shell.
+
+**Límites de «Datos de la card».** Salen del espacio de la card, no del formulario público (que
+sigue aceptando hasta 120). Viven en `CARD_LIMITS` (`infrastructure/cardFields.ts`) y
+`QUOTE_EDIT_MAX_CHARS` (`captionTemplates.ts`); la UI y `validateCardEdits` leen las mismas constantes.
+
+| Campo | Tope | Avisa desde |
+| --- | --- | --- |
+| Nombre | 40 | 35 |
+| Empresa | 40 | 32 |
+| Puesto del primer empleo, puesto principal, oficio anterior, rol nuevo | 50 | 40 |
+| País | 60 | 48 |
+| Cita de la historia | 300 | 240 (80 %) |
+
+Los inputs no cortan la escritura ni el pegado. El contador es gris hasta el umbral, ámbar desde
+el umbral y rojo al pasar el tope (ej. `43/40`, con borde rojo y mensaje). Mientras haya un campo
+excedido, «Guardar» y «Publicar» quedan deshabilitados. El servidor valida los mismos topes al
+guardar y al publicar. El largo se cuenta sin espacios en los extremos y por caracteres (un emoji
+simple cuenta 1). Los testimonios que llegaron con valores entre el tope nuevo y 120 se abren
+igual, con el campo en rojo, hasta que se acorten.
 
 | Ruta | Qué es |
 | --- | --- |
@@ -70,7 +89,11 @@ producción falta `GALLERY_URL`, no se muestra y ese texto vacío nombra la ruta
 Publicar arma la card en el browser. En el server, el update a `published` y `published_at`
 solo gana si la fila sigue `in_review`. El request que no cambia la fila no sube nada ni postea,
 y vuelve a la ficha. El que gana sube el PNG al bucket `share-cards` (`{slug}/instagram.png`).
-Si el PNG no se genera o pesa más de 5 MB, el testimonio sigue en revisión. Si no se puede
+Si el PNG no se genera o pesa más de 5 MB, el testimonio sigue en revisión. Si falta el objeto
+del avatar o de la captura en Storage, no se puede publicar ni previsualizar; la salida es
+reponer el objeto o rechazar el testimonio. Si no carga `/brand/logo-no-country.png`, o
+`/brand/ig-fallback.jpg` cuando esa es la foto de la card, tampoco se publica ni se
+previsualiza, y eso no es motivo para rechazar el testimonio. Si no se puede
 subir, la fila vuelve a `in_review` con `published_at` en null. Con la card guardada reserva cada
 red (la fecha solo si sigue en null) y manda la card al webhook de Discord comunidad y a Buffer.
 Cada red sale con su texto guardado. Discord tiene el suyo, sin mención ni hashtags; la cita queda
@@ -94,14 +117,27 @@ El detalle queda con `?status=archived` y el inbox lo lista en Archivados. Sale 
 Archivar no borra los posts ya enviados a Discord, Instagram ni LinkedIn, ni los ids de Buffer,
 ni las fechas de publicación (`published_at`, `*_posted_at`). Volver a publicar lo devuelve a
 `published` y a la galería sin reenviar a ninguna red: si una red nunca había salido, el panel
-de publicados vuelve a ofrecer Reintentar. Rechazar un archivado lo pasa a `rejected`, limpia el
-motivo y vuelve a `/testimonials` con los filtros del inbox.
+de publicados vuelve a ofrecer Reintentar. La ficha de un archivado solo ofrece «Volver a publicar».
+
+Rechazar pide un motivo obligatorio (hasta 500 caracteres) que se guarda en `reject_reason` y se muestra
+en el detalle del rechazado; los rechazados anteriores muestran «Sin motivo registrado». El motivo es solo
+para admin: no va a la vista pública ni a las redes.
+
+Desde el detalle de un rechazado se puede devolver el envío a revisión (`rejected` → `in_review`).
+Pide confirmación. El update solo gana si la fila sigue `rejected`: el estado pasa a `in_review`
+y `archive_reason` y `reject_reason` quedan null (volver a revisión limpia el motivo). No modifica `published_at`, la cita, los captions, `payload`, los
+ids ni las fechas de los posts, ni los archivos de Storage, y no manda nada a Discord, Instagram
+ni LinkedIn. Al confirmar, el detalle abre el formulario de revisión (guardar, publicar o rechazar
+de nuevo) y queda con `?status=in_review`. Si la fila ya no está `rejected`, el diálogo muestra
+«Este testimonio ya no está rechazado.»; si falla la lectura, «No encontramos ese testimonio.».
+No aparece en publicados ni archivados. El archivado sigue con «Volver a publicar». Sin migración.
 
 ### Eliminar rechazados
 
 En la pestaña Rechazados del inbox se marcan varios testimonios o todos los visibles
 (tope 100 por operación). «Eliminar definitivamente» pide confirmación con la cantidad.
-Solo corre sobre filas que siguen `rejected`. Por cada una borra primero el avatar
+Solo corre sobre filas que siguen `rejected`. Una fila devuelta a revisión ya no está `rejected`
+y no se borra. Por cada una borra primero el avatar
 (bucket `avatars`), la foto testimonial (bucket `captures`, si existe) y
 `share-cards/{slug}/instagram.png`, y después la fila. Si Storage falla en una, esa fila
 queda y se puede reintentar. Al terminar se queda en el inbox con los filtros de la URL
@@ -110,7 +146,7 @@ y muestra un resultado. No requiere migración: usa `service_role`.
 Antes de desplegar el panel hay que aplicar la migración
 `20261027221527_discord_caption.sql`. Sin la columna `discord_caption`, guardar y publicar fallan
 para todos los envíos. Archivar además necesita `20261028190000_archived_status.sql` y
-`20261028190001_archive_reason.sql` (el estado `archived` y el motivo).
+`20261028190001_archive_reason.sql` (el estado `archived` y el motivo). Rechazar necesita `20261029120000_reject_reason.sql`.
 
 Un reintento de LinkedIn de un testimonio publicado antes de este cambio ya no agrega el link del
 video al final: se manda el texto guardado.

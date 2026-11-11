@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { ArchivedPanel } from "@features/testimonials/components/ArchivedPanel";
 import { DetailHeader } from "@features/testimonials/components/DetailHeader";
 import { InboxBackLink } from "@features/testimonials/components/InboxFilters";
-import { PublishedPanel } from "@features/testimonials/components/PublishedPanel";
+import {
+  PublishedPanelSkeleton,
+  PublishedPanelSlot,
+} from "@features/testimonials/components/PublishedPanelSlot";
+import { RejectedPanel } from "@features/testimonials/components/RejectedPanel";
 import { ReviewForm } from "@features/testimonials/components/ReviewForm";
 import { Submission } from "@features/testimonials/components/Submission";
 import { bufferPublishesImmediately } from "@features/testimonials/infrastructure/buffer";
@@ -14,10 +19,8 @@ import {
   inboxSearchNeedsCleanup,
 } from "@features/testimonials/infrastructure/inboxQuery";
 import {
-  bufferPostStates,
   getTestimonialById,
   isTestimonialId,
-  storedShareCardUrl,
 } from "@features/testimonials/infrastructure/repositories/testimonialRepository";
 import { galleryTestimonialHref } from "@features/testimonials/infrastructure/site";
 import { PageHeader, PageHeaderDescription, PageHeaderTitle } from "@shared/ui/patterns/PageHeader";
@@ -79,39 +82,24 @@ export default async function TestimonialDetailPage({
     );
   }
 
-  const [shareCardUrl, bufferStates] =
-    testimonial.status === "published"
-      ? await Promise.all([storedShareCardUrl(testimonial.slug), bufferPostStates(testimonial)])
-      : [null, null];
-
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
       <DetailHeader testimonial={testimonial} />
       <div className="mt-6 flex min-w-0 flex-col gap-6">
         {submission}
         {testimonial.status === "published" ? (
-          <PublishedPanel
-            testimonial={testimonial}
-            channels={channels}
-            shareStatus={shareStatus}
-            shareCardUrl={shareCardUrl}
-            bufferStates={bufferStates}
-            publicHref={galleryTestimonialHref(testimonial.slug)}
-            scheduled={!bufferPublishesImmediately()}
-          />
+          <Suspense fallback={<PublishedPanelSkeleton />}>
+            <PublishedPanelSlot
+              testimonial={testimonial}
+              channels={channels}
+              shareStatus={shareStatus}
+              publicHref={galleryTestimonialHref(testimonial.slug)}
+              scheduled={!bufferPublishesImmediately()}
+            />
+          </Suspense>
         ) : null}
         {testimonial.status === "archived" ? <ArchivedPanel testimonial={testimonial} /> : null}
-        {testimonial.status === "rejected" ? (
-          <section className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-            <header className="flex flex-col gap-1">
-              <h2 className="text-admin-heading font-semibold text-foreground">Rechazado</h2>
-              <p className="text-admin-caption text-muted-foreground">
-                No sale en la galería ni en las redes. El envío queda guardado arriba por si hace
-                falta volver a verlo.
-              </p>
-            </header>
-          </section>
-        ) : null}
+        {testimonial.status === "rejected" ? <RejectedPanel testimonial={testimonial} /> : null}
       </div>
     </div>
   );

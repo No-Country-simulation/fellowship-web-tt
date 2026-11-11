@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 import { INBOX_FILTERS_FIELD, inboxHref, inboxQueryFromField } from "../infrastructure/inboxQuery";
 import { hasInstagramChannel, hasLinkedInChannel } from "../infrastructure/buffer";
 import { hasCommunityWebhook } from "../infrastructure/discord";
-import { validateCardEdits } from "../infrastructure/cardFields";
-import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS } from "../infrastructure/quote";
+import { cardTextLength, validateCardEdits } from "../infrastructure/cardFields";
+import { CAPTION_MAX_CHARS, QUOTE_EDIT_MAX_CHARS, QUOTE_TOO_LONG_MESSAGE } from "../infrastructure/quote";
 import {
   archiveTestimonial,
   getTestimonialById,
@@ -15,16 +15,31 @@ import {
   prepareShareCard,
   publishTestimonial,
   deleteRejectedTestimonials,
-  rejectArchivedTestimonial,
+  isInboxCursorTimestamp,
+  loadInboxSlice,
   rejectTestimonial,
   republishTestimonial,
+  returnRejectedToReview,
   revertPublishedTestimonial,
   saveReviewEdits,
   storedShareCardUrl,
 } from "../infrastructure/repositories/testimonialRepository";
 import { prepareErroredBufferRetries, readShareCard, sharePublished } from "../infrastructure/share";
-import type { ArchiveState, BulkDeleteState, ReviewState } from "../types/reviewState";
-import { ARCHIVE_REASON_MAX_CHARS, BULK_DELETE_MAX } from "../types/testimonial";
+import type {
+  ArchiveState,
+  BulkDeleteState,
+  ReturnToReviewState,
+  ReviewState,
+} from "../types/reviewState";
+import {
+  ARCHIVE_REASON_MAX_CHARS,
+  REJECT_REASON_MAX_CHARS,
+  BULK_DELETE_MAX,
+  isTestimonialStatus,
+  type InboxPageCursor,
+  type InboxPageSlice,
+  type TestimonialStatus,
+} from "../types/testimonial";
 import {
   SHARE_CARD_TOO_LARGE_MESSAGE,
   SHARE_CARD_TOO_LARGE_PUBLISH_MESSAGE,
@@ -51,7 +66,17 @@ export async function reviewTestimonial(
   }
 
   if (intent === "reject") {
-    const rejected = await rejectTestimonial(id);
+    const reason = readString(formData, "reason");
+    if (!reason) {
+      return { status: "error", message: "El motivo no puede estar vacío." };
+    }
+    if (reason.length > REJECT_REASON_MAX_CHARS) {
+      return {
+        status: "error",
+        message: `El motivo puede tener hasta ${REJECT_REASON_MAX_CHARS} caracteres.`,
+      };
+    }
+    const rejected = await rejectTestimonial(id, reason);
     if (!rejected.ok) {
       return { status: "error", message: rejected.message };
     }
@@ -68,10 +93,10 @@ export async function reviewTestimonial(
   if (!quote) {
     return { status: "error", message: "La cita de la historia no puede estar vacía." };
   }
-  if (quote.length > QUOTE_EDIT_MAX_CHARS) {
+  if (cardTextLength(quote) > QUOTE_EDIT_MAX_CHARS) {
     return {
       status: "error",
-      message: `La cita de la historia puede tener hasta ${QUOTE_EDIT_MAX_CHARS} caracteres.`,
+      message: QUOTE_TOO_LONG_MESSAGE,
     };
   }
 
@@ -144,7 +169,7 @@ export async function reviewTestimonial(
     };
   }
 
-  const latest = await getTestimonialById(id);
+  const latest = await getTestimonialById(id, { fresh: true });
   const share = latest.ok
     ? await sharePublished(latest.testimonial, null)
     : {
@@ -260,28 +285,35 @@ export async function republishAction(id: string, formData: FormData): Promise<v
   redirectWithFilters(`/testimonials/${id}`, formData, { status: "published" });
 }
 
-/** Archivado → rechazado. Igual que el rechazo de revisión: inbox con los filtros del form. */
-export async function rejectArchivedAction(id: string, formData: FormData): Promise<void> {
+/**
+ * Rechazado → en revisión. No publica ni toca archivos.
+ * Error para `useActionState`. Éxito: detalle con el filtro `in_review`.
+ */
+export async function returnRejectedToReviewAction(
+  id: string,
+  _prev: ReturnToReviewState,
+  formData: FormData,
+): Promise<ReturnToReviewState> {
   if (!isTestimonialId(id)) {
-    redirectWithFilters("/testimonials", formData);
+    return { status: "error", message: "No encontramos ese testimonio." };
   }
 
   const current = await getTestimonialById(id);
   if (!current.ok) {
-    redirectWithFilters("/testimonials", formData);
+    return { status: "error", message: current.message };
   }
 
-  if (current.testimonial.status !== "archived") {
-    redirectWithFilters(`/testimonials/${id}`, formData);
+  if (current.testimonial.status !== "rejected") {
+    return { status: "error", message: "Este testimonio ya no está rechazado." };
   }
 
-  const rejected = await rejectArchivedTestimonial(id);
-  if (!rejected.ok) {
-    redirectWithFilters(`/testimonials/${id}`, formData);
+  const restored = await returnRejectedToReview(id);
+  if (!restored.ok) {
+    return { status: "error", message: restored.message };
   }
 
   revalidateTestimonials(id);
-  redirectWithFilters("/testimonials", formData);
+  redirectWithFilters(`/testimonials/${id}`, formData, { status: "in_review" });
 }
 
 /**
@@ -314,6 +346,33 @@ export async function deleteRejectedAction(formData: FormData): Promise<BulkDele
     failed: deleted.failedIds.length,
     skipped: deleted.skippedIds.length,
   };
+}
+
+const inboxMoreError = "No pudimos cargar más testimonios. Probá de nuevo.";
+
+/** Única lectura del inbox por action. La primera página la pide el slot. */
+export async function loadInboxPage(input: {
+  status: TestimonialStatus;
+  cursor: InboxPageCursor;
+}): Promise<{ ok: true; page: InboxPageSlice } | { ok: false; message: string }> {
+  if (!input || typeof input !== "object") {
+    return { ok: false, message: inboxMoreError };
+  }
+  const status = input.status;
+  const cursor = input.cursor;
+  if (!isTestimonialStatus(status)) {
+    return { ok: false, message: inboxMoreError };
+  }
+  if (
+    !cursor ||
+    typeof cursor.id !== "string" ||
+    typeof cursor.submittedAt !== "string" ||
+    !isTestimonialId(cursor.id) ||
+    !isInboxCursorTimestamp(cursor.submittedAt)
+  ) {
+    return { ok: false, message: inboxMoreError };
+  }
+  return loadInboxSlice(status, { id: cursor.id, submittedAt: cursor.submittedAt });
 }
 
 function revalidateTestimonials(id: string | readonly string[]) {

@@ -129,7 +129,7 @@ export function PublishedPanel({
             {publicHref ? (
               <a
                 href={publicHref}
-                className={buttonVariants({ variant: "outline", size: "sm" })}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-10 md:h-7")}
               >
                 Ver ficha pública
               </a>
@@ -166,7 +166,7 @@ export function PublishedPanel({
                       href={state.postUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={buttonVariants({ variant: "outline", size: "xs" })}
+                      className={cn(buttonVariants({ variant: "outline", size: "xs" }), "h-10 md:h-6")}
                     >
                       Ver post
                     </a>

@@ -1,0 +1,385 @@
+{
+  "result": "PASS",
+  "reports": [
+    {
+      "width": 1440,
+      "locale": "es",
+      "category": "simulation",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 1440,
+      "locale": "es",
+      "category": "first_job",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": true,
+      "responsive": null
+    },
+    {
+      "width": 1440,
+      "locale": "es",
+      "category": "career_change",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": [
+        {
+          "width": 320,
+          "fontPercent": 100
+        },
+        {
+          "width": 320,
+          "fontPercent": 200
+        },
+        {
+          "width": 375,
+          "fontPercent": 100
+        },
+        {
+          "width": 375,
+          "fontPercent": 200
+        },
+        {
+          "width": 768,
+          "fontPercent": 100
+        },
+        {
+          "width": 768,
+          "fontPercent": 200
+        },
+        {
+          "width": 1024,
+          "fontPercent": 100
+        },
+        {
+          "width": 1024,
+          "fontPercent": 200
+        },
+        {
+          "width": 1440,
+          "fontPercent": 100
+        },
+        {
+          "width": 1440,
+          "fontPercent": 200
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "locale": "en",
+      "category": "simulation",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 1440,
+      "locale": "en",
+      "category": "first_job",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": true,
+      "responsive": null
+    },
+    {
+      "width": 1440,
+      "locale": "en",
+      "category": "career_change",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": [
+        {
+          "width": 320,
+          "fontPercent": 100
+        },
+        {
+          "width": 320,
+          "fontPercent": 200
+        },
+        {
+          "width": 375,
+          "fontPercent": 100
+        },
+        {
+          "width": 375,
+          "fontPercent": 200
+        },
+        {
+          "width": 768,
+          "fontPercent": 100
+        },
+        {
+          "width": 768,
+          "fontPercent": 200
+        },
+        {
+          "width": 1024,
+          "fontPercent": 100
+        },
+        {
+          "width": 1024,
+          "fontPercent": 200
+        },
+        {
+          "width": 1440,
+          "fontPercent": 100
+        },
+        {
+          "width": 1440,
+          "fontPercent": 200
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "locale": "pt",
+      "category": "simulation",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 1440,
+      "locale": "pt",
+      "category": "first_job",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": true,
+      "responsive": null
+    },
+    {
+      "width": 1440,
+      "locale": "pt",
+      "category": "career_change",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Enter",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": [
+        {
+          "width": 320,
+          "fontPercent": 100
+        },
+        {
+          "width": 320,
+          "fontPercent": 200
+        },
+        {
+          "width": 375,
+          "fontPercent": 100
+        },
+        {
+          "width": 375,
+          "fontPercent": 200
+        },
+        {
+          "width": 768,
+          "fontPercent": 100
+        },
+        {
+          "width": 768,
+          "fontPercent": 200
+        },
+        {
+          "width": 1024,
+          "fontPercent": 100
+        },
+        {
+          "width": 1024,
+          "fontPercent": 200
+        },
+        {
+          "width": 1440,
+          "fontPercent": 100
+        },
+        {
+          "width": 1440,
+          "fontPercent": 200
+        }
+      ]
+    },
+    {
+      "width": 375,
+      "locale": "es",
+      "category": "simulation",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "es",
+      "category": "first_job",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "es",
+      "category": "career_change",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "en",
+      "category": "simulation",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "en",
+      "category": "first_job",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "en",
+      "category": "career_change",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "pt",
+      "category": "simulation",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "pt",
+      "category": "first_job",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    },
+    {
+      "width": 375,
+      "locale": "pt",
+      "category": "career_change",
+      "result": "PASS",
+      "directBack": true,
+      "keyboard": "Space",
+      "retainedFieldsAndImages": true,
+      "noBackwardValidation": true,
+      "forwardValidation": true,
+      "categoryRoundtrip": true,
+      "pending": false,
+      "responsive": null
+    }
+  ],
+  "blockedPosts": 3,
+  "realSubmissions": 0,
+  "blockedExternal": 0,
+  "browserExceptionCount": 0,
+  "manual": "Real screen reader, Safari/Firefox, touch keyboard and browser zoom remain manual; font scaling and mobile widths are simulated."
+}

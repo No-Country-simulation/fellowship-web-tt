@@ -16,7 +16,7 @@ import { TestimonialDetail } from "@/components/testimonial-detail";
 | --- | --- | --- |
 | `testimonial` | `PublicTestimonial` | Testimonio publicado obtenido por la página |
 
-Es un componente de servidor. No consulta Supabase. `app/t/[slug]/page.tsx` conserva la obtención de datos, metadata basada en `quote`, `notFound()` y el error con `PageShell`.
+Es un componente de servidor. No consulta Supabase. `app/(public)/t/[slug]/page.tsx` conserva la obtención de datos, metadata basada en `quote`, `notFound()` y el error con `PageShell`.
 
 ## Composición y responsive
 

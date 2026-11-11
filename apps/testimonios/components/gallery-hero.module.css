@@ -1,11 +1,6 @@
 .hero {
   position: relative;
   isolation: isolate;
-  padding-inline: min(var(--spacing-md), 24px);
-}
-
-@media (min-width: 48rem) {
-  .hero { padding-inline: min(var(--spacing-lg), 32px); }
 }
 
 /* Columna de 340px para la publicación y hasta 32px de reserva para la pila. */

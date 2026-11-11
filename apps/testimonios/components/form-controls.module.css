@@ -1,0 +1,24 @@
+/* Field focus and scoped summary spacing. Colors, borders, placeholders and
+ * shared CTA variants keep the existing Design System styles. */
+.field:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}
+
+/* Only the summary editor: rem spacing must not consume enlarged text's width.
+ * Scoped selectors also avoid competing with custom px-md utilities in cn(). */
+.summaryEditor :is(input[type="text"], input[type="email"], input[type="url"], select) {
+  padding-inline: min(var(--spacing-sm), 16px);
+}
+
+.summaryEditor select {
+  padding-inline-end: min(3rem, 48px);
+}
+
+.summaryEditor textarea {
+  padding-inline: min(var(--spacing-xs), 8px);
+}
+
+.compactPicker {
+  padding: min(var(--spacing-sm), 16px);
+}

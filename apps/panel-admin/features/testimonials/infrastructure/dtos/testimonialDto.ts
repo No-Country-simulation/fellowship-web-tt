@@ -18,6 +18,7 @@ export type Database = {
           type: TestimonialType;
           status: TestimonialStatus;
           archive_reason: string | null;
+          reject_reason: string | null;
           slug: string;
           full_name: string;
           country: string | null;
@@ -49,6 +50,7 @@ export type Database = {
           type: TestimonialType;
           status?: TestimonialStatus;
           archive_reason?: string | null;
+          reject_reason?: string | null;
           slug: string;
           full_name: string;
           country?: string | null;
@@ -80,6 +82,7 @@ export type Database = {
           type?: TestimonialType;
           status?: TestimonialStatus;
           archive_reason?: string | null;
+          reject_reason?: string | null;
           slug?: string;
           full_name?: string;
           country?: string | null;

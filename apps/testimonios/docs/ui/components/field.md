@@ -27,6 +27,10 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 
 `Field` y `FileField` son Client Components (`useId` / preview local).
 
+En `/enviar` requieren `FormLocaleProvider` para sufijos accesibles y textos propios de imagen. Labels, ayudas y errores siguen llegando por props; no se traducen valores del participante. Cambiar contexto no reemplaza sus instancias ni sus object URLs.
+
+Estado vigente: input/textarea/select de país y picker restauran `border`; placeholder y sufijo opcional restauran `text-muted`, como antes de `e434ddb`. Se retiran los cambios locales de color por decisión de fidelidad al Design System; sus contrastes insuficientes siguen registrados como FAIL. `form-controls.module.css` conserva el contorno funcional de foco (cyan, 2px, offset 3px) y añade espaciado acotado a `summaryEditor`/`compactPicker`, para editar el resumen con fuente ampliada sin consumir el ancho del texto. No modifica bordes, placeholders, colores o botones. Se mantienen los indicadores previos, errores y validaciones. Véase [decisión vigente y evidencia](../../form-i18n-audit.md#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system); 0.f conserva el ajuste de contraste histórico.
+
 ## Props — `Field`
 
 | Prop | Tipo | Default | Descripción |
@@ -40,6 +44,7 @@ No armar labels e inputs a mano con otros bordes. No usarlo para botones.
 | `required` | `boolean` | `false` | Asterisco rosa decorativo y texto accesible “(obligatorio)” |
 | `reserveErrorSpace` | `boolean` | `!hint` | Reserva mínima de 24px debajo del control para el error |
 | `trailingInfo` | `ReactNode` | — | Información al extremo derecho de la fila del error, por ejemplo un contador |
+| `stackTrailingInfo` | `boolean` | `false` | Apila error y contador en el editor del resumen para conservar espacio de lectura |
 | `labelAs` | `"label" \| "span"` | `"label"` | `span` si el click lo maneja un hijo (file, radios) |
 | `hideLabel` | `boolean` | `false` | Label `sr-only` (sigue anunciado) |
 | `className` | `string` | — | Clases del wrapper |
@@ -101,6 +106,8 @@ habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provision
 
 | Prop | Tipo | Default | Descripción |
 | --- | --- | --- | --- |
+| `file` | `File \| null` | requerido | Archivo final confirmado, controlado por el padre; se usa también después de remontar el selector |
+| `compact` | `boolean` | `false` | Variante del resumen: padding acotado, estado vacío con altura suficiente y captura con `object-contain` |
 | `name` | `string` | — | `name` del `<input type="file">` |
 | `label` | `string` | — | Texto del label |
 | `hint` | `string` | — | Ayuda opcional sobre qué foto pedir |
@@ -108,12 +115,24 @@ habitual, como guiones y apóstrofes, sin exigir pertenecer a la lista provision
 | `accept` | `string` | — | p. ej. `"image/jpeg,image/png,image/webp"` |
 | `preview` | `"avatar" \| "capture"` | — | Avatar cuadrado; captura 16:9 |
 | `onFileChange` | `(file: File \| null) => void` | — | Archivo recortado confirmado o `null` al quitarlo explícitamente |
-| `onInvalid` | `(message?: string) => void` | — | Error de recorte o lectura |
+| `onInvalid` | `(issue?: FormIssue) => void` | — | Incidencia semántica de recorte; se traduce en el formulario |
 | `error` | `string` | — | Mensaje de error |
 | `optional` | `boolean` | `false` | Sufijo “Opcional” disponible para otros usos; `/enviar` no lo repite |
 | `required` | `boolean` | `false` | Marca accesible de obligatoriedad; no cambia las reglas de archivo |
 | `hideLabel` | `boolean` | `false` | Label `sr-only` |
 | `className` | `string` | — | Clases del wrapper |
+
+El padre controla el archivo confirmado mediante `file` y `onFileChange`; el
+selector conserva localmente el recorte pendiente. La URL del preview se deriva
+de `file` y se revoca al cambiarlo o desmontar. Esto permite trasladar los mismos
+controles entre los pasos y el resumen sin perder el archivo ni mantener dos
+selecciones independientes. Cancelar un recorte conserva el confirmado.
+
+En el editor del resumen se utiliza `compact`: padding acotado, captura con
+`object-contain` y altura suficiente para su estado vacío. Allí los grupos pasan
+a dos columnas desde `lg`. Los pasos originales conservan su distribución. El
+relato usa `stackTrailingInfo` para que error y contador ocupen filas distintas;
+el comportamiento por defecto de `Field` no cambia.
 
 ## Classes
 
@@ -163,6 +182,7 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 ```tsx
 <FileField
   name="avatar"
+  file={avatar}
   label="Foto de perfil"
   requirements="JPG, PNG o WebP · Máximo 5 MB."
   required
@@ -174,6 +194,7 @@ Focus: borde y ring cyan. `aria-invalid`: borde y ring destructive.
 
 <FileField
   name="capture"
+  file={capture}
   label="Foto testimonial"
   hint="Una foto real de tu experiencia: vos trabajando, con tu equipo o en una reunión."
   requirements="JPG, PNG o WebP · Máximo 8 MB."

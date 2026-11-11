@@ -69,7 +69,7 @@ El SVG decorativo es `aria-hidden`; el avatar tiene `alt=""` porque el autor ya 
 
 Se releyeron `drawAuthorText`, `drawNameAndCountry`, `truncateToWidth`, `layoutQuote` y la preview `IgShare` del checkout actual (último commit local del generador: `4dbcfb2`). El Canvas reserva como máximo 42% del ancho de autor para el país, limita el nombre al resto, trunca país/rol por ancho y reduce la cita hasta 30px antes de añadir elipsis. Su preview conserva el PNG 4:5 con `max-w-md`.
 
-En este checkout `drawNameAndCountry` **todavía coloca nombre y país en la misma línea**. La estructura vertical solicitada se aplica explícitamente a HTML; no se atribuye al panel una separación que no figura en el archivo inspeccionado. Se vuelve a ejecutar ese generador sin modificarlo para comparar PNG y HTML a 340px, con los mismos fixtures normales y extensos.
+El generador ya separa nombre y país, y el HTML del hero conserva su propio criterio (nombre en una línea con elipsis). Se vuelve a ejecutar ese generador sin modificarlo para comparar PNG y HTML a 340px, con los mismos fixtures normales y extensos.
 
 ## Validación
 

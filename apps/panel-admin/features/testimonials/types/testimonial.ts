@@ -93,9 +93,13 @@ export const STATUS_LABELS: Record<TestimonialStatus, string> = {
 
 /** Tope del motivo de archivo. Lo comparten el formulario y la action. */
 export const ARCHIVE_REASON_MAX_CHARS = 500;
+export const REJECT_REASON_MAX_CHARS = 500;
 
 /** Tope de un borrado de rechazados. Lo comparten la lista, la action y el repositorio. */
 export const BULK_DELETE_MAX = 100;
+
+/** Filas de un estado que pide el inbox. La lista y el repositorio lo comparten; el cliente no importa el repositorio. */
+export const INBOX_PAGE_SIZE = 30;
 
 export function isTestimonialStatus(value: string): value is TestimonialStatus {
   return (TESTIMONIAL_STATUSES as readonly string[]).includes(value);
@@ -224,6 +228,7 @@ export type AdminTestimonial = {
   status: TestimonialStatus;
   /** Motivo guardado al archivar. Null en cualquier otro estado. */
   archiveReason: string | null;
+  rejectReason: string | null;
   fullName: string;
   country: string | null;
   email: string;
@@ -264,7 +269,27 @@ export type AdminInboxItem = {
   submittedAt: string;
 };
 
-export type AdminInboxData = {
+/** Par de la última fila pedida. `submittedAt` es el texto crudo de la columna. */
+export type InboxPageCursor = {
+  submittedAt: string;
+  id: string;
+};
+
+/** Total de la tabla por estado. `null` si ese conteo no salió. */
+export type InboxStatusCounts = Record<TestimonialStatus, number | null>;
+
+/** Una página del inbox, sin los totales (esos vienen con la primera). */
+export type InboxPageSlice = {
   items: AdminInboxItem[];
+  /** Ids de las filas devueltas, en orden, también las que el mapper apartó. */
+  rowIds: string[];
+  omitted: number;
+  cursor: InboxPageCursor | null;
+};
+
+/** Primera página del estado activo, con los cuatro totales. */
+export type AdminInboxPage = InboxPageSlice & {
+  status: TestimonialStatus;
+  counts: InboxStatusCounts;
   loadError: string | null;
 };

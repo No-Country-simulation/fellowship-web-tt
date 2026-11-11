@@ -4,9 +4,13 @@ import { ImagePlus, X } from "lucide-react";
 
 import { CaptureCropDialog } from "./capture-crop-dialog";
 import { cropAvatarFile, cropCaptureFile } from "@/lib/testimonials/prepare-image";
+import { formIssue, type FormIssue } from "@/lib/testimonials/issues";
 import { cn } from "@/lib/utils";
+import { useFormLocale } from "./form-locale-provider";
+import controls from "./form-controls.module.css";
 
 export const fieldClassName = cn(
+  controls.field,
   "h-11 min-w-0 w-full rounded-md border border-border bg-bg-base px-md text-body text-text-primary outline-none",
   "placeholder:text-text-muted",
   "focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40",
@@ -14,6 +18,7 @@ export const fieldClassName = cn(
 );
 
 export const textareaClassName = cn(
+  controls.field,
   "min-h-56 min-w-0 w-full resize-y rounded-md border border-border bg-bg-base px-md py-sm text-body leading-relaxed text-text-primary outline-none sm:min-h-64",
   "placeholder:text-text-muted",
   "focus-visible:border-accent-cyan focus-visible:ring-2 focus-visible:ring-accent-cyan/40",
@@ -29,6 +34,7 @@ type FieldProps = {
   required?: boolean;
   reserveErrorSpace?: boolean;
   trailingInfo?: ReactNode;
+  stackTrailingInfo?: boolean;
   labelAs?: "label" | "span";
   hideLabel?: boolean;
   className?: string;
@@ -50,11 +56,13 @@ export function Field({
   required,
   reserveErrorSpace = !hint,
   trailingInfo,
+  stackTrailingInfo = false,
   labelAs = "label",
   hideLabel,
   className,
   children,
 }: FieldProps) {
+  const { t } = useFormLocale();
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const labelId = `${fieldId}-label`;
@@ -76,11 +84,11 @@ export function Field({
       {required ? (
         <>
           <span aria-hidden="true" className="ml-1 text-brand-pink">*</span>
-          <span className="sr-only"> (obligatorio)</span>
+          <span className="sr-only"> {t("form.common.required")}</span>
         </>
       ) : null}
       {optional ? (
-        <span className="ml-1 font-normal text-text-muted">Opcional</span>
+        <span className="ml-1 font-normal text-text-muted">{t("form.common.optional")}</span>
       ) : null}
     </>
   );
@@ -103,7 +111,7 @@ export function Field({
       {error || reserveErrorSpace || trailingInfo ? (
         <div className={cn(
           reserveErrorSpace && "min-h-6",
-          trailingInfo && "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-xs",
+          trailingInfo && (stackTrailingInfo ? "flex flex-col gap-xs" : "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-xs"),
         )}>
           {trailingInfo ? (
             <>
@@ -118,6 +126,8 @@ export function Field({
 }
 
 type FileFieldProps = {
+  file: File | null;
+  compact?: boolean;
   name: string;
   label: string;
   hint?: string;
@@ -130,11 +140,13 @@ type FileFieldProps = {
   accept: string;
   preview: "avatar" | "capture";
   onFileChange: (file: File | null) => void;
-  onInvalid?: (message: string | undefined) => void;
+  onInvalid?: (issue: FormIssue | undefined) => void;
 };
 
-/** Imagen con preview y requisitos asociados; el reemplazo solo se aplica tras recortarlo. */
+/** Controlled confirmed file; only the pending crop is local. Each preview owns its URL. */
 export function FileField({
+  file,
+  compact = false,
   name,
   label,
   hint,
@@ -149,8 +161,9 @@ export function FileField({
   onFileChange,
   onInvalid,
 }: FileFieldProps) {
+  const { t } = useFormLocale();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const previewRef = useRef<HTMLImageElement>(null);
   const [cropSource, setCropSource] = useState<{
     file: File;
     url: string;
@@ -167,7 +180,6 @@ export function FileField({
   }
 
   function clearFile() {
-    setObjectUrl(null);
     closeCrop();
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -202,13 +214,12 @@ export function FileField({
     void cropFile(cropSource.file, area)
       .then((prepared) => {
         if (currentOperation !== operation.current) return;
-        setObjectUrl(createObjectUrl(prepared));
         onFileChange(prepared);
         closeCrop();
       })
       .catch(() => {
         if (currentOperation !== operation.current) return;
-        onInvalid?.("No pudimos recortar la foto.");
+        onInvalid?.(formIssue("image.cropFailed"));
         closeCrop();
         if (inputRef.current) {
           inputRef.current.value = "";
@@ -216,15 +227,26 @@ export function FileField({
       });
   }
 
-  // Liberar solo URLs que el DOM ya dejó de usar; nunca desde un updater.
+  useLayoutEffect(() => {
+    const image = previewRef.current;
+    if (!file || !image) return;
+    const url = URL.createObjectURL(file);
+    image.src = url;
+    return () => {
+      image.removeAttribute("src");
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  // Original URLs belong only to the pending crop, never to the confirmed file.
   useEffect(() => {
     for (const url of objectUrls.current) {
-      if (url !== objectUrl && url !== cropSource?.url) {
+      if (url !== cropSource?.url) {
         URL.revokeObjectURL(url);
         objectUrls.current.delete(url);
       }
     }
-  }, [objectUrl, cropSource]);
+  }, [cropSource]);
 
   useLayoutEffect(() => {
     const urls = objectUrls.current;
@@ -263,20 +285,22 @@ export function FileField({
                 ? "relative aspect-video w-full flex-col items-center justify-center overflow-hidden rounded-md p-md text-center"
                 : "items-center gap-md p-md",
             invalid && "border-destructive",
+            compact && controls.compactPicker,
+            compact && !file && preview === "capture" && "min-h-40",
           )}
         >
-          {objectUrl ? (
+          {file ? (
             // Preview of the file the user just picked (not a remote asset).
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={objectUrl}
+              ref={previewRef}
               alt=""
               className={cn(
                 "shrink-0",
                 preview === "avatar"
                   ? "absolute inset-0 size-full object-cover"
                   : preview === "capture"
-                    ? "absolute inset-0 size-full object-cover"
+                    ? cn("absolute inset-0 size-full", compact ? "object-contain" : "object-cover")
                     : "h-16 w-24 rounded-sm object-cover",
               )}
             />
@@ -284,10 +308,10 @@ export function FileField({
             <span className="flex flex-col items-center gap-xs text-body-small text-text-secondary">
               {!cropSource ? <ImagePlus aria-hidden="true" className="size-6 text-accent-cyan" /> : null}
               {cropSource
-                ? "Recortando…"
+                ? t("form.images.cropping")
                 : preview === "avatar"
-                  ? "Agregar foto de perfil"
-                  : "Agregar fotografía"}
+                  ? t("form.images.addAvatar")
+                  : t("form.images.addCapture")}
             </span>
           )}
           <input
@@ -310,10 +334,10 @@ export function FileField({
             }}
           />
         </label>
-        {objectUrl ? (
+        {file ? (
           <button
             type="button"
-            aria-label={preview === "avatar" ? "Quitar foto" : "Quitar foto testimonial"}
+            aria-label={preview === "avatar" ? t("form.images.removeAvatar") : t("form.images.removeCapture")}
             className="absolute top-1 right-1 grid size-11 cursor-pointer place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
             onClick={clearFile}
           >

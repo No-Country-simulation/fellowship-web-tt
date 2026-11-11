@@ -1,0 +1,43 @@
+# Unapproved navigation-button proposal: keep local artifacts out of commits.
+/form-summary-edit/
+
+# Inline summary QA still generates and checks the complete image matrix.
+# Keep only the current report, validation regression and six review images.
+/form-summary-inline/*
+!/form-summary-inline/README.md
+!/form-summary-inline/qa-results.json
+!/form-summary-inline/submit-regression/
+/form-summary-inline/submit-regression/*
+!/form-summary-inline/submit-regression/qa-results.json
+!/form-summary-inline/en-1440-100-present.png
+!/form-summary-inline/en-1440-100-present-editing.png
+!/form-summary-inline/es-375-100-present.png
+!/form-summary-inline/es-375-100-present-editing.png
+!/form-summary-inline/pt-320-200-present-editing.png
+!/form-summary-inline/pt-320-200-editing-footer.png
+
+# Stage 5: four selected images and three reports; keep generated extras local.
+/hero-consent/**
+!/hero-consent/README.md
+!/hero-consent/qa-results.json
+!/hero-consent/hero-es-320.png
+!/hero-consent/hero-en-1440.png
+!/hero-consent/hero-pt-375-200.png
+!/hero-consent/es-375-review-submit.png
+!/hero-consent/summary-regression/
+!/hero-consent/summary-regression/qa-results.json
+!/hero-consent/submit-regression/
+!/hero-consent/submit-regression/qa-results.json
+
+# Hero/form integration: four representative images, full reports, no matrix duplicates.
+/hero-form-integration/**
+!/hero-form-integration/README.md
+!/hero-form-integration/qa-results.json
+!/hero-form-integration/hero-es-320.png
+!/hero-form-integration/hero-en-1440.png
+!/hero-form-integration/hero-pt-375-200.png
+!/hero-form-integration/es-375-review-submit.png
+!/hero-form-integration/summary-regression/
+!/hero-form-integration/summary-regression/qa-results.json
+!/hero-form-integration/submit-regression/
+!/hero-form-integration/submit-regression/qa-results.json
