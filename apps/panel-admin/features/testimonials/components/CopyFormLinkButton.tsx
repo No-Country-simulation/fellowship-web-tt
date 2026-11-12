@@ -51,7 +51,7 @@ export function CopyFormLinkButton({ href }: { href: string | null }) {
         data-copied={copied ? "" : undefined}
         className={cn(
           buttonVariants({ variant: "ghost", size: "xs" }),
-          "max-w-full transition-all duration-200 border-none bg-transparent"
+          "h-10 max-w-full transition-all duration-200 border-none bg-transparent md:h-6"
         )}
       >
         <span key={ack} className={cn("inline-flex", copied && "motion-safe:animate-copy-ack")}>
