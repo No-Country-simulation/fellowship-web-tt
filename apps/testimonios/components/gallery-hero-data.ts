@@ -8,24 +8,30 @@ import { availableShareCardUrls } from "@/lib/testimonials/share-card-availabili
 
 export type HeroStory = HeroTestimonialCardContent &
   Pick<PublicTestimonial, "id" | "slug" | "typeLabel">;
+export type HeroStories = readonly HeroStory[] | null;
+export type HeroStoriesSource = HeroStories | Promise<HeroStories>;
 
 function shareCardUrl(slug: string): string | null {
   return slug && slug !== "." && slug !== ".." && !/[\\/?#]/.test(slug)
     ? publicStorageUrl("share-cards", `${slug}/instagram.png`) : null;
 }
 
-/** Uses confirmed public artwork within a 200ms budget; after() completes pending metadata probes. */
+/** Stream as soon as three images are confirmed, or all bounded checks finish; warm the rest with after(). */
 export async function selectAvailableHeroStories(testimonials: readonly PublicTestimonial[]): Promise<HeroStory[]> {
   const candidates = testimonials.map(testimonial => ({ testimonial, url: shareCardUrl(testimonial.slug) }));
+  // Randomize the probe order as well, so a cold request does not always favour the newest records.
+  for (let index = candidates.length - 1; index > 0; index--) {
+    const selected = Math.floor(Math.random() * (index + 1));
+    [candidates[index], candidates[selected]] = [candidates[selected], candidates[index]];
+  }
   const available = new Set<string>();
-  const checking = availableShareCardUrls(candidates.flatMap(({ url }) => url ? [url] : []), available);
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const completed = await Promise.race([
-    checking.then(() => true),
-    new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 200); }),
-  ]);
-  clearTimeout(timer);
-  if (!completed) after(() => checking.then(() => undefined));
+  let confirmThree!: () => void;
+  const enough = new Promise<void>(resolve => { confirmThree = resolve; });
+  const checking = availableShareCardUrls(candidates.flatMap(({ url }) => url ? [url] : []), available, () => {
+    if (available.size >= 3) confirmThree();
+  });
+  await Promise.race([checking, enough]);
+  if (available.size >= 3) after(() => checking.then(() => undefined));
   const eligible = candidates.filter(({ url }) => url && available.has(url)).map(({ testimonial }) => testimonial);
   if (eligible.length) return selectHeroStories(eligible);
   return selectHeroStories(testimonials).map(story => ({ ...story, imageUrl: null }));

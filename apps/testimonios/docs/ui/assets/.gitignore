@@ -68,3 +68,23 @@
 !/carousel-availability/public-cache.json
 !/carousel-availability/before.json
 !/carousel-availability/after.json
+
+# First visit: compact regression summary and two small diagnostic snapshots only.
+/carousel-first-visit/**
+!/carousel-first-visit/README.md
+!/carousel-first-visit/qa-summary.json
+!/carousel-first-visit/trace.json
+!/carousel-first-visit/pipeline.json
+
+# Compact carousel: summary, one public snapshot, comparisons and four review screenshots.
+# Full reports, coordinates, payload dumps and experimental matrices stay local.
+/carousel-legibility/**
+!/carousel-legibility/README.md
+!/carousel-legibility/public-verification.json
+!/carousel-legibility/qa-summary.json
+!/carousel-legibility/comparison-2.png
+!/carousel-legibility/comparison-4.png
+!/carousel-legibility/en-1440.png
+!/carousel-legibility/es-320.png
+!/carousel-legibility/pt-375-200.png
+!/carousel-legibility/es-375-fallback.png

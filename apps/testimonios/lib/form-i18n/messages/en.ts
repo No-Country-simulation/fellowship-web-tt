@@ -34,8 +34,9 @@ export const en = {
       of: "of",
       testimonial: "Testimonial",
       readText: "Read testimonial as text",
-      imageLoading: "Loading preview. You can read the testimonial below.",
-      imageUnavailable: "Preview unavailable. You can read the testimonial below."
+      loadingStories: "Loading testimonials…",
+      imageLoading: "Loading preview…",
+      imageUnavailable: "Preview unavailable."
     },
     intro: {
       title: "Share your experience",

@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "images": [
+    {
+      "quality": 85,
+      "width": 384
+    },
+    {
+      "quality": 85,
+      "width": 384
+    },
+    {
+      "quality": 85,
+      "width": 384
+    }
+  ],
+  "requests": [
+    {
+      "status": 200,
+      "mime": "image/webp",
+      "networkBytes": 37350
+    },
+    {
+      "status": 200,
+      "mime": "image/webp",
+      "networkBytes": 28040
+    },
+    {
+      "status": 200,
+      "mime": "image/webp",
+      "networkBytes": 14128
+    }
+  ],
+  "scope": "Final production build, existing public query and only public HEAD/GET. Three selected images, no 400; navigation demand loading. No URLs, participant data, credentials or writes recorded."
+}

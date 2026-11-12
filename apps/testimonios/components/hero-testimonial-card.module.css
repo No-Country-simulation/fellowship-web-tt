@@ -6,6 +6,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--bg-surface-2);
+  container-type: inline-size;
 }
 
 .placeholder {
@@ -21,10 +22,63 @@
   overflow-wrap: anywhere;
 }
 
+.placeholder[hidden] { display: none; }
+
 .image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+/* One semantic equivalent. Visually clipped until it is needed, never duplicated below the art. */
+.textAlternative {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  background: var(--bg-surface-2);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.textAlternative > * + * { margin-top: var(--spacing-sm); }
+
+.frame[data-text-fallback] .textAlternative,
+.textAlternative:focus-visible {
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: var(--spacing-sm);
+  overflow: auto;
+  clip-path: none;
+  scrollbar-gutter: stable;
+}
+
+.textAlternative:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: -3px;
+}
+
+/* At 200% root text, 272–340px holds fewer than 11em: offer reflowing text in the same frame.
+   This is a width/font ratio, not detection of native browser zoom or every OS accessibility setting. */
+@container (max-width: 11em) {
+  .textAlternative {
+    inset: 0;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: var(--spacing-sm);
+    overflow: auto;
+    clip-path: none;
+    scrollbar-gutter: stable;
+  }
 }

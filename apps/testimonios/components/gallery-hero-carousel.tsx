@@ -9,7 +9,6 @@ import { HeroTestimonialCard } from "@/components/hero-testimonial-card";
 import { cn } from "@/lib/utils";
 import { getFormMessages } from "@/lib/form-i18n/messages";
 import type { FormLocale } from "@/lib/form-i18n/locales";
-import { stripWrappingQuotes } from "@/lib/testimonials/quote";
 
 import styles from "./gallery-hero-carousel.module.css";
 
@@ -40,8 +39,7 @@ export function GalleryHeroCarousel({ stories, locale }: GalleryHeroCarouselProp
 }
 
 function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
-  const messages = getFormMessages(locale).form;
-  const copy = messages.hero;
+  const copy = getFormMessages(locale).form.hero;
   const [{ activeIndex, hasNavigated, motion, requested }, setNavigation] = useState<{
     activeIndex: number;
     hasNavigated: boolean;
@@ -57,7 +55,6 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
   const id = useId();
   const total = stories.length;
   const hasNavigation = total > 1;
-  const activeStory = stories[activeIndex];
 
   useEffect(() => {
     if (!motion) return;
@@ -160,26 +157,6 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
             })}
           </div>
         </div>
-      </div>
-      {/* One responsive text equivalent; also usable when artwork is small or unavailable. */}
-      <div className={styles.transcript} key={activeStory.id} data-hero-transcript>
-        <p className="font-semibold text-text-primary wrap-anywhere">{activeStory.fullName}</p>
-        <p className="text-sm leading-relaxed text-text-secondary wrap-anywhere">
-          {messages.categories[activeStory.type].label}
-          {activeStory.country ? ` · ${activeStory.country}` : ""}
-        </p>
-        <details>
-          <summary className={styles.textControl}>{copy.readText}</summary>
-          <div className="space-y-sm pt-xs text-base leading-relaxed text-text-primary wrap-anywhere">
-            <blockquote className="whitespace-pre-wrap">{stripWrappingQuotes(activeStory.quote)}</blockquote>
-            {activeStory.story !== activeStory.quote ? <p className="whitespace-pre-wrap">{activeStory.story}</p> : null}
-            <dl className="space-y-xs text-sm">
-              {activeStory.previousRole ? <div><dt className="text-text-secondary">{messages.fields.previous_profession.label}</dt><dd>{activeStory.previousRole}</dd></div> : null}
-              {activeStory.role ? <div><dt className="text-text-secondary">{activeStory.type === "simulation" ? messages.fields.primary_role.label : activeStory.type === "first_job" ? messages.fields.role_achieved.label : messages.fields.new_role.label}</dt><dd>{activeStory.role}</dd></div> : null}
-              {activeStory.company ? <div><dt className="text-text-secondary">{messages.fields.company.label}</dt><dd>{activeStory.company}</dd></div> : null}
-            </dl>
-          </div>
-        </details>
       </div>
       {/* Fuera de la publicación: no cubren el autor ni forman parte de su diseño. */}
       <div className="mt-sm flex min-w-0 flex-wrap items-center justify-between gap-xs">

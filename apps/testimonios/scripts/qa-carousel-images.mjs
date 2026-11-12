@@ -7,7 +7,8 @@ import { createRequire } from "node:module";
 import { appDir, browserQA, pause, require, until } from "./qa-carousel-browser.mjs";
 
 const sharp = createRequire(require.resolve("next/package.json"))("sharp");
-const output = join(appDir, "docs/ui/assets/carousel-optimized");
+const originals = join(appDir, "docs/ui/assets/carousel-optimized/generated");
+const output = join(appDir, "docs/ui/assets/carousel-legibility/design-regression");
 const layouts = [], scenarios = [], optimized = [], navigation = [], negotiation = [];
 const nextLabels = { es: "Siguiente testimonio", en: "Next testimonial", pt: "Próximo depoimento" };
 const textLabels = { es: "Leer testimonio en texto", en: "Read testimonial as text", pt: "Ler depoimento em texto" };
@@ -37,7 +38,7 @@ try {
   assert.ok(new URL(new URL(source, qa.origin).searchParams.get("url")).pathname.includes("/share-cards/"));
   for (const design of ["photo", "quote", "portrait", "offer", "journey", "shift", "profile"]) {
     // The fixture selects a design by a known synthetic slug; no Storage catalogue is queried.
-    const image = await readFile(join(output, "generated", design + ".png"));
+    const image = await readFile(join(originals, design + ".png"));
     const metadata = await sharp(image).metadata(); assert.equal(metadata.width, 1080); assert.equal(metadata.height, 1350);
   }
 
@@ -65,11 +66,10 @@ try {
   await qa.cdp("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   for (const locale of ["es", "en", "pt"]) {
     await qa.load(locale); await ready(qa);
-    assert.equal(await qa.ev(() => document.querySelector('[data-hero-transcript] summary').textContent), textLabels[locale]);
-    await qa.ev(() => document.querySelector('[data-hero-transcript] summary').focus());
-    await qa.key("Enter", "Enter", 13, "\r");
-    assert.ok(await qa.ev(() => document.querySelector('[data-hero-transcript] details').open), "native keyboard expands the semantic text");
-    assert.ok(await qa.ev(() => document.activeElement.matches('summary:focus-visible') && getComputedStyle(document.activeElement).outlineStyle !== 'none'), "text control keeps visible keyboard focus");
+    assert.equal(await qa.ev(() => document.querySelector('[data-position="0"] [data-hero-transcript]').getAttribute('aria-label')), textLabels[locale]);
+    await qa.key('Tab', 'Tab', 9);
+    await qa.ev(() => document.querySelector('[data-position="0"] [data-hero-transcript]').focus());
+    assert.ok(await qa.ev(() => document.activeElement.matches(':focus-visible') && getComputedStyle(document.activeElement).clipPath === 'none' && getComputedStyle(document.activeElement).outlineStyle !== 'none'), "text region is readable with visible keyboard focus");
     await qa.key('Tab', 'Tab', 9);
     assert.ok(await qa.ev(() => document.activeElement.matches('a[href^="/t/"]')), "Tab reaches the existing detail link");
     await qa.key('Tab', 'Tab', 9); await qa.key('Tab', 'Tab', 9);
@@ -82,7 +82,7 @@ try {
         await ready(qa);
         const layout = await qa.ev(selector => {
           const root = document.querySelector(selector), frame = root.querySelector('[data-position="0"] [data-hero-artwork]'), img = frame.querySelector("img");
-          const r = frame.getBoundingClientRect(), text = root.querySelector("[data-hero-transcript]");
+          const r = frame.getBoundingClientRect(), text = root.querySelector('[data-position="0"] [data-hero-transcript]');
           const controls = [...root.querySelectorAll("button, a, summary")].filter(e => !e.closest('[inert]'));
           return { fits: document.documentElement.scrollWidth <= document.documentElement.clientWidth && root.scrollWidth <= root.clientWidth + 1,
             ratio: Math.abs(r.width / r.height - 0.8) < 0.005, width: r.width, height: r.height,
@@ -90,16 +90,15 @@ try {
             oneActive: root.querySelectorAll('[data-position]:not([aria-hidden="true"])').length === 1,
             inactiveSafe: [...root.querySelectorAll('[data-position]:not([data-position="0"])')].every(e => e.inert && e.getAttribute("aria-hidden") === "true"),
             touchAreas: controls.every(e => e.getBoundingClientRect().height >= 43),
-            textFits: [...text.querySelectorAll("p,dd,dt,blockquote,summary")].every(e => e.scrollWidth <= e.clientWidth + 1),
-            textOpen: text.querySelector("details").open,
+            textFits: getComputedStyle(text).clipPath !== 'none' || text.scrollWidth <= text.clientWidth + 1,
+            textVisible: getComputedStyle(text).clipPath === 'none',
             imageAlt: img.alt, heroGateIntact: !document.querySelector('#hero-consent-checkbox').checked && document.querySelector('#hero-consent button').disabled,
             rawOriginalRequests: performance.getEntriesByType("resource").filter(e => e.name.includes('/storage/v1/') && !e.name.includes('/_next/image?')).length };
         }, carousel);
         assert.ok(layout.fits && layout.ratio && layout.imageContained && layout.oneActive && layout.inactiveSafe && layout.touchAreas && layout.textFits && layout.heroGateIntact && layout.rawOriginalRequests === 0, JSON.stringify({ locale, width, dpr, scale, index, layout }));
         layouts.push({ locale, viewport: width, dpr, textPercent: scale * 100, index, ...layout });
         await qa.click('button[aria-label="' + nextLabels[locale] + '"]');
-        // Each active story has one text equivalent; expanded state intentionally resets.
-        await qa.click('[data-hero-transcript] summary');
+        // Each active story has one equivalent; normal motion does not focus or reveal inactive text.
       }
       if (locale === "es" && width === 320 && dpr === 1 && scale === 1) await capture(qa, "es-320-text.png");
       if (locale === "pt" && width === 375 && dpr === 1 && scale === 2) await capture(qa, "pt-375-200.png");
@@ -112,13 +111,15 @@ try {
   }
   await qa.cdp("Emulation.setScriptExecutionDisabled", { value: true });
   await qa.cdp("Page.navigate", { url: qa.origin + '/enviar?lang=es' });
-  await until(() => qa.ev(selector => { const img = document.querySelector(selector); return document.readyState === 'complete' && img?.complete && img.naturalWidth > 0; }, activeImage), 'server-rendered artwork without hydration');
-  assert.equal(await qa.ev(selector => getComputedStyle(document.querySelector(selector)).opacity, activeImage), '1', 'initial artwork can paint before client JavaScript');
-  scenarios.push({ case: 'JavaScript disabled', serverArtworkVisible: true, result: 'PASS' });
+  await until(() => qa.ev(() => document.readyState === 'complete' && !!document.querySelector('[data-hero-pending]')), 'document with scripts disabled');
+  const noScripts = await qa.ev(() => ({ pendingHeight: document.querySelector('[data-hero-pending]').getBoundingClientRect().height,
+    visibleArtwork: [...document.querySelectorAll('[data-hero-artwork] img')].filter(e => e.getBoundingClientRect().height > 0).length }));
+  scenarios.push({ case: 'JavaScript disabled', ...noScripts, streamingSwapRequiresJavaScript: true, result: 'DOCUMENTED LIMITATION', note: 'No guarantee that the hero or streamed artwork is visible without JavaScript.' });
   await qa.cdp("Emulation.setScriptExecutionDisabled", { value: false });
   qa.setImageFailure(true); await qa.cdp("Network.setCacheDisabled", { cacheDisabled: true }); await qa.viewport(375); await qa.load("es");
   await until(() => qa.ev(selector => !document.querySelector(selector) && document.querySelector('[data-position="0"] [data-hero-artwork]').textContent.includes("no disponible"), activeImage), "failed optimizer fallback");
-  await qa.click('[data-hero-transcript] summary'); await capture(qa, "es-375-error.png");
+  assert.ok(await qa.ev(() => getComputedStyle(document.querySelector('[data-position="0"] [data-hero-transcript]')).clipPath === 'none'));
+  await capture(qa, "es-375-error.png");
   scenarios.push({ case: "optimizer 503 or browser network error", fallback: true, textAvailable: true });
 } finally { await qa.close(); }
 
@@ -127,13 +128,14 @@ for (const config of [{ count: 0 }, { count: 1 }, { count: 2 }, { count: 3, erro
   qa = await browserQA({ env: { QA_CAROUSEL_COUNT: String(config.count), QA_CAROUSEL_IMAGE_ERROR: config.error ?? "" } });
   try {
     await qa.viewport(375); await qa.load("en");
+    await until(() => qa.ev(() => !!document.querySelector('[aria-labelledby="gallery-title"]') && !document.querySelector('[data-hero-pending]')), 'resolved stream');
     if (!config.count) assert.equal(await qa.ev(selector => document.querySelector(selector), carousel), null);
     else {
       assert.equal(await qa.ev(selector => Number(document.querySelector(selector).dataset.count), carousel), config.count);
       if (!config.error) await ready(qa);
       else await until(() => qa.ev(selector => !document.querySelector(selector), activeImage), "server image failure fallback");
       assert.equal(await qa.ev(selector => document.querySelectorAll(selector + ' button').length, carousel), config.count === 1 ? 0 : 2);
-      assert.ok(await qa.ev(() => !!document.querySelector('[data-hero-transcript] summary')));
+      assert.ok(await qa.ev(() => !!document.querySelector('[data-position="0"] [data-hero-transcript]')));
     }
     assert.deepEqual(qa.stats(), { blockedPosts: 0, blockedExternal: 0, browserExceptions: 0 });
     scenarios.push({ ...config, responses: artRequests(qa).map(r => ({ status: r.status, mime: r.mime })), result: "PASS" });
@@ -150,7 +152,7 @@ for (const design of ["photo", "quote", "portrait", "offer", "journey", "shift",
     const body = Buffer.from(await response.arrayBuffer()), metadata = await sharp(body).metadata();
     assert.equal(response.status, 200); assert.equal(metadata.format, "webp"); assert.ok(metadata.width < 1080);
     assert.ok(Math.abs(metadata.height - metadata.width * 1.25) <= 1, "resizing preserves 4:5 within one pixel rounding");
-    const raw = await readFile(join(output, "generated", design + ".png"));
+    const raw = await readFile(join(originals, design + ".png"));
     assert.ok(body.length < raw.length);
     optimized.push({ design, originalBytes: raw.length, browserWidth: url.searchParams.get("w"), contentType: response.headers.get("content-type"), width: metadata.width, height: metadata.height, bytes: body.length, optimizerCache: response.headers.get("x-nextjs-cache"), durationMs: performance.now() - started });
     if (design === "photo") {

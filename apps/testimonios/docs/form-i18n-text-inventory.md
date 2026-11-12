@@ -29,9 +29,10 @@ Textos añadidos para el carrusel optimizado (ES/EN/PT, sin traducir testimonios
 
 | Archivo/componente | Texto actual | ES | PT-BR | Clave sugerida |
 | --- | --- | --- | --- | --- |
-| GalleryHeroCarousel / lectura | Leer testimonio en texto | Leer testimonio en texto | Ler depoimento em texto | `form.hero.readText` |
-| HeroTestimonialCard / carga | Cargando vista previa. Puedes leer el testimonio debajo. | Cargando vista previa. Puedes leer el testimonio debajo. | Carregando prévia. Você pode ler o depoimento abaixo. | `form.hero.imageLoading` |
-| HeroTestimonialCard / error | Vista previa no disponible. Puedes leer el testimonio debajo. | Vista previa no disponible. Puedes leer el testimonio debajo. | Prévia indisponível. Você pode ler o depoimento abaixo. | `form.hero.imageUnavailable` |
+| HeroTestimonialCard / región textual accesible | Leer testimonio en texto | Leer testimonio en texto | Ler depoimento em texto | `form.hero.readText` |
+| GalleryHero / carga parcial | Cargando testimonios… | Cargando testimonios… | Carregando depoimentos… | `form.hero.loadingStories` |
+| HeroTestimonialCard / carga | Cargando vista previa… | Cargando vista previa… | Carregando prévia… | `form.hero.imageLoading` |
+| HeroTestimonialCard / error | Vista previa no disponible. | Vista previa no disponible. | Prévia indisponível. | `form.hero.imageUnavailable` |
 
 | Archivo/componente | Texto actual | Propuesta en español neutro | Propuesta inicial pt-BR | Clave sugerida |
 | --- | --- | --- | --- | --- |

@@ -1,5 +1,7 @@
 # Carrusel del hero con imágenes optimizadas
 
+**Histórico de la migración inicial:** calidad 75 y bloque textual inferior corresponden a esta etapa. La [iteración de nitidez y simplificación](./carousel-legibility.md) documenta la configuración visual vigente; conserva estas mediciones y capturas sin sobrescribirlas.
+
 **Actualización de disponibilidad:** la [corrección de archivos faltantes](./carousel-image-availability.md) agrega selección con HEAD cacheados en servidor y espera acotada. Las mediciones y capturas de esta página corresponden a la migración anterior a ese filtro y se conservan como evidencia de esa etapa; no incluyen su coste de descubrimiento.
 
 Rama `feat/testimonios-carousel-optimized-images`. Implementación del 11/11/2026, pendiente de revisión manual del desarrollador antes del commit. Alcance exclusivo: carrusel de `/enviar`; formulario, consentimiento, validaciones, payload, acciones y servicios conservados. No se modifican panel, esquema ni `packages/ui`.

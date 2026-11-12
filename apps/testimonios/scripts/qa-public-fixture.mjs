@@ -30,7 +30,7 @@ async function fixtureFetch(input, init) {
   const method = init?.method ?? (input instanceof Request ? input.method : "GET");
   if (url.pathname === "/rest/v1/testimonials_public" && method === "GET") {
     if (process.env.QA_CAROUSEL_AVAILABILITY) {
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, Number(process.env.QA_CAROUSEL_PUBLIC_DELAY ?? 50)));
       const synthetic = Array.from({ length: 10 }, (_, index) => ({ ...rows[index % rows.length], id: `fixture-${index}`, slug: `availability-${process.env.QA_CAROUSEL_AVAILABILITY}-${index}` }));
       const slug = url.searchParams.get("slug");
       return Response.json(slug ? synthetic.filter(row => slug === `eq.${row.slug}`) : synthetic);

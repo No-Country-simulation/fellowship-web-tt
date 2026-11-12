@@ -1,0 +1,3 @@
+# One-off quality/crop experiments retained locally; no regression imports these files.
+/qa-carousel-quality-matrix.mjs
+/qa-carousel-quality-visual.mjs

@@ -1,0 +1,369 @@
+{
+  "schema": 1,
+  "scope": "Summary of the full local reports. Detailed cases, coordinates and payload dumps are generated and ignored; assertions are unchanged. Each suite retains its original result and manual limits.",
+  "suites": {
+    "streaming": {
+      "result": "PASS",
+      "scope": "Current local production build; synthetic public records/Storage bytes. Early form interaction, delayed stream, absence, transient recovery after 15s, timeout, demand loading, keyboard and 36 responsive states; zero writes or real services. Physical devices/screen readers/native zoom remain manual.",
+      "scenarios": [
+        {
+          "case": "form interactive before public query and HEAD complete; late stream, keyboard, ES/EN/PT",
+          "result": "PASS"
+        },
+        {
+          "available": 0,
+          "result": "PASS"
+        },
+        {
+          "available": 1,
+          "result": "PASS"
+        },
+        {
+          "available": 2,
+          "result": "PASS"
+        },
+        {
+          "available": 3,
+          "result": "PASS"
+        },
+        {
+          "available": 6,
+          "result": "PASS"
+        },
+        {
+          "available": 6,
+          "failure": "network",
+          "result": "PASS"
+        },
+        {
+          "available": 6,
+          "failure": "http",
+          "result": "PASS"
+        },
+        {
+          "available": 6,
+          "delay": 2000,
+          "result": "PASS"
+        }
+      ],
+      "layout": {
+        "executions": 36,
+        "locales": [
+          "en",
+          "es",
+          "pt"
+        ],
+        "viewports": [
+          320,
+          375,
+          768,
+          1024,
+          1440,
+          1920
+        ],
+        "textPercent": [
+          100,
+          200
+        ],
+        "dpr": [],
+        "checks": {
+          "fits": true,
+          "hidden": true
+        }
+      }
+    },
+    "form": {
+      "result": "PASS",
+      "scope": "Integrated hero and five steps in /enviar, affirmative declaration sent separately from editable values; nine category/locale flows. Final localized authorization appears only on review, describes submit, and is associated with the submit button. All testimonial submissions are blocked; no external services. Public avatar receives synthetic PNG bytes.",
+      "manual": "Physical devices, screen readers and native zoom remain manual; 200% uses root font scaling. Authorization sufficiency remains pending team/editorial/legal review.",
+      "flows": [
+        "es/simulation: PASS",
+        "es/first_job: PASS",
+        "es/career_change: PASS",
+        "en/simulation: PASS",
+        "en/first_job: PASS",
+        "en/career_change: PASS",
+        "pt/simulation: PASS",
+        "pt/first_job: PASS",
+        "pt/career_change: PASS"
+      ],
+      "checks": {
+        "authorizationOnlyOnReview": true,
+        "entryViaIntro": true,
+        "globalEditing": true,
+        "integralValidation": true,
+        "invalidFieldFocus": true,
+        "noConsentCookies": true,
+        "noPayloadFromSaveChanges": true,
+        "returnPreservesDraft": true
+      },
+      "hero": {
+        "executions": 36,
+        "locales": [
+          "en",
+          "es",
+          "pt"
+        ],
+        "viewports": [
+          320,
+          375,
+          768,
+          1024,
+          1440,
+          1920
+        ],
+        "textPercent": [
+          100,
+          200
+        ],
+        "dpr": [],
+        "checks": {
+          "fits": true,
+          "area": true,
+          "spacing": true,
+          "disabled": true
+        }
+      },
+      "authorization": {
+        "executions": 36,
+        "locales": [
+          "en",
+          "es",
+          "pt"
+        ],
+        "viewports": [
+          320,
+          375,
+          768,
+          1024,
+          1440,
+          1920
+        ],
+        "textPercent": [
+          100,
+          200
+        ],
+        "dpr": [],
+        "checks": {
+          "documentFits": true,
+          "afterSummary": true,
+          "beforeSubmit": true,
+          "allTextFits": true,
+          "secondary": true
+        }
+      },
+      "alignment": {
+        "executions": 576,
+        "checks": {
+          "aligned": true,
+          "singlePadding": true,
+          "fits": true,
+          "noGalleryExit": false
+        }
+      },
+      "routes": [
+        {
+          "result": "PASS",
+          "liveLanguage": true,
+          "gallery": true,
+          "detail": true,
+          "browserBack": true,
+          "browserForward": {
+            "formVisible": false
+          },
+          "reloadResetsConsent": true,
+          "singleChrome": true,
+          "keyboardCarousel": true
+        }
+      ],
+      "gallery": {
+        "executions": 12,
+        "locales": [],
+        "viewports": [
+          320,
+          375,
+          768,
+          1024,
+          1440,
+          1920
+        ],
+        "textPercent": [
+          100,
+          200
+        ],
+        "dpr": [],
+        "checks": {
+          "fits": true
+        }
+      },
+      "simulatedPosts": 0,
+      "realSubmissions": 0,
+      "registrationRequests": 0,
+      "blockedExternal": 0,
+      "browserExceptions": 0
+    },
+    "submission": {
+      "result": "PASS",
+      "scope": "Current production build, existing rules. Hidden-control changes deliberately test the final guard; normal forward navigation remains validated.",
+      "manual": "Real screen reader and mobile hardware remain manual. No visual summary changes.",
+      "flows": [
+        "es/simulation: PASS",
+        "es/first_job: PASS",
+        "es/career_change: PASS",
+        "en/simulation: PASS",
+        "en/first_job: PASS",
+        "en/career_change: PASS",
+        "pt/simulation: PASS",
+        "pt/first_job: PASS",
+        "pt/career_change: PASS"
+      ],
+      "checks": {
+        "accessibleFocus": true,
+        "categoryRoundtrip": true,
+        "consentRejectionRecoverable": true,
+        "newResponseIdentity": true,
+        "noPayloadBeforeValidation": true,
+        "serverErrorsRetained": true,
+        "valuesRetained": true
+      },
+      "simulatedPosts": 45,
+      "realSubmissions": 0,
+      "blockedExternal": 0,
+      "browserExceptions": 0
+    },
+    "presentation": {
+      "result": "PASS",
+      "scope": "Final production build; public PNGs replayed locally, synthetic public records. Five widths, DPR1/2/3, root text100/200, ES/EN/PT. Layout matrix may retain larger cached candidates; separate 15-case resolution matrix uses new source identities. CDP accessibility and keyboard; no real services/submissions. Not a physical-device/screen-reader certification; native zoom remains manual.",
+      "scenarios": [
+        {
+          "case": "normal motion, Enter/Space, retained images and focus",
+          "result": "PASS"
+        },
+        {
+          "case": "GET/optimizer failure after positive HEAD: complete text inside reserved frame",
+          "result": "PASS"
+        },
+        {
+          "case": "HEAD missing: no optimizer 400, complete local text, no detail request",
+          "result": "PASS"
+        }
+      ],
+      "layout": {
+        "executions": 270,
+        "locales": [
+          "en",
+          "es",
+          "pt"
+        ],
+        "viewports": [
+          320,
+          375,
+          768,
+          1440,
+          1920
+        ],
+        "textPercent": [
+          100,
+          200
+        ],
+        "dpr": [
+          1,
+          2,
+          3
+        ],
+        "checks": {
+          "fits": true,
+          "textFits": true,
+          "ratio": true,
+          "noBelowTranscript": true,
+          "oneActive": true,
+          "inactiveSafe": true,
+          "touch": true,
+          "gate": true
+        }
+      },
+      "quality85": true,
+      "oneStoryLink": true,
+      "rawStorageRequests": 0,
+      "normalTextClipped": true,
+      "enlargedTextReadable": true,
+      "initialResolutions": [
+        {
+          "viewport": 320,
+          "dpr": 1,
+          "deliveredWidth": 384
+        },
+        {
+          "viewport": 320,
+          "dpr": 2,
+          "deliveredWidth": 640
+        },
+        {
+          "viewport": 320,
+          "dpr": 3,
+          "deliveredWidth": 828
+        },
+        {
+          "viewport": 375,
+          "dpr": 1,
+          "deliveredWidth": 384
+        },
+        {
+          "viewport": 375,
+          "dpr": 2,
+          "deliveredWidth": 750
+        },
+        {
+          "viewport": 375,
+          "dpr": 3,
+          "deliveredWidth": 1080
+        },
+        {
+          "viewport": 768,
+          "dpr": 1,
+          "deliveredWidth": 384
+        },
+        {
+          "viewport": 768,
+          "dpr": 2,
+          "deliveredWidth": 750
+        },
+        {
+          "viewport": 768,
+          "dpr": 3,
+          "deliveredWidth": 1080
+        },
+        {
+          "viewport": 1440,
+          "dpr": 1,
+          "deliveredWidth": 384
+        },
+        {
+          "viewport": 1440,
+          "dpr": 2,
+          "deliveredWidth": 750
+        },
+        {
+          "viewport": 1440,
+          "dpr": 3,
+          "deliveredWidth": 1080
+        },
+        {
+          "viewport": 1920,
+          "dpr": 1,
+          "deliveredWidth": 384
+        },
+        {
+          "viewport": 1920,
+          "dpr": 2,
+          "deliveredWidth": 750
+        },
+        {
+          "viewport": 1920,
+          "dpr": 3,
+          "deliveredWidth": 1080
+        }
+      ]
+    }
+  }
+}

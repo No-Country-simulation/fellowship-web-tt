@@ -63,24 +63,25 @@ describe("availability-aware hero selection", () => {
     }
     assert.deepEqual(JSON.parse(JSON.stringify(await exports.selectAvailableHeroStories([]))),[]);
   });
-  it('caps the wait, preserves confirmed candidates and leaves remaining checks to after()',async()=>{
-    for(const warm of [false,true]){
-      let onBudget,finish,complete=false;const tasks=[], scoped={};
-      runInNewContext(code,{exports:scoped,setTimeout:fn=>{onBudget=fn;return 1;},clearTimeout:()=>{},require:name=>{
+  it('streams three confirmed candidates before slow remaining checks, without freezing a textual response',async()=>{
+    for(const confirmed of [2,3]){
+      let finish,returned=false;const tasks=[], scoped={};
+      runInNewContext(code,{exports:scoped,require:name=>{
         if(name==='server-only')return{};
         if(name==='next/server')return{after:task=>tasks.push(task)};
         if(name==='@/lib/supabase/storage')return{publicStorageUrl:(bucket,path)=>'https://fixture/'+bucket+'/'+path};
-        if(name==='@/lib/testimonials/share-card-availability')return{availableShareCardUrls:(urls,available)=>{
-          if(complete){urls.forEach(url=>available.add(url));return Promise.resolve(available);}
-          if(warm)available.add(urls[0]);
-          return new Promise(resolve=>{finish=()=>{complete=true;urls.forEach(url=>available.add(url));resolve(available);};});
+        if(name==='@/lib/testimonials/share-card-availability')return{availableShareCardUrls:(urls,available,onAvailable)=>{
+          urls.slice(0,confirmed).forEach(url=>{available.add(url);onAvailable();});
+          return new Promise(resolve=>{finish=()=>resolve(available);});
         }};throw Error('Unexpected test import');
       }});
       const rows=Array.from({length:5},(_,i)=>({...base,id:String(i),slug:'story-'+i}));
-      const checking=scoped.selectAvailableHeroStories(rows);onBudget();const first=JSON.parse(JSON.stringify(await checking));
-      assert.equal(first.length,warm?1:3);assert.ok(first.every(story=>warm?story.imageUrl!==null:story.imageUrl===null));assert.equal(tasks.length,1);
-      finish();await tasks[0]();const next=JSON.parse(JSON.stringify(await scoped.selectAvailableHeroStories(rows)));
-      assert.equal(next.length,3);assert.ok(next.every(story=>story.imageUrl));assert.ok(first.every(story=>warm||story.imageUrl===null),'response already returned is not mutated by background verification');
+      const checking=scoped.selectAvailableHeroStories(rows).then(value=>{returned=true;return value;});
+      await new Promise(resolve=>setImmediate(resolve));
+      assert.equal(returned,confirmed===3);
+      finish();const first=JSON.parse(JSON.stringify(await checking));
+      assert.equal(first.length,confirmed);assert.ok(first.every(story=>story.imageUrl));
+      assert.equal(tasks.length,confirmed===3?1:0);if(tasks.length)await tasks[0]();
     }
   });
 });
@@ -93,17 +94,17 @@ describe("server availability cache with isolated fetch and clock", () => {
       const key=keys.join(':')+url, entry=caches.get(key);
       if(entry&&entry.expires>clock)return Promise.resolve(entry.value);
       const refresh=()=>Promise.resolve(fn(url)).then(value=>{caches.set(key,{value,expires:clock+revalidate*1000});return value;});
-      if(entry){const work=refresh();inFlight.push(work);return Promise.resolve(entry.value);}
+      if(entry){const work=refresh().catch(()=>entry.value);inFlight.push(work);return Promise.resolve(entry.value);}
       return refresh();
     };
     const result={};
     const source=await readFile(new URL('../lib/testimonials/share-card-availability.ts',import.meta.url),'utf8');
     runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{
-      exports:result,AbortSignal,
+      exports:result,AbortSignal,Date:class extends Date{static now(){return clock;}},
       fetch:async(url,options)=>{calls++;active++;maxActive=Math.max(active,maxActive);assert.equal(options.method,'HEAD');assert.equal(options.cache,'no-store');assert.equal(options.redirect,'error');assert.ok(options.signal);try{return await response(url);}finally{active--;}}
       ,require:name=>{if(name==='server-only')return{};if(name==='next/cache')return{unstable_cache:cacheDouble};throw Error('Unexpected test import');}
     });
-    return {read:async urls=>[...await result.availableShareCardUrls(urls)],setResponse:fn=>{response=fn;},advance:()=>{clock+=301000;},flush:()=>Promise.all(inFlight.splice(0)),calls:()=>calls,maxActive:()=>maxActive};
+    return {read:async urls=>[...await result.availableShareCardUrls(urls)],setResponse:fn=>{response=fn;},advance:(ms=301000)=>{clock+=ms;},flush:()=>Promise.all(inFlight.splice(0)),calls:()=>calls,maxActive:()=>maxActive};
   }
   it('reuses successful and unavailable metadata without per-visitor HEADs',async()=>{
     const qa=await setup();qa.setResponse(async url=>new Response(null,{status:url==='missing'?400:200,headers:{'content-type':'image/png'}}));
@@ -129,5 +130,19 @@ describe("server availability cache with isolated fetch and clock", () => {
     const qa=await setup();qa.setResponse(async()=>{await new Promise(r=>setTimeout(r,5));return new Response(null,{headers:{'content-type':'image/png'}});});
     await Promise.all([qa.read(['same']),qa.read(['same'])]);assert.equal(qa.calls(),1);
     await qa.read(Array.from({length:14},(_,i)=>'unique-'+i));assert.equal(qa.maxActive(),6);
+  });
+  it('does not cache timeouts/500/network/unexpected responses for five minutes; backs off 15s',async()=>{
+    for(const fail of [async()=>{throw new DOMException('timeout','TimeoutError');},async()=>{throw Error('network');},async()=>new Response(null,{status:500}),async()=>new Response('unexpected',{headers:{'content-type':'text/html'}})]){
+      const qa=await setup();qa.setResponse(fail);assert.deepEqual(await qa.read(['source']),[]);assert.equal(qa.calls(),1);
+      qa.setResponse(async()=>new Response(null,{headers:{'content-type':'image/png'}}));
+      qa.advance(14999);assert.deepEqual(await qa.read(['source']),[]);assert.equal(qa.calls(),1);
+      qa.advance(2);assert.deepEqual(await qa.read(['source']),['source']);assert.equal(qa.calls(),2);
+    }
+  });
+  it('keeps the last confirmed positive during a failed stale refresh and retries after backoff',async()=>{
+    const qa=await setup();assert.deepEqual(await qa.read(['source']),['source']);
+    qa.advance();qa.setResponse(async()=>new Response(null,{status:500}));assert.deepEqual(await qa.read(['source']),['source']);await qa.flush();
+    assert.deepEqual(await qa.read(['source']),['source']);await qa.flush();assert.equal(qa.calls(),2);
+    qa.advance(15001);qa.setResponse(async()=>new Response(null,{headers:{'content-type':'image/png'}}));await qa.read(['source']);await qa.flush();assert.deepEqual(await qa.read(['source']),['source']);assert.equal(qa.calls(),3);
   });
 });

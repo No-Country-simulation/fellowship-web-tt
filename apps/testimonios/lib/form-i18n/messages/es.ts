@@ -34,8 +34,9 @@ export const es = {
       of: "de",
       testimonial: "Testimonio",
       readText: "Leer testimonio en texto",
-      imageLoading: "Cargando vista previa. Puedes leer el testimonio debajo.",
-      imageUnavailable: "Vista previa no disponible. Puedes leer el testimonio debajo."
+      loadingStories: "Cargando testimonios…",
+      imageLoading: "Cargando vista previa…",
+      imageUnavailable: "Vista previa no disponible."
     },
     intro: {
       title: "Comparte tu experiencia",

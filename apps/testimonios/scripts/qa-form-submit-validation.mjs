@@ -14,10 +14,11 @@ import { fileURLToPath } from "node:url";
 const appDir = fileURLToPath(new URL("../", import.meta.url));
 const require = createRequire(import.meta.url);
 const summaryEdit = process.argv.includes('--summary-edit');
-const carouselImages = process.argv.includes('--carousel-images');
+const firstVisit = process.argv.includes('--first-visit');
+const carouselImages = firstVisit || process.argv.includes('--carousel-images');
 const integration = carouselImages || process.argv.includes('--hero-form');
 const heroConsent = integration || process.argv.includes('--hero-consent');
-const output = join(appDir, carouselImages ? "docs/ui/assets/carousel-optimized/submit-regression" : integration ? "docs/ui/assets/hero-form-integration/submit-regression" : heroConsent ? "docs/ui/assets/hero-consent/submit-regression" : summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
+const output = join(appDir, process.argv.includes('--legibility') ? "docs/ui/assets/carousel-legibility/submit-regression" : firstVisit ? "docs/ui/assets/carousel-first-visit/submit-regression" : carouselImages ? "docs/ui/assets/carousel-optimized/submit-regression" : integration ? "docs/ui/assets/hero-form-integration/submit-regression" : heroConsent ? "docs/ui/assets/hero-consent/submit-regression" : summaryEdit ? "docs/ui/assets/form-summary-inline/submit-regression" : "docs/ui/assets/form-submit-validation");
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let expectAction = false, pendingAction = null;
 async function port(){const s=createServer();await new Promise(r=>s.listen(0,'127.0.0.1',r));const n=s.address().port;await new Promise(r=>s.close(r));return n;}

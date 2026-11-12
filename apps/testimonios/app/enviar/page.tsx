@@ -23,8 +23,9 @@ export async function generateMetadata({ searchParams }: PageProps<"/enviar">): 
 
 export default async function EnviarPage({ searchParams }: PageProps<"/enviar">) {
   const locale = await getInitialLocale(searchParams);
-  const listed = await listPublishedTestimonials();
-  const stories = listed.ok ? await selectAvailableHeroStories(listed.testimonials) : null;
+  const stories = listPublishedTestimonials().then(listed =>
+    listed.ok ? selectAvailableHeroStories(listed.testimonials) : null,
+  ).catch(() => null);
   return (
     <Suspense fallback={null}>
       <FormLocaleProvider initialLocale={locale}>

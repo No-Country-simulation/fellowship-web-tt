@@ -56,7 +56,7 @@ if (!baseline) for (const config of [{available:0},{available:1},{available:2},{
     await qa.viewport(375);await qa.load('en');
     const count=await qa.ev(()=>Number(document.querySelector('section[data-count]').dataset.count));
     assert.equal(count, expected ? Math.min(3,expected) : 3);
-    assert.ok(await qa.ev(()=>!!document.querySelector('[data-hero-transcript] summary')));
+    assert.ok(await qa.ev(()=>!!document.querySelector('[data-position="0"] [data-hero-transcript]')));
     if (!expected) assert.equal(await qa.ev(()=>document.querySelectorAll('[data-hero-artwork] img').length),0,'no broken image URLs when no confirmed artwork');
     else {
       await until(()=>qa.ev(()=>{const img=document.querySelector('[data-position="0"] img');return img?.complete&&img.naturalWidth>0;}),'eligible artwork');
@@ -74,7 +74,7 @@ if (!baseline) for (const config of [{available:0},{available:1},{available:2},{
       await writeFile(stateFile,JSON.stringify({available:0}));
       await qa.setImageFailure(true);await qa.cdp('Network.setCacheDisabled',{cacheDisabled:true});
       await qa.load('en');await until(()=>qa.ev(()=>!document.querySelector('[data-position="0"] img')),'runtime disappearance fallback');
-      assert.ok(await qa.ev(()=>document.querySelector('[data-hero-transcript]').textContent.includes('QA')));
+      assert.ok(await qa.ev(()=>document.querySelector('[data-position="0"] [data-hero-transcript]').textContent.includes('QA')));
     }
     await until(async()=> (await readFile(metricsFile,'utf8')).trim().split('\n').filter(Boolean).map(JSON.parse).filter(e=>e.kind==='availability').length===10,'background metadata checks complete');
     const phases=(await readFile(metricsFile,'utf8')).trim().split('\n').filter(Boolean).map(JSON.parse);

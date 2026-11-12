@@ -1,5 +1,7 @@
 # Disponibilidad de imágenes del carrusel
 
+**Evolución posterior:** [Primera visita por streaming](./carousel-first-visit.md) sustituye el corte de 200ms y el cacheado de desconocidos por cinco minutos. Este informe conserva la corrección anterior y sus mediciones históricas; la política actual está en el nuevo informe.
+
 Corrección del 11/11/2026 sobre `feat/testimonios-carousel-optimized-images`, pendiente de revisión manual. Complementa la [migración a imágenes optimizadas](./carousel-optimized-images.md). No modifica calidad, resolución, compresión, diseño, transcripción, enlaces, consentimiento, formulario, acciones ni esquema. La migración anterior todavía está sin commit; su estado Git también aparece en la entrega.
 
 ## Cuatro archivos verificados

@@ -34,8 +34,9 @@ export const ptBR = {
       of: "de",
       testimonial: "Depoimento",
       readText: "Ler depoimento em texto",
-      imageLoading: "Carregando prévia. Você pode ler o depoimento abaixo.",
-      imageUnavailable: "Prévia indisponível. Você pode ler o depoimento abaixo."
+      loadingStories: "Carregando depoimentos…",
+      imageLoading: "Carregando prévia…",
+      imageUnavailable: "Prévia indisponível."
     },
     intro: {
       title: "Compartilhe sua experiência",

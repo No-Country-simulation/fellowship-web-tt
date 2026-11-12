@@ -85,7 +85,7 @@ Las tres rutas usan el scroll del documento. El layout es una columna flexible c
 
 La barra de `TestimonialsGallery` mantiene búsqueda, filtros y contador. Su API se describe en la ficha correspondiente. Conservar el código accesible no equivale a aprobar su publicación.
 
-Al ampliar la fuente, el CTA puede ocupar varias líneas y el hero apila sus columnas si no dispone de `56rem`. La publicación tiene hasta 340px de ancho, cita limitada visualmente a cinco/seis líneas y autor en filas de nombre, país y puesto. Los textos completos se conservan en el DOM; el nombre muestra elipsis en una línea. Solo los metadatos y la fuente ampliada pueden hacer crecer la tarjeta por encima de la referencia 4:5. Los controles permanecen fuera de su área visual. Los detalles están documentados en cada componente.
+Al ampliar la fuente, el CTA puede ocupar varias líneas y el hero apila sus columnas si no dispone de `56rem`. La publicación administrativa optimizada tiene hasta 340px de ancho y conserva 4:5, sin reconstruir ni recortar su diseño. Debajo solo están «Leer historia», flechas y posición. Una única región con relato completo se revela dentro de la tarjeta ante error, foco de teclado o relación ancho/fuente insuficiente; los relatos largos tienen scroll. El texto rasterizado mantiene límites de ampliación tipográfica: [nitidez y carrusel compacto](../carousel-legibility.md) documenta la alternativa al 200% y la revisión manual pendiente.
 
 ## Composición de la ficha
 
