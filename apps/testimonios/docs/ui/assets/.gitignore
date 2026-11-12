@@ -41,3 +41,50 @@
 !/hero-form-integration/summary-regression/qa-results.json
 !/hero-form-integration/submit-regression/
 !/hero-form-integration/submit-regression/qa-results.json
+
+# Optimized carousel: four representative screenshots and reports only.
+# Keep generated Canvas originals, matrix captures and regression extras local.
+/carousel-optimized/**
+!/carousel-optimized/README.md
+!/carousel-optimized/qa-results.json
+!/carousel-optimized/performance-before.json
+!/carousel-optimized/performance-after.json
+!/carousel-optimized/public-probe.json
+!/carousel-optimized/en-1440.png
+!/carousel-optimized/es-320-text.png
+!/carousel-optimized/pt-375-200.png
+!/carousel-optimized/es-375-error.png
+!/carousel-optimized/form-regression/
+/carousel-optimized/form-regression/*
+!/carousel-optimized/form-regression/qa-results.json
+!/carousel-optimized/submit-regression/
+/carousel-optimized/submit-regression/*
+!/carousel-optimized/submit-regression/qa-results.json
+
+# Availability correction: reports only; no new image matrix or diagnostic scripts.
+/carousel-availability/**
+!/carousel-availability/README.md
+!/carousel-availability/public-check.json
+!/carousel-availability/public-cache.json
+!/carousel-availability/before.json
+!/carousel-availability/after.json
+
+# First visit: compact regression summary and two small diagnostic snapshots only.
+/carousel-first-visit/**
+!/carousel-first-visit/README.md
+!/carousel-first-visit/qa-summary.json
+!/carousel-first-visit/trace.json
+!/carousel-first-visit/pipeline.json
+
+# Compact carousel: summary, one public snapshot, comparisons and four review screenshots.
+# Full reports, coordinates, payload dumps and experimental matrices stay local.
+/carousel-legibility/**
+!/carousel-legibility/README.md
+!/carousel-legibility/public-verification.json
+!/carousel-legibility/qa-summary.json
+!/carousel-legibility/comparison-2.png
+!/carousel-legibility/comparison-4.png
+!/carousel-legibility/en-1440.png
+!/carousel-legibility/es-320.png
+!/carousel-legibility/pt-375-200.png
+!/carousel-legibility/es-375-fallback.png

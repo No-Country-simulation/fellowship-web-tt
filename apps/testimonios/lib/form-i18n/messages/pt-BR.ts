@@ -32,7 +32,11 @@ export const ptBR = {
       previous: "Depoimento anterior",
       next: "Próximo depoimento",
       of: "de",
-      testimonial: "Depoimento"
+      testimonial: "Depoimento",
+      readText: "Ler depoimento em texto",
+      loadingStories: "Carregando depoimentos…",
+      imageLoading: "Carregando prévia…",
+      imageUnavailable: "Prévia indisponível."
     },
     intro: {
       title: "Compartilhe sua experiência",

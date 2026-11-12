@@ -1,0 +1,1158 @@
+{
+  "result": "PASS",
+  "samples": [
+    {
+      "trial": 1,
+      "cache": "cold",
+      "responseMs": 337,
+      "firstArtMs": 601.0999999940395,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 10,
+        "optimizer-source": 1
+      },
+      "availabilityWallMs": 117.08439999999996,
+      "optimizerRequestMs": 250.23399999190588,
+      "optimizerCache": "MISS",
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1537.8859,
+          "ms": 55.98019999999997
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1599.8422,
+          "ms": 54.80289999999991
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1600.4638,
+          "ms": 54.444999999999936
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1600.6355,
+          "ms": 54.38009999999986
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1600.8216,
+          "ms": 54.30400000000009
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1600.2491,
+          "ms": 54.53970000000004
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1601.0187,
+          "ms": 54.23919999999998
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1658.0534,
+          "ms": 58.48019999999997
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1658.3292,
+          "ms": 58.39840000000004
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1658.7991,
+          "ms": 58.02520000000004
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1658.9921,
+          "ms": 57.93450000000007
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1906.0266,
+          "ms": 4.173900000000003
+        }
+      ]
+    },
+    {
+      "trial": 1,
+      "cache": "warm",
+      "responseMs": 85.5,
+      "firstArtMs": 252.29999999701977,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "availabilityWallMs": 0,
+      "optimizerRequestMs": 158.14500000851694,
+      "optimizerCache": "MISS",
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2099.153,
+          "ms": 60.20340000000033
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2204.7538,
+          "ms": 4.328899999999976
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "cache": "cold",
+      "responseMs": 343,
+      "firstArtMs": 615.7000000029802,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 10,
+        "optimizer-source": 1
+      },
+      "availabilityWallMs": 120.9661000000001,
+      "optimizerRequestMs": 259.8850000067614,
+      "optimizerCache": "MISS",
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1531.6726,
+          "ms": 51.35039999999981
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1589.2257,
+          "ms": 57.003400000000056
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1589.5492,
+          "ms": 56.873800000000074
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1589.952,
+          "ms": 56.8424
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1589.7656,
+          "ms": 56.86350000000016
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1590.1307,
+          "ms": 56.83810000000017
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1590.3545,
+          "ms": 56.81660000000011
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1651.2091,
+          "ms": 58.424600000000055
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1652.2014,
+          "ms": 57.85050000000001
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1651.8093,
+          "ms": 58.105200000000195
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1652.4852,
+          "ms": 57.70659999999998
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1870.5363,
+          "ms": 11.158799999999928
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "cache": "warm",
+      "responseMs": 88.29999999701977,
+      "firstArtMs": 255.6000000089407,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "availabilityWallMs": 0,
+      "optimizerRequestMs": 158.49200000229757,
+      "optimizerCache": "MISS",
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2104.2924,
+          "ms": 60.61959999999999
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2205.8275,
+          "ms": 2.6359999999999673
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "cache": "cold",
+      "responseMs": 337,
+      "firstArtMs": 618.9000000059605,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 10,
+        "optimizer-source": 1
+      },
+      "availabilityWallMs": 118.47019999999998,
+      "optimizerRequestMs": 269.96299999882467,
+      "optimizerCache": "MISS",
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1547.8359,
+          "ms": 54.85739999999987
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1608.8095,
+          "ms": 55.95830000000001
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1609.1994,
+          "ms": 55.72050000000013
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1609.4555,
+          "ms": 55.58860000000004
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1609.6618,
+          "ms": 55.494699999999966
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1609.8598,
+          "ms": 55.45399999999995
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1610.0645,
+          "ms": 55.47240000000011
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1668.583,
+          "ms": 58.18299999999999
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1668.9709,
+          "ms": 58.047199999999975
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1669.2139,
+          "ms": 57.948900000000094
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1669.4081,
+          "ms": 57.871599999999944
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1887.7196,
+          "ms": 15.015900000000101
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "cache": "warm",
+      "responseMs": 83,
+      "firstArtMs": 128.8999999910593,
+      "imageBytes": 0,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 0
+      },
+      "availabilityWallMs": 0,
+      "optimizerRequestMs": 0.04100000660400838,
+      "optimizerCache": "MISS",
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2169.9232,
+          "ms": 57.42809999999963
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "trial": 1,
+      "randomFirstCards": 7,
+      "result": "PASS"
+    },
+    {
+      "trial": 2,
+      "randomFirstCards": 9,
+      "result": "PASS"
+    },
+    {
+      "trial": 3,
+      "randomFirstCards": 6,
+      "result": "PASS"
+    },
+    {
+      "available": 0,
+      "rendered": 3,
+      "result": "PASS",
+      "responseMs": 353.59999999403954,
+      "verificationWallMs": 119.35940000000005,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1482.4074,
+          "ms": 51.54829999999993
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1539.9234,
+          "ms": 56.29840000000013
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1540.2391,
+          "ms": 56.135099999999966
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1541.0925,
+          "ms": 55.664999999999964
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1540.9059,
+          "ms": 55.61809999999991
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1540.4547,
+          "ms": 56.42710000000011
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1540.6662,
+          "ms": 56.37890000000016
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1599.897,
+          "ms": 58.46749999999997
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1600.295,
+          "ms": 58.469699999999875
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1600.6013,
+          "ms": 58.391399999999976
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1600.8004,
+          "ms": 58.48239999999987
+        },
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2025.3271,
+          "ms": 55.36610000000019
+        },
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2110.2844,
+          "ms": 51.578799999999774
+        }
+      ]
+    },
+    {
+      "available": 1,
+      "rendered": 1,
+      "result": "PASS",
+      "responseMs": 354.79999999701977,
+      "verificationWallMs": 118.96010000000001,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1594.4945,
+          "ms": 64.18830000000003
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1665.1142,
+          "ms": 55.92039999999997
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1665.4521,
+          "ms": 55.731700000000046
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1666.3985,
+          "ms": 55.068500000000085
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1665.6669,
+          "ms": 56.06330000000003
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1666.1832,
+          "ms": 55.41240000000016
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1665.8956,
+          "ms": 55.40519999999992
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1724.4922,
+          "ms": 59.15390000000002
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1725.0262,
+          "ms": 58.77759999999989
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1724.721,
+          "ms": 59.21370000000002
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1725.243,
+          "ms": 58.831300000000056
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1939.7156,
+          "ms": 11.238399999999956
+        }
+      ]
+    },
+    {
+      "available": 2,
+      "rendered": 2,
+      "result": "PASS",
+      "responseMs": 387.90000000596046,
+      "verificationWallMs": 125.8904,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1586.0379,
+          "ms": 65.13789999999995
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1657.5238,
+          "ms": 55.75559999999996
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1657.7947,
+          "ms": 55.86340000000018
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1658.4958,
+          "ms": 55.51279999999997
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1658.682,
+          "ms": 55.799800000000005
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1658.0152,
+          "ms": 56.81899999999996
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1658.2614,
+          "ms": 56.9400999999998
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1723.0574,
+          "ms": 59.893600000000106
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1725.3624,
+          "ms": 57.930000000000064
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1723.7059,
+          "ms": 59.4357
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1724.8699,
+          "ms": 58.54430000000002
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1962.5714,
+          "ms": 15.256799999999885
+        }
+      ]
+    },
+    {
+      "available": 3,
+      "rendered": 3,
+      "result": "PASS",
+      "responseMs": 83.19999998807907,
+      "verificationWallMs": 117.91270000000009,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1498.7875,
+          "ms": 66.57230000000004
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1572.0401,
+          "ms": 56.036600000000135
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1572.8223,
+          "ms": 55.406799999999976
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1573.282,
+          "ms": 55.23350000000005
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1573.083,
+          "ms": 55.27189999999996
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1572.6158,
+          "ms": 56.02839999999992
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1572.3809,
+          "ms": 56.4083999999998
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1631.9268,
+          "ms": 57.799400000000105
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1632.63,
+          "ms": 57.18729999999982
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1631.6714,
+          "ms": 57.87040000000002
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1632.4039,
+          "ms": 57.5489
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1847.8804,
+          "ms": 19.11999999999989
+        },
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 2126.9481,
+          "ms": 58.52599999999984
+        }
+      ]
+    },
+    {
+      "available": 6,
+      "rendered": 3,
+      "result": "PASS",
+      "responseMs": 347.40000000596046,
+      "verificationWallMs": 117.58709999999996,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1441.5441,
+          "ms": 64.73149999999987
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1513.5376,
+          "ms": 55.135499999999865
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1513.8646,
+          "ms": 55.07369999999992
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1514.7979,
+          "ms": 54.290500000000065
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1514.338,
+          "ms": 54.4837
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1514.5994,
+          "ms": 54.62040000000002
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 200,
+          "startedMs": 1514.1063,
+          "ms": 55.246900000000096
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1572.1021,
+          "ms": 58.67269999999985
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1572.603,
+          "ms": 58.32809999999995
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1572.9268,
+          "ms": 58.10519999999997
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 400,
+          "startedMs": 1573.1363,
+          "ms": 57.98840000000018
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1782.0181,
+          "ms": 15.306900000000041
+        }
+      ]
+    },
+    {
+      "available": 6,
+      "failure": "network",
+      "rendered": 3,
+      "result": "PASS",
+      "responseMs": 340.30000001192093,
+      "verificationWallMs": 121.97869999999989,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1570.5838,
+          "ms": 52.387899999999945
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1628.9398,
+          "ms": 57.67949999999996
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1629.8357,
+          "ms": 56.918499999999995
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1629.6289,
+          "ms": 57.38630000000012
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1630.0494,
+          "ms": 56.82029999999986
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1630.2736,
+          "ms": 56.84190000000012
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1629.2326,
+          "ms": 58.04880000000003
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1690.0859,
+          "ms": 60.48219999999992
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1690.8056,
+          "ms": 59.996700000000146
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1690.5191,
+          "ms": 60.21049999999991
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1691.0198,
+          "ms": 59.89869999999996
+        }
+      ]
+    },
+    {
+      "available": 6,
+      "failure": "http",
+      "rendered": 3,
+      "result": "PASS",
+      "responseMs": 364,
+      "verificationWallMs": 120.3936000000001,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1486.1954,
+          "ms": 55.419399999999996
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1547.8437,
+          "ms": 55.77850000000012
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1548.7876,
+          "ms": 55.106199999999944
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1548.5216,
+          "ms": 55.518100000000004
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1548.1125,
+          "ms": 55.6572000000001
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1548.9944,
+          "ms": 55.18450000000007
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1548.332,
+          "ms": 55.97239999999988
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1606.9724,
+          "ms": 60.40099999999984
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1607.4895,
+          "ms": 60.227600000000166
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1607.2146,
+          "ms": 60.737499999999955
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": 503,
+          "startedMs": 1607.6929,
+          "ms": 60.544399999999996
+        }
+      ]
+    },
+    {
+      "available": 6,
+      "delay": 2000,
+      "rendered": 3,
+      "result": "PASS",
+      "responseMs": 442.29999999701977,
+      "verificationWallMs": 1616.9001000000003,
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "startedMs": 1494.432,
+          "ms": 63.59050000000002
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1564.2124,
+          "ms": 800.5882999999999
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1564.4947,
+          "ms": 800.452
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1564.6921,
+          "ms": 800.3621999999998
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1564.9027,
+          "ms": 800.2595999999999
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1565.1224,
+          "ms": 800.2638
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 1565.2949,
+          "ms": 800.2524000000001
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 2367.9248,
+          "ms": 811.9293000000002
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 2368.4844,
+          "ms": 811.8403000000003
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 2368.7173,
+          "ms": 811.9917
+        },
+        {
+          "kind": "availability",
+          "method": "HEAD",
+          "status": null,
+          "startedMs": 2369.0468,
+          "ms": 812.0657000000001
+        }
+      ]
+    }
+  ],
+  "scope": "Local production build, 10 synthetic published records; public query 50ms, HEAD 50ms; actual optimizer and demand loading retained. Three trials, cold/new URLs and warm/same server cache. Browser GET image bytes, no real services or submissions. These are lab measurements, not production latency."
+}

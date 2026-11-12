@@ -1,0 +1,379 @@
+{
+  "implementation": "Next optimized image, active only initially",
+  "result": "PASS",
+  "samples": [
+    {
+      "mode": "desktop",
+      "trial": 1,
+      "cacheState": "cold",
+      "lcpMs": 456,
+      "cls": 0,
+      "firstImageMs": 391.8999999985099,
+      "initialKiB": 292.9150390625,
+      "imageKiB": 16.3046875,
+      "requests": 19,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "384",
+          "mime": "image/webp",
+          "bytes": 9779,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 503.5652
+    },
+    {
+      "mode": "desktop",
+      "trial": 1,
+      "cacheState": "warm",
+      "lcpMs": 172,
+      "cls": 0,
+      "firstImageMs": 83.79999999701977,
+      "initialKiB": 14.4912109375,
+      "imageKiB": 0,
+      "requests": 18,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "384",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 510.14609999999993
+    },
+    {
+      "mode": "desktop",
+      "trial": 2,
+      "cacheState": "cold",
+      "lcpMs": 456,
+      "cls": 0,
+      "firstImageMs": 392.6000000014901,
+      "initialKiB": 292.9150390625,
+      "imageKiB": 16.3046875,
+      "requests": 19,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "384",
+          "mime": "image/webp",
+          "bytes": 9779,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 503.54869999999937
+    },
+    {
+      "mode": "desktop",
+      "trial": 2,
+      "cacheState": "warm",
+      "lcpMs": 180,
+      "cls": 0,
+      "firstImageMs": 85.19999999552965,
+      "initialKiB": 14.4912109375,
+      "imageKiB": 0,
+      "requests": 18,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "384",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 497.33400000000074
+    },
+    {
+      "mode": "desktop",
+      "trial": 3,
+      "cacheState": "cold",
+      "lcpMs": 436,
+      "cls": 0,
+      "firstImageMs": 397.3999999985099,
+      "initialKiB": 292.9150390625,
+      "imageKiB": 16.3046875,
+      "requests": 19,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "384",
+          "mime": "image/webp",
+          "bytes": 9779,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 495.15849999999955
+    },
+    {
+      "mode": "desktop",
+      "trial": 3,
+      "cacheState": "warm",
+      "lcpMs": 144,
+      "cls": 0,
+      "firstImageMs": 82.59999999403954,
+      "initialKiB": 14.4912109375,
+      "imageKiB": 0,
+      "requests": 18,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "384",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 506.22079999999914
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 1,
+      "cacheState": "cold",
+      "lcpMs": 1108,
+      "cls": 0.000014307534246575341,
+      "firstImageMs": 1006.2999999970198,
+      "initialKiB": 303.0322265625,
+      "imageKiB": 26.4228515625,
+      "requests": 19,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "750",
+          "mime": "image/webp",
+          "bytes": 20140,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 535.4266000000025
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 1,
+      "cacheState": "warm",
+      "lcpMs": 624,
+      "cls": 0,
+      "firstImageMs": 334.30000000447035,
+      "initialKiB": 14.4912109375,
+      "imageKiB": 0,
+      "requests": 18,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "750",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 503.35779999999795
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 2,
+      "cacheState": "cold",
+      "lcpMs": 1188,
+      "cls": 0.000014307534246575341,
+      "firstImageMs": 1071.2000000029802,
+      "initialKiB": 303.0322265625,
+      "imageKiB": 26.4228515625,
+      "requests": 19,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "750",
+          "mime": "image/webp",
+          "bytes": 20140,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 524.1447000000007
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 2,
+      "cacheState": "warm",
+      "lcpMs": 636,
+      "cls": 0,
+      "firstImageMs": 320.79999999701977,
+      "initialKiB": 14.4912109375,
+      "imageKiB": 0,
+      "requests": 18,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "750",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 515.7681000000011
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 3,
+      "cacheState": "cold",
+      "lcpMs": 1116,
+      "cls": 0.000014307534246575341,
+      "firstImageMs": 1041.7999999970198,
+      "initialKiB": 303.0322265625,
+      "imageKiB": 26.4228515625,
+      "requests": 19,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "750",
+          "mime": "image/webp",
+          "bytes": 20140,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 516.1444999999949
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 3,
+      "cacheState": "warm",
+      "lcpMs": 656,
+      "cls": 0,
+      "firstImageMs": 321.3999999985099,
+      "initialKiB": 14.4912109375,
+      "imageKiB": 0,
+      "requests": 18,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "share-cards/historia-qa/instagram.png",
+          "requestedWidth": "750",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ],
+      "nextCardReadyMs": 510.4860000000044
+    }
+  ],
+  "environment": "Local production build; synthetic public records; Chrome headless. Cold=new browser/server + empty optimizer cache. Warm=reload, same browser/server. Slow mobile=375px DPR2, 1.6Mbps/150ms latency/4x CPU. Desktop=1440px DPR1, unthrottled. Three samples per condition. No real services or testimonial writes. Not production CWV."
+}

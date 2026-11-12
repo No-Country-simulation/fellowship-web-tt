@@ -25,6 +25,15 @@ Las claves son propuestas semánticas estables, no cadenas españolas usadas com
 
 ## 1. Página, pasos y navegación
 
+Textos añadidos para el carrusel optimizado (ES/EN/PT, sin traducir testimonios):
+
+| Archivo/componente | Texto actual | ES | PT-BR | Clave sugerida |
+| --- | --- | --- | --- | --- |
+| HeroTestimonialCard / región textual accesible | Leer testimonio en texto | Leer testimonio en texto | Ler depoimento em texto | `form.hero.readText` |
+| GalleryHero / carga parcial | Cargando testimonios… | Cargando testimonios… | Carregando depoimentos… | `form.hero.loadingStories` |
+| HeroTestimonialCard / carga | Cargando vista previa… | Cargando vista previa… | Carregando prévia… | `form.hero.imageLoading` |
+| HeroTestimonialCard / error | Vista previa no disponible. | Vista previa no disponible. | Prévia indisponível. | `form.hero.imageUnavailable` |
+
 | Archivo/componente | Texto actual | Propuesta en español neutro | Propuesta inicial pt-BR | Clave sugerida |
 | --- | --- | --- | --- | --- |
 | P / metadata.title | Enviar testimonio | Comparte tu testimonio | Compartilhe seu depoimento | `form.metadata.title` |

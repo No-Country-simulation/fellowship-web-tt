@@ -40,14 +40,16 @@ export function GalleryHeroCarousel({ stories, locale }: GalleryHeroCarouselProp
 
 function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
   const copy = getFormMessages(locale).form.hero;
-  const [{ activeIndex, hasNavigated, motion }, setNavigation] = useState<{
+  const [{ activeIndex, hasNavigated, motion, requested }, setNavigation] = useState<{
     activeIndex: number;
     hasNavigated: boolean;
     motion: CarouselMotion | null;
+    requested: readonly number[];
   }>({
     activeIndex: 0,
     hasNavigated: false,
     motion: null,
+    requested: [0],
   });
   const stackRef = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -86,9 +88,11 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
       // No encolamos clics ni usamos disabled: los controles conservan el foco.
       if (current.motion && !reducedMotion) return current;
 
+      const nextIndex = (current.activeIndex + direction + total) % total;
       return {
-        activeIndex: (current.activeIndex + direction + total) % total,
+        activeIndex: nextIndex,
         hasNavigated: true,
+        requested: current.requested.includes(nextIndex) ? current.requested : [...current.requested, nextIndex],
         motion: reducedMotion
           ? null
           : {
@@ -142,7 +146,12 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
                   }
                   className={styles.card}
                 >
-                  <HeroTestimonialCard story={story} />
+                  <HeroTestimonialCard
+                    key={story.imageUrl}
+                    story={story}
+                    locale={locale}
+                    requested={requested.includes(index)}
+                  />
                 </div>
               );
             })}
@@ -153,6 +162,7 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
       <div className="mt-sm flex min-w-0 flex-wrap items-center justify-between gap-xs">
         <Link
           href={`/t/${stories[activeIndex].slug}`}
+          prefetch={false}
           aria-label={`${copy.readStoryOf} ${stories[activeIndex].fullName}`}
           className="inline-flex min-h-11 max-w-full items-center rounded-button text-sm font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
         >

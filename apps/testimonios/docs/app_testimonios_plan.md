@@ -26,6 +26,8 @@ Este checklist resume el estado de desarrollo de Testimonios. Las secciones sigu
 
 ### Issue 1 — Landing de captación y carrusel social
 
+**Registro histórico:** la réplica descrita a continuación fue sustituida en `feat/testimonios-carousel-optimized-images` por [arte administrativo optimizado y alternativa textual](./carousel-optimized-images.md). El hero vive actualmente en `/enviar`; `/` y las fichas corresponden a funcionalidades futuras. Se conservan aquí las decisiones de la Issue 1 y sus evidencias históricas.
+
 La consulta pública existente y `force-dynamic` se conservan. El home solo compone el hero; se retira el mapeo destinado a la galería, sin modificar Supabase ni la selección de publicados. Las fichas continúan accesibles y sus enlaces de retorno dicen «Volver al inicio». Navbar, footer y formulario no se rediseñan.
 
 `HeroTestimonialCard` traslada únicamente la presentación de `drawQuoteDesign`, `drawBody`, `learningGradient`, `drawAuthorInline` y sus recursos relacionados de `apps/panel-admin/features/testimonials/infrastructure/ig-card-canvas.ts`. No importa código administrativo ni duplica edición, validaciones, captions, exportación o publicación. El contrato mínimo se deriva de `PublicTestimonial` en servidor, sin nuevas consultas ni datos privados.

@@ -32,7 +32,11 @@ export const es = {
       previous: "Testimonio anterior",
       next: "Siguiente testimonio",
       of: "de",
-      testimonial: "Testimonio"
+      testimonial: "Testimonio",
+      readText: "Leer testimonio en texto",
+      loadingStories: "Cargando testimonios…",
+      imageLoading: "Cargando vista previa…",
+      imageUnavailable: "Vista previa no disponible."
     },
     intro: {
       title: "Comparte tu experiencia",

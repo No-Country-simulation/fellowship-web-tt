@@ -1,0 +1,86 @@
+{
+  "scope": "Two public /enviar GETs against local production build, existing published source and public HEADs only; no images downloaded, credentials inspected or services mutated.",
+  "samples": [
+    {
+      "visit": 1,
+      "http": 200,
+      "responseHeadersMs": 2331.5784000000003,
+      "responseCompleteMs": 2401.87,
+      "selected": 3,
+      "excludedKnownMissing": true,
+      "phases": [
+        {
+          "kind": "public-query",
+          "status": 200,
+          "ms": 1375.6873
+        },
+        {
+          "kind": "availability",
+          "status": 200,
+          "ms": 354.2419
+        },
+        {
+          "kind": "availability",
+          "status": 200,
+          "ms": 369.2975000000001
+        },
+        {
+          "kind": "availability",
+          "status": 200,
+          "ms": 375.65319999999974
+        },
+        {
+          "kind": "availability",
+          "status": 200,
+          "ms": 391.88380000000006
+        },
+        {
+          "kind": "availability",
+          "status": 200,
+          "ms": 393.13779999999997
+        },
+        {
+          "kind": "availability",
+          "status": 400,
+          "ms": 365.0520999999999
+        },
+        {
+          "kind": "availability",
+          "status": 400,
+          "ms": 362.76279999999997
+        },
+        {
+          "kind": "availability",
+          "status": 400,
+          "ms": 371.46990000000005
+        },
+        {
+          "kind": "availability",
+          "status": 200,
+          "ms": 762.4101
+        },
+        {
+          "kind": "availability",
+          "status": 400,
+          "ms": 366.5081
+        }
+      ]
+    },
+    {
+      "visit": 2,
+      "http": 200,
+      "responseHeadersMs": 410.34940000000006,
+      "responseCompleteMs": 472.84850000000006,
+      "selected": 3,
+      "excludedKnownMissing": true,
+      "phases": [
+        {
+          "kind": "public-query",
+          "status": 200,
+          "ms": 362.8431999999998
+        }
+      ]
+    }
+  ],
+  "implementation": "Initial diagnostic with full metadata wait, before introducing the 200ms budget; preserve as evidence of the cold-wait issue, not final page latency."
+}
