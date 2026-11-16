@@ -21,7 +21,11 @@ Carrusel manual de hasta tres testimonios publicados del hero de `/enviar`. Rend
 | Dos / tres | Navegación circular y una / dos superficies posteriores neutras, con reservas laterales de 16 / 32px desde `sm`. |
 | Error de listado | El hero muestra su estado de indisponibilidad, distinto de vacío. |
 
-La clave de la pila sigue dependiendo de IDs y orden. El estado de navegación añade únicamente los índices cuya imagen ya se solicitó. Al comenzar solo contiene `0`. La primera imagen se descubre desde el HTML con prioridad alta; una tarjeta futura no tiene `img`, por lo que su ubicación en la pila no dispara lazy loading anticipado. Al navegar se monta su imagen y permanece disponible al volver. No se introduce precarga especulativa.
+La clave de la pila sigue dependiendo de IDs y orden. `requested` conserva los índices cuyas imágenes se montaron, por navegación o precarga, y `settled` registra las que terminaron en carga o error. La primera se descubre desde el HTML, eager/high. Cuando termina, se monta la segunda eager/low; al terminar ésta, la tercera eager/low. La cola vive en `carousel-image-queue.ts` y no usa timers, efectos de polling ni URLs alternativas. No se espera a un clic.
+
+Si la persona navega antes, el destino se monta inmediatamente con prioridad high o se conserva su mismo `Image` en vuelo y su atributo pasa a high. No se desmontan las visitadas/precargadas, ni se inician nuevas descargas de fondo mientras las solicitadas sigan pendientes. Cambiar prioridad no cambia `srcSet`, `sizes`, calidad 85 ni la identidad del elemento: se reutiliza el recurso del navegador. Un error libera la cola y conserva el fallback. Solo se consideran los archivos de las historias seleccionadas con URL disponible.
+
+`fetchPriority` es una indicación al navegador. Chrome mostró High/Low/Low al descargar automáticamente y High para un destino nuevo activado antes de tiempo; no notificó cambio nativo de prioridad para una petición Low ya iniciada aunque su atributo pasara a high. No se reinicia esa petición ni se prometen prioridades estrictas entre navegadores. Estrategia, mediciones, límites y comandos: [precarga progresiva](../../carousel-preload.md).
 
 Las diapositivas mantienen las posiciones, animaciones de 420ms, protección frente a clics durante la transición y resolución con `getAnimations()`/`Promise.allSettled`. Movimiento reducido cambia directamente el índice. El área del arte es siempre 4:5; el equivalente textual pertenece a esa misma tarjeta. Se conserva el ancho máximo 340px y las áreas de 44px de los controles.
 

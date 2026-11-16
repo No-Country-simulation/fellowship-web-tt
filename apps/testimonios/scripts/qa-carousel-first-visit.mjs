@@ -30,8 +30,9 @@ try{
  await qa.click('form ol li:first-child button');
  await qa.click('form > div:last-child button:first-of-type');await loaded(qa);
  assert.ok(await qa.ev(()=>document.activeElement.id==='gallery-title'),'existing return focus');
+ await until(()=>qa.ev(()=>[...document.querySelectorAll('[data-hero-artwork] img')].filter(e=>e.complete&&e.naturalWidth>0&&e.dataset.loaded==='true').length===3),'background images after late stream');
  const firstRequests=[...qa.requests.values()].filter(e=>e.type==='Image'&&decodeURIComponent(e.url).includes('/share-cards/'));
- assert.equal(firstRequests.length,1,'only the first artwork loads even with a late stream');
+ assert.equal(firstRequests.length,3,'late stream also starts progressive preloading');
  for(const locale of ['es','en','pt']){
   await qa.load(locale);await loaded(qa);
   const placeholder=await qa.ev(()=>{const p=document.querySelector('[data-position="0"] [data-hero-artwork] p');return{hidden:p.hidden,display:getComputedStyle(p).display,height:p.getBoundingClientRect().height};});
@@ -49,7 +50,7 @@ try{
   assert.ok(await qa.ev(label=>document.activeElement.getAttribute('aria-label')===label,label));
   assert.equal(await qa.ev(()=>document.querySelectorAll('[data-position]:not([aria-hidden="true"])').length),1);
  }
- assert.deepEqual(qa.stats(),{blockedPosts:0,blockedExternal:0,browserExceptions:0});results.push({case:'form interactive before public query and HEAD complete; late stream, keyboard, ES/EN/PT',result:'PASS'});
+ assert.deepEqual(qa.stats(),{blockedPosts:0,blockedExternal:0,browserExceptions:0});results.push({case:'form interactive before public query and HEAD complete; late stream, progressive preload, keyboard, ES/EN/PT',result:'PASS'});
 }finally{await qa.close();}
 
 for(const config of [{available:0},{available:1},{available:2},{available:3},{available:6},{available:6,failure:'network'},{available:6,failure:'http'},{available:6,delay:2000}]){

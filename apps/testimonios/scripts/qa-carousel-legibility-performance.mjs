@@ -26,7 +26,7 @@ for (const mode of ['desktop', 'slow-mobile']) for (let trial = 1; trial <= 3; t
       await until(() => qa.ev(() => window.__carouselTiming.painted > 0), 'Element Timing'); await pause(600);
       const measured = await qa.ev(() => ({ ...window.__carouselTiming, ttfb: performance.getEntriesByType('navigation')[0].responseStart, quality: new URL(document.querySelector('[data-position="0"] img').currentSrc).searchParams.get('q'), width: new URL(document.querySelector('[data-position="0"] img').currentSrc).searchParams.get('w') }));
       const requests = [...qa.requests.values()].filter(r => r.type === 'Image' && decodeURIComponent(r.url).includes('/share-cards/'));
-      assert.equal(requests.length, 1, 'only active image requested initially');
+      assert.ok(requests.length >= 1 && requests.length <= 3, 'first image followed by progressive background requests');
       const old = await qa.ev(() => document.querySelector('[data-position="0"]').getAttribute('aria-label'));
       const started = performance.now(); await qa.click('button[aria-label="Siguiente testimonio"]');
       await until(() => qa.ev(old => { const e = document.querySelector('[data-position="0"]'), img = e.querySelector('img'); return e.getAttribute('aria-label') !== old && img?.complete && img.naturalWidth > 0 && img.dataset.loaded === 'true'; }, old), 'next image');

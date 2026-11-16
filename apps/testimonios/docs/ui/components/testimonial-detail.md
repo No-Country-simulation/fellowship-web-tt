@@ -2,6 +2,8 @@
 
 Composición editorial de la ficha pública `/t/[slug]`. Recibe datos ya resueltos y presenta al participante, su historia completa, los medios disponibles y las acciones de cierre.
 
+Implementada y accesible, con aprobación definitiva de publicación pendiente junto con la galería; no hay restricción de rutas implementada. [Alcance vigente](../../hero-form-integration.md#alcance-de-publicación).
+
 **Archivos:** `components/testimonial-detail.tsx` y `components/testimonial-detail.module.css`.
 
 ## Import y uso
@@ -46,7 +48,7 @@ País y fecha son opcionales; el separador requiere ambos. La fecha conserva `fo
 - Foto y video tienen contenedores `mt-md w-full max-w-3xl`: máximo 48rem (768px), alineados a la izquierda con la historia y a todo el ancho disponible en mobile. El límite pertenece a esta ficha, sin cambiar otros usos de los componentes.
 - La foto conserva proporciones y dimensiones intrínsecas: no se recortan archivos verticales o cuadrados ni se amplían imágenes pequeñas. El marco interno se ajusta al ancho disponible.
 - `youtubeEmbedUrl` habilita “En video” mediante `YoutubeEmbed`, con proporción 16:9 y título específico del participante. La URL, los permisos y `allowFullScreen` se conservan sin cambios.
-- `CLOSING_COPY` agrupa el título, la descripción y las dos acciones. «Compartir mi testimonio» enlaza a `/enviar` con `buttonVariants({ variant: "gradient" })`; «Volver al inicio» enlaza a la landing `/`. El enlace superior y el retorno desde el error de carga también dicen «Volver al inicio», porque el home ya no muestra la galería.
+- `CLOSING_COPY` agrupa el título, la descripción y las dos acciones. «Compartir mi testimonio» enlaza a `/enviar` con `buttonVariants({ variant: "gradient" })`; «Volver al inicio» conserva `/`, que actualmente muestra la galería. El enlace superior y el retorno desde el error conservan también ese texto/destino. La landing de captación está integrada en `/enviar`; esta auditoría no cambia los enlaces existentes de la ficha.
 - El diálogo de la foto conserva su límite de viewport: no hereda el máximo de 768px de la vista integrada. La regla global `html:has(dialog:modal)` bloquea el scroll del documento mientras está abierto; `scrollbar-gutter: stable` evita cambios de ancho. Al cerrar, se retira el bloqueo sin cambiar la posición ni la gestión de foco del componente.
 
 El máximo CSS cambia solamente el tamaño de visualización. No reduce la resolución del archivo ni los bytes descargados: vista integrada y diálogo conservan la misma URL pública. Una miniatura independiente requeriría evaluar variantes y procesamiento como mejora futura; este componente no transforma URLs ni modifica Storage.

@@ -1,5 +1,7 @@
 # Evidencias — hero y formulario integrados
 
+Registro de la integración y alineación originales. Sus capturas preceden a la migración de arte administrativo y a la [precarga progresiva](../../../carousel-preload.md); se conservan sin atribuirles el diseño o las mediciones de esa etapa posterior.
+
 Selección limitada. Datos y fotos sintéticos; todos los POST interceptados o bloqueados. No se eliminan ni sobrescriben evidencias históricas.
 
 - [Hero ES, 320 px](./hero-es-320.png): autorización y CTA móvil.

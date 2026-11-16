@@ -52,7 +52,7 @@ for (const mode of ["desktop", "slow-mobile"]) {
         }, oldSlide), "second card ready");
         await ev(() => Promise.allSettled(document.querySelector('[data-position="0"]').getAnimations({subtree:true}).map(animation=>animation.finished)).then(()=>true));
         samples.at(-1).nextCardReadyMs = performance.now() - started;
-        if (!baseline) assert.equal(images.filter(image => image.source?.startsWith("share-cards/")).length, 1, "only active artwork initially");
+        if (!baseline) assert.ok(images.filter(image => image.source?.startsWith("share-cards/")).length <= 3, "at most the three selected artworks");
         assert.equal(qa.stats().blockedPosts, 0); assert.equal(qa.stats().blockedExternal, 0); assert.equal(qa.stats().browserExceptions, 0);
         console.log(JSON.stringify({ mode, trial: trial + 1, cacheState, lcpMs: metrics.lcp, firstImageMs: metrics.firstImage, images: images.length }));
       }
@@ -61,6 +61,6 @@ for (const mode of ["desktop", "slow-mobile"]) {
 }
 await mkdir(output, { recursive: true });
 await writeFile(join(output, baseline ? "performance-before.json" : "performance-after.json"), JSON.stringify({
-  implementation: baseline ? "HTML replica" : "Next optimized image, active only initially", result: "PASS", samples,
+  implementation: baseline ? "HTML replica" : "Next optimized image, progressive background loading", result: "PASS", samples,
   environment: "Local production build; synthetic public records; Chrome headless. Cold=new browser/server + empty optimizer cache. Warm=reload, same browser/server. Slow mobile=375px DPR2, 1.6Mbps/150ms latency/4x CPU. Desktop=1440px DPR1, unthrottled. Three samples per condition. No real services or testimonial writes. Not production CWV.",
 }, null, 2) + "\n");

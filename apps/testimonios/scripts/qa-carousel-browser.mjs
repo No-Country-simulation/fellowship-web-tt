@@ -68,7 +68,8 @@ export async function browserQA({ fixture = "qa-public-fixture.mjs", env = {} } 
         pending.delete(event.id); clearTimeout(item.timer);
         if (event.error) item.reject(Error(event.error.message)); else item.resolve(event.result);
       } else if (event.method === "Runtime.exceptionThrown") exceptions.push("browser exception");
-      else if (event.method === "Network.requestWillBeSent") requests.set(p.requestId, { url: p.request.url, type: p.type, start: p.timestamp, initiator: p.initiator });
+      else if (event.method === "Network.requestWillBeSent") requests.set(p.requestId, { url: p.request.url, type: p.type, start: p.timestamp, initiator: p.initiator, initialPriority: p.request.initialPriority, priorityChanges: [] });
+      else if (event.method === "Network.resourceChangedPriority") requests.get(p.requestId)?.priorityChanges.push(p.newPriority);
       else if (event.method === "Network.responseReceived") {
         const item = requests.get(p.requestId);
         if (item) Object.assign(item, { mime: p.response.mimeType, status: p.response.status, cache: p.response.fromDiskCache, headers: p.response.headers });

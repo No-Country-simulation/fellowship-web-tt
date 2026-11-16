@@ -29,8 +29,9 @@ await mkdir(output, { recursive: true });
 let qa = await browserQA();
 try {
   await qa.viewport(1440); await qa.load("en"); await ready(qa); await pause(400);
-  assert.equal(artRequests(qa).length, 1, "only the active artwork downloads initially");
-  assert.equal(await qa.ev(selector => document.querySelectorAll(selector + ' img').length, carousel), 1, "inactive cards have no image sources");
+  await until(() => qa.ev(selector => [...document.querySelectorAll(selector + ' img')].filter(e => e.complete && e.naturalWidth > 0 && e.dataset.loaded === 'true').length === 3, carousel), 'progressive background images');
+  assert.equal(artRequests(qa).length, 3, "following artwork downloads automatically after the first");
+  assert.equal(await qa.ev(selector => document.querySelectorAll(selector + ' img').length, carousel), 3, "preloaded cards stay mounted");
   assert.ok(artRequests(qa).every(r => r.mime === "image/webp"), "browser really receives WebP");
 
   // No resource interception: inspect the optimizer's actual response bytes and cache.
@@ -45,7 +46,7 @@ try {
   const before = await qa.ev(selector => document.querySelector(selector + ' [data-position="0"]').getBoundingClientRect().height, carousel);
   await qa.ev(label => document.querySelector('button[aria-label="' + label + '"]').focus(), nextLabels.en);
   await qa.key("Enter", "Enter", 13, "\r"); await ready(qa); await pause(500);
-  assert.equal(artRequests(qa).length, 2, JSON.stringify(artRequests(qa).map(r => ({ source: new URL(r.url).searchParams.get('url')?.split('/share-cards/')[1], width: new URL(r.url).searchParams.get('w'), mime: r.mime }))));
+  assert.equal(artRequests(qa).length, 3, "navigation reuses the preloaded optimized resource");
   assert.ok(await qa.ev(label => document.activeElement.getAttribute("aria-label") === label, nextLabels.en), "navigation preserves focus");
   await qa.key(" ", "Space", 32, " "); await ready(qa); await pause(500); assert.equal(artRequests(qa).length, 3);
   await qa.key("Enter", "Enter", 13, "\r"); await ready(qa); await pause(500); assert.equal(artRequests(qa).length, 3, "return does not fetch a fourth card");
@@ -55,7 +56,7 @@ try {
   await qa.click('button[aria-label="Next testimonial"]'); await ready(qa); await pause(500);
   assert.equal(artRequests(qa).length, 3, "reverse navigation reuses the already loaded images");
   assert.equal(await qa.ev(selector => document.querySelector(selector + ' [data-position="0"]').getBoundingClientRect().height, carousel), before, "art dimensions remain stable");
-  navigation.push({ keyboard: "Enter and Space; wrap to first", initialArtworkRequests: 1, afterThreeCards: 3, repeatRequests: 0, preservedFocus: true, motion: "normal" });
+  navigation.push({ keyboard: "Enter and Space; wrap to first", initialArtworkRequests: 3, afterThreeCards: 3, repeatRequests: 0, preservedFocus: true, motion: "normal" });
   // Capture after the network assertions: headless capture can request extra srcset variants.
   await capture(qa, "en-1440.png");
   await qa.viewport(375, 3); await ready(qa);

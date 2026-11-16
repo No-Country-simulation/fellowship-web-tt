@@ -23,10 +23,12 @@ export type HeroTestimonialCardContent = {
 };
 
 /** Optimized artwork and one text equivalent, revealed in-place on failure, text enlargement or keyboard focus. */
-export function HeroTestimonialCard({ story, locale, requested }: {
+export function HeroTestimonialCard({ story, locale, requested, active, onSettled }: {
   story: HeroTestimonialCardContent;
   locale: FormLocale;
   requested: boolean;
+  active: boolean;
+  onSettled: () => void;
 }) {
   const messages = getFormMessages(locale).form;
   const copy = messages.hero;
@@ -48,12 +50,12 @@ export function HeroTestimonialCard({ story, locale, requested }: {
           quality={85}
           sizes="(max-width: 387px) calc(100vw - 48px), 340px"
           loading="eager"
-          fetchPriority="high"
+          fetchPriority={active ? "high" : "low"}
           className={styles.image}
           data-loaded={status === "loaded"}
           data-publication-content
-          onLoad={() => setStatus("loaded")}
-          onError={() => setStatus("failed")}
+          onLoad={() => { setStatus("loaded"); onSettled(); }}
+          onError={() => { setStatus("failed"); onSettled(); }}
         />
       ) : null}
       <div

@@ -1,6 +1,8 @@
 # Hero y formulario en `/enviar`
 
-Rama: `feat/testimonios-hero-form-integration`. La integración funcional fue aprobada en localhost por el desarrollador; el ajuste posterior de alineación queda pendiente de revisión manual antes del commit. Las cinco etapas anteriores fueron aprobadas en Demo Day y mergeadas a `dev`; se conservan sus evidencias históricas.
+**Estado de implementación al 16/11/2026:** integración de hero/formulario y alineación implementadas en la base de `dev`. La implementación y revisión manual en localhost de la precarga del carrusel se completaron el 16/11/2026; véase [precarga progresiva](./carousel-preload.md). Este registro no certifica accesibilidad, revisión editorial/legal ni un despliegue en producción.
+
+Registro de la etapa original: rama `feat/testimonios-hero-form-integration`. La integración funcional fue aprobada en localhost; los apartados de QA y estado Git conservan los pendientes y cifras de aquel cierre, no el estado de la rama actual. Las cinco etapas anteriores fueron aprobadas en Demo Day y mergeadas a `dev`, según la confirmación registrada del desarrollador.
 
 ## Alcance de publicación
 
@@ -45,11 +47,11 @@ Se retiran las antiguas compensaciones de margen negativo del título y tarjetas
 
 Antes, `/` mostraba el hero con una casilla que solo habilitaba la navegación; `/enviar` permitía acceso directo al formulario. El parser generaba `consent_at` sin recibir una declaración afirmativa.
 
-Ahora `app/enviar/page.tsx` resuelve el idioma y obtiene exclusivamente publicados mediante la consulta existente. `selectHeroStories()` selecciona hasta tres en servidor. La ruta es dinámica. No se importan repositorios administrativos, clientes privados ni componentes del panel. No se modifican las consultas públicas.
+`app/enviar/page.tsx` resuelve el idioma e inicia como promesa la consulta pública existente y `selectAvailableHeroStories()`, que elige hasta tres historias con imágenes confirmadas cuando las hay, o conserva publicados con fallback textual si no se confirma ninguna. `GalleryHero` consume la promesa bajo un `Suspense` exclusivo del carrusel: no bloquea el resto del hero ni reinicia el formulario al completarse. La ruta sigue dinámica. No se importan repositorios administrativos, clientes privados ni componentes del panel. Véanse [disponibilidad/streaming](./carousel-first-visit.md) y [carga actual de las imágenes](./carousel-preload.md).
 
 `FormLocaleProvider` y `FormHeader` son únicos y rodean toda la experiencia. `EnviarExperience` comparte aceptación y controla la vista. Reutiliza `GalleryHero`, `HeroConsent`, `GalleryHeroCarousel`, `EnviarIntro` y `EnviarForm`. El hero se desmonta al comenzar. El formulario permanece montado, oculto e inert durante la introducción y al volver: conserva valores, categorías, archivos y validaciones, sin almacenamiento adicional. Solo hay un main y un h1 visible; no se monta navbar/footer institucional en `/enviar`.
 
-`GalleryHero` pasa a ser una vista de la experiencia cliente sin consultas propias. Título, descripción, estados vacío/error y nombres de controles del carrusel usan ES/EN/PT. Las tarjetas HTML/CSS, citas y textos de publicación conservan su diseño y contenido original. No se implementa la migración a PNG/WebP.
+`GalleryHero` es una vista cliente sin consultas propias. Título, descripción, estados vacío/error y nombres de controles usan ES/EN/PT. El carrusel muestra arte administrativo a través de `next/image`, calidad 85, con equivalente textual y fallback local; la réplica HTML/CSS fue sustituida. Primera imagen eager/high y secundarias progresivas eager/low, sin cambiar consentimiento, profesionales activos ni contenido de participantes.
 
 `/` recupera `TestimonialsGallery`, búsqueda, filtros, estados vacío/error y enlaces a fichas, con chrome público. Su CTA apunta a `/enviar`; los enlaces heredados `/?lang=...#hero-consent` conservan un ancla en ese CTA y transmiten el idioma explícito. `/t/[slug]` se conserva. Las nuevas invitaciones de éxito y portapapeles conducen a `/enviar?lang=...`, sin fragmento. La invitación sigue siendo un enlace nativo: en la misma sesión abre un documento nuevo y descarta el envío terminado; evita una navegación solo de hash que conservaría la pantalla de éxito. La transición normal hero → paso 1 sigue sin recarga.
 
@@ -99,7 +101,7 @@ En PowerShell se puede usar `pnpm.cmd` cuando la política local bloquea `pnpm.p
 
 `qa-enter-form.mjs` prepara los scripts históricos mediante la casilla/CTA reales; `qa-hero-consent.mjs` conserva una entrada compatible. `--hero-form` separa los nuevos reportes de las evidencias anteriores. Se conservan [cuatro PNG y tres JSON](./ui/assets/hero-form-integration/README.md), sin ampliar la selección con matrices redundantes.
 
-Resultados de la integración inicial, anteriores al ajuste de layout: **PASS**. Los reportes seleccionados se regeneran durante el ajuste con los nuevos anchos; sus mediciones actualizadas se documentan al cierre de esta revisión.
+Resultados históricos de la integración inicial, anteriores al ajuste de layout: **PASS**. Las mediciones posteriores se conservan en el apartado del ajuste; no se regeneran estos reportes en la auditoría documental ni se atribuye su arquitectura a la precarga actual.
 
 - Unitarias: **93/93 en 14 suites**, incluida declaración ausente/negativa/malformada/duplicada/archivo en las tres categorías, rechazo antes de persistencia/notificación y fecha de servidor. Contrato y catálogos ES/EN/PT: **190 claves**, sin problemas de codificación.
 - TypeScript (`--noEmit --incremental false`), ESLint (`--max-warnings 0`), build de producción y `git diff --check`: **PASS**. El primer build restringido no pudo descargar la fuente; el build normal con acceso a Google Fonts terminó correctamente, sin cambiar configuración.
@@ -109,11 +111,11 @@ Resultados de la integración inicial, anteriores al ajuste de layout: **PASS**.
 - Regresión histórica de i18n: metadata SSR/cliente, query/cookie/History, layouts, 404, cinco pasos, tres categorías, modal, estado pendiente, éxito y portapapeles: **PASS**, con **2 POST interceptados**. Su reporte y capturas auxiliares quedan ignorados en `.next/hero-form-i18n`, sin sobrescribir evidencia histórica ni aumentar la selección versionable.
 - En los reportes: **cero envíos reales, cero solicitudes externas y cero excepciones de navegador**. Se cerraron servidores, navegadores y perfiles propios. No se modificaron componentes/CSS de fotografías, tarjetas ni Design System, consultas públicas, configuración de Next, dependencias, store o notificaciones.
 
-Pendientes manuales: revisión localhost del desarrollador, dispositivos físicos, zoom nativo, Safari/Firefox y lectores de pantalla. Fuente raíz al 200% comprueba reflow y no equivale a certificación de accesibilidad. La revisión editorial/legal sigue pendiente del equipo.
+Pendientes anotados al cierre original: revisión localhost del desarrollador, dispositivos físicos, zoom nativo, Safari/Firefox y lectores de pantalla. Fuente raíz al 200% comprueba reflow y no equivale a certificación de accesibilidad. La revisión editorial/legal sigue pendiente del equipo; la aprobación manual de la precarga no la sustituye.
 
 ## QA del ajuste de layout y alcance
 
-Estado: **PASS técnico**, pendiente de revisión manual del desarrollador. Los cambios de este ajuste son contenedor/lectura, retirada del enlace redundante, QA y documentación. Consentimiento, parser, `consent_at`, validaciones, carrusel, tarjetas, Storage y notificaciones conservan la implementación aprobada. Las diferencias de esos módulos que aún aparecen en Git pertenecen a la integración anterior sin commit.
+Estado registrado en el ajuste: **PASS técnico**, pendiente de revisión manual del desarrollador en aquel cierre. Los cambios fueron contenedor/lectura, retirada del enlace redundante, QA y documentación. Consentimiento, parser, `consent_at`, validaciones, carrusel, tarjetas, Storage y notificaciones conservaron la implementación aprobada. Las referencias al diff sin commit son históricas.
 
 - **93/93 unitarias en 14 suites**. TypeScript, ESLint sin advertencias, build de producción y `git diff --check`: PASS.
 - **576 mediciones de alineación**: 540 en los cinco pasos de nueve recorridos y 36 en el hero. ES/EN/PT, 320/375/768/1024/1440/1920px y fuente raíz al 100/200%. Diferencia máxima medida entre extremos de header y contenido: **0px**; sin doble padding ni desbordamiento. Logo y selector coinciden con sus extremos.
@@ -126,6 +128,8 @@ Estado: **PASS técnico**, pendiente de revisión manual del desarrollador. Los 
 Se regeneran las **cuatro imágenes seleccionadas y tres reportes** de la carpeta de integración. La captura auxiliar `layout-en-1440-step1.png` se genera para inspección local y queda ignorada; no se añade a la selección ni se enlaza como evidencia versionada. Los PNG de etapas anteriores se conservan. La matriz de resumen no escribe PNG nuevos. Zoom nativo, dispositivos físicos, Safari/Firefox y lectores de pantalla reales siguen pendientes; ampliar la fuente raíz no equivale a zoom nativo ni certifica accesibilidad.
 
 ## Archivos de implementación
+
+Inventario y estados Git del cierre original: no describen el diff actual ni operaciones realizadas en esta revisión documental.
 
 Todos los caminos son relativos a `apps/testimonios`:
 

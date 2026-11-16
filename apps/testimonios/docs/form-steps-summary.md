@@ -1,5 +1,15 @@
 # Navegación y resumen del formulario — etapas 1 a 4
 
+## Estado vigente — 16/11/2026
+
+El flujo está integrado en `/enviar`: hero introductorio con aceptación compartida y cinco pasos (categoría, datos personales, experiencia, fotografías/enlaces y revisión/envío). No hay sexto paso ni consentimiento como pantalla independiente. Las etapas de este informe están cerradas e integradas; las secciones por etapa de abajo conservan su QA y decisiones históricas. El contrato actual de aceptación reemplaza la etapa 5 simplificada y se describe en [hero y formulario](./hero-form-integration.md#declaración-y-fecha-de-consentimiento).
+
+El indicador permite volver exclusivamente a pasos anteriores, sin validar ni modificar valores; avanzar usa «Siguiente» y sus validaciones. No hay historial que habilite pasos futuros por haberlos visitado. Al cambiar de categoría se conservan campos profesionales inactivos y archivos; se revisan los valores profesionales previamente validados de la categoría reactivada, preservando rechazos pendientes del servidor. Antes de enviar se valida integralmente la categoría activa y solo sus campos profesionales se incluyen en `FormData`. El servidor sigue siendo la autoridad final.
+
+El paso 5 muestra tres tarjetas: datos personales con avatar final recortado; experiencia completa y categoría de solo lectura; fotografía opcional confirmada y enlaces. Los previews derivan de `avatarFile`/`captureFile`, con object URLs revocadas al reemplazar o desmontar. «Editar» habilita edición global con los controles existentes; «Guardar cambios» al pie valida datos editables y errores activos del servidor, conserva edición/foco ante error y vuelve a lectura con foco en «Editar» si es válido. No construye `FormData` ni envía. Consentimiento se comprueba al enviar, no al guardar cambios; el aviso final no agrega otra casilla. Pending bloquea navegación y edición. Las evidencias históricas no sustituyen pruebas físicas, lectores ni zoom nativo.
+
+## Registro de las etapas originales
+
 Fecha histórica: 5 de noviembre de 2026. Rama: `feat/testimonios-form-steps-summary`. Las cinco etapas fueron aprobadas en Demo Day y mergeadas a `dev`, según la confirmación del desarrollador. Las referencias a revisión/commit pendientes más abajo son históricas. Flujo vigente y nueva revisión: [Hero y formulario integrados](./hero-form-integration.md).
 
 Actualización de layout: el contenedor común de `/enviar` usa ahora 70rem y gutters acotados de 24/32px. Las compensaciones de margen negativo del resumen descritas más abajo fueron retiradas, porque el wrapper ya no aumenta su padding lateral con el texto. Se conserva el tamaño ampliado, permitiendo partir únicamente palabras que superan el ancho disponible. Véase la documentación vigente para alcance de publicación y QA actualizado.
@@ -286,6 +296,8 @@ Leandro y Geraldine recomendaron que el consentimiento deje de ser un paso del f
 También se separa «Guardar cambios» (datos editables) de «Enviar testimonio» (incluye comprobación de aceptación). La integración futura con la web oficial continúa fuera del alcance y pendiente de coordinación con Matías.
 
 ## Etapa 5 — autorización simplificada en hero y envío
+
+**Histórico, reemplazado por la integración del hero en `/enviar`:** la navegación entre rutas y el envío sin una declaración afirmativa descritos aquí ya no son el contrato vigente. Acceder por URL no permite omitir el consentimiento: la versión actual comparte aceptación y exige `consent=on` en servidor. Se conservan texto, resultados, cifras y estados de cierre originales de esta etapa.
 
 Estado: implementación para revisión final en localhost, sin commit. Las etapas 1–4 están aprobadas y commiteadas; la etapa 4 corresponde a `1490a3d`. Esta decisión de producto se acordó con Geraldine y se revisará con Geraldine/Leandro y el equipo en Demo Day.
 

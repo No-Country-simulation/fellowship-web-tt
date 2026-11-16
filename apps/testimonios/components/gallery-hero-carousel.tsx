@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { HeroStory } from "@/components/gallery-hero-data";
 import { HeroTestimonialCard } from "@/components/hero-testimonial-card";
+import { initialImageQueue, settleImage } from "@/components/carousel-image-queue";
 import { cn } from "@/lib/utils";
 import { getFormMessages } from "@/lib/form-i18n/messages";
 import type { FormLocale } from "@/lib/form-i18n/locales";
@@ -40,17 +41,19 @@ export function GalleryHeroCarousel({ stories, locale }: GalleryHeroCarouselProp
 
 function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
   const copy = getFormMessages(locale).form.hero;
+  const available = stories.map(story => Boolean(story.imageUrl));
   const [{ activeIndex, hasNavigated, motion, requested }, setNavigation] = useState<{
     activeIndex: number;
     hasNavigated: boolean;
     motion: CarouselMotion | null;
     requested: readonly number[];
-  }>({
+    settled: readonly number[];
+  }>(() => ({
     activeIndex: 0,
     hasNavigated: false,
     motion: null,
-    requested: [0],
-  });
+    ...initialImageQueue(available),
+  }));
   const stackRef = useRef<HTMLDivElement>(null);
   const id = useId();
   const total = stories.length;
@@ -90,6 +93,7 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
 
       const nextIndex = (current.activeIndex + direction + total) % total;
       return {
+        ...current,
         activeIndex: nextIndex,
         hasNavigated: true,
         requested: current.requested.includes(nextIndex) ? current.requested : [...current.requested, nextIndex],
@@ -151,6 +155,8 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
                     story={story}
                     locale={locale}
                     requested={requested.includes(index)}
+                    active={active}
+                    onSettled={() => setNavigation(current => settleImage(current, index, available))}
                   />
                 </div>
               );

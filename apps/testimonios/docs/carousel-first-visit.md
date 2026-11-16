@@ -1,5 +1,7 @@
 # Primera visita del carrusel
 
+**Registro histórico de rendimiento de esta etapa:** la arquitectura de streaming se conserva, pero la [precarga progresiva vigente](./carousel-preload.md) reemplaza la descarga de secundarias solo al navegar. Las mediciones y condiciones originales siguientes no se atribuyen a la nueva cola.
+
 Iteración del 11/11/2026 en `feat/testimonios-carousel-optimized-images`, después del commit intermedio de imágenes/disponibilidad. Arquitectura de streaming aprobada como base por el desarrollador. Las mediciones siguientes conservan el estado de esa etapa (calidad 75 y transcripción inferior); la [iteración visual posterior](./carousel-legibility.md) documenta calidad 85 y carrusel compacto, sin rediseñar carga/caché. Esta etapa no cambió resoluciones, `sizes`, diseño de publicaciones, enlaces, formulario, consentimiento, backend, panel, Storage ni publicación de rutas.
 
 ## Diagnóstico
