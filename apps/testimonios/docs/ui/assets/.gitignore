@@ -88,3 +88,8 @@
 !/carousel-legibility/es-320.png
 !/carousel-legibility/pt-375-200.png
 !/carousel-legibility/es-375-fallback.png
+
+# Progressive preload: retain only a compact review summary, not per-run network dumps.
+/carousel-preload/**
+!/carousel-preload/README.md
+!/carousel-preload/results-summary.json

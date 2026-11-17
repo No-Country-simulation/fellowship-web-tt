@@ -2,6 +2,8 @@
 
 Implementación inicial: 29 de octubre de 2026. Pulido visual: 30 de octubre de 2026. Rama: `feat/testimonios-capture-landing`.
 
+**Histórico de la réplica HTML y del hero en `/`:** fue reemplazado por hero integrado en `/enviar`, arte administrativo optimizado y [precarga progresiva](../carousel-preload.md). Las capturas, medidas y revisiones pendientes de este informe corresponden a aquella etapa; no se reescriben como QA de la implementación nueva. La galería volvió a `/`, manteniendo su aprobación definitiva de publicación pendiente.
+
 **Estado:** pulido implementado para una nueva revisión humana. El QA técnico de la primera versión no equivalía a aprobación visual. Las capturas iniciales se conservan como registro; las de `assets/carousel-polish/` muestran la iteración actual.
 
 ## Pulido del 30/10 — causas y cambios

@@ -45,6 +45,8 @@ globalThis.fetch = async (input, init) => {
   }
   if (directory && method === 'GET' && url.pathname.startsWith('/storage/v1/object/public/share-cards/')) {
     const slug = url.pathname.split('/').at(-2);
+    if (process.env.QA_QUALITY_ARTWORK_DELAY) await new Promise(resolve => setTimeout(resolve, Number(process.env.QA_QUALITY_ARTWORK_DELAY)));
+    if (process.env.QA_QUALITY_FAILED_SOURCE && slug.startsWith(process.env.QA_QUALITY_FAILED_SOURCE)) return new Response(null, { status: 503 });
     const index = Number(slug.match(/^quality-(\d+)-/)?.[1]) || (slug.startsWith('historia') ? 1 : slug.startsWith('simulacion') ? 2 : 3);
     return new Response(await readFile(join(directory, `source-${index}.png`)), { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=3600' } });
   }

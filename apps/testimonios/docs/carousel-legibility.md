@@ -1,5 +1,7 @@
 # Nitidez y carrusel compacto
 
+**Evolución de carga:** la [precarga progresiva](./carousel-preload.md) sustituye la descarga bajo demanda por imágenes secundarias low después de la primera. Este informe conserva las mediciones y decisiones de calidad/diseño de su etapa; no describe la precarga actual.
+
 Iteración del 11/11/2026, rama `feat/testimonios-carousel-optimized-images`. Pendiente de revisión manual en localhost. La arquitectura de [streaming y disponibilidad](./carousel-first-visit.md) queda aprobada como base y se conserva: no se modificaron selección, HEAD, concurrencia, timeout, backoff, Data Cache ni `Suspense`. Solo se ajustó la altura de su reserva visual al retirar el bloque inferior.
 
 ## Decisión de imagen

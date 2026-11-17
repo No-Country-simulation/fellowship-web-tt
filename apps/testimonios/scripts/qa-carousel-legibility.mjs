@@ -18,7 +18,7 @@ async function capture(qa, name) {
 let qa = await browserQA({ fixture: 'qa-carousel-quality-fixture.mjs', env: { QA_QUALITY_SOURCES: join(output, 'local'), QA_CAROUSEL_DESIGN: 'legibility-final' } });
 try {
   await qa.viewport(1440); await qa.load('en'); await ready(qa);
-  assert.equal(await qa.ev(() => document.querySelectorAll('[data-hero-artwork] img').length), 1);
+  await until(() => qa.ev(() => [...document.querySelectorAll('[data-hero-artwork] img')].filter(e => e.complete && e.naturalWidth > 0 && e.dataset.loaded === 'true').length === 3), 'automatic background images');
   assert.ok([...qa.requests.values()].filter(r => r.type === 'Image' && decodeURIComponent(r.url).includes('/share-cards/')).every(r => r.status === 200 && r.mime === 'image/webp'));
   // Keep actual animation and keyboard focus checks before the responsive/reduced-motion matrix.
   await qa.ev(label => document.querySelector('button[aria-label="' + label + '"]').focus(), labels.en);

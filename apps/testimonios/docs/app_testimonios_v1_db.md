@@ -57,7 +57,7 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `capture_path` | `text` | sí | | Path en `captures`. Foto del **entorno de trabajo** (equipo, oficina, reunión), no la cara ni una captura del proyecto |
 | `video_url` | `text` | sí | | URL de YouTube |
 | `payload` | `jsonb` | no | `'{}'` | Solo campos del tipo (abajo) |
-| `consent_at` | `timestamptz` | no | | |
+| `consent_at` | `timestamptz` | no | | Fecha de servidor del envío válido con declaración afirmativa; no es la hora del clic |
 | `submitted_at` | `timestamptz` | no | `now()` | |
 | `published_at` | `timestamptz` | sí | | Al publicar. Se escribe aunque Discord o Buffer fallen |
 | `discord_posted_at` | `timestamptz` | sí | | Cuando el webhook de comunidad posteó con éxito. Null = pendiente, falló, o no hay webhook |
@@ -69,6 +69,8 @@ Una fila por envío. Campos comunes en columnas; lo específico del tipo en `pay
 | `updated_at` | `timestamptz` | no | `now()` | Trigger `on update` |
 
 Índices: `unique (slug)`, `(status, submitted_at desc)`, `(type)`.
+
+Semántica del formulario vigente: el parser exige una única entrada `consent=on`, valida datos y genera `consentAt` en servidor; el store persiste ese valor en la columna existente. No se aceptan timestamps del cliente ni se acredita lectura, identidad o interacción física. No hay cambio de esquema por este contrato. [Declaración y límites](./hero-form-integration.md#declaración-y-fecha-de-consentimiento).
 
 `video_url` vacío o YouTube (`youtube.com` / `youtu.be`). `payload_is_object` (`jsonb_typeof(payload) = 'object'`) y `payload_matches_type` ya están en la base (formas abajo). Los crea [`20260906000000_init.sql`](../supabase/migrations/20260906000000_init.sql); [`20260923210000_country_and_simulation_role.sql`](../supabase/migrations/20260923210000_country_and_simulation_role.sql) reemplaza `payload_matches_type`.
 

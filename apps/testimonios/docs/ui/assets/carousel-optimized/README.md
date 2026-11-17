@@ -1,5 +1,7 @@
 # Evidencias — carrusel optimizado
 
+**Histórico de la migración inicial:** calidad 75, transcripción inferior y descarga bajo demanda. La afirmación sobre pintura sin JavaScript corresponde a esa etapa previa al streaming. [Comportamiento vigente](../../../carousel-preload.md): calidad 85, Suspense que necesita JavaScript para incorporar el stream y precarga progresiva; no se reinterpretan ni regeneran los reportes de abajo.
+
 Datos sintéticos y Canvas del panel local, Chrome headless contra build de producción. No representan testimonios reales ni aprobación visual del desarrollador. [Decisiones y límites](../../../carousel-optimized-images.md).
 
 Se conservan únicamente cuatro PNG:

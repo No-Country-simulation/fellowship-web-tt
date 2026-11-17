@@ -1,5 +1,7 @@
 # Evidencia vigente de edición global
 
+**Vigente para el cierre histórico de las etapas 3–4:** las capturas y resultados se conservan sin regenerarlos. La ubicación/validación de consentimiento y el contenedor posteriores se describen en [hero y formulario integrados](../../../hero-form-integration.md); este registro no representa por sí solo todo el flujo actual.
+
 Se propone versionar seis PNG y dos reportes JSON. Ningún archivo de esta carpeta
 estaba bajo seguimiento antes de esta selección. Las etapas anteriores se
 conservan sin borrar sus capturas versionadas.

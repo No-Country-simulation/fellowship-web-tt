@@ -1,12 +1,20 @@
 # Issue 2 — Auditoría del formulario multilingüe de Testimonios
 
+## Estado vigente — revisión documental del 16/11/2026
+
+La internacionalización del formulario está implementada e integrada en `dev`: catálogos tipados ES/EN/PT, errores semánticos, metadata y selector compacto único en FormHeader. Códigos canónicos `es/en/pt`, alias de lectura `pt-BR` y atributo HTML `pt-BR` para portugués brasileño. Seleccionar idioma conserva el formulario y la URL y guarda `testimonios_locale`; una query explícita prevalece en una nueva navegación o recarga. No se usa `NEXT_LOCALE`. Véase [contrato vigente del selector](./ui/components/form-language-select.md).
+
+El hero está dentro de `/enviar`, antes de los cinco pasos. El checkbox controlado comparte aceptación con el formulario; el parser exige una única declaración `consent=on` y genera la fecha de servidor solo para el envío válido. [Contrato vigente](./hero-form-integration.md#declaración-y-fecha-de-consentimiento). Navegación, resumen y edición están implementados, no pendientes de esta issue.
+
+Lo que sigue es **registro histórico de la auditoría y sus etapas**: los recuentos de claves/pruebas, selector nativo/portal, History API, consentimiento anterior, fechas y estados de revisión corresponden a cada cierre. No describen todos ellos simultáneamente la arquitectura actual. Se conservan los FAIL de contraste conocidos y las reservas editoriales/legales, PT-BR, lectores y zoom real; no se declaran corregidos ni aprobados por esta revisión documental. Las [mediciones recientes de precarga](./carousel-preload.md) tampoco constituyen certificación de accesibilidad.
+
 > Flujo vigente desde el 10 de noviembre de 2026: el hero inicia /enviar bajo FormHeader, con declaración afirmativa requerida por el servidor; / recupera la galería. Las descripciones anteriores de hero independiente y acceso directo a pasos son históricas. Véase [Hero y formulario integrados](./hero-form-integration.md).
 
 Nota histórica: las referencias al checkbox dentro de los pasos describen una versión anterior. La [etapa 5 simplificada](./form-steps-summary.md#etapa-5--autorización-simplificada-en-hero-y-envío) permitió acceso directo a los pasos y mostró autorización informada al enviar. La integración actual requiere la declaración del hero; las evidencias y resultados originales se conservan como historial.
 
 Auditoría original: 31 de octubre de 2026. Cierre de QA de etapa 5: 1 de noviembre de 2026. Rama: `feat/testimonios-form-i18n`, destino propuesto: `dev`.
 
-**Estado actual: ajustes de UX implementados y colores oficiales restaurados por decisión de producto; contraste vigente FAIL y última revisión manual PENDIENTE.** El selector aparece solo en el header, sin portal; el foco nativo ya no provoca el salto reproducido en Chrome. Ver [0.g](#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system). Los PASS de contraste de 0.f son históricos y corresponden a overrides retirados. Permanecen pendientes popup nativo con puntero, Safari/Firefox, lector real, zoom manual, revisión brasileña, pregunta de empleo y consentimiento ES/PT. Fidelidad visual y accesibilidad son aprobaciones diferentes.
+**Estado registrado al cerrar 0.g: ajustes de UX implementados y colores oficiales restaurados por decisión de producto; contraste FAIL y última revisión manual PENDIENTE.** El selector de aquella etapa aparece solo en el header, sin portal; el foco nativo ya no provoca el salto reproducido en Chrome. Ver [0.g](#0g-ajustes-finales-de-ux-y-fidelidad-al-design-system). Los PASS de contraste de 0.f corresponden a overrides retirados. Las referencias a popup nativo se conservan como antecedente: 0.h/0.i y la ficha del selector documentan su sustitución por el menú compacto. Fidelidad visual y accesibilidad son aprobaciones diferentes; se mantienen los límites externos indicados arriba.
 
 ## 0. Etapa 1 — estado al cerrar la infraestructura
 
@@ -984,6 +992,8 @@ La documentación oficial externa de `next-intl` se cita en la comparación de e
 
 
 ## 0.h. Extensión ES/EN/PT y selector compacto (2026-11-03)
+
+**Etapa intermedia histórica:** su uso de `replaceState` fue reemplazado por la preferencia de 0.i; la ficha del selector describe el comportamiento vigente. Las limitaciones y ejecuciones de este entorno se conservan como fueron registradas.
 
 **Nueva decisión de equipo:** Talent expone ES, EN y PT y se observó `NEXT_LOCALE=es/en/pt` al seleccionar cada opción. En esta aplicación se adoptan esos identificadores como códigos canónicos y se mantienen URLs con `pt-BR` como alias legible para enlaces anteriores; el catálogo portugués **sigue siendo brasileño**. No se importa la cookie ni la arquitectura de Talent.
 

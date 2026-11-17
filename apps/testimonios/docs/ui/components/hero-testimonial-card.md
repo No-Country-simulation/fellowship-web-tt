@@ -5,12 +5,12 @@ Vista del arte administrativo publicado en el carrusel de `/enviar`. Sustituye l
 **Archivos:** `components/hero-testimonial-card.tsx` y `hero-testimonial-card.module.css`.
 
 ```tsx
-<HeroTestimonialCard story={story} locale={locale} requested={requested} />
+<HeroTestimonialCard story={story} locale={locale} requested={requested} active={active} onSettled={onSettled} />
 ```
 
 `story` contiene `type`, `quote`, `story` completo, `fullName`, `country`, `imageUrl`, `role`, `company` y `previousRole`. `imageUrl` es una URL candidata de `share-cards/{slug}/instagram.png` o `null`; su presencia no certifica que exista el archivo. El mapper pertenece a `gallery-hero-data.ts`, protegido con `server-only`.
 
-`requested` permite montar el único `next/image` cuando la tarjeta se activa por primera vez. Luego permanece montado hasta desmontar el carrusel. El padre usa la URL como clave para reiniciar el estado de carga si cambia. La prioridad es alta y la carga eager para cada imagen solicitada; las tarjetas nunca visitadas no tienen imagen ni `srcset`. No se precargan las tres publicaciones.
+`requested` monta el único `next/image`, por activación o por la cola de precarga progresiva del padre. Luego permanece montado hasta desmontar el carrusel. El padre usa la URL como clave para reiniciar el estado de carga si cambia. La carga es eager: `active` determina fetchPriority high/low. `onSettled()` se llama después de `onLoad` de Next (que espera decode) o de `onError`, liberando la siguiente precarga sin bloquear la primera. No se añade otro objeto Image ni un enlace preload: se conserva exactamente el `srcset`/`sizes` que usará la tarjeta visible. Los detalles de navegación anticipada y prioridades nativas están en [precarga progresiva](../../carousel-preload.md).
 
 El contenedor reserva 4:5, con máximo de 340px de ancho fijado por el carrusel. El `Image` declara 1080×1350, `quality={85}` y usa `object-fit: contain`: conserva todo el diseño sin distorsionar ni recortar texto, incluso si un archivo remoto tiene otra proporción. `sizes="(max-width: 387px) calc(100vw - 48px), 340px"` corresponde al ancho móvil menos los gutters de 24px y al máximo de escritorio. Next selecciona la resolución del `srcset` según viewport y DPR; no se usa `unoptimized` ni se asigna el PNG original como fallback del navegador. `images.qualities=[75,85]` conserva el predeterminado 75 para los otros recursos. Comparación visual 75/85/90 y DPR: [nitidez](../../carousel-legibility.md).
 

@@ -23,7 +23,7 @@ for (let trial = 1; trial <= 3; trial++) {
       const navigation = await qa.ev(() => ({ responseMs: performance.getEntriesByType('navigation')[0].responseStart, firstArtMs: window.__firstArt,
         imageBytes: performance.getEntriesByType('resource').filter(e=>e.name.includes('/_next/image?')&&decodeURIComponent(e.name).includes('/share-cards/')).reduce((n,e)=>n+e.transferSize,0),
         artworkCount: document.querySelectorAll('[data-hero-artwork] img').length }));
-      assert.equal(navigation.artworkCount, 1);
+      assert.ok(navigation.artworkCount >= 1 && navigation.artworkCount <= 3, 'progressive images after active load');
       const lines = (await readFile(metricsFile, 'utf8')).trim().split('\n').filter(Boolean).slice(prior).map(JSON.parse);
       const counts = Object.fromEntries(['published-query', 'availability', 'optimizer-source'].map(kind=>[kind,lines.filter(e=>e.kind===kind).length]));
       assert.equal(counts['published-query'], 1);
@@ -87,5 +87,5 @@ if (!baseline) for (const config of [{available:0},{available:1},{available:2},{
   }finally{await qa.close();}
 }
 await writeFile(join(output, baseline?'before.json':'after.json'),JSON.stringify({result:'PASS',samples,scenarios,
-  scope:'Local production build, 10 synthetic published records; public query 50ms, HEAD 50ms; actual optimizer and demand loading retained. Three trials, cold/new URLs and warm/same server cache. Browser GET image bytes, no real services or submissions. These are lab measurements, not production latency.'},null,2)+'\n');
+  scope:'Local production build, 10 synthetic published records; public query 50ms, HEAD 50ms; actual optimizer and progressive loading retained. Three trials, cold/new URLs and warm/same server cache. Browser GET image bytes, no real services or submissions. These are lab measurements, not production latency.'},null,2)+'\n');
 console.log(JSON.stringify({result:'PASS',baseline,samples:samples.length,scenarios:scenarios.length}));
