@@ -2,7 +2,7 @@
 
 ## Estado actual de implementación
 
-**Última revisión:** 30 de octubre de 2026.
+**Revisión del estado vigente:** 16 de noviembre de 2026. El registro original del plan es del 30 de octubre de 2026 y se conserva más abajo.
 
 Este checklist resume el estado de desarrollo de Testimonios. Las secciones siguientes conservan la planificación y las decisiones originales del proyecto.
 
@@ -11,20 +11,32 @@ Este checklist resume el estado de desarrollo de Testimonios. Las secciones sigu
 - [x] Formulario `/enviar` de cinco pasos y tres categorías de testimonios.
 - [x] Validaciones, avatar obligatorio y fotografía testimonial opcional.
 - [x] Consentimiento, resumen y confirmación del envío pendiente de moderación.
-- [x] Landing de captación con mensaje neutro latinoamericano y CTA «Compartir mi testimonio» hacia `/enviar`, sin promesa de publicación automática.
-- [x] Galería con búsqueda, filtros, contador y estados vacíos implementada y conservada, temporalmente fuera del home.
-- [x] Carrusel manual de hasta tres testimonios publicados, con réplica HTML de la plantilla Canvas `quote` (Cita) y variantes por tipo real.
-- [x] Ficha individual con historia completa, fotografía testimonial y video de YouTube.
+- [x] Hero integrado en `/enviar`, antes de los cinco pasos, con casilla que habilita iniciar y declaración afirmativa obligatoria al enviar; fecha del servidor en `consent_at`.
+- [x] Galería rediseñada con búsqueda, filtros, contador y estados vacíos en `/`; implementada, con publicación definitiva pendiente.
+- [x] Carrusel manual de hasta tres publicados con arte administrativo mediante `next/image`, calidad 85, disponibilidad cacheada, streaming y fallback textual; sustituye la réplica HTML de Cita.
+- [x] Ficha rediseñada con historia completa, fotografía ampliable y video de YouTube; `/t/[slug]` sigue pendiente de aprobación definitiva de publicación.
+- [x] Alineación visual con la identidad de No Country, tokens y componentes existentes; no equivale a certificación de accesibilidad ni aprobación de propuestas para la web oficial.
+- [x] Formulario multilingüe ES/EN/PT, errores semánticos, selector único y preferencia de idioma.
+- [x] Indicador navegable hacia pasos anteriores y validación integral de campos activos, conservando valores/archivos y errores pendientes del servidor.
+- [x] Resumen en tres tarjetas con fotos finales confirmadas y edición global «Editar/Guardar cambios», sin envío al guardar cambios.
 - [x] Mejoras responsive, de accesibilidad y adaptación a texto ampliado.
 - [x] Documentación UI de los componentes implementados y modificados.
 
-### V1 — Funcionalidades del equipo
+La base anterior está integrada en `dev`. La **implementación y revisión manual en localhost de la precarga progresiva se completaron el 16/11/2026**; rama de implementación: `perf/testimonios-carousel-preload`. El desarrollador confirmó imágenes secundarias disponibles al navegar y mayor fluidez. Primera eager/high; siguientes automáticas eager/low, una por vez; navegación anticipada inmediata y recursos conservados. Este registro no afirma un despliegue en producción. [Decisión, resultados y límites](./carousel-preload.md).
+
+Mapa vigente: [UI](./ui/README.md), [hero/rutas/consentimiento](./hero-form-integration.md), [formulario y resumen](./form-steps-summary.md) e [i18n](./form-i18n-audit.md). `/enviar` es el flujo aprobado; galería y fichas existen y siguen accesibles, sin flags ni restricciones implementadas.
+
+### V1 — Funcionalidades del equipo (estado registrado)
 
 - [x] Panel administrativo de revisión, edición y moderación de testimonios.
 - [x] Generación de cards para redes sociales.
 - [x] Integraciones con Discord y Buffer, demostradas funcionando por el equipo en dev.
 
+Este registro no implica reauditar el panel, sus servicios ni el despliegue en esta revisión documental.
+
 ### Issue 1 — Landing de captación y carrusel social
+
+**Registro histórico:** la réplica descrita a continuación fue sustituida en `feat/testimonios-carousel-optimized-images` por [arte administrativo optimizado y alternativa textual](./carousel-optimized-images.md). El hero vive actualmente en `/enviar`; `/` y las fichas corresponden a funcionalidades futuras. Se conservan aquí las decisiones de la Issue 1 y sus evidencias históricas.
 
 La consulta pública existente y `force-dynamic` se conservan. El home solo compone el hero; se retira el mapeo destinado a la galería, sin modificar Supabase ni la selección de publicados. Las fichas continúan accesibles y sus enlaces de retorno dicen «Volver al inicio». Navbar, footer y formulario no se rediseñan.
 
@@ -38,7 +50,7 @@ Referencias: [tarjeta y diferencias con Canvas](./ui/components/hero-testimonial
 
 - [ ] Revisar la protección de fotografías pendientes de moderación en Supabase Storage.
 - [ ] Verificar los controles de autenticación y autorización del panel antes de utilizar datos reales.
-- [x] Límites de la card PNG y Storage: la card y el bucket `share-cards` cortan en 5 MB. El body de la Server Action queda en 8 MB para que entren la card y el texto.
+- [x] Registro original de límites administrativos: card PNG y bucket `share-cards` de 5 MB, y acción del panel de 8 MB para card y texto. No describe el formulario público: `apps/testimonios/next.config.ts` configura `bodySizeLimit: "15mb"`. El panel no se revalida en esta auditoría.
 - [x] Recuperación si Buffer falla después de crear el post: el reintento borra fecha e id solo si siguen siendo los de ese post y vuelve a publicar esa red.
 - [x] Definir la política de conservación o eliminación de testimonios rechazados y sus archivos: se borran en lote desde la pestaña Rechazados (tope 100 por vez), de forma definitiva, con avatar, foto testimonial y card. Si Storage falla en una, esa fila queda para reintentar. Sin migración.
 
@@ -51,7 +63,15 @@ Referencias: [tarjeta y diferencias con Canvas](./ui/components/hero-testimonial
 
 **Nota:** los puntos de V2 son funcionalidades futuras, no tareas incumplidas de V1. Los pendientes relacionados con el panel, Supabase y las publicaciones requieren evaluación por sus responsables.
 
+### Límites y decisiones fuera del cierre de la precarga
+
+Las revisiones editorial/legal y PT-BR, los contrastes insuficientes conocidos, pruebas físicas/lectores/zoom nativo y las condiciones del hosting conservan sus límites documentados; no se declaran resueltos por QA técnico. La exposición definitiva de `/` y `/t/[slug]` requiere decisión del equipo, especialmente por el enlace «Leer historia». Las propuestas de web oficial y V2 son trabajo futuro; no son funcionalidades implementadas ni nuevos bloqueos atribuidos a la precarga. No se inventan aprobaciones o despliegues.
+
 ---
+
+## Registro original de planificación V1/V2 — histórico
+
+Las descripciones siguientes conservan el diseño del sistema y sus decisiones originales, incluidas ubicaciones antiguas del consentimiento y del hero. Para la interfaz vigente rige el estado anterior y sus enlaces; no se deben interpretar este wizard, el logo o los flujos de publicación originales como una especificación actual de `/enviar`. No se alteran las mediciones ni fechas históricas.
 
 El inbox ya no vive en esta app. Galería y `/enviar` quedan en `apps/testimonios`. Revisar y publicar está en `apps/panel-admin` (`/testimonials`). Quote y captions salen de la plantilla; no hay generación con IA.
 

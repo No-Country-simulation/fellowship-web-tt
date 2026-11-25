@@ -1,0 +1,22 @@
+{
+  "scope": "One diagnostic request using an already supported Next srcset width (828), unchanged quality 75, selected published source. No frontend size/quality change. Native source body and Sharp.toBuffer instrumented only in the local QA process; body clone adds small measurement overhead. Not a production benchmark.",
+  "status": 200,
+  "mime": "image/webp",
+  "optimizerCache": "MISS",
+  "headerMs": 565.3718000000003,
+  "completeMs": 567.422,
+  "bytes": 27456,
+  "phases": [
+    {
+      "kind": "original-body",
+      "headerMs": 350.4861000000001,
+      "completeMs": 393.8188,
+      "bytes": 190048
+    },
+    {
+      "kind": "sharp-buffer",
+      "ms": 117.71309999999994,
+      "bytes": 27456
+    }
+  ]
+}

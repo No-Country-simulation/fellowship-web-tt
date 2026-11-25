@@ -12,7 +12,7 @@ cp .env.example .env.local
 pnpm turbo run dev --filter=testimonios
 ```
 
-Desde esta carpeta también vale `pnpm dev`. Abrí [http://localhost:3001](http://localhost:3001).
+Desde esta carpeta también vale `pnpm dev`. Para el flujo aprobado, abrí [http://localhost:3001/enviar](http://localhost:3001/enviar).
 
 | Ruta | Qué es |
 | --- | --- |
@@ -59,6 +59,23 @@ El build actual incluye las tres rutas. Declarar la galería como futura no rest
 
 ## UI
 
-Tokens y type scale: DM Sans y paleta oscura de `app/globals.css`, con el [design system de la landing](../landing-contratar/docs/ui/design-system.md) como referencia interna. Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). `/enviar` reúne hero y formulario bajo FormHeader, con contenedor compartido de 70rem y gutters de 24/32px; `/` conserva la galería futura y su chrome institucional. El carrusel utiliza una réplica HTML de Cita; no muestra PNG finales. Scrollbar fino en `app/globals.css`.
+Tokens y type scale: DM Sans y paleta oscura de `app/globals.css`, con el [design system de la landing](../landing-contratar/docs/ui/design-system.md) como referencia interna. Button y BrandLogo: [`packages/ui/docs`](../../packages/ui/README.md). `/enviar` reúne hero y formulario bajo FormHeader, con contenedor compartido de 70rem y gutters de 24/32px; `/` conserva la galería futura y su chrome institucional. Scrollbar fino en `app/globals.css`.
+
+## Estado vigente — 16/11/2026
+
+La base de Testimonios está integrada en `dev`: galería y fichas rediseñadas, identidad visual de No Country, formulario ES/EN/PT, navegación hacia pasos anteriores, validación integral y resumen con fotografías confirmadas y edición global «Editar/Guardar cambios».
+
+El hero es la introducción de `/enviar`, no una página independiente ni un sexto paso. Entrar por URL muestra la casilla desmarcada; aceptarla habilita comenzar los cinco pasos. La aceptación compartida se comprueba al enviar y el parser exige una única entrada `consent=on`. Solo un envío válido recibe `consent_at` generado por el servidor; esa fecha no prueba lectura ni hora del clic. El paso 5 mantiene el recordatorio de autorización, sin otra casilla. [Contrato y límites](./docs/hero-form-integration.md#declaración-y-fecha-de-consentimiento).
+
+El carrusel utiliza PNG administrativos mediante `next/image` (normalmente WebP, calidad 85), selección/disponibilidad cacheadas y streaming con `Suspense`, con equivalente textual y fallback local. La **implementación y revisión manual en localhost de la precarga progresiva se completaron el 16/11/2026**: primera eager/high; segunda automática tras terminar la primera, eager/low; tercera tras la segunda. Navegar anticipadamente solicita o reutiliza el destino y conserva las imágenes montadas. `fetchPriority` es una indicación del navegador, no una garantía de prioridad efectiva. Este registro no afirma un despliegue en producción. [Estrategia, métricas y límites](./docs/carousel-preload.md).
+
+| Documento vigente | Uso |
+| --- | --- |
+| [Plan y estado](./docs/app_testimonios_plan.md) | Implementado, límites y planificación histórica |
+| [Índice UI](./docs/ui/README.md) | Componentes y arquitectura actual |
+| [Hero y formulario](./docs/hero-form-integration.md) | Rutas, consentimiento y estado en memoria |
+| [Navegación y resumen](./docs/form-steps-summary.md) | Estado vigente y evolución por etapas |
+| [Internacionalización](./docs/form-i18n-audit.md) | ES/EN/PT, preferencia y registro histórico de QA |
+| [Precarga del carrusel](./docs/carousel-preload.md) | Comportamiento actual, mediciones y aprobación manual |
 
 Componentes reutilizables (PageShell, TestimonialCard, Field, etc.): [docs/ui](./docs/ui/README.md).

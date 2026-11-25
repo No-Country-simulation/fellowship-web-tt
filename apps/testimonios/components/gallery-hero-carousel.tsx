@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { HeroStory } from "@/components/gallery-hero-data";
 import { HeroTestimonialCard } from "@/components/hero-testimonial-card";
+import { initialImageQueue, settleImage } from "@/components/carousel-image-queue";
 import { cn } from "@/lib/utils";
 import { getFormMessages } from "@/lib/form-i18n/messages";
 import type { FormLocale } from "@/lib/form-i18n/locales";
@@ -40,15 +41,19 @@ export function GalleryHeroCarousel({ stories, locale }: GalleryHeroCarouselProp
 
 function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
   const copy = getFormMessages(locale).form.hero;
-  const [{ activeIndex, hasNavigated, motion }, setNavigation] = useState<{
+  const available = stories.map(story => Boolean(story.imageUrl));
+  const [{ activeIndex, hasNavigated, motion, requested }, setNavigation] = useState<{
     activeIndex: number;
     hasNavigated: boolean;
     motion: CarouselMotion | null;
-  }>({
+    requested: readonly number[];
+    settled: readonly number[];
+  }>(() => ({
     activeIndex: 0,
     hasNavigated: false,
     motion: null,
-  });
+    ...initialImageQueue(available),
+  }));
   const stackRef = useRef<HTMLDivElement>(null);
   const id = useId();
   const total = stories.length;
@@ -86,9 +91,12 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
       // No encolamos clics ni usamos disabled: los controles conservan el foco.
       if (current.motion && !reducedMotion) return current;
 
+      const nextIndex = (current.activeIndex + direction + total) % total;
       return {
-        activeIndex: (current.activeIndex + direction + total) % total,
+        ...current,
+        activeIndex: nextIndex,
         hasNavigated: true,
+        requested: current.requested.includes(nextIndex) ? current.requested : [...current.requested, nextIndex],
         motion: reducedMotion
           ? null
           : {
@@ -142,7 +150,14 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
                   }
                   className={styles.card}
                 >
-                  <HeroTestimonialCard story={story} />
+                  <HeroTestimonialCard
+                    key={story.imageUrl}
+                    story={story}
+                    locale={locale}
+                    requested={requested.includes(index)}
+                    active={active}
+                    onSettled={() => setNavigation(current => settleImage(current, index, available))}
+                  />
                 </div>
               );
             })}
@@ -153,6 +168,7 @@ function HeroStoryStack({ stories, locale }: GalleryHeroCarouselProps) {
       <div className="mt-sm flex min-w-0 flex-wrap items-center justify-between gap-xs">
         <Link
           href={`/t/${stories[activeIndex].slug}`}
+          prefetch={false}
           aria-label={`${copy.readStoryOf} ${stories[activeIndex].fullName}`}
           className="inline-flex min-h-11 max-w-full items-center rounded-button text-sm font-medium text-accent-cyan wrap-anywhere hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-cyan"
         >

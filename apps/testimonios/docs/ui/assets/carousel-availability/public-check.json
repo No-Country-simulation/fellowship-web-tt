@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-11-11T21:21:09.965Z",
+  "publicRows": 10,
+  "results": [
+    {
+      "slug": "lautaro-duran-99d4858c",
+      "url": "https://zfxdyfoycrjoluegnubx.supabase.co/storage/v1/object/public/share-cards/lautaro-duran-99d4858c/instagram.png",
+      "http": 400,
+      "error": {
+        "statusCode": "404",
+        "error": "not_found",
+        "message": "Object not found",
+        "code": "NoSuchKey"
+      },
+      "exists": false,
+      "published": true
+    },
+    {
+      "slug": "lautaro-duran-149e8cab",
+      "url": "https://zfxdyfoycrjoluegnubx.supabase.co/storage/v1/object/public/share-cards/lautaro-duran-149e8cab/instagram.png",
+      "http": 400,
+      "error": {
+        "statusCode": "404",
+        "error": "not_found",
+        "message": "Object not found",
+        "code": "NoSuchKey"
+      },
+      "exists": false,
+      "published": true
+    },
+    {
+      "slug": "lautaro-duran-duran-d9970b40",
+      "url": "https://zfxdyfoycrjoluegnubx.supabase.co/storage/v1/object/public/share-cards/lautaro-duran-duran-d9970b40/instagram.png",
+      "http": 400,
+      "error": {
+        "statusCode": "404",
+        "error": "not_found",
+        "message": "Object not found",
+        "code": "NoSuchKey"
+      },
+      "exists": false,
+      "published": true
+    },
+    {
+      "slug": "lautaro-duran-2872f91e",
+      "url": "https://zfxdyfoycrjoluegnubx.supabase.co/storage/v1/object/public/share-cards/lautaro-duran-2872f91e/instagram.png",
+      "http": 400,
+      "error": {
+        "statusCode": "404",
+        "error": "not_found",
+        "message": "Object not found",
+        "code": "NoSuchKey"
+      },
+      "exists": false,
+      "published": true
+    }
+  ],
+  "scope": "Existing testimonials_public query and public GET Range 0-0 only; no bucket listing or credentials. No private records or mutations."
+}

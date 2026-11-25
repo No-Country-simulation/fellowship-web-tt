@@ -1,0 +1,62 @@
+{
+  "scope": "Read-only: one SSR query to the existing published source, at most three selected published slugs; no bucket listing, credentials, URLs, personal data or arbitrary errors retained.",
+  "samples": [
+    {
+      "status": 200,
+      "errorKind": null,
+      "bytes": 952958,
+      "format": "png",
+      "width": 1080,
+      "height": 1350,
+      "cacheControl": "public, max-age=3600",
+      "next": {
+        "status": 200,
+        "bytes": 40150,
+        "format": "webp",
+        "width": 750,
+        "height": 938,
+        "cacheControl": "public, max-age=14400, must-revalidate"
+      }
+    },
+    {
+      "status": 200,
+      "errorKind": null,
+      "bytes": 1513834,
+      "format": "png",
+      "width": 1080,
+      "height": 1350,
+      "cacheControl": "public, max-age=3600",
+      "next": {
+        "status": 200,
+        "bytes": 45282,
+        "format": "webp",
+        "width": 750,
+        "height": 938,
+        "cacheControl": "public, max-age=14400, must-revalidate"
+      }
+    },
+    {
+      "status": 200,
+      "errorKind": null,
+      "bytes": 1277812,
+      "format": "png",
+      "width": 1080,
+      "height": 1350,
+      "cacheControl": "public, max-age=3600",
+      "next": {
+        "status": 200,
+        "bytes": 42752,
+        "format": "webp",
+        "width": 750,
+        "height": 938,
+        "cacheControl": "public, max-age=14400, must-revalidate"
+      }
+    }
+  ],
+  "initialProbe": {
+    "originalStatus": 400,
+    "nextStatus": 400,
+    "supabaseTransformStatus": 400,
+    "note": "Earlier single public candidate in this task; cause not classified. A failed source does not establish whether transformations are enabled. The later three public samples below succeeded."
+  }
+}

@@ -2,7 +2,9 @@
 
 Inventario original: 31 de octubre de 2026. Estado actualizado: 1 de noviembre de 2026. **Referencia histórica; sus textos originales se conservan.** Diagnóstico, implementación y aceptación final: [form-i18n-audit.md](./form-i18n-audit.md).
 
-La arquitectura general de diccionarios locales tipados ES/PT-BR, sin dependencias adicionales, fue aprobada. Las 163 claves originales sugeridas de las tablas ya existen en [messages/es.ts](../lib/form-i18n/messages/es.ts) y [messages/pt-BR.ts](../lib/form-i18n/messages/pt-BR.ts), bajo el contrato compartido [FormMessages](../lib/form-i18n/types.ts). **Etapas 1–4 aprobadas técnica y visualmente por el equipo, según la solicitud de etapa 5.** El formulario integra ambos idiomas, errores semánticos, provider, selector único con portal, metadata y header exclusivo, conservando estado con History API. El [cierre de aceptación](./form-i18n-audit.md#0e-etapa-5--aceptación-final-y-preparación-del-pr) separa PASS técnico, fallos de contraste y pendientes externos. Las columnas «Texto actual» y las tablas completas conservan el checkout histórico; la aprobación visual no aprueba el copy PT-BR ni el consentimiento.
+**Lectura actual:** las tablas son el inventario original, no un contrato literal de la UI vigente. Hoy hay ES/EN/PT, selector compacto sin portal, preferencia por cookie sin cambiar la URL, progreso navegable hacia atrás y quinto paso de revisión/envío. La aceptación se comparte desde el hero integrado y el servidor exige `consent=on`. Catálogos/contrato en código y el [estado vigente de i18n](./form-i18n-audit.md#estado-vigente--revisión-documental-del-16112026) prevalecen sobre filas históricas como «Consentimiento», selector nativo o valor `1`; las cifras y propuestas originales no se reescriben.
+
+La arquitectura general de diccionarios locales tipados ES/PT-BR, sin dependencias adicionales, fue aprobada. Las 163 claves originales sugeridas de las tablas se implementaron en [messages/es.ts](../lib/form-i18n/messages/es.ts) y [messages/pt-BR.ts](../lib/form-i18n/messages/pt-BR.ts), bajo el contrato compartido [FormMessages](../lib/form-i18n/types.ts); etapas posteriores añadieron o retiraron claves. **Etapas 1–4 aprobadas técnica y visualmente por el equipo, según la solicitud de etapa 5.** Aquella versión integraba ambos idiomas, errores semánticos, provider, selector único con portal, metadata y header exclusivo, conservando estado con History API. El [cierre de aceptación](./form-i18n-audit.md#0e-etapa-5--aceptación-final-y-preparación-del-pr) separa PASS técnico, fallos de contraste y pendientes externos. Las columnas «Texto actual» y las tablas completas conservan el checkout histórico; la aprobación visual no aprueba el copy PT-BR ni el consentimiento.
 
 Implementación de claves no equivale a aprobación de sus textos: PT-BR sigue pendiente de revisión competente brasileña; la autorización ES/PT está marcada en [FORM_CONSENT_REVIEW_STATUS](../lib/form-i18n/messages.ts) como pendiente de revisión editorial/legal. Se mantienen íntegros el cuerpo ES vigente y la propuesta PT, solo galería y Discord. El matiz de la pregunta de empleo sigue pendiente. Etapa 4 resolvió esta versión sin footer institucional en `/enviar` y con logo no navegable; cualquier información legal obligatoria adicional requiere definición del equipo.
 
@@ -24,6 +26,15 @@ Abreviaturas de archivo en las tablas, relativas a `apps/testimonios`:
 Las claves son propuestas semánticas estables, no cadenas españolas usadas como claves. `{step}`, `{total}`, `{title}`, `{min}`, `{max}`, `{current}`, `{hint}` y `{maxMb}` son parámetros; se conservan los límites reales. Marcas, URLs técnicas, `name`, valores internos e identificadores ARIA no son traducciones.
 
 ## 1. Página, pasos y navegación
+
+Textos añadidos para el carrusel optimizado (ES/EN/PT, sin traducir testimonios):
+
+| Archivo/componente | Texto actual | ES | PT-BR | Clave sugerida |
+| --- | --- | --- | --- | --- |
+| HeroTestimonialCard / región textual accesible | Leer testimonio en texto | Leer testimonio en texto | Ler depoimento em texto | `form.hero.readText` |
+| GalleryHero / carga parcial | Cargando testimonios… | Cargando testimonios… | Carregando depoimentos… | `form.hero.loadingStories` |
+| HeroTestimonialCard / carga | Cargando vista previa… | Cargando vista previa… | Carregando prévia… | `form.hero.imageLoading` |
+| HeroTestimonialCard / error | Vista previa no disponible. | Vista previa no disponible. | Prévia indisponível. | `form.hero.imageUnavailable` |
 
 | Archivo/componente | Texto actual | Propuesta en español neutro | Propuesta inicial pt-BR | Clave sugerida |
 | --- | --- | --- | --- | --- |

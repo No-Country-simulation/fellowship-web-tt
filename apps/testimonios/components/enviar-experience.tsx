@@ -3,7 +3,7 @@
 import { formHtmlLang } from "@/lib/form-i18n/locales";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { focusAndReveal } from "@/lib/form-focus";
-import type { HeroStory } from "./gallery-hero-data";
+import type { HeroStoriesSource } from "./gallery-hero-data";
 import { GalleryHero } from "./gallery-hero";
 
 import { EnviarForm } from "./enviar-form";
@@ -12,7 +12,7 @@ import { useFormLocale } from "./form-locale-provider";
 import layout from "./form-layout.module.css";
 
 /** One in-memory flow under FormHeader; hiding preserves the five-step form and files. */
-export function EnviarExperience({ stories }: { stories: readonly HeroStory[] | null }) {
+export function EnviarExperience({ stories }: { stories: HeroStoriesSource }) {
   const { locale, t } = useFormLocale();
   const [started, setStarted] = useState(false);
   const [accepted, setAccepted] = useState(false);

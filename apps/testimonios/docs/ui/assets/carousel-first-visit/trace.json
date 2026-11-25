@@ -1,0 +1,35 @@
+{
+  "scope": "One representative real public trace in the final production build, with current availability/optimizer caches as found; not a controlled cold comparison. Resource Timing is actual browser fetch initiation/end; Element Timing is paint. DOM artAdded is the browser-observable resolved selection, not a server-side timestamp.",
+  "timing": {
+    "ttfb": 228.8999999910593,
+    "pendingStart": 386.69999998807907,
+    "pendingEnd": 1535,
+    "artAdded": 1534,
+    "imageRequestStart": 1532.2999999970198,
+    "imageResponseEnd": 1541.699999988079,
+    "imageTransfer": 16688,
+    "imageLoad": 1556.7999999970198,
+    "decodeReady": 1558.8999999910593,
+    "painted": 1620,
+    "placeholderStart": 1534,
+    "placeholderHidden": 1569.2999999970198,
+    "lcp": 1620,
+    "cls": 0.00098490234375
+  },
+  "phases": [
+    {
+      "kind": "public",
+      "status": 200,
+      "start": 1815.6995,
+      "ms": 1414.2136000000003,
+      "rows": 10
+    },
+    {
+      "kind": "head",
+      "status": 200,
+      "start": 3236.8972,
+      "ms": 310.6745000000001,
+      "rows": null
+    }
+  ]
+}

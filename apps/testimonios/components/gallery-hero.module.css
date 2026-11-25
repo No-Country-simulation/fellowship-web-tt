@@ -3,6 +3,33 @@
   isolation: isolate;
 }
 
+.storiesSlot {
+  display: grid;
+  align-content: start;
+  width: 100%;
+  min-width: 0;
+  max-width: 372px;
+  justify-self: center;
+  container-type: inline-size;
+}
+
+/* Compact carousel: artwork plus controls, without the former visible transcript/caption. */
+.storiesPending { min-height: calc(min(340px, 100cqi) * 1.25 + 4rem); }
+.pendingFrame {
+  display: grid;
+  width: min(340px, 100%);
+  aspect-ratio: 4 / 5;
+  place-items: center;
+  padding: min(var(--spacing-md), 24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
 /* Columna de 340px para la publicación y hasta 32px de reserva para la pila. */
 @media (min-width: 64rem) {
   @container (min-width: 56rem) {

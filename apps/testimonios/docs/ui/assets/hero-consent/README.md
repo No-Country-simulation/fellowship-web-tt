@@ -1,5 +1,7 @@
 # Etapa 5 — autorización simplificada
 
+**Histórico:** la navegación a un formulario independiente y el envío sin declaración explícita de esta etapa fueron reemplazados por [hero y formulario integrados en `/enviar`](../../../hero-form-integration.md). Hoy entrar por URL no omite aceptación: se comparte el checkbox y el parser exige `consent=on`. Los resultados y capturas siguientes conservan sus condiciones originales.
+
 Evidencia sintética de la misma aplicación; sin envíos reales de testimonios.
 Las seis capturas históricas de la etapa 4 se conservan sin sobrescribir.
 

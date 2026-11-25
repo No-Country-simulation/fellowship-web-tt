@@ -1,16 +1,19 @@
+"use client";
+
+import { Suspense, use } from "react";
 import { HeroConsent } from "@/components/hero-consent";
 import type { FormLocale } from "@/lib/form-i18n/locales";
 import { getFormMessages } from "@/lib/form-i18n/messages";
 
 import { GalleryHeroCarousel } from "@/components/gallery-hero-carousel";
-import type { HeroStory } from "@/components/gallery-hero-data";
+import type { HeroStoriesSource } from "@/components/gallery-hero-data";
 import { cn } from "@/lib/utils";
 
 import styles from "./gallery-hero.module.css";
 import layout from "./form-layout.module.css";
 
 type GalleryHeroProps = {
-  stories: readonly HeroStory[] | null;
+  stories: HeroStoriesSource;
   locale: FormLocale;
   accepted: boolean;
   onAcceptedChange: (accepted: boolean) => void;
@@ -129,7 +132,7 @@ export function GalleryHero({ stories, locale, ...consent }: GalleryHeroProps) {
       <div
         className={cn(
           layout.container, "grid gap-lg",
-          stories && stories.length > 0 && styles.withStories,
+          stories && (!Array.isArray(stories) || stories.length > 0) && styles.withStories,
         )}>
         <div className="min-w-0 wrap-anywhere">
           <p className="type-eyebrow flex items-center gap-xs text-text-secondary">
@@ -151,18 +154,22 @@ export function GalleryHero({ stories, locale, ...consent }: GalleryHeroProps) {
           </p>
           <HeroConsent locale={locale} {...consent} />
         </div>
-        {stories === null ? (
-          <p role="status" className="text-sm leading-relaxed text-text-secondary">
-            {copy.unavailable}
-          </p>
-        ) : stories.length > 0 ? (
-          <GalleryHeroCarousel stories={stories} locale={locale} />
-        ) : (
-          <p className="max-w-[36rem] text-sm leading-relaxed text-text-secondary">
-            {copy.empty}
-          </p>
-        )}
+        <div className={styles.storiesSlot}>
+          <Suspense fallback={<div className={styles.storiesPending} data-hero-pending>
+            <div className={styles.pendingFrame} role="status">{copy.loadingStories}</div>
+          </div>}>
+            <HeroStoriesContent stories={stories} locale={locale} />
+          </Suspense>
+        </div>
       </div>
     </section>
   );
+}
+
+function HeroStoriesContent({ stories, locale }: { stories: HeroStoriesSource; locale: FormLocale }) {
+  const resolved = stories && "then" in stories ? use(stories) : stories;
+  const copy = getFormMessages(locale).form.hero;
+  if (resolved === null) return <p role="status" className="text-sm leading-relaxed text-text-secondary">{copy.unavailable}</p>;
+  if (!resolved.length) return <p className="text-sm leading-relaxed text-text-secondary">{copy.empty}</p>;
+  return <GalleryHeroCarousel stories={resolved} locale={locale} />;
 }

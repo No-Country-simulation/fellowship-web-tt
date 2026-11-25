@@ -29,7 +29,8 @@ export type FormMessages = {
     readonly hero: Readonly<Record<
       "eyebrow" | "title" | "highlight" | "description" | "empty" | "unavailable" |
       "carouselPlural" | "carouselSingle" | "carousel" | "slide" | "readStory" |
-      "readStoryOf" | "previous" | "next" | "of" | "testimonial", string
+      "readStoryOf" | "previous" | "next" | "of" | "testimonial" |
+      "readText" | "imageLoading" | "imageUnavailable" | "loadingStories", string
     >>;
     readonly common: {
       readonly asterisk: string;

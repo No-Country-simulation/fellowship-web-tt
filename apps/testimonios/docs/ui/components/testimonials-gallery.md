@@ -4,7 +4,7 @@ Exploración interactiva de las historias publicadas: buscador, filtros, contado
 
 **Archivo:** `components/testimonials-gallery.tsx`
 
-**Estado:** temporalmente fuera del home desde la landing de captación (issue 1). Se conserva la implementación completa para reutilización futura: no se monta, no carga su bundle ni expone buscador, filtros, contador o estados de exploración en `/`.
+**Estado:** implementada y montada en `/` desde la integración del hero en `/enviar`. La galería y sus fichas siguen siendo funcionalidad futura respecto de la aprobación definitiva de publicación; no hay flags ni restricciones de acceso implementados. La retirada del home de la issue 1 fue una etapa anterior.
 
 ## Import y uso
 
@@ -31,7 +31,7 @@ import { TestimonialsGallery } from "@/components/testimonials-gallery";
 - Búsqueda y categoría actúan juntas e inmediatamente sobre el array recibido. `visible` se deriva de las props y de los estados `filter` y `query`, sin guardar otra copia de los resultados. No cambian el orden, la URL ni realizan consultas adicionales; tampoco requieren debounce.
 - Cambiar de categoría conserva el texto. El botón con `X`, “Limpiar búsqueda”, vacía solo el texto y devuelve el foco al input. La consulta conserva lo escrito visualmente; espacios exteriores y diferencias de acentos/caso no alteran la coincidencia. Una consulta solo de espacios se considera inactiva.
 - El contador indica la cantidad visible, con singular/plural. Solo su nodo es una región `aria-live="polite"`, con `aria-atomic`.
-- Quien reutilice este componente debe resolver los errores de carga antes de montarlo, sin presentarlos como resultados vacíos. Actualmente el error del home se comunica en `GalleryHero` y no monta esta galería.
+- Quien reutilice este componente debe resolver los errores de carga antes de montarlo, sin presentarlos como resultados vacíos. `app/(public)/page.tsx` muestra el error del listado con `role="status"`; en ese caso no monta la galería. El hero pertenece a `/enviar`.
 
 ## Estados vacíos
 
@@ -93,4 +93,4 @@ La grilla muestra todos los resultados: una columna en mobile, dos desde `md` (7
 
 Cada historia utiliza `TestimonialCard variant="gallery"`, con avatar real, cita recortada a tres líneas y enlace a `/t/[slug]`. En mobile, las filas automáticas permiten una altura independiente según el contenido; desde `md`, la card conserva un mínimo de 17rem. Mantiene hover, foco y reducción de movimiento. El componente y la grilla no agregan nuevos contenedores de scroll.
 
-Los textos provisionales se agrupan en `GALLERY_COPY`. El componente declara `"use client"` para el estado de la búsqueda y del filtro; la carga de datos y el hero permanecen en el servidor. `app/(public)/page.tsx` conserva `force-dynamic` y el contrato público existente.
+Los textos provisionales se agrupan en `GALLERY_COPY`. El componente declara `"use client"` para búsqueda y filtro; la consulta pública permanece en servidor. `app/(public)/page.tsx` conserva `force-dynamic` y el contrato público existente. Esta pantalla no monta `GalleryHero`, que es una vista cliente de la experiencia de `/enviar`.

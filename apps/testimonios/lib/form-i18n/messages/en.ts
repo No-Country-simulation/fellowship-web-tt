@@ -32,7 +32,11 @@ export const en = {
       previous: "Previous testimonial",
       next: "Next testimonial",
       of: "of",
-      testimonial: "Testimonial"
+      testimonial: "Testimonial",
+      readText: "Read testimonial as text",
+      loadingStories: "Loading testimonials…",
+      imageLoading: "Loading preview…",
+      imageUnavailable: "Preview unavailable."
     },
     intro: {
       title: "Share your experience",

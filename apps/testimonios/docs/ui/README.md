@@ -2,6 +2,8 @@
 
 > Flujo aprobado: `/enviar`, con hero y cinco pasos bajo FormHeader. `/` y `/t/[slug]` conservan la experiencia pública futura, todavía sin aprobación de publicación definitiva. Sus rutas siguen incluidas en el build: no hay restricciones implementadas. Layout y alternativas de despliegue: [Hero y formulario integrados](../hero-form-integration.md).
 
+> Estado de implementación al 16/11/2026: la base de galería/fichas, identidad visual, formulario ES/EN/PT, navegación/resumen, hero integrado e imágenes optimizadas está en `dev`. La implementación y revisión manual en localhost de la [precarga progresiva](../carousel-preload.md) se completaron el 16/11/2026; este registro no afirma un despliegue en producción. Los informes por etapas conservan sus resultados originales y no se regeneran con una arquitectura posterior.
+
 Documentación de los componentes reutilizables de `apps/testimonios`.
 
 **Objetivo:** cualquier dev puede armar galería, ficha o form sin reimplementar chrome ni cards.
@@ -12,7 +14,7 @@ El design system de Landing es una referencia interna. Los tokens y utilities vi
 
 El formulario de página (`enviar-form`) no se documenta acá: es de una ruta, no un primitivo.
 
-Las [etapas de navegación, validación y resumen del formulario](../form-steps-summary.md) documentan el indicador accesible, la comprobación integral y el resumen en tres secciones con fotografías confirmadas. «Editar» permanece en el encabezado y «Guardar cambios» al pie de las tarjetas durante la edición. El checkbox del hero solo habilita su CTA; `/enviar` admite acceso directo sin aceptación previa. El paso 5 «Revisión y envío» muestra la autorización informada inmediatamente antes de enviar, sin otro checkbox. El servidor valida los datos y registra la fecha del envío válido en `consent_at`, sin afirmar que verificó un checkbox. Las evidencias y límites de revisión editorial/legal y de Demo Day están documentados; la integración futura con la web oficial se coordinará con Matías.
+Las [etapas de navegación, validación y resumen del formulario](../form-steps-summary.md) documentan el indicador hacia pasos anteriores, la comprobación integral y las tres tarjetas con fotografías confirmadas. «Editar» permanece en el encabezado y «Guardar cambios» al pie durante la edición; valida los datos editables sin enviar. Entrar directamente a `/enviar` muestra el hero con casilla desmarcada: no permite omitir aceptación para comenzar ni para enviar. El paso 5 «Revisión y envío» muestra el recordatorio de autorización, sin otra casilla. El servidor exige una única declaración `consent=on` y los datos válidos antes de registrar `consent_at`; no acredita interacción física con el checkbox. Véanse [contrato y límites](../hero-form-integration.md#declaración-y-fecha-de-consentimiento). La revisión editorial/legal y la coordinación futura con la web oficial no se presentan como resueltas.
 
 ## Índice
 
@@ -25,8 +27,8 @@ Las [etapas de navegación, validación y resumen del formulario](../form-steps-
 | [Propuesta para la web oficial](./official-chrome-improvements.md) | Registro de hallazgos, diferencias deliberadas y QA integral del chrome |
 | [GalleryHero](./components/gallery-hero.md) | Landing de captación, CTA y composición del hero |
 | [GalleryHeroCarousel](./components/gallery-hero-carousel.md) | Hasta tres testimonios publicados, apilados y con navegación manual |
-| [HeroTestimonialCard](./components/hero-testimonial-card.md) | Réplica HTML de la plantilla Canvas Cita, con variantes por tipo |
-| [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla; temporalmente fuera del home |
+| [HeroTestimonialCard](./components/hero-testimonial-card.md) | Arte administrativo optimizado, precarga progresiva y alternativa textual en el carrusel |
+| [TestimonialsGallery](./components/testimonials-gallery.md) | Buscador, filtros, contador y grilla en `/`; publicación futura |
 | [TestimonialDetail](./components/testimonial-detail.md) | Ficha editorial de servidor, contexto profesional y medios opcionales |
 | [TestimonialCapture](./components/testimonial-capture.md) | Foto testimonial a tamaño natural, sin pie visible y con ampliación accesible |
 | [PageShell](./components/page-shell.md) | Wrapper de página (`<main>` + título) |
@@ -34,7 +36,7 @@ Las [etapas de navegación, validación y resumen del formulario](../form-steps-
 | [YoutubeEmbed](./components/youtube-embed.md) | Iframe 16:9 de YouTube |
 | [Field](./components/field.md) | Label, hint, error y classes de input |
 | [CaptureCropDialog](./components/capture-crop-dialog.md) | Recorte de foto: 16:9 o cuadrado |
-| [FormLanguageSelect](./components/form-language-select.md) | Selector ES/PT-BR exclusivo del header, inerte mientras hay recorte |
+| [FormLanguageSelect](./components/form-language-select.md) | Selector ES/EN/PT exclusivo del header, inerte mientras hay recorte |
 | [FormHeader](./components/form-header.md) | Marca no navegable y selector único, exclusivo de `/enviar` |
 
 ## Convención al agregar un componente
@@ -73,19 +75,21 @@ El [QA integral de etapas 1–4](./official-chrome-improvements.md#qa-integral--
 
 `app/layout.tsx` conserva HTML/body, fuente, estilos y metadata general. `app/(public)/layout.tsx` compone `SiteHeader`, contenido y `SiteFooter` sin wrappers DOM. Las URLs públicas no cambian. El 404 raíz reutiliza ese layout para URLs inexistentes; el 404 del grupo público hereda su chrome sin duplicarlo. El footer continúa en el flujo del documento y no modifica el scroll ni el bloqueo de los diálogos.
 
-Las etapas 3 y 4 de i18n conectan ES/PT-BR exclusivamente en `/enviar`, con `FormLocaleProvider`, [FormHeader](./components/form-header.md) y un único [FormLanguageSelect](./components/form-language-select.md). Esa ruta no monta navbar/footer institucionales. La introducción consume el contexto y conserva el SVG y su composición; sigue entrando como children a `EnviarForm` y desaparece en éxito. Véase la [auditoría](../form-i18n-audit.md) para metadata, estado, QA y límites de revisión.
+`/enviar` conecta ES/EN/PT con `FormLocaleProvider`, [FormHeader](./components/form-header.md) y un único [FormLanguageSelect](./components/form-language-select.md). Los códigos canónicos son `es/en/pt`; `pt-BR` es alias de lectura y atributo HTML del portugués brasileño. Elegir idioma conserva estado y URL y guarda la preferencia `testimonios_locale`; una query explícita prevalece al navegar o recargar. Esa ruta no monta navbar/footer institucionales. `EnviarIntro` sigue entrando como children a `EnviarForm` y desaparece en éxito; el hero integrado es una vista separada de `EnviarExperience`. Véase la [auditoría](../form-i18n-audit.md) para historia, metadata y límites.
 
 `app/(public)/page.tsx` consulta publicados y monta la galería, conservando `force-dynamic`. `/enviar` resuelve query, metadata y hasta tres historias para su hero en `app/enviar/page.tsx`. `form-layout.module.css` comparte contenido de hasta 70rem, padding exterior de 24px y 32px desde 48rem entre header, hero y formulario, sin modificar contenedores globales. La descripción del hero conserva 36rem y los párrafos largos del formulario 44rem. `EnviarIntro` entra como children a `EnviarForm` y desaparece en éxito; se retira su enlace a `/` porque el paso 1 ya permite volver al hero. `SuccessCard` conserva el foco; el selector permanece disponible.
 
 Las tres rutas usan el scroll del documento. El layout es una columna flexible con altura mínima de `100dvh`; cada `<main>` crece con su contenido y no crea un scroll independiente. El header institucional es sticky y publica su altura real para el offset de scroll. El formulario enfoca pasos y errores sin scroll automático y luego desplaza el documento, descontando la altura real del header y 16px de separación. Su contenedor permite cortar palabras demasiado anchas y sus botones de navegación admiten varias líneas para no depender del antiguo scroll horizontal al ampliar la fuente. Los diálogos modales bloquean el scroll raíz mediante `html:has(dialog:modal)`; `scrollbar-gutter: stable` conserva el ancho al abrirlos y cerrarlos. Los paneles de diálogo mantienen su scroll interno cuando hace falta.
 
-`GalleryHero` es una vista de `EnviarExperience` e integra `GalleryHeroCarousel`, con datos seleccionados en servidor por `selectHeroStories`. Transmite identidad, slug y datos públicos de presentación, sin consultas desde el cliente. El hero distingue cero publicados y error de carga y mantiene el CTA. «Leer historia» conserva el enlace a la ficha futura; debe resolverse esa dependencia antes de restringir rutas.
+`GalleryHero` es una vista cliente de `EnviarExperience` e integra `GalleryHeroCarousel`. La página inicia la consulta pública y `selectAvailableHeroStories()` como promesa; un `Suspense` exclusivo del carrusel incorpora hasta tres historias, priorizando imágenes confirmadas y usando historias textuales si no hay ninguna disponible, sin bloquear el resto del flujo. Conserva timeout, caché y backoff descritos en [primera visita](../carousel-first-visit.md). El navegador no consulta Supabase ni lista Storage. Tras la primera imagen eager/high, la cola prepara segunda y tercera eager/low, conservando elementos y recursos; navegar anticipadamente solicita o reutiliza el destino. Las prioridades son hints. [Comportamiento y mediciones vigentes](../carousel-preload.md).
+
+El hero distingue cero publicados y error de carga y mantiene el CTA. Cada arte administrativo usa `next/image`, calidad 85 y `sizes` según ancho/DPR; la alternativa textual y el fallback local conservan el relato sin depender de la ficha. «Leer historia» es el único enlace visible del carrusel y conserva el destino futuro; debe resolverse esa dependencia antes de restringir rutas.
 
 `TestimonialsGallery` conserva contrato y distribución: una columna en mobile, dos desde `md` y tres desde `lg`, con gap de 24px. Se monta en `/`; no se elimina ni rediseña en el ajuste de `/enviar`.
 
 La barra de `TestimonialsGallery` mantiene búsqueda, filtros y contador. Su API se describe en la ficha correspondiente. Conservar el código accesible no equivale a aprobar su publicación.
 
-Al ampliar la fuente, el CTA puede ocupar varias líneas y el hero apila sus columnas si no dispone de `56rem`. La publicación tiene hasta 340px de ancho, cita limitada visualmente a cinco/seis líneas y autor en filas de nombre, país y puesto. Los textos completos se conservan en el DOM; el nombre muestra elipsis en una línea. Solo los metadatos y la fuente ampliada pueden hacer crecer la tarjeta por encima de la referencia 4:5. Los controles permanecen fuera de su área visual. Los detalles están documentados en cada componente.
+Al ampliar la fuente, el CTA puede ocupar varias líneas y el hero apila sus columnas si no dispone de `56rem`. La publicación administrativa optimizada tiene hasta 340px de ancho y conserva 4:5, sin reconstruir ni recortar su diseño. Debajo solo están «Leer historia», flechas y posición. Una única región con relato completo se revela dentro de la tarjeta ante error, foco de teclado o relación ancho/fuente insuficiente; los relatos largos tienen scroll. El texto rasterizado mantiene límites de ampliación tipográfica: [nitidez y carrusel compacto](../carousel-legibility.md) documenta la alternativa al 200% y la revisión manual pendiente.
 
 ## Composición de la ficha
 

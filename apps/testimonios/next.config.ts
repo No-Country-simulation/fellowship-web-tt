@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Keep the default for avatars/other resources; only hero publications request 85.
+    qualities: [75, 85],
     remotePatterns: [
       {
         protocol: "https",

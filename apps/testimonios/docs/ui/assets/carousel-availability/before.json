@@ -1,0 +1,169 @@
+{
+  "result": "PASS",
+  "samples": [
+    {
+      "trial": 1,
+      "cache": "cold",
+      "responseMs": 205.90000000596046,
+      "firstArtMs": 468.70000000298023,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "ms": 57.38580000000002
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "ms": 4.289999999999964
+        }
+      ]
+    },
+    {
+      "trial": 1,
+      "cache": "warm",
+      "responseMs": 81,
+      "firstArtMs": 257.70000000298023,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "ms": 58.58590000000004
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "ms": 4.695099999999911
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "cache": "cold",
+      "responseMs": 210.59999999403954,
+      "firstArtMs": 457.8999999910593,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "ms": 64.82089999999994
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "ms": 10.169399999999996
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "cache": "warm",
+      "responseMs": 87.09999999403954,
+      "firstArtMs": 258.5,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "ms": 61.81529999999998
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "ms": 2.900000000000091
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "cache": "cold",
+      "responseMs": 209.09999999403954,
+      "firstArtMs": 452.79999999701977,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "ms": 63.57950000000005
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "ms": 7.642800000000079
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "cache": "warm",
+      "responseMs": 81.40000000596046,
+      "firstArtMs": 239.90000000596046,
+      "imageBytes": 22164,
+      "artworkCount": 1,
+      "counts": {
+        "published-query": 1,
+        "availability": 0,
+        "optimizer-source": 1
+      },
+      "phases": [
+        {
+          "kind": "published-query",
+          "method": "GET",
+          "status": 200,
+          "ms": 56.282199999999875
+        },
+        {
+          "kind": "optimizer-source",
+          "method": "GET",
+          "status": 200,
+          "ms": 2.3702999999998156
+        }
+      ]
+    }
+  ],
+  "scenarios": [],
+  "scope": "Local production build, 10 synthetic published records; public query 50ms, HEAD 50ms; actual optimizer and demand loading retained. Three trials, cold/new URLs and warm/same server cache. Browser GET image bytes, no real services or submissions. These are lab measurements, not production latency."
+}

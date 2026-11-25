@@ -2,6 +2,8 @@
 
 **Última revisión:** 23 de octubre de 2026. **Estado:** implementación y QA automatizado de etapas 1–4 completados; revisión visual humana y pruebas manuales pendientes.
 
+**Registro histórico de esas etapas:** fechas, capturas, mediciones y pendientes siguientes se conservan; no son una nueva auditoría del sitio oficial ni aprobación del equipo para trasladar las propuestas. El chrome institucional está implementado en el grupo público (`/` y `/t/[slug]`, con publicación definitiva pendiente); `/enviar` utiliza ahora FormHeader, hero integrado y formulario ES/EN/PT, sin SiteHeader/SiteFooter. El [índice vigente](./README.md) separa ese estado de esta evidencia y de las mejoras propuestas todavía sin aprobar.
+
 Este documento propone mejoras al equipo de la [web oficial](https://www.nocountry.tech/). Conserva la identidad aprobada y distingue observaciones comprobadas, decisiones propias de Testimonios y propuestas sin aprobar. No es una certificación de accesibilidad ni presupone que todas las soluciones deban trasladarse automáticamente a otra aplicación.
 
 ## Alcance y arquitectura

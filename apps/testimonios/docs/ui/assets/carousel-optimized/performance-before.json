@@ -1,0 +1,451 @@
+{
+  "implementation": "HTML replica",
+  "result": "PASS",
+  "samples": [
+    {
+      "mode": "desktop",
+      "trial": 1,
+      "cacheState": "cold",
+      "lcpMs": 452,
+      "cls": 0,
+      "firstImageMs": 483.40000000596046,
+      "initialKiB": 308.416015625,
+      "imageKiB": 28.5458984375,
+      "requests": 22,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 21410,
+          "cache": false
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "64",
+          "mime": "image/webp",
+          "bytes": 904,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ]
+    },
+    {
+      "mode": "desktop",
+      "trial": 1,
+      "cacheState": "warm",
+      "lcpMs": 132,
+      "cls": 0,
+      "firstImageMs": 89.5,
+      "initialKiB": 16.8310546875,
+      "imageKiB": 0.2373046875,
+      "requests": 21,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "64",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 243,
+          "cache": false
+        }
+      ]
+    },
+    {
+      "mode": "desktop",
+      "trial": 2,
+      "cacheState": "cold",
+      "lcpMs": 464,
+      "cls": 0,
+      "firstImageMs": 481.1000000014901,
+      "initialKiB": 308.416015625,
+      "imageKiB": 28.5458984375,
+      "requests": 22,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 21410,
+          "cache": false
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "64",
+          "mime": "image/webp",
+          "bytes": 904,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ]
+    },
+    {
+      "mode": "desktop",
+      "trial": 2,
+      "cacheState": "warm",
+      "lcpMs": 168,
+      "cls": 0,
+      "firstImageMs": 82.29999999701977,
+      "initialKiB": 16.83203125,
+      "imageKiB": 0.2373046875,
+      "requests": 21,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "64",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 243,
+          "cache": false
+        }
+      ]
+    },
+    {
+      "mode": "desktop",
+      "trial": 3,
+      "cacheState": "cold",
+      "lcpMs": 420,
+      "cls": 0,
+      "firstImageMs": 437.6000000014901,
+      "initialKiB": 308.41015625,
+      "imageKiB": 28.5458984375,
+      "requests": 22,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 21410,
+          "cache": false
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "64",
+          "mime": "image/webp",
+          "bytes": 904,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ]
+    },
+    {
+      "mode": "desktop",
+      "trial": 3,
+      "cacheState": "warm",
+      "lcpMs": 148,
+      "cls": 0,
+      "firstImageMs": 117.5,
+      "initialKiB": 16.8251953125,
+      "imageKiB": 0.2373046875,
+      "requests": 21,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "64",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 243,
+          "cache": false
+        }
+      ]
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 1,
+      "cacheState": "cold",
+      "lcpMs": 1128,
+      "cls": 0.000014307534246575341,
+      "firstImageMs": 1419.3999999985099,
+      "initialKiB": 308.5927734375,
+      "imageKiB": 28.7236328125,
+      "requests": 22,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 21410,
+          "cache": false
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "128",
+          "mime": "image/webp",
+          "bytes": 1086,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ]
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 1,
+      "cacheState": "warm",
+      "lcpMs": 644,
+      "cls": 0,
+      "firstImageMs": 325.8999999985099,
+      "initialKiB": 16.83203125,
+      "imageKiB": 0.2373046875,
+      "requests": 21,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "128",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 243,
+          "cache": false
+        }
+      ]
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 2,
+      "cacheState": "cold",
+      "lcpMs": 1180,
+      "cls": 0.000014307534246575341,
+      "firstImageMs": 1463.9000000059605,
+      "initialKiB": 308.59375,
+      "imageKiB": 28.7236328125,
+      "requests": 22,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 21410,
+          "cache": false
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "128",
+          "mime": "image/webp",
+          "bytes": 1086,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ]
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 2,
+      "cacheState": "warm",
+      "lcpMs": 664,
+      "cls": 0,
+      "firstImageMs": 347.6000000014901,
+      "initialKiB": 16.83203125,
+      "imageKiB": 0.2373046875,
+      "requests": 21,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "128",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 243,
+          "cache": false
+        }
+      ]
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 3,
+      "cacheState": "cold",
+      "lcpMs": 1132,
+      "cls": 0.000014307534246575341,
+      "firstImageMs": 1457.1000000014901,
+      "initialKiB": 308.5927734375,
+      "imageKiB": 28.7236328125,
+      "requests": 22,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 6917,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 21410,
+          "cache": false
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "128",
+          "mime": "image/webp",
+          "bytes": 1086,
+          "cache": false,
+          "optimizerCache": "MISS"
+        }
+      ]
+    },
+    {
+      "mode": "slow-mobile",
+      "trial": 3,
+      "cacheState": "warm",
+      "lcpMs": 684,
+      "cls": 0,
+      "firstImageMs": 334.3999999985099,
+      "initialKiB": 16.83203125,
+      "imageKiB": 0.2373046875,
+      "requests": 21,
+      "images": [
+        {
+          "path": "/_next/image",
+          "requestedWidth": "256",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/_next/image",
+          "source": "avatars/qa-avatar.png",
+          "requestedWidth": "128",
+          "mime": "image/webp",
+          "bytes": 0,
+          "cache": false,
+          "optimizerCache": "MISS"
+        },
+        {
+          "path": "/brand/logo-no-country.png",
+          "requestedWidth": null,
+          "mime": "image/png",
+          "bytes": 243,
+          "cache": false
+        }
+      ]
+    }
+  ],
+  "environment": "Local production build; synthetic public records; Chrome headless. Cold=new browser/server + empty optimizer cache. Warm=reload, same browser/server. Slow mobile=375px DPR2, 1.6Mbps/150ms latency/4x CPU. Desktop=1440px DPR1, unthrottled. Three samples per condition. No real services or testimonial writes. Not production CWV."
+}
